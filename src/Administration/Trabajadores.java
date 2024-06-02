@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComboBox;
@@ -27,13 +28,14 @@ public class Trabajadores extends javax.swing.JInternalFrame {
     int id;
     String tipoDocumento;
     String numDocumento;
-    String Nombres, sexo, fechaNacimiento;
+    String Nombres, sexo;
+    Date fechaNacimiento;
     int edad;
     String direccion;
     int zipCode;
     String ciudad, state, telefono, email, estado;
 
-    public Trabajadores(int id, String tipoDocumento, String numDocumento, String Nombres, String sexo, String fechaNacimiento, int edad, String direccion, int zipCode, String ciudad, String state, String telefono, String email, String estado) {
+    public Trabajadores(int id, String tipoDocumento, String numDocumento, String Nombres, String sexo, Date fechaNacimiento, int edad, String direccion, int zipCode, String ciudad, String state, String telefono, String email, String estado) {
         this.id = id;
         this.tipoDocumento = tipoDocumento;
         this.numDocumento = numDocumento;
@@ -90,11 +92,11 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         this.sexo = sexo;
     }
 
-    public String getFechaNacimiento() {
+    public Date getFechaNacimiento() {
         return fechaNacimiento;
     }
 
-    public void setFechaNacimiento(String fechaNacimiento) {
+    public void setFechaNacimiento(Date fechaNacimiento) {
         this.fechaNacimiento = fechaNacimiento;
     }
 
@@ -215,7 +217,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
 
         try {
 
-            String[] titulosTabla = {"Id", "Documento", "NumeroDoc", "Nombres", "Sexo", "FechaNac", "Edad", "Direccion", 
+            String[] titulosTabla = {"Id", "Documento", "NumeroDoc", "Nombres", "Sexo", "FechaNac", "Edad", "Direccion",
                 "ZipCode", "Ciudad", "Estado", "Telefono", "email", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[14];                                   //Registros de la Basede Datos
 
@@ -259,7 +261,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             tbTrabajadores.getColumnModel().getColumn(10).setPreferredWidth(100);
             tbTrabajadores.getColumnModel().getColumn(11).setPreferredWidth(100);
             tbTrabajadores.getColumnModel().getColumn(12).setPreferredWidth(100);
-            
+
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error: " + e.toString());
         }
@@ -269,7 +271,8 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         //Variables
         String tipoDocumento;
         String numDocumento;
-        String Nombres, sexo, fechaNacimiento;
+        String Nombres, sexo;
+
         int edad;
         String direccion;
         int zipCode;
@@ -282,15 +285,28 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         sexo = cbxSexo.getSelectedItem().toString();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String fechaNac = sdf.format(JDateFechaNac.getDate());
-      //  fechaNacimiento = JDateFechaNac.getCalendar().toString();
-        edad = Integer.parseInt(txtEdad.getText());
+
+// Calcular la edad a partir de la fecha de nacimiento
+        Date fechaNacimiento = JDateFechaNac.getDate();
+        Calendar calNacimiento = Calendar.getInstance();
+        calNacimiento.setTime(fechaNacimiento);
+        Calendar fechaActual = Calendar.getInstance();
+        edad = fechaActual.get(Calendar.YEAR) - calNacimiento.get(Calendar.YEAR);
+        if (calNacimiento.get(Calendar.MONTH) > fechaActual.get(Calendar.MONTH)
+                || (calNacimiento.get(Calendar.MONTH) == fechaActual.get(Calendar.MONTH)
+                && calNacimiento.get(Calendar.DAY_OF_MONTH) > fechaActual.get(Calendar.DAY_OF_MONTH))) {
+            edad--;
+        }
+
+//Asignamos la edad al campo de texto correspondiente
+        txtEdad.setText(Integer.toString(edad));
+
         direccion = txtDireccion.getText();
         zipCode = Integer.parseInt(txtZipCode.getText());
         ciudad = txtCiudad.getText();
         state = txtState.getText();
         telefono = txtTelefono.getText();
         email = txtEmail.getText();
-        
 
         //Consulta sql para insertar los datos (nombres como en la base de datos)
         String sql = "INSERT INTO worker (documentType, documentNumber, nombre, sex, "
@@ -327,7 +343,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
                 txtNumeroDocumento.setText("");
                 txtNombres.setText("");
                 cbxSexo.setSelectedItem("");
-               // JDateFechaNac.setDate();
+                // JDateFechaNac.setDate();
                 txtDireccion.setText("");
                 txtZipCode.setText("");
                 txtCiudad.setText("");
@@ -367,9 +383,8 @@ public class Trabajadores extends javax.swing.JInternalFrame {
     }
 
     public void SeleccionarTrabajador(JTable TablaTrabajador, JTextField Id, JTextField tipodeDocumento, JTextField numeroDocumento,
-            JTextField Nombres, JComboBox Sexo, JDateChooser FechaNacimiento,
-            JTextField Edad, JTextField Direccion, JTextField ZipCode, JTextField Ciudad,
-            JTextField State, JTextField Telefono, JTextField Email) {
+            JTextField Nombres, JComboBox Sexo, JDateChooser FechaNacimiento, JTextField Edad, JTextField Direccion, JTextField ZipCode,
+            JTextField Ciudad, JTextField State, JTextField Telefono, JTextField Email) {
 
         int fila = TablaTrabajador.getSelectedRow();
         if (fila >= 0) {
@@ -393,9 +408,8 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         }
     }
 
-    public void ModificarTrabajador(JTextField Id, JTextField tipodeDocumento, JTextField numeroDocumento,
-            JTextField Nombres, JComboBox Sexo, JDateChooser FechaNacimiento,
-            JTextField Edad, JTextField Direccion, JTextField ZipCode, JTextField Ciudad,
+    public void ModificarTrabajador(JTextField Id, JTextField tipodeDocumento, JTextField numeroDocumento, JTextField Nombres,
+            JComboBox Sexo, JDateChooser FechaNacimiento, JTextField Edad, JTextField Direccion, JTextField ZipCode, JTextField Ciudad,
             JTextField State, JTextField Telefono, JTextField Email) {
 
         setId(Integer.parseInt(Id.getText()));
@@ -403,8 +417,22 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         setNumDocumento(numeroDocumento.getText());
         setNombres(Nombres.getText());
         setSexo(Sexo.getSelectedItem().toString());
-        setFechaNacimiento(FechaNacimiento.getDateFormatString());
-        setEdad(Integer.parseInt(Edad.getText()));
+
+        // Obtener la fecha de nacimiento como java.util.Date y calcular la edad
+        Date fechaNacimiento = FechaNacimiento.getDate();
+        Calendar calNacimiento = Calendar.getInstance();
+        calNacimiento.setTime(fechaNacimiento);
+        Calendar fechaActual = Calendar.getInstance();
+        int edad = fechaActual.get(Calendar.YEAR) - calNacimiento.get(Calendar.YEAR);
+        if (calNacimiento.get(Calendar.MONTH) > fechaActual.get(Calendar.MONTH)
+                || (calNacimiento.get(Calendar.MONTH) == fechaActual.get(Calendar.MONTH)
+                && calNacimiento.get(Calendar.DAY_OF_MONTH) > fechaActual.get(Calendar.DAY_OF_MONTH))) {
+            edad--;
+        }
+        setEdad(edad);
+        // Establecer la fecha de nacimiento como java.sql.Date
+        setFechaNacimiento(new java.sql.Date(fechaNacimiento.getTime()));
+
         setDireccion(Direccion.getText());
         setZipCode(Integer.parseInt(ZipCode.getText()));
         setCiudad(Ciudad.getText());
@@ -421,7 +449,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             cs.setString(2, getNumDocumento());
             cs.setString(3, getNombres());
             cs.setString(4, getSexo());
-            cs.setString(5, getFechaNacimiento());
+            cs.setDate(5, (java.sql.Date) FechaNacimiento.getDate());
             cs.setInt(6, getEdad());
             cs.setString(7, getDireccion());
             cs.setInt(8, getZipCode());
@@ -436,7 +464,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "No se Modifico, error: " + e.toString());
         }
     }
-    
+
     public void BuscarTrabajadores(java.awt.event.KeyEvent evt) {
 
         try {
@@ -448,7 +476,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
 
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
 
-            String ConsultaSQL = "select * from worker WHERE nombre LIKE '%"+txtBuscarTrabajador.getText()+"%'";
+            String ConsultaSQL = "select * from worker WHERE nombre LIKE '%" + txtBuscarTrabajador.getText() + "%'";
 
             Statement st = connect.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
@@ -471,7 +499,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
 
                 model.addRow(RegistroBD);
             }
-           
+
             tbTrabajadores.setModel(model);
             tbTrabajadores.getColumnModel().getColumn(0).setPreferredWidth(20);
             tbTrabajadores.getColumnModel().getColumn(1).setPreferredWidth(100);
@@ -486,22 +514,20 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             tbTrabajadores.getColumnModel().getColumn(10).setPreferredWidth(100);
             tbTrabajadores.getColumnModel().getColumn(11).setPreferredWidth(100);
             tbTrabajadores.getColumnModel().getColumn(12).setPreferredWidth(100);
-            
+
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error: " + e.toString());
         }
     }
-    
-    
 
     public Trabajadores() {
         initComponents();
 
         CargarDatosTable("");
         txtId.setEnabled(false);
+        txtEdad.setEnabled(false);
         txtTipoDocumento.requestFocus();
     }
-
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -550,7 +576,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
 
         setIconifiable(true);
         setMaximizable(true);
-        setTitle("Worker");
+        setTitle("Trabajadores");
         setPreferredSize(new java.awt.Dimension(800, 500));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
