@@ -171,6 +171,7 @@ public class Empresas extends javax.swing.JInternalFrame {
 
     Conectar objconexion = new Conectar();
     Connection connect = objconexion.getConexion();
+    PreparedStatement ps;
 
     //Constructores de Metodos que vamos a necesitar
     //Realización de los Métodos
@@ -192,7 +193,7 @@ public class Empresas extends javax.swing.JInternalFrame {
 
         btnNuevo.setEnabled(true);
         btnAgregar.setEnabled(false);
-        
+
         btnCancelar.setEnabled(false);
 
     }
@@ -244,7 +245,7 @@ public class Empresas extends javax.swing.JInternalFrame {
 
         try {
 
-            String[] titulosTabla = {"Código", "Empresa","Dirección", "ZipCode", "Ciudad", "Estado", 
+            String[] titulosTabla = {"Código", "Empresa", "Dirección", "ZipCode", "Ciudad", "Estado",
                 "Propietario", "Celular", "email", "Contacto", "celular", "email", "Website", "Fecha Inicio", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[16];                                   //Registros de la Basede Datos
 
@@ -290,7 +291,6 @@ public class Empresas extends javax.swing.JInternalFrame {
             tbEmpresa.getColumnModel().getColumn(11).setPreferredWidth(100);
             tbEmpresa.getColumnModel().getColumn(12).setPreferredWidth(150);
             tbEmpresa.getColumnModel().getColumn(13).setPreferredWidth(150);
-            
 
         } catch (SQLException e) {
 
@@ -298,7 +298,6 @@ public class Empresas extends javax.swing.JInternalFrame {
         }
     }
 
-    
     void Guardar() {
 
         // Variables
@@ -363,7 +362,7 @@ public class Empresas extends javax.swing.JInternalFrame {
 
                 //Luego Bloquera campos
                 BloquearCampos();
-            }else{
+            } else {
                 JOptionPane.showMessageDialog(null, "El registro NO se guardo exitosamente");
             }
             CargarDatosTable("");
@@ -395,10 +394,10 @@ public class Empresas extends javax.swing.JInternalFrame {
 
     }
 
-    public void SeleccionarEmpresa(JTable TablaEmpresa, JTextField id, JTextField nameBusiness,  
-            JTextField address, JTextField zipCode, JTextField city, JTextField state, JTextField nameOwner, 
-            JTextField cellPhoneOwner, JTextField emailOwner, JTextField nameContact, JTextField cellphoneContact, 
-            JTextField emailContact, JTextField webpageBusiness){
+    public void SeleccionarEmpresa(JTable TablaEmpresa, JTextField id, JTextField nameBusiness,
+            JTextField address, JTextField zipCode, JTextField city, JTextField state, JTextField nameOwner,
+            JTextField cellPhoneOwner, JTextField emailOwner, JTextField nameContact, JTextField cellphoneContact,
+            JTextField emailContact, JTextField webpageBusiness) {
 
         try {
 
@@ -423,14 +422,14 @@ public class Empresas extends javax.swing.JInternalFrame {
                 JOptionPane.showMessageDialog(null, "Fila No seleccionada");
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error de Seleccion, Error: "+e.toString());
+            JOptionPane.showMessageDialog(null, "Error de Seleccion, Error: " + e.toString());
         }
     }
 
-    public void ModificarEmpresa(JTextField id, JTextField empresa, JTextField direccion, 
-            JTextField zipCode, JTextField ciudad, JTextField estado, JTextField duenio, JTextField telefonod, 
-            JTextField emaild, JTextField contacto, JTextField telefonoc, JTextField emailc, JTextField web){
-    
+    public void ModificarEmpresa(JTextField id, JTextField empresa, JTextField direccion,
+            JTextField zipCode, JTextField ciudad, JTextField estado, JTextField duenio, JTextField telefonod,
+            JTextField emaild, JTextField contacto, JTextField telefonoc, JTextField emailc, JTextField web) {
+
         setIdBusiness(Integer.parseInt(id.getText()));
         setNameBusiness(empresa.getText());
         setAddressBusiness(direccion.getText());
@@ -444,14 +443,14 @@ public class Empresas extends javax.swing.JInternalFrame {
         setCellPhoneContact(telefonoc.getText());
         setEmailContact(emailc.getText());
         setWebpageBusiness(web.getText());
-        
+
         String consulta = "UPDATE bussiness SET nameBusiness=?, addressBusiness=?, "
                 + "zipCode=?, city=?, state=?, nameOwner=?, cellPhoneOwner=?, emailOwner=?, nameContact=?, "
                 + "cellPhoneContact=?, emailContact=?, webpageBusiness=? Where idBusiness=?";
-        
+
         try {
             CallableStatement cs = objconexion.getConexion().prepareCall(consulta);
-            
+
             cs.setString(1, getNameBusiness());
             cs.setString(2, getAddressBusiness());
             cs.setInt(3, getZipCode());
@@ -465,28 +464,28 @@ public class Empresas extends javax.swing.JInternalFrame {
             cs.setString(11, getEmailContact());
             cs.setString(12, getWebpageBusiness());
             cs.setInt(13, getIdBusiness());
-            
+
             cs.executeUpdate();
             JOptionPane.showMessageDialog(null, "Modificacion Exitosa");
-            
+
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "No se ejecutó la Modificacion, Error "+e.toString());
+            JOptionPane.showMessageDialog(null, "No se ejecutó la Modificacion, Error " + e.toString());
         }
     }
-    
-    public Empresas BuscarEmp(java.awt.event.KeyEvent evt){
-        String[] titulosTabla = {"Código", "Empresa","Dirección", "ZipCode", "Ciudad", "Estado", 
-                "Propietario", "Celular", "email", "Contacto", "celular", "email", "Website", "Fecha Inicio", "Estado"}; //Titulos de la Tabla
-            String[] RegistroBD = new String[16];
-            
+
+    public Empresas BuscarEmp(java.awt.event.KeyEvent evt) {
+        String[] titulosTabla = {"Código", "Empresa", "Dirección", "ZipCode", "Ciudad", "Estado",
+            "Propietario", "Celular", "email", "Contacto", "celular", "email", "Website", "Fecha Inicio", "Estado"}; //Titulos de la Tabla
+        String[] RegistroBD = new String[16];
+
         Empresas empresa = new Empresas();
-        String sql = "SELECT * FROM bussiness WHERE nameBusiness LIKE '%"+txtBuscarEmpresa.getText()+"%'";
+        String sql = "SELECT * FROM bussiness WHERE nameBusiness LIKE '%" + txtBuscarEmpresa.getText() + "%'";
         model = new DefaultTableModel(null, titulosTabla);
         try {
             Statement st = objconexion.getConexion().createStatement();
             ResultSet rs = st.executeQuery(sql);
             connect = objconexion.getConexion();
-            while(rs.next()){
+            while (rs.next()) {
                 RegistroBD[0] = rs.getString("idBusiness");
                 RegistroBD[1] = rs.getString("nameBusiness");
                 RegistroBD[2] = rs.getString("addressBusiness");
@@ -519,28 +518,36 @@ public class Empresas extends javax.swing.JInternalFrame {
             tbEmpresa.getColumnModel().getColumn(11).setPreferredWidth(100);
             tbEmpresa.getColumnModel().getColumn(12).setPreferredWidth(150);
             tbEmpresa.getColumnModel().getColumn(13).setPreferredWidth(150);
-        }catch (SQLException e){ 
+        } catch (SQLException e) {
             System.out.println(e.toString());
         }
         return empresa;
     }
-  
 
-    /**
-     * Creates new form Business
-     */
+    public boolean accion(String estado, int idBusiness) {
+        String sql = "UPDATE bussiness SET estado = ? WHERE idBusiness = ?";
+        try {
+            Conectar con = new Conectar();
+            Connection connect = con.getConexion();
+
+            ps = connect.prepareStatement(sql);
+            ps.setString(1, estado);
+            ps.setInt(2, idBusiness);
+            ps.execute();
+            return true;
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e.toString());
+            return false;
+        }
+    }
+
     public Empresas() {
         initComponents();
-        
+
         txtId.setEnabled(false);
         CargarDatosTable("");
     }
 
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -558,6 +565,8 @@ public class Empresas extends javax.swing.JInternalFrame {
         btnEliminar = new javax.swing.JButton();
         btnCancelar = new javax.swing.JButton();
         btnAgregar = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         txtZipCode = new javax.swing.JTextField();
         txtCity = new javax.swing.JTextField();
@@ -684,6 +693,20 @@ public class Empresas extends javax.swing.JInternalFrame {
             }
         });
 
+        jButton1.setText("Activar");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("Inactivar");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -699,7 +722,7 @@ public class Empresas extends javax.swing.JInternalFrame {
                         .addComponent(btnLimpiar)
                         .addGap(26, 26, 26)
                         .addComponent(btnNuevo)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 65, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
                         .addComponent(btnModificar))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(208, 208, 208)
@@ -709,11 +732,17 @@ public class Empresas extends javax.swing.JInternalFrame {
                         .addGap(88, 88, 88)
                         .addComponent(btnEliminar)))
                 .addGap(35, 35, 35)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnCancelar)
-                    .addComponent(btnSalir))
-                .addGap(146, 146, 146))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(btnCancelar)
+                        .addGap(32, 32, 32)
+                        .addComponent(btnSalir))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jButton1)
+                        .addGap(41, 41, 41)
+                        .addComponent(jButton2)))
+                .addGap(34, 34, 34))
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane1)
                 .addContainerGap())
@@ -727,27 +756,34 @@ public class Empresas extends javax.swing.JInternalFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnEliminar)
                             .addComponent(btnAgregar)
-                            .addComponent(btnCancelar))
+                            .addComponent(btnCancelar)
+                            .addComponent(btnSalir))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnModificar)
                             .addComponent(btnNuevo)
-                            .addComponent(btnSalir)
                             .addComponent(btnLimpiar))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel16)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtBuscarEmpresa, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel17))
-                        .addGap(20, 20, 20)))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel16)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(txtBuscarEmpresa, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel17))
+                                .addGap(50, 50, 50))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jButton1)
+                                    .addComponent(jButton2))
+                                .addGap(18, 18, 18)))))
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(183, 183, 183))
+                .addGap(153, 153, 153))
         );
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 180, 1140, 290));
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 170, 1110, 290));
 
         jPanel2.setBackground(new java.awt.Color(204, 255, 255));
 
@@ -955,8 +991,8 @@ public class Empresas extends javax.swing.JInternalFrame {
         ModificarEmpresa(txtId, txtBusinessName, txtAddress, txtZipCode, txtCity, txtState, txtNameOwner, txtCellphoneOwner, txtEmailOwner, txtNameContact, txtCellphoneContact, txtEmailContact, txtWebsiteBusiness);
         CargarDatosTable("");
         LimpiarCajasTexto();
-       
-        
+
+
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
@@ -980,22 +1016,45 @@ public class Empresas extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_txtWebsiteBusinessActionPerformed
 
     private void btnLimpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarActionPerformed
-        txtBuscarEmpresa.setText("");
+        LimpiarCajasTexto();
+        txtBusinessName.requestFocus();
         CargarDatosTable("");
-        
+
     }//GEN-LAST:event_btnLimpiarActionPerformed
 
     private void txtBuscarEmpresaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscarEmpresaKeyTyped
-        
+
     }//GEN-LAST:event_txtBuscarEmpresaKeyTyped
 
     private void txtBuscarEmpresaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscarEmpresaKeyReleased
-        
+
     }//GEN-LAST:event_txtBuscarEmpresaKeyReleased
 
     private void txtBuscarEmpresaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscarEmpresaKeyPressed
         BuscarEmp(evt);
     }//GEN-LAST:event_txtBuscarEmpresaKeyPressed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        int fila = tbEmpresa.getSelectedRow();
+        int id = Integer.parseInt(txtId.getText());
+        if (accion("Activo", id)) {
+            JOptionPane.showMessageDialog(null, "Activado");
+            CargarDatosTable("");
+        } else {
+            JOptionPane.showMessageDialog(null, "Error al Activar");
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        int fila = tbEmpresa.getSelectedRow();
+        int id = Integer.parseInt(txtId.getText());
+        if (accion("Inactivo", id)) {
+            JOptionPane.showMessageDialog(null, "Inactivado");
+            CargarDatosTable("");
+        }else{
+            JOptionPane.showMessageDialog(null, "Error al Inactivar");
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1007,6 +1066,8 @@ public class Empresas extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnNuevo;
     private javax.swing.JButton btnSalir;
     private com.toedter.calendar.JDateChooser calendar;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;

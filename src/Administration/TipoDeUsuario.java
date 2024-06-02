@@ -459,8 +459,8 @@ public class TipoDeUsuario extends javax.swing.JInternalFrame {
         int fila = tbTipoUsuario.getSelectedRow();
         int id = Integer.parseInt(txtId.getText());
         if (accion("Activo", id)) {
-            CargarDatosTabla("");
             JOptionPane.showMessageDialog(null, "Activado");
+            CargarDatosTabla("");
         }else{
             JOptionPane.showMessageDialog(null, "Error al Activar");
         }
@@ -470,8 +470,8 @@ public class TipoDeUsuario extends javax.swing.JInternalFrame {
         int fila = tbTipoUsuario.getSelectedRow();
         int id = Integer.parseInt(txtId.getText());
         if (accion("Inactivo", id)) {
-            CargarDatosTabla("");
             JOptionPane.showMessageDialog(null, "Inactivado");
+            CargarDatosTabla("");
         }else{
             JOptionPane.showMessageDialog(null, "Error al Inactivar");
         }
