@@ -8,7 +8,13 @@ import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,7 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
-import java.util.Date;
+
 import java.util.GregorianCalendar;
 
 public class Trabajadores extends javax.swing.JInternalFrame {
@@ -272,7 +278,6 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         String tipoDocumento;
         String numDocumento;
         String Nombres, sexo;
-
         int edad;
         String direccion;
         int zipCode;
@@ -283,22 +288,18 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         numDocumento = txtNumeroDocumento.getText();
         Nombres = txtNombres.getText();
         sexo = cbxSexo.getSelectedItem().toString();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String fechaNac = sdf.format(JDateFechaNac.getDate());
 
-// Calcular la edad a partir de la fecha de nacimiento
-        Date fechaNacimiento = JDateFechaNac.getDate();
-        Calendar calNacimiento = Calendar.getInstance();
-        calNacimiento.setTime(fechaNacimiento);
-        Calendar fechaActual = Calendar.getInstance();
-        edad = fechaActual.get(Calendar.YEAR) - calNacimiento.get(Calendar.YEAR);
-        if (calNacimiento.get(Calendar.MONTH) > fechaActual.get(Calendar.MONTH)
-                || (calNacimiento.get(Calendar.MONTH) == fechaActual.get(Calendar.MONTH)
-                && calNacimiento.get(Calendar.DAY_OF_MONTH) > fechaActual.get(Calendar.DAY_OF_MONTH))) {
-            edad--;
-        }
+        // Obtener la fecha de nacimiento del JDateChooser como java.util.Date con casting
+        java.util.Date fechaNuevaUtil = JDateFechaNac.getDate();
 
-//Asignamos la edad al campo de texto correspondiente
+// Convertir la fecha de nacimiento a LocalDate
+        LocalDate fechaNueva = fechaNuevaUtil.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate fechaActual = null;
+
+        // Calcular la edad a partir de la fecha de nacimiento
+        edad = Period.between(fechaNueva, fechaActual).getYears();
+
+        //Asignamos la edad al campo de texto correspondiente
         txtEdad.setText(Integer.toString(edad));
 
         direccion = txtDireccion.getText();
@@ -315,7 +316,6 @@ public class Trabajadores extends javax.swing.JInternalFrame {
 
         //Para almacenar los datos empleo un try cash
         try {
-
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
             PreparedStatement ps = connect.prepareStatement(sql);
 
@@ -323,7 +323,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             ps.setString(2, numDocumento);
             ps.setString(3, Nombres);
             ps.setString(4, sexo);
-            ps.setString(5, fechaNac);
+            ps.setObject(5, fechaNueva);
             ps.setInt(6, edad);
             ps.setString(7, direccion);
             ps.setInt(8, zipCode);
@@ -339,6 +339,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             if (n > 0) {
                 JOptionPane.showMessageDialog(null, "El registro se guardo exitosamente");
 
+                // Limpiar campos
                 txtTipoDocumento.setText("");
                 txtNumeroDocumento.setText("");
                 txtNombres.setText("");
@@ -357,7 +358,6 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             Logger.getLogger(Tarifario.class.getName()).log(Level.SEVERE, null, e);
             JOptionPane.showMessageDialog(null, "El registro NO se guardo exitosamente, Error " + e.toString());
         }
-
     }
 
     public void Eliminar(JTextField codigo) {
@@ -418,20 +418,18 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         setNombres(Nombres.getText());
         setSexo(Sexo.getSelectedItem().toString());
 
-        // Obtener la fecha de nacimiento como java.util.Date y calcular la edad
-        Date fechaNacimiento = FechaNacimiento.getDate();
-        Calendar calNacimiento = Calendar.getInstance();
-        calNacimiento.setTime(fechaNacimiento);
-        Calendar fechaActual = Calendar.getInstance();
-        int edad = fechaActual.get(Calendar.YEAR) - calNacimiento.get(Calendar.YEAR);
-        if (calNacimiento.get(Calendar.MONTH) > fechaActual.get(Calendar.MONTH)
-                || (calNacimiento.get(Calendar.MONTH) == fechaActual.get(Calendar.MONTH)
-                && calNacimiento.get(Calendar.DAY_OF_MONTH) > fechaActual.get(Calendar.DAY_OF_MONTH))) {
-            edad--;
-        }
-        setEdad(edad);
-        // Establecer la fecha de nacimiento como java.sql.Date
-        setFechaNacimiento(new java.sql.Date(fechaNacimiento.getTime()));
+        // Obtener la fecha de nacimiento como LocalDate
+        LocalDate fechaNueva = FechaNacimiento.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        // Calcular la edad a partir de la fecha de nacimiento
+        LocalDate fechaActual = LocalDate.now();
+        int nuevaEdad = Period.between(fechaNueva, fechaActual).getYears();
+
+        // Convertir LocalDate a Date
+        Date fechaNacimientoSQL = Date.valueOf(fechaNueva);
+
+        setFechaNacimiento(fechaNacimientoSQL); // Establecer la nueva fecha de nacimiento como un objeto Date
+        setEdad(nuevaEdad);
 
         setDireccion(Direccion.getText());
         setZipCode(Integer.parseInt(ZipCode.getText()));
@@ -449,7 +447,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             cs.setString(2, getNumDocumento());
             cs.setString(3, getNombres());
             cs.setString(4, getSexo());
-            cs.setDate(5, (java.sql.Date) FechaNacimiento.getDate());
+            cs.setDate(5, Date.valueOf(fechaNueva)); // Utilizar la nueva fecha seleccionada
             cs.setInt(6, getEdad());
             cs.setString(7, getDireccion());
             cs.setInt(8, getZipCode());
@@ -459,6 +457,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             cs.setString(12, getEmail());
             cs.setInt(13, getId());
             cs.executeUpdate();
+
             JOptionPane.showMessageDialog(null, "Modificacion Exitosa");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se Modifico, error: " + e.toString());

@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -427,22 +428,26 @@ public class Empresas extends javax.swing.JInternalFrame {
     }
 
     public void ModificarEmpresa(JTextField id, JTextField empresa, JTextField direccion,
-            JTextField zipCode, JTextField ciudad, JTextField estado, JTextField duenio, JTextField telefonod,
-            JTextField emaild, JTextField contacto, JTextField telefonoc, JTextField emailc, JTextField web) {
+        JTextField zipCode, JTextField ciudad, JTextField estado, JTextField duenio, JTextField telefonod,
+        JTextField emaild, JTextField contacto, JTextField telefonoc, JTextField emailc, JTextField web) {
 
-        setIdBusiness(Integer.parseInt(id.getText()));
-        setNameBusiness(empresa.getText());
-        setAddressBusiness(direccion.getText());
-        setZipCode(Integer.parseInt(zipCode.getText()));
-        setCity(ciudad.getText());
-        setState(estado.getText());
-        setNameOwner(duenio.getText());
-        setCellPhoneOwner(telefonod.getText());
-        setEmailOwner(emaild.getText());
-        setNameContact(contacto.getText());
-        setCellPhoneContact(telefonoc.getText());
-        setEmailContact(emailc.getText());
-        setWebpageBusiness(web.getText());
+    // Convertir las fechas a LocalDate
+    // Por ejemplo, asumiendo que las fechas son almacenadas en formato dd-MM-yyyy
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    
+    setIdBusiness(Integer.parseInt(id.getText()));
+    setNameBusiness(empresa.getText());
+    setAddressBusiness(direccion.getText());
+    setZipCode(Integer.parseInt(zipCode.getText()));
+    setCity(ciudad.getText());
+    setState(estado.getText());
+    setNameOwner(duenio.getText());
+    setCellPhoneOwner(telefonod.getText());
+    setEmailOwner(emaild.getText());
+    setNameContact(contacto.getText());
+    setCellPhoneContact(telefonoc.getText());
+    setEmailContact(emailc.getText());
+    setWebpageBusiness(web.getText());
 
         String consulta = "UPDATE bussiness SET nameBusiness=?, addressBusiness=?, "
                 + "zipCode=?, city=?, state=?, nameOwner=?, cellPhoneOwner=?, emailOwner=?, nameContact=?, "
