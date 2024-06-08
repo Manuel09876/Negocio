@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -31,10 +32,12 @@ public class Empresas extends javax.swing.JInternalFrame {
     String nameBusiness;
     String addressBusiness;
     int zipCode;
-    String city, state, nameOwner, cellPhoneOwner, emailOwner, nameContact, cellPhoneContact, emailContact, webpageBusiness, dateStart, estado;
+    String city, state, nameOwner, cellPhoneOwner, emailOwner, nameContact, cellPhoneContact, emailContact, webpageBusiness, estado;
+    Date dateStart;
 
-    public Empresas(int idBusiness, String addressBusiness, int zipCode, String city, String state, String nameOwner, String cellPhoneOwner, String emailOwner, String nameContact, String cellPhoneContact, String emailContact, String webpageBusiness, String dateStart, String estado) {
+    public Empresas(int idBusiness, String nameBusiness, String addressBusiness, int zipCode, String city, String state, String nameOwner, String cellPhoneOwner, String emailOwner, String nameContact, String cellPhoneContact, String emailContact, String webpageBusiness, String estado, Date dateStart) {
         this.idBusiness = idBusiness;
+        this.nameBusiness = nameBusiness;
         this.addressBusiness = addressBusiness;
         this.zipCode = zipCode;
         this.city = city;
@@ -46,8 +49,8 @@ public class Empresas extends javax.swing.JInternalFrame {
         this.cellPhoneContact = cellPhoneContact;
         this.emailContact = emailContact;
         this.webpageBusiness = webpageBusiness;
-        this.dateStart = dateStart;
         this.estado = estado;
+        this.dateStart = dateStart;
     }
 
     public int getIdBusiness() {
@@ -154,11 +157,11 @@ public class Empresas extends javax.swing.JInternalFrame {
         this.webpageBusiness = webpageBusiness;
     }
 
-    public String getDateStart() {
+    public Date getDateStart() {
         return dateStart;
     }
 
-    public void setDateStart(String dateStart) {
+    public void setDateStart(Date dateStart) {
         this.dateStart = dateStart;
     }
 
@@ -398,7 +401,7 @@ public class Empresas extends javax.swing.JInternalFrame {
     public void SeleccionarEmpresa(JTable TablaEmpresa, JTextField id, JTextField nameBusiness,
             JTextField address, JTextField zipCode, JTextField city, JTextField state, JTextField nameOwner,
             JTextField cellPhoneOwner, JTextField emailOwner, JTextField nameContact, JTextField cellphoneContact,
-            JTextField emailContact, JTextField webpageBusiness) {
+            JTextField emailContact, JTextField webpageBusiness, JDateChooser fecha) {
 
         try {
 
@@ -419,39 +422,46 @@ public class Empresas extends javax.swing.JInternalFrame {
                 cellphoneContact.setText(TablaEmpresa.getValueAt(fila, 10).toString());
                 emailContact.setText(TablaEmpresa.getValueAt(fila, 11).toString());
                 webpageBusiness.setText(TablaEmpresa.getValueAt(fila, 12).toString());
+
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Formato de fecha de la tabla
+                String fechaString = TablaEmpresa.getValueAt(fila, 13).toString(); // Obtener la fecha como String de la tabla
+                Date fechaDate = sdf.parse(fechaString); // Convertir el String a un objeto Date
+                fecha.setDate(fechaDate); // Establecer la fecha en el JDateChooser
+
             } else {
                 JOptionPane.showMessageDialog(null, "Fila No seleccionada");
             }
-        } catch (Exception e) {
+        } catch (HeadlessException | ParseException e) {
             JOptionPane.showMessageDialog(null, "Error de Seleccion, Error: " + e.toString());
         }
     }
 
     public void ModificarEmpresa(JTextField id, JTextField empresa, JTextField direccion,
-        JTextField zipCode, JTextField ciudad, JTextField estado, JTextField duenio, JTextField telefonod,
-        JTextField emaild, JTextField contacto, JTextField telefonoc, JTextField emailc, JTextField web) {
+            JTextField zipCode, JTextField ciudad, JTextField estado, JTextField duenio, JTextField telefonod,
+            JTextField emaild, JTextField contacto, JTextField telefonoc, JTextField emailc, JTextField web, JDateChooser fecha) {
 
-    // Convertir las fechas a LocalDate
-    // Por ejemplo, asumiendo que las fechas son almacenadas en formato dd-MM-yyyy
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-    
-    setIdBusiness(Integer.parseInt(id.getText()));
-    setNameBusiness(empresa.getText());
-    setAddressBusiness(direccion.getText());
-    setZipCode(Integer.parseInt(zipCode.getText()));
-    setCity(ciudad.getText());
-    setState(estado.getText());
-    setNameOwner(duenio.getText());
-    setCellPhoneOwner(telefonod.getText());
-    setEmailOwner(emaild.getText());
-    setNameContact(contacto.getText());
-    setCellPhoneContact(telefonoc.getText());
-    setEmailContact(emailc.getText());
-    setWebpageBusiness(web.getText());
+        // Convertir las fechas a LocalDate
+        // Por ejemplo, asumiendo que las fechas son almacenadas en formato dd-MM-yyyy
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        setIdBusiness(Integer.parseInt(id.getText()));
+        setNameBusiness(empresa.getText());
+        setAddressBusiness(direccion.getText());
+        setZipCode(Integer.parseInt(zipCode.getText()));
+        setCity(ciudad.getText());
+        setState(estado.getText());
+        setNameOwner(duenio.getText());
+        setCellPhoneOwner(telefonod.getText());
+        setEmailOwner(emaild.getText());
+        setNameContact(contacto.getText());
+        setCellPhoneContact(telefonoc.getText());
+        setEmailContact(emailc.getText());
+        setWebpageBusiness(web.getText());
+        setDateStart(fecha.getDate()); //Obtenemos la fecha del JDateChooser
 
         String consulta = "UPDATE bussiness SET nameBusiness=?, addressBusiness=?, "
                 + "zipCode=?, city=?, state=?, nameOwner=?, cellPhoneOwner=?, emailOwner=?, nameContact=?, "
-                + "cellPhoneContact=?, emailContact=?, webpageBusiness=? Where idBusiness=?";
+                + "cellPhoneContact=?, emailContact=?, webpageBusiness=?, dateStart=? Where idBusiness=?";
 
         try {
             CallableStatement cs = objconexion.getConexion().prepareCall(consulta);
@@ -468,7 +478,11 @@ public class Empresas extends javax.swing.JInternalFrame {
             cs.setString(10, getCellPhoneContact());
             cs.setString(11, getEmailContact());
             cs.setString(12, getWebpageBusiness());
-            cs.setInt(13, getIdBusiness());
+            // Convertir la fecha de tipo java.util.Date a java.sql.Date
+            Date fechaSqlDate = new java.sql.Date(getDateStart().getTime());
+
+            cs.setDate(13, (java.sql.Date) fechaSqlDate);
+            cs.setInt(14, getIdBusiness());
 
             cs.executeUpdate();
             JOptionPane.showMessageDialog(null, "Modificacion Exitosa");
@@ -551,6 +565,13 @@ public class Empresas extends javax.swing.JInternalFrame {
 
         txtId.setEnabled(false);
         CargarDatosTable("");
+
+        // Configurar el JDateChooser para mostrar la fecha actual al abrir la aplicación
+        JDateChooser fechaChooser = new JDateChooser();
+        fechaChooser.setDate(new Date()); // Establecer la fecha actual
+
+// También puedes personalizar el formato de la fecha
+        fechaChooser.setDateFormatString("dd-MM-yyyy");
     }
 
     @SuppressWarnings("unchecked")
@@ -993,7 +1014,7 @@ public class Empresas extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnNuevoActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-        ModificarEmpresa(txtId, txtBusinessName, txtAddress, txtZipCode, txtCity, txtState, txtNameOwner, txtCellphoneOwner, txtEmailOwner, txtNameContact, txtCellphoneContact, txtEmailContact, txtWebsiteBusiness);
+        ModificarEmpresa(txtId, txtBusinessName, txtAddress, txtZipCode, txtCity, txtState, txtNameOwner, txtCellphoneOwner, txtEmailOwner, txtNameContact, txtCellphoneContact, txtEmailContact, txtWebsiteBusiness, calendar);
         CargarDatosTable("");
         LimpiarCajasTexto();
 
@@ -1006,14 +1027,14 @@ public class Empresas extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        SeleccionarEmpresa(tbEmpresa, txtId, txtBusinessName, txtAddress, txtZipCode, txtCity, txtState, txtNameOwner, txtCellphoneOwner, txtEmailOwner, txtNameContact, txtCellphoneContact, txtEmailContact, txtWebsiteBusiness);
+        SeleccionarEmpresa(tbEmpresa, txtId, txtBusinessName, txtAddress, txtZipCode, txtCity, txtState, txtNameOwner, txtCellphoneOwner, txtEmailOwner, txtNameContact, txtCellphoneContact, txtEmailContact, txtWebsiteBusiness, calendar);
         Eliminar(txtId);
         CargarDatosTable("");
         LimpiarCajasTexto();
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void tbEmpresaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbEmpresaMouseClicked
-        SeleccionarEmpresa(tbEmpresa, txtId, txtBusinessName, txtAddress, txtZipCode, txtCity, txtState, txtNameOwner, txtCellphoneOwner, txtEmailOwner, txtNameContact, txtCellphoneContact, txtEmailContact, txtWebsiteBusiness);
+        SeleccionarEmpresa(tbEmpresa, txtId, txtBusinessName, txtAddress, txtZipCode, txtCity, txtState, txtNameOwner, txtCellphoneOwner, txtEmailOwner, txtNameContact, txtCellphoneContact, txtEmailContact, txtWebsiteBusiness, calendar);
     }//GEN-LAST:event_tbEmpresaMouseClicked
 
     private void txtWebsiteBusinessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtWebsiteBusinessActionPerformed
@@ -1056,7 +1077,7 @@ public class Empresas extends javax.swing.JInternalFrame {
         if (accion("Inactivo", id)) {
             JOptionPane.showMessageDialog(null, "Inactivado");
             CargarDatosTable("");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Error al Inactivar");
         }
     }//GEN-LAST:event_jButton2ActionPerformed

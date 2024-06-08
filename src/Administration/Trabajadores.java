@@ -2,6 +2,7 @@ package Administration;
 
 import com.toedter.calendar.JDateChooser;
 import conectar.Conectar;
+import java.awt.HeadlessException;
 import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
 import java.sql.Statement;
@@ -9,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Date;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -385,26 +387,32 @@ public class Trabajadores extends javax.swing.JInternalFrame {
     public void SeleccionarTrabajador(JTable TablaTrabajador, JTextField Id, JTextField tipodeDocumento, JTextField numeroDocumento,
             JTextField Nombres, JComboBox Sexo, JDateChooser FechaNacimiento, JTextField Edad, JTextField Direccion, JTextField ZipCode,
             JTextField Ciudad, JTextField State, JTextField Telefono, JTextField Email) {
+        try {
+            int fila = TablaTrabajador.getSelectedRow();
+            if (fila >= 0) {
 
-        int fila = TablaTrabajador.getSelectedRow();
-        if (fila >= 0) {
+                Id.setText(TablaTrabajador.getValueAt(fila, 0).toString());
+                tipodeDocumento.setText(TablaTrabajador.getValueAt(fila, 1).toString());
+                numeroDocumento.setText(TablaTrabajador.getValueAt(fila, 2).toString());
+                Nombres.setText(TablaTrabajador.getValueAt(fila, 3).toString());
+                Sexo.setSelectedItem(TablaTrabajador.getValueAt(fila, 4).toString());
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Formato de fecha de la tabla
+                String fechaString = TablaTrabajador.getValueAt(fila, 5).toString(); // Obtener la fecha como String de la tabla
+                java.util.Date fechaDate = sdf.parse(fechaString); // Convertir el String a un objeto Date
+                FechaNacimiento.setDate(fechaDate); // Establecer la fecha en el JDateChooser
+                Edad.setText(TablaTrabajador.getValueAt(fila, 6).toString());
+                Direccion.setText(TablaTrabajador.getValueAt(fila, 7).toString());
+                ZipCode.setText(TablaTrabajador.getValueAt(fila, 8).toString());
+                Ciudad.setText(TablaTrabajador.getValueAt(fila, 9).toString());
+                State.setText(TablaTrabajador.getValueAt(fila, 10).toString());
+                Telefono.setText(TablaTrabajador.getValueAt(fila, 11).toString());
+                Email.setText(TablaTrabajador.getValueAt(fila, 12).toString());
 
-            Id.setText(TablaTrabajador.getValueAt(fila, 0).toString());
-            tipodeDocumento.setText(TablaTrabajador.getValueAt(fila, 1).toString());
-            numeroDocumento.setText(TablaTrabajador.getValueAt(fila, 2).toString());
-            Nombres.setText(TablaTrabajador.getValueAt(fila, 3).toString());
-            Sexo.setSelectedItem(TablaTrabajador.getValueAt(fila, 4).toString());
-            FechaNacimiento.setDateFormatString(TablaTrabajador.getValueAt(fila, 5).toString());
-            Edad.setText(TablaTrabajador.getValueAt(fila, 6).toString());
-            Direccion.setText(TablaTrabajador.getValueAt(fila, 7).toString());
-            ZipCode.setText(TablaTrabajador.getValueAt(fila, 8).toString());
-            Ciudad.setText(TablaTrabajador.getValueAt(fila, 9).toString());
-            State.setText(TablaTrabajador.getValueAt(fila, 10).toString());
-            Telefono.setText(TablaTrabajador.getValueAt(fila, 11).toString());
-            Email.setText(TablaTrabajador.getValueAt(fila, 12).toString());
-
-        } else {
-            JOptionPane.showMessageDialog(null, "Fila No seleccionada");
+            } else {
+                JOptionPane.showMessageDialog(null, "Fila No seleccionada");
+            }
+        } catch (HeadlessException | ParseException e) {
+            JOptionPane.showMessageDialog(null, "Error de Seleccion, Error: " + e.toString());
         }
     }
 
