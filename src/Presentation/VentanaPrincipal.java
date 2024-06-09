@@ -2,6 +2,7 @@ package Presentation;
 
 import Administration.*;
 import Admission.Clientes;
+import Admission.Configuracion;
 import Admission.tipos_pagosgenerales;
 import Register.CompraEquiposVehiculos;
 import Admission.Localizacion;
@@ -52,6 +53,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         TipoProMat = new javax.swing.JMenuItem();
         TipoMaqVe = new javax.swing.JMenuItem();
         Localizacion = new javax.swing.JMenuItem();
+        menuConfiguracion = new javax.swing.JMenuItem();
         menuOrdenes = new javax.swing.JMenuItem();
         menuVerOrdenes = new javax.swing.JMenuItem();
         menuIngreso = new javax.swing.JMenuItem();
@@ -297,6 +299,14 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
         });
         menuAdmission.add(Localizacion);
+
+        menuConfiguracion.setText("Configuracion");
+        menuConfiguracion.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuConfiguracionActionPerformed(evt);
+            }
+        });
+        menuAdmission.add(menuConfiguracion);
 
         jMenuBar1.add(menuAdmission);
 
@@ -768,6 +778,12 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         objTipoProMat.show();
     }//GEN-LAST:event_TipoProMatActionPerformed
 
+    private void menuConfiguracionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuConfiguracionActionPerformed
+        Configuracion objConfig = new Configuracion();
+        jpEscritorio.add(objConfig);
+        objConfig.show();
+    }//GEN-LAST:event_menuConfiguracionActionPerformed
+
     
     
     
@@ -829,6 +845,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     public javax.swing.JMenuItem menuCancelaciones;
     public javax.swing.JMenuItem menuCargosPendientes;
     public javax.swing.JMenuItem menuClientes;
+    private javax.swing.JMenuItem menuConfiguracion;
     public javax.swing.JMenuItem menuConvenios;
     public javax.swing.JMenuItem menuDeudasPorCobrar;
     public javax.swing.JMenuItem menuDeudasPorPagar;

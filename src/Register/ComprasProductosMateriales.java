@@ -354,6 +354,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jLabel4 = new javax.swing.JLabel();
         cbxTipoProducto = new javax.swing.JComboBox<>();
         txtIdTipoPro = new javax.swing.JTextField();
+        btnRefresh = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(0, 51, 153));
         setIconifiable(true);
@@ -524,6 +525,14 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(cbxTipoProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 80, 180, -1));
         jPanel16.add(txtIdTipoPro, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 120, 80, -1));
 
+        btnRefresh.setText("Refresh");
+        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshActionPerformed(evt);
+            }
+        });
+        jPanel16.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 10, -1, -1));
+
         getContentPane().add(jPanel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1080, 510));
 
         pack();
@@ -570,6 +579,10 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         MostrarCodigoTipo(cbxTipoProducto, txtIdProducto);
     }//GEN-LAST:event_cbxTipoProductoItemStateChanged
 
+    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
+         repaint(); // Actualizar el JInternalFrame al hacer clic en el botón "Refresh"
+    }//GEN-LAST:event_btnRefreshActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JLabel JLabelTotalCompra;
@@ -577,6 +590,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     public javax.swing.JButton btnGenerarCompra;
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnModificar;
+    private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnSalir;
     private javax.swing.ButtonGroup buttonGroup1;
     public javax.swing.JComboBox<Object> cbxMarca;
