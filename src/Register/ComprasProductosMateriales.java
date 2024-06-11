@@ -144,6 +144,12 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         MostrarProducto(cbxProducto);
         MostrarFormaDePago(cbxPagarCon);
         MostrarTipo(cbxTipoProducto);
+        txtIdMarca.setEnabled(false);
+        txtIdProducto.setEnabled(false);
+        txtIdProveedor.setEnabled(false);
+        txtIdTipoPro.setEnabled(false);
+        txtId_CompraProMat.setEnabled(false);
+        txtIdPagarCon.setEnabled(false);
 
         MostrarDatos("");
         txtId_CompraProMat.setEnabled(false);
@@ -342,7 +348,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         txtIdProducto = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         cbxPagarCon = new javax.swing.JComboBox<>();
-        txtPagarCon = new javax.swing.JTextField();
+        txtIdPagarCon = new javax.swing.JTextField();
         dateFecha = new com.toedter.calendar.JDateChooser();
         jLabel2 = new javax.swing.JLabel();
         btnGuardar = new javax.swing.JButton();
@@ -474,7 +480,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             }
         });
         jPanel16.add(cbxPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 390, 190, -1));
-        jPanel16.add(txtPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(930, 390, 90, -1));
+        jPanel16.add(txtIdPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(930, 390, 90, -1));
 
         dateFecha.setDateFormatString("yyyy-MM-dd");
         jPanel16.add(dateFecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 380, 220, -1));
@@ -555,7 +561,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbxProductoItemStateChanged
 
     private void cbxPagarConItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxPagarConItemStateChanged
-        MostrarCodigoFormaDePago(cbxPagarCon, txtPagarCon);
+        MostrarCodigoFormaDePago(cbxPagarCon, txtIdPagarCon);
     }//GEN-LAST:event_cbxPagarConItemStateChanged
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
@@ -576,7 +582,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_tbCompraProductoMouseClicked
 
     private void cbxTipoProductoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxTipoProductoItemStateChanged
-        MostrarCodigoTipo(cbxTipoProducto, txtIdProducto);
+        MostrarCodigoTipo(cbxTipoProducto, txtIdTipoPro);
     }//GEN-LAST:event_cbxTipoProductoItemStateChanged
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
@@ -619,12 +625,12 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     public javax.swing.JTable tbCompraProducto;
     public javax.swing.JTextField txtCant;
     private javax.swing.JTextField txtIdMarca;
+    private javax.swing.JTextField txtIdPagarCon;
     private javax.swing.JTextField txtIdProducto;
     private javax.swing.JTextField txtIdProveedor;
     private javax.swing.JTextField txtIdTipoPro;
     private javax.swing.JTextField txtId_CompraProMat;
     public javax.swing.JTextField txtNumeroRecibo;
-    private javax.swing.JTextField txtPagarCon;
     public javax.swing.JTextField txtSubTotal;
     public javax.swing.JTextField txtTaxes;
     public javax.swing.JTextField txtTotal;
