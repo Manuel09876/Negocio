@@ -300,13 +300,13 @@ public class CreditoEqVe extends javax.swing.JFrame {
         jPanel1.add(txtIdCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 152, 91, -1));
         jPanel1.add(txtIdCredito, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 14, 98, -1));
         jPanel1.add(txtInicial, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 20, 130, -1));
-        jPanel1.add(txtDiferencia, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 20, 120, -1));
+        jPanel1.add(txtDiferencia, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 20, 120, -1));
 
         jLabel1.setText("Inicial");
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 20, -1, -1));
 
         jLabel2.setText("Diferencia");
-        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 20, -1, -1));
+        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 20, -1, -1));
 
         jButton2.setText("Modificar");
         jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 70, -1, -1));

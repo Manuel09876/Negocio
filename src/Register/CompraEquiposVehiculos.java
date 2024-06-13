@@ -11,11 +11,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -226,6 +228,7 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         txtEquipo.requestFocus();
         txt_Inicial.setEnabled(false);
         txt_diferencia.setEnabled(false);
+        btnRegistrarCredito.setEnabled(false);
     }
 
     public void Limpiar() {
@@ -239,6 +242,8 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         txtTotal.setText("");
 
     }
+    
+    
 
     void MostrarTabla(String Valores) {
 
@@ -332,6 +337,7 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         FechaPago = dateFechaPago.getDate();
         Forma_Pago = Integer.parseInt(txtIdPagarCon.getText());
 
+                
         //Consulta para evitar duplicados
         String consulta = "SELECT * FROM equipos WHERE serie = ?";
 
@@ -358,6 +364,8 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
             pst.setDouble(11, total);
             pst.setDate(12, new java.sql.Date(FechaPago.getTime()));
             pst.setInt(13, Forma_Pago);
+            
+            
 
             //Declara otra variable para validar los registros
             int n = pst.executeUpdate();
@@ -399,7 +407,7 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
 
     public void SeleccionarEquipo(JTable Tabla, JTextField id, JTextField nombre, JTextField serie, JComboBox id_tipo,
             JComboBox id_marca, JComboBox id_proveedor, JTextField condicion, JTextField anio_fabricacion, JTextField Recibo,
-            JTextField SubTotal, JTextField Taxes, JTextField Total, JDateChooser FechaPago, JComboBox forma_pago) {
+            JTextField SubTotal, JTextField Taxes, JTextField Total, JDateChooser FechaPago, JComboBox forma_pago) throws ParseException {
 
         try {
 
@@ -407,21 +415,23 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
 
             if (fila >= 0) {
 
-                id.setText(tbEquipos.getValueAt(fila, 0).toString());
-                nombre.setText(tbEquipos.getValueAt(fila, 1).toString());
-                serie.setText(tbEquipos.getValueAt(fila, 2).toString());
-                id_tipo.setSelectedItem(tbEquipos.getValueAt(fila, 3).toString());
-                id_marca.setSelectedItem(tbEquipos.getValueAt(fila, 4).toString());
-                id_proveedor.setSelectedItem(tbEquipos.getValueAt(fila, 5).toString());
-                condicion.setText(tbEquipos.getValueAt(fila, 6).toString());
-                anio_fabricacion.setText(tbEquipos.getValueAt(fila, 7).toString());
-                Recibo.setText(tbEquipos.getValueAt(fila, 8).toString());
-                SubTotal.setText(tbEquipos.getValueAt(fila, 9).toString());
-                Taxes.setText(tbEquipos.getValueAt(fila, 10).toString());
-                Total.setText(tbEquipos.getValueAt(fila, 11).toString());
+                id.setText(Tabla.getValueAt(fila, 0).toString());
+                nombre.setText(Tabla.getValueAt(fila, 1).toString());
+                serie.setText(Tabla.getValueAt(fila, 2).toString());
+                id_tipo.setSelectedItem(Tabla.getValueAt(fila, 3).toString());
+                id_marca.setSelectedItem(Tabla.getValueAt(fila, 4).toString());
+                id_proveedor.setSelectedItem(Tabla.getValueAt(fila, 5).toString());
+                condicion.setText(Tabla.getValueAt(fila, 6).toString());
+                anio_fabricacion.setText(Tabla.getValueAt(fila, 7).toString());
+                Recibo.setText(Tabla.getValueAt(fila, 8).toString());
+                SubTotal.setText(Tabla.getValueAt(fila, 9).toString());
+                Taxes.setText(Tabla.getValueAt(fila, 10).toString());
+                Total.setText(Tabla.getValueAt(fila, 11).toString());
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Formato de fecha de la tabla
-                FechaPago.setDate((Date) tbEquipos.getValueAt(fila, 12));
-                forma_pago.setSelectedItem(tbEquipos.getValueAt(fila, 13).toString());
+                String fechaString = Tabla.getValueAt(fila, 12).toString(); // Obtener la fecha como String de la tabla
+                java.util.Date fechaDate = sdf.parse(fechaString); // Convertir el String a un objeto Date
+                FechaPago.setDate(fechaDate); // Establecer la fecha en el JDateChooser
+                forma_pago.setSelectedItem(Tabla.getValueAt(fila, 13).toString());
 
                 SimpleDateFormat s = new SimpleDateFormat("yyyy-MM-dd");
                 java.util.Date fecha;
@@ -767,6 +777,8 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
 
         jLabel17.setText("Fecha");
 
+        dateFechaPago.setDateFormatString("yyyy-MM-dd");
+
         jLabel49.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel49.setText("Pagar con");
 
@@ -782,6 +794,11 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         cbxPagarCon.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cbxPagarConItemStateChanged(evt);
+            }
+        });
+        cbxPagarCon.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbxPagarConActionPerformed(evt);
             }
         });
 
@@ -932,11 +949,15 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cbxPagarConItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxPagarConItemStateChanged
-        MostrarCodigoFormaDePago(cbxPagarCon, txtIdPagarCon);
+        MostrarCodigoFormaDePago(cbxPagarCon, txtIdPagarCon, txt_Inicial, txt_diferencia, btnRegistrarCredito);
     }//GEN-LAST:event_cbxPagarConItemStateChanged
 
     private void tbEquiposMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbEquiposMouseClicked
-        SeleccionarEquipo(tbEquipos, txtId, txtEquipo, txtSerie, cbxTipoMaqVe, cbxMarca, cbxProveedor, txtCondicion, txtAnioFabricacion, txtRecibo, txtSubtotal, txtTaxes, txtTotal, dateFechaPago, cbxPagarCon);
+        try {
+            SeleccionarEquipo(tbEquipos, txtId, txtEquipo, txtSerie, cbxTipoMaqVe, cbxMarca, cbxProveedor, txtCondicion, txtAnioFabricacion, txtRecibo, txtSubtotal, txtTaxes, txtTotal, dateFechaPago, cbxPagarCon);
+        } catch (ParseException ex) {
+            Logger.getLogger(CompraEquiposVehiculos.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_tbEquiposMouseClicked
 
     private void cbxTipoMaqVeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxTipoMaqVeItemStateChanged
@@ -948,12 +969,17 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnBorrarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-        SeleccionarEquipo(tbEquipos, txtId, txtEquipo, txtSerie, cbxTipoMaqVe, cbxMarca, cbxProveedor, txtCondicion, txtAnioFabricacion, txtRecibo, txtSubtotal, txtTaxes, txtTotal, dateFechaPago, cbxPagarCon);
+        try {
+            SeleccionarEquipo(tbEquipos, txtId, txtEquipo, txtSerie, cbxTipoMaqVe, cbxMarca, cbxProveedor, txtCondicion, txtAnioFabricacion, txtRecibo, txtSubtotal, txtTaxes, txtTotal, dateFechaPago, cbxPagarCon);
+        } catch (ParseException ex) {
+            Logger.getLogger(CompraEquiposVehiculos.class.getName()).log(Level.SEVERE, null, ex);
+        }
         modificar(txtId, txtEquipo, txtSerie, cbxTipoMaqVe, cbxMarca, cbxProveedor, txtCondicion, txtAnioFabricacion, txtRecibo, txtSubtotal, txtTaxes, txtTotal, dateFechaPago, cbxPagarCon);
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
         Guardar();
+        
     }//GEN-LAST:event_btnGuardarActionPerformed
 
     private void cbxProveedorItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxProveedorItemStateChanged
@@ -973,6 +999,10 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         objCredito.EnviarDatos(txt_Inicial.getText(), txt_diferencia.getText());
         objCredito.setVisible(true);
     }//GEN-LAST:event_btnRegistrarCreditoActionPerformed
+
+    private void cbxPagarConActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxPagarConActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cbxPagarConActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1189,37 +1219,43 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         }
     }
 
-    public void MostrarCodigoFormaDePago(JComboBox cbxPagarCon, JTextField idPagarCon) {
+    public void MostrarCodigoFormaDePago(JComboBox cbxPagarCon, JTextField idPagarCon, JTextField txt_Inicial, JTextField txt_diferencia, JButton btnRegistrarCredito) {
+    String consulta = "SELECT formadepago.id_formadepago FROM formadepago WHERE formadepago.nombre=?";
+    
+    try {
+        if (cbxPagarCon.getSelectedIndex() == -1) {
+            return; // Si no se ha seleccionado ningún elemento en el JComboBox, salir del método
+        }
 
-        String consuta = "select formadepago.id_formadepago from formadepago where formadepago.nombre=?";
+        CallableStatement cs = con.getConexion().prepareCall(consulta);
+        
+        Object selectedValue = cbxPagarCon.getSelectedItem();
+        if (selectedValue != null) {
+            String valorSeleccionado = selectedValue.toString();
+            cs.setString(1, valorSeleccionado);
+            cs.execute();
 
-        try {
-            // Validar si hay un item seleccionado en el JComboBox
-            if (cbxPagarCon.getSelectedIndex() == -1) {
-//            JOptionPane.showMessageDialog(null, "Error: No se ha seleccionado ningún proveedor.");
-                return;
-            }
-
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
-
-            Object selectedValue = cbxPagarCon.getSelectedItem();
-            if (selectedValue != null) {
-                String valorSeleccionado = selectedValue.toString();
-                cs.setString(1, valorSeleccionado);
-
-                cs.execute();
-
-                ResultSet rs = cs.executeQuery();
-
-                if (rs.next()) {
-                    idPagarCon.setText(rs.getString("id_formadepago"));
+            ResultSet rs = cs.executeQuery();
+            
+            if (rs.next()) {
+                idPagarCon.setText(rs.getString("id_formadepago"));
+                
+                // Validar el código de forma de pago y habilitar componentes
+                if (Integer.parseInt(rs.getString("id_formadepago")) == 3 || Integer.parseInt(rs.getString("id_formadepago")) == 6) {
+                    txt_Inicial.setEnabled(true);
+                    txt_diferencia.setEnabled(true);
+                    btnRegistrarCredito.setEnabled(true);
+                } else {
+                    txt_Inicial.setEnabled(false);
+                    txt_diferencia.setEnabled(false);
+                    btnRegistrarCredito.setEnabled(false);
                 }
             }
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
         }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
     }
+}
 
     public void MostrarFormaDePago(JComboBox cbxPagarCon) {
 
