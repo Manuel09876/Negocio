@@ -40,11 +40,9 @@ public class Orden extends javax.swing.JInternalFrame {
     int item;
     double TotalPagar = 0.00;
 
-//    java.util.Date inicio;
-//    java.util.Date fin;
+
     public Orden() {
-        // this.inicio = DateInicio.getDate();
-        // this.fin = DateFinal.getDate();
+        
         initComponents();
         AutoCompleteDecorator.decorate(cbxBusiness);
         AutoCompleteDecorator.decorate(cbxCustomer);
@@ -83,6 +81,7 @@ public class Orden extends javax.swing.JInternalFrame {
             }
 //            int a = Integer.parseInt(txtEntreServicios.getText());
             int n = dias / Integer.parseInt(txtEntreServicios.getText());
+        
             txtCantServicios.setText("" + n);
         } else {
             JOptionPane.showMessageDialog(null, "Seleccione la fechas", "", JOptionPane.ERROR_MESSAGE);
@@ -806,6 +805,7 @@ public class Orden extends javax.swing.JInternalFrame {
             String servicio = txtServicios.getText();
             double precio = Double.parseDouble(txtPrecioPorServicio.getText());
             String notaEmpresa = txtNotaE.getText();
+            
             //obtener la fecha de inicio y fin
             Date fechaInicio = DateInicio.getDate();
             Date fechafin = DateFinal.getDate();

@@ -364,6 +364,22 @@ public class Productos extends javax.swing.JInternalFrame {
         }
         return productos;
     }
+    
+    public boolean accion(String estado, int idTipoDeUsuario) {
+        String sql = "UPDATE product SET estado = ? WHERE idProduct = ?";
+        try {
+            connect = con.getConexion();
+            PreparedStatement ps;
+            ps = connect.prepareStatement(sql);
+            ps.setString(1, estado);
+            ps.setInt(2, idTipoDeUsuario);
+            ps.execute();
+            return true;
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e.toString());
+            return false;
+        }
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -394,6 +410,8 @@ public class Productos extends javax.swing.JInternalFrame {
         jLabel11 = new javax.swing.JLabel();
         txtBuscarProductos = new javax.swing.JTextField();
         btnSerch = new javax.swing.JButton();
+        btnActivar = new javax.swing.JButton();
+        btnInactivar = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(0, 255, 0));
         setIconifiable(true);
@@ -634,6 +652,17 @@ public class Productos extends javax.swing.JInternalFrame {
         });
         jPanel2.add(btnSerch, new org.netbeans.lib.awtextra.AbsoluteConstraints(288, 11, -1, 30));
 
+        btnActivar.setText("Activar");
+        jPanel2.add(btnActivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 360, -1, -1));
+
+        btnInactivar.setText("Inactivar");
+        btnInactivar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInactivarActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnInactivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 360, -1, -1));
+
         getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(417, 6, -1, 404));
 
         pack();
@@ -733,12 +762,25 @@ public class Productos extends javax.swing.JInternalFrame {
         MostrarCodigoUnidades(cbxUnidades, txtIdUnidades);
     }//GEN-LAST:event_cbxUnidadesItemStateChanged
 
+    private void btnInactivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInactivarActionPerformed
+        int fila = tbProducts.getSelectedRow();
+        int id = Integer.parseInt(txtIdProducto.getText());
+        if (accion("Inactivo", id)) {
+            JOptionPane.showMessageDialog(null, "Inactivado");
+            CargarDatosTable("");
+        }else{
+            JOptionPane.showMessageDialog(null, "Error al Inactivar");
+        }
+    }//GEN-LAST:event_btnInactivarActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnActivar;
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnExit;
+    private javax.swing.JButton btnInactivar;
     private javax.swing.JButton btnNew;
     private javax.swing.JButton btnSerch;
     private javax.swing.JButton btnUpdate;

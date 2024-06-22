@@ -322,7 +322,7 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
         txtIdBusiness = new javax.swing.JTextField();
         btnFiltrar = new javax.swing.JButton();
         btnProgramar = new javax.swing.JButton();
-        cbSeleecconaTodo = new javax.swing.JCheckBox();
+        cbSeleccionaTodo = new javax.swing.JCheckBox();
         btnSoloEmpresa = new javax.swing.JButton();
         btnMostrarTodo = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -382,10 +382,10 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
             }
         });
 
-        cbSeleecconaTodo.setText("Selecciona Todo");
-        cbSeleecconaTodo.addActionListener(new java.awt.event.ActionListener() {
+        cbSeleccionaTodo.setText("Selecciona Todo");
+        cbSeleccionaTodo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbSeleecconaTodoActionPerformed(evt);
+                cbSeleccionaTodoActionPerformed(evt);
             }
         });
 
@@ -422,7 +422,7 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
                             .addComponent(cbxEmpresa, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(41, 41, 41))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(cbSeleecconaTodo)
+                        .addComponent(cbSeleccionaTodo)
                         .addGap(37, 37, 37)
                         .addComponent(btnSoloEmpresa)
                         .addGap(57, 57, 57)))
@@ -459,7 +459,7 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cbSeleecconaTodo)
+                    .addComponent(cbSeleccionaTodo)
                     .addComponent(btnProgramar, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnMostrarTodo))
                 .addGap(9, 9, 9))
@@ -558,19 +558,19 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
         FiltrarTabla();
     }//GEN-LAST:event_btnFiltrarActionPerformed
 //Seleecionar todos los checkbox
-    private void cbSeleecconaTodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbSeleecconaTodoActionPerformed
-        if (cbSeleecconaTodo.isSelected()) {
-            cbSeleecconaTodo.setText("Deseleccionar Todo");
+    private void cbSeleccionaTodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbSeleccionaTodoActionPerformed
+        if (cbSeleccionaTodo.isSelected()) {
+            cbSeleccionaTodo.setText("Deseleccionar Todo");
             for (int i = 0; i < tbAsignacionTrabajos.getRowCount(); i++) {
                 tbAsignacionTrabajos.setValueAt(true, i, 0);
             }
         } else {
-            cbSeleecconaTodo.setText("Seleccionar Todo");
+            cbSeleccionaTodo.setText("Seleccionar Todo");
             for (int i = 0; i < tbAsignacionTrabajos.getRowCount(); i++) {
                 tbAsignacionTrabajos.setValueAt(false, i, 0);
             }
         }
-    }//GEN-LAST:event_cbSeleecconaTodoActionPerformed
+    }//GEN-LAST:event_cbSeleccionaTodoActionPerformed
 
     private void btnSoloEmpresaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSoloEmpresaActionPerformed
         FiltrarSoloEmpresa();
@@ -591,7 +591,7 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnProgramar;
     private javax.swing.JButton btnSalir;
     private javax.swing.JButton btnSoloEmpresa;
-    private javax.swing.JCheckBox cbSeleecconaTodo;
+    private javax.swing.JCheckBox cbSeleccionaTodo;
     private javax.swing.JComboBox<String> cbxEmpresa;
     private javax.swing.JComboBox<String> cbxTrabajador;
     private com.toedter.calendar.JDateChooser dateFin;

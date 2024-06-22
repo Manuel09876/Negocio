@@ -451,7 +451,8 @@ public class Proveedor extends javax.swing.JInternalFrame {
         tbSuplier = new javax.swing.JTable();
         btnModificar = new javax.swing.JButton();
         btnEliminar = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        btnReingresar = new javax.swing.JButton();
+        btnInactivar = new javax.swing.JButton();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -620,14 +621,22 @@ public class Proveedor extends javax.swing.JInternalFrame {
         });
         getContentPane().add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 10, -1, -1));
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/login.png"))); // NOI18N
-        jButton1.setText("Reingresar");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnReingresar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/login.png"))); // NOI18N
+        btnReingresar.setText("Reingresar");
+        btnReingresar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnReingresarActionPerformed(evt);
             }
         });
-        getContentPane().add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 10, -1, -1));
+        getContentPane().add(btnReingresar, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 10, -1, -1));
+
+        btnInactivar.setText("Inactivar");
+        btnInactivar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInactivarActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnInactivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(970, 10, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -674,9 +683,16 @@ public class Proveedor extends javax.swing.JInternalFrame {
         txtEmail.setText("");
     }//GEN-LAST:event_btnEliminarActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        
-    }//GEN-LAST:event_jButton1ActionPerformed
+    private void btnReingresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReingresarActionPerformed
+        int fila = tbSuplier.getSelectedRow();
+        int id = Integer.parseInt(txtIdSuplier.getText());
+        if (accion("Activo", id)) {
+            JOptionPane.showMessageDialog(null, "Activado");
+            MostrarProveedor("");
+        }else{
+            JOptionPane.showMessageDialog(null, "Error al Activar");
+        }
+    }//GEN-LAST:event_btnReingresarActionPerformed
 
     private void tbSuplierMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbSuplierMouseClicked
         Seleccionar(tbSuplier, txtIdSuplier, txtNameSuplier, txtAddress, txtZipCode, txtCity, txtState, txtPhonenNumber, txtWebsite, txtEmail);
@@ -693,6 +709,17 @@ public class Proveedor extends javax.swing.JInternalFrame {
         txtEmail.setText("");
     }//GEN-LAST:event_btnCancelActionPerformed
 
+    private void btnInactivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInactivarActionPerformed
+        int fila = tbSuplier.getSelectedRow();
+        int id = Integer.parseInt(txtIdSuplier.getText());
+        if (accion("Inactivo", id)) {
+            JOptionPane.showMessageDialog(null, "Inactivado");
+            MostrarProveedor("");
+        }else{
+            JOptionPane.showMessageDialog(null, "Error al Inactivar");
+        }
+    }//GEN-LAST:event_btnInactivarActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBuscar;
@@ -700,9 +727,10 @@ public class Proveedor extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnGrabar;
+    private javax.swing.JButton btnInactivar;
     private javax.swing.JButton btnModificar;
     private javax.swing.JButton btnNew;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnReingresar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

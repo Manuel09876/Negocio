@@ -370,7 +370,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
 
         try {
 
-            CallableStatement cs = objconexion.getConexion().prepareCall(consulta);
+            CallableStatement cs = con.getConexion().prepareCall(consulta);
             cs.setInt(1, getId());
             cs.executeUpdate();
 
@@ -450,7 +450,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
                 + "bornDate=?, age=?, address=?, zipCode=?, city=?, state=?, cellphone=?, "
                 + "email=? where idWorker=?";
         try {
-            CallableStatement cs = objconexion.getConexion().prepareCall(consulta);
+            CallableStatement cs = con.getConexion().prepareCall(consulta);
             cs.setString(1, getTipoDocumento());
             cs.setString(2, getNumDocumento());
             cs.setString(3, getNombres());
@@ -526,6 +526,22 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Error: " + e.toString());
         }
     }
+    
+    public boolean accion(String estado, int idTipoDeUsuario) {
+        String sql = "UPDATE worker SET status = ? WHERE idWorker = ?";
+        try {
+            connect = con.getConexion();
+            PreparedStatement ps;
+            ps = connect.prepareStatement(sql);
+            ps.setString(1, estado);
+            ps.setInt(2, idTipoDeUsuario);
+            ps.execute();
+            return true;
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e.toString());
+            return false;
+        }
+    }
 
     public Trabajadores() {
         initComponents();
@@ -580,6 +596,8 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         btnCancelar = new javax.swing.JButton();
         btnSalir = new javax.swing.JButton();
         btnEliminar = new javax.swing.JButton();
+        btnActivar = new javax.swing.JButton();
+        btnInactivar = new javax.swing.JButton();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -717,7 +735,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
                 btnNuevoActionPerformed(evt);
             }
         });
-        getContentPane().add(btnNuevo, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 420, -1, -1));
+        getContentPane().add(btnNuevo, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 420, -1, -1));
 
         btnGrabar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/guardar.png"))); // NOI18N
         btnGrabar.setText("Grabar");
@@ -726,7 +744,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
                 btnGrabarActionPerformed(evt);
             }
         });
-        getContentPane().add(btnGrabar, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 420, -1, -1));
+        getContentPane().add(btnGrabar, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 420, -1, -1));
 
         btnModificar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/actualizar.png"))); // NOI18N
         btnModificar.setText("Modificar");
@@ -735,7 +753,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
                 btnModificarActionPerformed(evt);
             }
         });
-        getContentPane().add(btnModificar, new org.netbeans.lib.awtextra.AbsoluteConstraints(800, 420, -1, -1));
+        getContentPane().add(btnModificar, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 420, -1, -1));
 
         btnCancelar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/close.png"))); // NOI18N
         btnCancelar.setText("Cancelar");
@@ -744,7 +762,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
                 btnCancelarActionPerformed(evt);
             }
         });
-        getContentPane().add(btnCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(960, 420, -1, -1));
+        getContentPane().add(btnCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 420, -1, -1));
 
         btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
         btnSalir.setText("Salir");
@@ -762,7 +780,23 @@ public class Trabajadores extends javax.swing.JInternalFrame {
                 btnEliminarActionPerformed(evt);
             }
         });
-        getContentPane().add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1090, 420, -1, -1));
+        getContentPane().add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(890, 420, -1, -1));
+
+        btnActivar.setText("Activar");
+        btnActivar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnActivarActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnActivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1020, 420, -1, -1));
+
+        btnInactivar.setText("Inactivar");
+        btnInactivar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInactivarActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnInactivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1120, 420, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -832,13 +866,37 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         BuscarTrabajadores(evt);
     }//GEN-LAST:event_txtBuscarTrabajadorKeyPressed
 
+    private void btnActivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActivarActionPerformed
+        int fila = tbTrabajadores.getSelectedRow();
+        int id = Integer.parseInt(txtId.getText());
+        if (accion("Activo", id)) {
+            JOptionPane.showMessageDialog(null, "Activado");
+            CargarDatosTable("");
+        }else{
+            JOptionPane.showMessageDialog(null, "Error al Activar");
+        }
+    }//GEN-LAST:event_btnActivarActionPerformed
+
+    private void btnInactivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInactivarActionPerformed
+        int fila = tbTrabajadores.getSelectedRow();
+        int id = Integer.parseInt(txtId.getText());
+        if (accion("Inactivo", id)) {
+            JOptionPane.showMessageDialog(null, "Inactivado");
+            CargarDatosTable("");
+        }else{
+            JOptionPane.showMessageDialog(null, "Error al Inactivar");
+        }
+    }//GEN-LAST:event_btnInactivarActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private com.toedter.calendar.JDateChooser JDateFechaNac;
+    private javax.swing.JButton btnActivar;
     private javax.swing.JButton btnBuscar;
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGrabar;
+    private javax.swing.JButton btnInactivar;
     private javax.swing.JButton btnModificar;
     private javax.swing.JButton btnNuevo;
     private javax.swing.JButton btnSalir;
@@ -876,6 +934,6 @@ public class Trabajadores extends javax.swing.JInternalFrame {
     private javax.swing.JTextField txtZipCode;
     // End of variables declaration//GEN-END:variables
 
-    Conectar objconexion = new Conectar();
-    Connection connect = objconexion.getConexion();
+    Conectar con = new Conectar();
+    Connection connect = con.getConexion();
 }

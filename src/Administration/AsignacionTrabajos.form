@@ -71,7 +71,7 @@
                           <EmptySpace min="-2" pref="41" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="1" attributes="0">
-                          <Component id="cbSeleecconaTodo" min="-2" max="-2" attributes="0"/>
+                          <Component id="cbSeleccionaTodo" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="-2" pref="37" max="-2" attributes="0"/>
                           <Component id="btnSoloEmpresa" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="-2" pref="57" max="-2" attributes="0"/>
@@ -119,7 +119,7 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="cbSeleecconaTodo" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="cbSeleccionaTodo" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnProgramar" alignment="3" min="-2" pref="31" max="-2" attributes="0"/>
                       <Component id="btnMostrarTodo" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -268,12 +268,12 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnProgramarActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JCheckBox" name="cbSeleecconaTodo">
+        <Component class="javax.swing.JCheckBox" name="cbSeleccionaTodo">
           <Properties>
             <Property name="text" type="java.lang.String" value="Selecciona Todo"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbSeleecconaTodoActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbSeleccionaTodoActionPerformed"/>
           </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnSoloEmpresa">
