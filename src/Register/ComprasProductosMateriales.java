@@ -139,20 +139,23 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         AutoCompleteDecorator.decorate(cbxProducto);
         AutoCompleteDecorator.decorate(cbxPagarCon);
         AutoCompleteDecorator.decorate(cbxTipoProducto);
+        
         MostrarProveedor(cbxProveedor);
         MostrarMarca(cbxMarca);
         MostrarProducto(cbxProducto);
         MostrarFormaDePago(cbxPagarCon);
         MostrarTipo(cbxTipoProducto);
+                
         txtIdMarca.setEnabled(false);
         txtIdProducto.setEnabled(false);
         txtIdProveedor.setEnabled(false);
         txtIdTipoPro.setEnabled(false);
         txtId_CompraProMat.setEnabled(false);
         txtIdPagarCon.setEnabled(false);
+        txtId_CompraProMat.setEnabled(false);
 
         MostrarDatos("");
-        txtId_CompraProMat.setEnabled(false);
+        
     }
 
     public void MostrarDatos(String Valores) {
@@ -182,6 +185,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             }
 
         } catch (SQLException e) {
+            System.out.println("Error "+e);
         }
     }
 
@@ -390,29 +394,28 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(jScrollPane12, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 147, 1050, 220));
 
         jLabel40.setText("Producto");
-        jPanel16.add(jLabel40, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 40, -1, -1));
+        jPanel16.add(jLabel40, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, -1, -1));
 
         jLabel41.setText("Recibo N°");
         jPanel16.add(jLabel41, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 20, -1, -1));
 
         jLabel42.setText("Cant");
-        jPanel16.add(jLabel42, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 50, -1, -1));
+        jPanel16.add(jLabel42, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 20, -1, -1));
 
         jLabel43.setText("Precio Unitario");
-        jPanel16.add(jLabel43, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 50, -1, -1));
+        jPanel16.add(jLabel43, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 20, -1, -1));
 
         jLabel44.setText("Total");
-        jPanel16.add(jLabel44, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 50, -1, -1));
+        jPanel16.add(jLabel44, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 20, -1, -1));
         jPanel16.add(txtNumeroRecibo, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 10, 170, 30));
-        jPanel16.add(txtCant, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 80, 70, 30));
-        jPanel16.add(txtSubTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 80, 70, 30));
-        jPanel16.add(txtTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(760, 80, 70, 30));
+        jPanel16.add(txtCant, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 50, 70, 30));
+        jPanel16.add(txtSubTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 50, 70, 30));
+        jPanel16.add(txtTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(690, 50, 70, 30));
 
         btnGenerarCompra.setBackground(new java.awt.Color(204, 204, 204));
         btnGenerarCompra.setFont(new java.awt.Font("Times New Roman", 1, 12)); // NOI18N
-        btnGenerarCompra.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/guardar.png"))); // NOI18N
-        btnGenerarCompra.setText("Ingresar");
-        jPanel16.add(btnGenerarCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(920, 80, 150, 30));
+        btnGenerarCompra.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/nuevo-producto.png"))); // NOI18N
+        jPanel16.add(btnGenerarCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(980, 100, 60, 30));
 
         jLabel46.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel46.setText("Proveedor");
@@ -427,15 +430,15 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
         jLabel47.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel47.setText("Total Pagar");
-        jPanel16.add(jLabel47, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 460, -1, -1));
+        jPanel16.add(jLabel47, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 90, -1, -1));
 
         JLabelTotalCompra.setText("-----------");
-        jPanel16.add(JLabelTotalCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 460, 130, -1));
+        jPanel16.add(JLabelTotalCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 120, 130, -1));
 
         jLabel49.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel49.setText("Pagar con");
-        jPanel16.add(jLabel49, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 370, -1, -1));
-        jPanel16.add(txtTaxes, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 410, 70, 30));
+        jPanel16.add(jLabel49, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 390, -1, -1));
+        jPanel16.add(txtTaxes, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 110, 70, 30));
 
         btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
         btnSalir.setText("Salir");
@@ -448,7 +451,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
         jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/clear.png"))); // NOI18N
         jButton2.setText("Limpiar");
-        jPanel16.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(890, 10, -1, -1));
+        jPanel16.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 50, -1, -1));
         jPanel16.add(txtIdProveedor, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 420, 80, -1));
 
         cbxProducto.addItemListener(new java.awt.event.ItemListener() {
@@ -456,7 +459,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                 cbxProductoItemStateChanged(evt);
             }
         });
-        jPanel16.add(cbxProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 80, 150, -1));
+        jPanel16.add(cbxProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 70, 150, -1));
         jPanel16.add(txtIdMarca, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 460, 80, -1));
 
         jLabel51.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
@@ -469,18 +472,18 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             }
         });
         jPanel16.add(cbxMarca, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 460, 220, -1));
-        jPanel16.add(txtIdProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 120, 90, -1));
+        jPanel16.add(txtIdProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 70, 80, -1));
 
         jLabel1.setText("Impuestos");
-        jPanel16.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 390, -1, -1));
+        jPanel16.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 90, -1, -1));
 
         cbxPagarCon.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cbxPagarConItemStateChanged(evt);
             }
         });
-        jPanel16.add(cbxPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 390, 190, -1));
-        jPanel16.add(txtIdPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(930, 390, 90, -1));
+        jPanel16.add(cbxPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 390, 190, -1));
+        jPanel16.add(txtIdPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 390, 90, -1));
 
         dateFecha.setDateFormatString("yyyy-MM-dd");
         jPanel16.add(dateFecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 380, 220, -1));
@@ -495,7 +498,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                 btnGuardarActionPerformed(evt);
             }
         });
-        jPanel16.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(830, 430, -1, -1));
+        jPanel16.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 380, 120, -1));
 
         btnModificar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/exchange.png"))); // NOI18N
         btnModificar.setText("Modificar");
@@ -504,7 +507,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                 btnModificarActionPerformed(evt);
             }
         });
-        jPanel16.add(btnModificar, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 430, -1, -1));
+        jPanel16.add(btnModificar, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 420, 120, -1));
 
         btnEliminar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/eliminar.png"))); // NOI18N
         btnEliminar.setText("Eliminar");
@@ -513,23 +516,23 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                 btnEliminarActionPerformed(evt);
             }
         });
-        jPanel16.add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(950, 430, -1, -1));
+        jPanel16.add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 470, 120, -1));
         jPanel16.add(txtId_CompraProMat, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 100, -1));
 
         jLabel3.setText("Otros");
-        jPanel16.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 390, -1, -1));
-        jPanel16.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 410, 80, 30));
+        jPanel16.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 90, -1, -1));
+        jPanel16.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 110, 80, 30));
 
         jLabel4.setText("Tipo");
-        jPanel16.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 50, -1, -1));
+        jPanel16.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, -1, -1));
 
         cbxTipoProducto.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cbxTipoProductoItemStateChanged(evt);
             }
         });
-        jPanel16.add(cbxTipoProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 80, 180, -1));
-        jPanel16.add(txtIdTipoPro, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 120, 80, -1));
+        jPanel16.add(cbxTipoProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 110, 150, -1));
+        jPanel16.add(txtIdTipoPro, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 110, 80, -1));
 
         btnRefresh.setText("Refresh");
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
@@ -537,7 +540,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                 btnRefreshActionPerformed(evt);
             }
         });
-        jPanel16.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 10, -1, -1));
+        jPanel16.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 10, -1, -1));
 
         getContentPane().add(jPanel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1080, 510));
 

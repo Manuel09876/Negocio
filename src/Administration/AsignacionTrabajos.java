@@ -239,8 +239,9 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
             System.out.println("Error al mostrar la Tabla " + e.toString());
         }
     }
+    
 
-    //Guardar selección y asignar trabajo a trabajador, eliminando fila
+//Guardar selección y asignar trabajo a trabajador, eliminando fila
     public void guardarSeleccion() {
         try {
 // Conexión a la base de datos

@@ -142,7 +142,7 @@ public class CreditoEqVe extends javax.swing.JFrame {
         initComponents();
         txtIdCompra.setEnabled(false);
         txtIdCredito.setEnabled(false);
-        initListeners(); //Inicializar los listener
+//        initListeners(); //Inicializar los listener
 
     }
 
@@ -156,153 +156,154 @@ public class CreditoEqVe extends javax.swing.JFrame {
     }
 
     // Método para hallar el id_venta que se está ejecutando en ese momento
-    public int IdCompra() {
-        int id = 0;
-        String sql = "SELECT MAX(id_equipos) FROM equipos";
-        Conectar con = new Conectar();
-        Connection connect = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                id = rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            System.out.println(e.toString());
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (ps != null) {
-                    ps.close();
-                }
-                if (connect != null) {
-                    connect.close();
-                }
-            } catch (SQLException e) {
-            }
-        }
-        return id;
-    }
-
-    private void registrarPagosPendientes() {
-        Conectar con = new Conectar();
-        Connection connect = null;
-        PreparedStatement stmt = null;
-        try {
-            connect = con.getConexion();
-
-            // Obtener los datos de las cajas de texto
-            int id = IdCompra();
-            int frecuencia = Integer.parseInt(txtFrecuencia.getText());
-            double interes = Double.parseDouble(txtInteres.getText());
-            int numeroCuotas = Integer.parseInt(txtNumeroCuotas.getText());
-            double valorCuota = Double.parseDouble(txtValorCuota.getText());
-            double total = Double.parseDouble(txtTotal.getText());
-            double diferencia = total;
-
-            // Obtener la fecha de inicio
-            Date fechaInicio = dateInicio.getDate();
-            if (fechaInicio == null) {
-                JOptionPane.showMessageDialog(null, "La fecha de inicio es nula. Por favor selecciona una fecha válida.");
-                return;
-            }
-
-            // Preparar la inserción de pagos en la base de datos
-            String sql = "INSERT INTO credito (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-            stmt = connect.prepareStatement(sql);
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(fechaInicio);
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-            for (int i = 1; i <= numeroCuotas; i++) {
-                calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
-
-                Date fechaPago = calendar.getTime();
-                diferencia -= valorCuota;
-
-                stmt.setInt(1, id);
-                stmt.setInt(2, frecuencia);
-                stmt.setString(3, dateFormat.format(fechaPago));
-                stmt.setDouble(4, interes);
-                stmt.setInt(5, i); // Número de la cuota actual
-                stmt.setDouble(6, valorCuota);
-                stmt.setDouble(7, diferencia); // Diferencia actualizada
-                stmt.setString(8, "Pendiente");
-
-                stmt.executeUpdate();
-
-//                // Mostrar aviso dos días antes de la fecha de pago
-//                Calendar avisoCalendar = Calendar.getInstance();
-//                avisoCalendar.setTime(fechaPago);
-//                avisoCalendar.add(Calendar.DAY_OF_MONTH, -2);
-//                Date fechaAviso = avisoCalendar.getTime();
-//                DateFormat avisoFormat = new SimpleDateFormat("dd/MM/yyyy");
-//                JOptionPane.showMessageDialog(null, "¡Atención! Quedan 2 días para la fecha de pago de la cuota " + i + ": " + avisoFormat.format(fechaAviso));
-            }
-
-            JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
-
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null, "Error al parsear un valor numérico: " + ex.getMessage());
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (connect != null) {
-                    connect.close();
-                }
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
-            }
-        }
-    }
-
-    public void MostrarTabla(String Valores) {
-        try {
-            String[] titulosTabla = {"id", "idCompra", "Descripcion", "Fecha de Pago", "Cuota Numero", "Monto a Pagar"}; //Titulos de la Tabla
-            String[] RegistroBD = new String[6];
-
-            model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
-
-            String sql = "";
-
-            Conectar con = new Conectar();
-            Connection connect = con.getConexion();
-            Statement st = connect.createStatement();
-            ResultSet result = st.executeQuery(sql);
-            
-            while (result.next()) {
-                RegistroBD[0] = result.getString("id");
-                RegistroBD[1] = result.getString("idCompra");
-                RegistroBD[2] = result.getString("descripcion");
-                RegistroBD[3] = result.getString("fechaPago");
-                RegistroBD[4] = result.getString("NumeroCuotas");
-                RegistroBD[5] = result.getString("cuota");
-                
-
-                model.addRow(RegistroBD);
-            }
-
-            tbCredito.setModel(model); //Le asignamos a nuestra tabla la modelación de la Base de Datos
-            TableColumn ci = tbCredito.getColumn("idCredito");
-            ci.setMaxWidth(0);
-            ci.setMinWidth(0);
-            ci.setPreferredWidth(0);
-            tbCredito.doLayout();
-            
-        } catch (SQLException e) {
-        }
-    }
+//    public int IdCompra() {
+//        int id = 0;
+//        String sql = "SELECT MAX(id_equipos) FROM equipos";
+//        Conectar con = new Conectar();
+//        Connection connect = null;
+//        PreparedStatement ps = null;
+//        ResultSet rs = null;
+//        try {
+//            connect = con.getConexion();
+//            ps = connect.prepareStatement(sql);
+//            rs = ps.executeQuery();
+//            if (rs.next()) {
+//                id = rs.getInt(1);
+//            }
+//        } catch (SQLException e) {
+//            System.out.println(e.toString());
+//        } finally {
+//            try {
+//                if (rs != null) {
+//                    rs.close();
+//                }
+//                if (ps != null) {
+//                    ps.close();
+//                }
+//                if (connect != null) {
+//                    connect.close();
+//                }
+//            } catch (SQLException e) {
+//            }
+//        }
+//        return id;
+//    }
+//
+//    public void registrarPagosPendientes() {
+//        Conectar con = new Conectar();
+//        Connection connect = null;
+//        PreparedStatement stmt = null;
+//        try {
+//            connect = con.getConexion();
+//
+//            // Obtener los datos de las cajas de texto
+//            int id = IdCompra();
+//            int frecuencia = Integer.parseInt(txtFrecuencia.getText());
+//            double interes = Double.parseDouble(txtInteres.getText());
+//            int numeroCuotas = Integer.parseInt(txtNumeroCuotas.getText());
+//            double valorCuota = Double.parseDouble(txtValorCuota.getText());
+//            double total = Double.parseDouble(txtTotal.getText());
+//            double diferencia = total;
+//
+//            // Obtener la fecha de inicio
+//            Date fechaInicio = dateInicio.getDate();
+//            if (fechaInicio == null) {
+//                JOptionPane.showMessageDialog(null, "La fecha de inicio es nula. Por favor selecciona una fecha válida.");
+////                return;
+//            }
+//
+//            // Preparar la inserción de pagos en la base de datos
+//            String sql = "INSERT INTO credito (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
+//                    + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
+//            stmt = connect.prepareStatement(sql);
+//
+//            Calendar calendar = Calendar.getInstance();
+//            calendar.setTime(fechaInicio);
+//            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//
+//            for (int i = 1; i <= numeroCuotas; i++) {
+//                calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
+//
+//                Date fechaPago = calendar.getTime();
+//                diferencia -= valorCuota;
+//
+//                stmt.setInt(1, id);
+//                stmt.setInt(2, frecuencia);
+//                stmt.setString(3, dateFormat.format(fechaPago));
+//                stmt.setDouble(4, interes);
+//                stmt.setInt(5, i); // Número de la cuota actual
+//                stmt.setDouble(6, valorCuota);
+//                stmt.setDouble(7, diferencia); // Diferencia actualizada
+//                stmt.setString(8, "Pendiente");
+//
+//                stmt.executeUpdate();
+//
+////                // Mostrar aviso dos días antes de la fecha de pago
+////                Calendar avisoCalendar = Calendar.getInstance();
+////                avisoCalendar.setTime(fechaPago);
+////                avisoCalendar.add(Calendar.DAY_OF_MONTH, -2);
+////                Date fechaAviso = avisoCalendar.getTime();
+////                DateFormat avisoFormat = new SimpleDateFormat("dd/MM/yyyy");
+////                JOptionPane.showMessageDialog(null, "¡Atención! Quedan 2 días para la fecha de pago de la cuota " + i + ": " + avisoFormat.format(fechaAviso));
+//            }
+//
+//            JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
+//
+//        } catch (NumberFormatException ex) {
+//            System.out.println("Error "+ex);
+//            JOptionPane.showMessageDialog(null, "Error al parsear un valor numérico: " + ex.getMessage());
+//        } catch (SQLException ex) {
+//            JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
+//        } finally {
+//            try {
+//                if (stmt != null) {
+//                    stmt.close();
+//                }
+//                if (connect != null) {
+//                    connect.close();
+//                }
+//            } catch (SQLException ex) {
+//                JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
+//            }
+//        }
+//    }
+//
+//    public void MostrarTabla(String Valores) {
+//        try {
+//            String[] titulosTabla = {"id", "idCompra", "Descripcion", "Fecha de Pago", "Cuota Numero", "Monto a Pagar"}; //Titulos de la Tabla
+//            String[] RegistroBD = new String[6];
+//
+//            model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
+//
+//            String sql = "";
+//
+//            Conectar con = new Conectar();
+//            Connection connect = con.getConexion();
+//            Statement st = connect.createStatement();
+//            ResultSet result = st.executeQuery(sql);
+//            
+//            while (result.next()) {
+//                RegistroBD[0] = result.getString("id");
+//                RegistroBD[1] = result.getString("idCompra");
+//                RegistroBD[2] = result.getString("descripcion");
+//                RegistroBD[3] = result.getString("fechaPago");
+//                RegistroBD[4] = result.getString("NumeroCuotas");
+//                RegistroBD[5] = result.getString("cuota");
+//                
+//
+//                model.addRow(RegistroBD);
+//            }
+//
+//            tbCredito.setModel(model); //Le asignamos a nuestra tabla la modelación de la Base de Datos
+//            TableColumn ci = tbCredito.getColumn("idCredito");
+//            ci.setMaxWidth(0);
+//            ci.setMinWidth(0);
+//            ci.setPreferredWidth(0);
+//            tbCredito.doLayout();
+//            
+//        } catch (SQLException e) {
+//        }
+//    }
     
     
 
@@ -390,13 +391,28 @@ public class CreditoEqVe extends javax.swing.JFrame {
         jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 20, -1, -1));
 
         jButton2.setText("Modificar");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
         jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 70, -1, -1));
 
         jButton3.setText("Eliminar");
         jButton3.setToolTipText("");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
         jPanel1.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 120, -1, -1));
 
         jButton4.setText("Pagada");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
         jPanel1.add(jButton4, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 170, -1, -1));
         jPanel1.add(txtValorCuota, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 170, 100, -1));
 
@@ -440,9 +456,21 @@ public class CreditoEqVe extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void btnFechasDePagoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFechasDePagoActionPerformed
-        registrarPagosPendientes();
-        LimpiarCampos();
+//        registrarPagosPendientes();
+//        LimpiarCampos();
     }//GEN-LAST:event_btnFechasDePagoActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -519,47 +547,47 @@ public class CreditoEqVe extends javax.swing.JFrame {
     private javax.swing.JTextField txtValorCuota;
     // End of variables declaration//GEN-END:variables
 
-    private void LimpiarCampos() {
-        txtDiferencia.setText("");
-        txtFrecuencia.setText("");
-        txtInicial.setText("");
-        txtInteres.setText("");
-        txtNumeroCuotas.setText("");
-        txtValorCuota.setText("");
-        dateInicio.setDateFormatString("");
-        txtTotal.setText("");
-    }
+//    private void LimpiarCampos() {
+//        txtDiferencia.setText("");
+//        txtFrecuencia.setText("");
+//        txtInicial.setText("");
+//        txtInteres.setText("");
+//        txtNumeroCuotas.setText("");
+//        txtValorCuota.setText("");
+//        dateInicio.setDateFormatString("");
+//        txtTotal.setText("");
+//    }
     
-     private void initListeners() {
-        txtInicial.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                calcularDiferencia();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                calcularDiferencia();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                calcularDiferencia();
-            }
-        });
-    }
-
-    private void calcularDiferencia() {
-        try {
-            double total = Double.parseDouble(txtTotal.getText());
-            double inicial = Double.parseDouble(txtInicial.getText());
-            double diferencia = total - inicial;
-            txtDiferencia.setText(String.valueOf(diferencia));
-        } catch (NumberFormatException ex) {
-            // Manejo de excepción en caso de que los textos no sean números válidos
-//            JOptionPane.showMessageDialog(this, "Por favor, ingrese valores numéricos válidos.");
-        }
-        
-    }
+//     private void initListeners() {
+//        txtInicial.getDocument().addDocumentListener(new DocumentListener() {
+//            @Override
+//            public void insertUpdate(DocumentEvent e) {
+//                calcularDiferencia();
+//            }
+//
+//            @Override
+//            public void removeUpdate(DocumentEvent e) {
+//                calcularDiferencia();
+//            }
+//
+//            @Override
+//            public void changedUpdate(DocumentEvent e) {
+//                calcularDiferencia();
+//            }
+//        });
+//    }
+//
+//    private void calcularDiferencia() {
+//        try {
+//            double total = Double.parseDouble(txtTotal.getText());
+//            double inicial = Double.parseDouble(txtInicial.getText());
+//            double diferencia = total - inicial;
+//            txtDiferencia.setText(String.valueOf(diferencia));
+//        } catch (NumberFormatException ex) {
+//            // Manejo de excepción en caso de que los textos no sean números válidos
+////            JOptionPane.showMessageDialog(this, "Por favor, ingrese valores numéricos válidos.");
+//        }
+//        
+//    }
 
 }
