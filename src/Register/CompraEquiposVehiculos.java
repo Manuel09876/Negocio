@@ -6,6 +6,7 @@ import Bases.CreditoEqVe;
 import com.toedter.calendar.JDateChooser;
 import conectar.Conectar;
 import java.awt.HeadlessException;
+import java.awt.event.KeyEvent;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -234,10 +235,11 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         txt_diferencia.setEnabled(false);
         btnRegistrarCredito.setEnabled(false);
         initListeners();
-        
-        
-                
+
     }
+    
+    
+
 
     public void Limpiar() {
         txtEquipo.setText("");
@@ -254,8 +256,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         cbxTipoMaqVe.setSelectedItem("");
 
     }
-    
-    
 
     public void MostrarTabla(String Valores) {
 
@@ -274,7 +274,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
                                  INNER JOIN marca AS m ON e.id_marca=m.id_marca 
                                  INNER JOIN suplier AS s ON e.id_proveedor=s.idSuplier
                                  INNER JOIN formadepago AS fp ON e.forma_pago=fp.id_formadepago ORDER BY e.id_equipos DESC""";
-                                 
 
             Statement st = connect.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
@@ -346,11 +345,11 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         subTotal = Double.parseDouble(txtSubtotal.getText());
         taxes = Double.parseDouble(txtTaxes.getText());
         total = Double.parseDouble(txtTotal.getText());
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         FechaPago = dateFechaPago.getDate();
         Forma_Pago = Integer.parseInt(txtIdPagarCon.getText());
 
-                
         //Consulta para evitar duplicados
         String consulta = "SELECT * FROM equipos WHERE serie = ?";
 
@@ -377,8 +376,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
             pst.setDouble(11, total);
             pst.setDate(12, new java.sql.Date(FechaPago.getTime()));
             pst.setInt(13, Forma_Pago);
-            
-            
 
             //Declara otra variable para validar los registros
             int n = pst.executeUpdate();
@@ -398,7 +395,7 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         }
 
     }
-    
+
     public void GuardarCredito() {
 
         // Variables
@@ -429,7 +426,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         FechaPago = dateFechaPago.getDate();
         Forma_Pago = Integer.parseInt(txtIdPagarCon.getText());
 
-                
         //Consulta para evitar duplicados
         String consulta = "SELECT * FROM equipos WHERE serie = ?";
 
@@ -456,8 +452,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
             pst.setDouble(11, total);
             pst.setDate(12, new java.sql.Date(FechaPago.getTime()));
             pst.setInt(13, Forma_Pago);
-            
-            
 
             //Declara otra variable para validar los registros
             int n = pst.executeUpdate();
@@ -573,8 +567,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
 
         }
     }
-    
-     
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -764,7 +756,7 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         });
         jPanel1.add(btnLimpiar, new org.netbeans.lib.awtextra.AbsoluteConstraints(182, 400, -1, -1));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, -1, 612));
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, 510, 612));
 
         jPanel2.setBackground(new java.awt.Color(204, 255, 204));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -787,7 +779,7 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         });
         jScrollPane1.setViewportView(tbEquipos);
 
-        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 20, 706, 219));
+        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 706, 219));
 
         getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(522, 355, 727, -1));
 
@@ -803,11 +795,23 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         jLabel15.setText("Taxes");
         jPanel3.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(37, 85, -1, -1));
         jPanel3.add(txtRecibo, new org.netbeans.lib.awtextra.AbsoluteConstraints(99, 19, 120, -1));
+
+        txtTaxes.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtTaxesKeyPressed(evt);
+            }
+        });
         jPanel3.add(txtTaxes, new org.netbeans.lib.awtextra.AbsoluteConstraints(99, 82, 120, -1));
         jPanel3.add(txtSubtotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(99, 53, 120, -1));
 
         jLabel16.setText("Total");
         jPanel3.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 119, -1, -1));
+
+        txtTotal.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtTotalKeyPressed(evt);
+            }
+        });
         jPanel3.add(txtTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(99, 116, 120, -1));
 
         jLabel17.setText("Fecha");
@@ -819,6 +823,12 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         jLabel49.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel49.setText("Pagar con");
         jPanel3.add(jLabel49, new org.netbeans.lib.awtextra.AbsoluteConstraints(325, 14, -1, -1));
+
+        txt_Inicial.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txt_InicialKeyPressed(evt);
+            }
+        });
         jPanel3.add(txt_Inicial, new org.netbeans.lib.awtextra.AbsoluteConstraints(99, 192, 88, -1));
 
         txt_diferencia.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -897,7 +907,7 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         jPanel3.add(btnRegistrarCredito, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 240, -1, -1));
         jPanel3.add(txtIdCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 290, 80, -1));
 
-        getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(522, 6, -1, 330));
+        getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(522, 6, 710, 330));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -933,7 +943,7 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
         Guardar();
-        
+
     }//GEN-LAST:event_btnGuardarActionPerformed
 
     private void cbxProveedorItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxProveedorItemStateChanged
@@ -949,7 +959,7 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnSalirActionPerformed
 
     private void btnRegistrarCreditoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegistrarCreditoActionPerformed
-        
+
         registrarPagosPendientes();
         GuardarCredito();
         LimpiartxtCred();
@@ -962,16 +972,32 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         Limpiar();
         txtEquipo.requestFocus();
-        
+
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void txt_diferenciaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_diferenciaKeyReleased
-       
+
     }//GEN-LAST:event_txt_diferenciaKeyReleased
 
     private void btnLimpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarActionPerformed
         Limpiar();
     }//GEN-LAST:event_btnLimpiarActionPerformed
+
+    private void txt_InicialKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_InicialKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            double total = Double.parseDouble(txtTotal.getText());
+            double inicial = Double.parseDouble(txt_Inicial.getText());
+            double diferencia = total - inicial;
+        }
+    }//GEN-LAST:event_txt_InicialKeyPressed
+
+    private void txtTaxesKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTaxesKeyPressed
+       
+    }//GEN-LAST:event_txtTaxesKeyPressed
+
+    private void txtTotalKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTotalKeyPressed
+
+    }//GEN-LAST:event_txtTotalKeyPressed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1207,54 +1233,54 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoFormaDePago(JComboBox cbxPagarCon, JTextField idPagarCon, JTextField txt_Inicial, JTextField txt_diferencia, JButton btnRegistrarCredito) {
-    String consulta = "SELECT formadepago.id_formadepago FROM formadepago WHERE formadepago.nombre=?";
-    
-    try {
-        if (cbxPagarCon.getSelectedIndex() == -1) {
-            return; // Si no se ha seleccionado ningún elemento en el JComboBox, salir del método
-        }
+        String consulta = "SELECT formadepago.id_formadepago FROM formadepago WHERE formadepago.nombre=?";
 
-        CallableStatement cs = con.getConexion().prepareCall(consulta);
-        
-        Object selectedValue = cbxPagarCon.getSelectedItem();
-        if (selectedValue != null) {
-            String valorSeleccionado = selectedValue.toString();
-            cs.setString(1, valorSeleccionado);
-            cs.execute();
+        try {
+            if (cbxPagarCon.getSelectedIndex() == -1) {
+                return; // Si no se ha seleccionado ningún elemento en el JComboBox, salir del método
+            }
 
-            ResultSet rs = cs.executeQuery();
-            
-            if (rs.next()) {
-                idPagarCon.setText(rs.getString("id_formadepago"));
-                
-                // Validar el código de forma de pago y habilitar componentes
-                if (Integer.parseInt(rs.getString("id_formadepago")) == 3 || Integer.parseInt(rs.getString("id_formadepago")) == 6) {
-                    txt_Inicial.setEnabled(true);
-                    txt_diferencia.setEnabled(true);
-                    btnRegistrarCredito.setEnabled(true);
-                    btnGuardar.setEnabled(false);
-                    txtTotal1.setEnabled(true);
-                    txtFrecuencia.setEnabled(true);
-                    txtInteres.setEnabled(true);
-                    txtNumeroCuotas.setEnabled(true);
-                    txtValorCuota.setEnabled(true);
-                } else {
-                    txt_Inicial.setEnabled(false);
-                    txt_diferencia.setEnabled(false);
-                    btnRegistrarCredito.setEnabled(false);
-                    btnGuardar.setEnabled(true);
-                    txtTotal1.setEnabled(false);
-                    txtFrecuencia.setEnabled(false);
-                    txtInteres.setEnabled(false);
-                    txtNumeroCuotas.setEnabled(false);
-                    txtValorCuota.setEnabled(false);
+            CallableStatement cs = con.getConexion().prepareCall(consulta);
+
+            Object selectedValue = cbxPagarCon.getSelectedItem();
+            if (selectedValue != null) {
+                String valorSeleccionado = selectedValue.toString();
+                cs.setString(1, valorSeleccionado);
+                cs.execute();
+
+                ResultSet rs = cs.executeQuery();
+
+                if (rs.next()) {
+                    idPagarCon.setText(rs.getString("id_formadepago"));
+
+                    // Validar el código de forma de pago y habilitar componentes
+                    if (Integer.parseInt(rs.getString("id_formadepago")) == 3 || Integer.parseInt(rs.getString("id_formadepago")) == 6) {
+                        txt_Inicial.setEnabled(true);
+                        txt_diferencia.setEnabled(true);
+                        btnRegistrarCredito.setEnabled(true);
+                        btnGuardar.setEnabled(false);
+                        txtTotal1.setEnabled(true);
+                        txtFrecuencia.setEnabled(true);
+                        txtInteres.setEnabled(true);
+                        txtNumeroCuotas.setEnabled(true);
+                        txtValorCuota.setEnabled(true);
+                    } else {
+                        txt_Inicial.setEnabled(false);
+                        txt_diferencia.setEnabled(false);
+                        btnRegistrarCredito.setEnabled(false);
+                        btnGuardar.setEnabled(true);
+                        txtTotal1.setEnabled(false);
+                        txtFrecuencia.setEnabled(false);
+                        txtInteres.setEnabled(false);
+                        txtNumeroCuotas.setEnabled(false);
+                        txtValorCuota.setEnabled(false);
+                    }
                 }
             }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
         }
-    } catch (SQLException e) {
-        JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
     }
-}
 
     public void MostrarFormaDePago(JComboBox cbxPagarCon) {
 
@@ -1277,8 +1303,8 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
         }
     }
-    
-     // Método para hallar el id_venta que se está ejecutando en ese momento
+
+    // Método para hallar el id_Compra que se está ejecutando en ese momento
     public int IdCompra() {
         int id = 0;
         String sql = "SELECT MAX(id_equipos) FROM equipos";
@@ -1311,62 +1337,61 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         }
         return id;
     }
-    
+
     public void registrarPagosPendientes() {
-    Conectar con = new Conectar();
-    Connection connect = null;
-    PreparedStatement stmt = null;
-    try {
-        connect = con.getConexion();
+        Conectar con = new Conectar();
+        Connection connect = null;
+        PreparedStatement stmt = null;
+        try {
+            connect = con.getConexion();
 
-        // Obtener los datos de las cajas de texto
-        int id = IdCompra();
-        int frecuencia = Integer.parseInt(txtFrecuencia.getText());
-        double interes = Double.parseDouble(txtInteres.getText());
-        int numeroCuotas = Integer.parseInt(txtNumeroCuotas.getText());
-        double valorCuota = Double.parseDouble(txtValorCuota.getText());
-        double total = Double.parseDouble(txtTotal.getText());
-        double diferencia = total;
+            // Obtener los datos de las cajas de texto
+            int id = IdCompra();
+            int frecuencia = Integer.parseInt(txtFrecuencia.getText());
+            double interes = Double.parseDouble(txtInteres.getText());
+            int numeroCuotas = Integer.parseInt(txtNumeroCuotas.getText());
+            double valorCuota = Double.parseDouble(txtValorCuota.getText());
+            double total = Double.parseDouble(txtTotal.getText());
+            double diferencia = total;
 
-        // Obtener la fecha de inicio
-        Date fechaInicio = dateFechaPagoCred.getDate();
-        if (fechaInicio == null) {
-            JOptionPane.showMessageDialog(null, "La fecha de inicio es nula. Por favor selecciona una fecha válida.");
-            return; // Añadido return para evitar continuar si la fecha es nula
-        }
-
-        // Preparar la inserción de pagos en la base de datos
-        String sql = "INSERT INTO credito (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
-        stmt = connect.prepareStatement(sql);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(fechaInicio);
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-        for (int i = 1; i <= numeroCuotas; i++) {
-            calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
-
-            Date fechaPago = calendar.getTime();
-            double cuotaActual = valorCuota;
-
-            // Ajustar la última cuota si la diferencia es menor que el valor de la cuota
-            if (i == numeroCuotas && diferencia < valorCuota) {
-                cuotaActual = diferencia;
+            // Obtener la fecha de inicio
+            Date fechaInicio = dateFechaPagoCred.getDate();
+            if (fechaInicio == null) {
+                JOptionPane.showMessageDialog(null, "La fecha de inicio es nula. Por favor selecciona una fecha válida.");
+                return; // Añadido return para evitar continuar si la fecha es nula
             }
 
-            diferencia -= cuotaActual;
+            // Preparar la inserción de pagos en la base de datos
+            String sql = "INSERT INTO credito (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
+            stmt = connect.prepareStatement(sql);
 
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(fechaInicio);
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-            stmt.setInt(1, id);
-            stmt.setInt(2, frecuencia);
-            stmt.setString(3, dateFormat.format(fechaPago));
-            stmt.setDouble(4, interes);
-            stmt.setInt(5, i); // Número de la cuota actual
-            stmt.setDouble(6, cuotaActual);
-            stmt.setDouble(7, diferencia); // Diferencia actualizada
+            for (int i = 1; i <= numeroCuotas; i++) {
+                calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
 
-            stmt.executeUpdate();
+                Date fechaPago = calendar.getTime();
+                double cuotaActual = valorCuota;
+
+                // Ajustar la última cuota si la diferencia es menor que el valor de la cuota
+                if (i == numeroCuotas && diferencia < valorCuota) {
+                    cuotaActual = diferencia;
+                }
+
+                diferencia -= cuotaActual;
+
+                stmt.setInt(1, id);
+                stmt.setInt(2, frecuencia);
+                stmt.setString(3, dateFormat.format(fechaPago));
+                stmt.setDouble(4, interes);
+                stmt.setInt(5, i); // Número de la cuota actual
+                stmt.setDouble(6, cuotaActual);
+                stmt.setDouble(7, diferencia); // Diferencia actualizada
+
+                stmt.executeUpdate();
 
 //            // Mostrar aviso dos días antes de la fecha de pago
 //            Calendar avisoCalendar = Calendar.getInstance();
@@ -1375,30 +1400,30 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
 //            Date fechaAviso = avisoCalendar.getTime();
 //            DateFormat avisoFormat = new SimpleDateFormat("dd/MM/yyyy");
 //            JOptionPane.showMessageDialog(null, "¡Atención! Quedan 2 días para la fecha de pago de la cuota " + i + ": " + avisoFormat.format(fechaAviso));
-        }
-
-        JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
-
-    } catch (NumberFormatException ex) {
-        System.out.println("Error " + ex);
-        JOptionPane.showMessageDialog(null, "Error al parsear un valor numérico: " + ex.getMessage());
-    } catch (SQLException ex) {
-        JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
-    } finally {
-        try {
-            if (stmt != null) {
-                stmt.close();
             }
-            if (connect != null) {
-                connect.close();
-            }
+
+            JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
+
+        } catch (NumberFormatException ex) {
+            System.out.println("Error " + ex);
+            JOptionPane.showMessageDialog(null, "Error al parsear un valor numérico: " + ex.getMessage());
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (connect != null) {
+                    connect.close();
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
+            }
         }
     }
-}
-    
-    private void LimpiartxtCred(){
+
+    private void LimpiartxtCred() {
         txtTotal1.setText("");
         txtFrecuencia.setText("");
         txtNumeroCuotas.setText("");
@@ -1410,8 +1435,9 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         cbxMarca.setSelectedItem("");
         cbxProveedor.setSelectedItem("");
         cbxTipoMaqVe.setSelectedItem("");
+
     }
-    
+
     private void LimpiarCampos() {
         txt_diferencia.setText("");
         txtFrecuencia.setText("");
@@ -1422,8 +1448,7 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         dateFechaPagoCred.setDateFormatString("");
         txtTotal.setText("");
     }
-    
-    
+
     private void initListeners() {
         txt_Inicial.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -1453,7 +1478,7 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
             // Manejo de excepción en caso de que los textos no sean números válidos
             JOptionPane.showMessageDialog(this, "Por favor, ingrese valores numéricos válidos.");
         }
-        
+
     }
 
 }

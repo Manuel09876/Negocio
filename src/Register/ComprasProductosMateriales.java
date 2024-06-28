@@ -9,12 +9,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
@@ -185,7 +189,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             }
 
         } catch (SQLException e) {
-            System.out.println("Error "+e);
+//            System.out.println("Error "+e);
         }
     }
 
@@ -248,6 +252,8 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         }
 
     }
+    
+    
 
     public void Modificar(JTextField idProducto, JTextField Recibo, JTextField cantidad, JTextField precioUnit, JComboBox Proveedor, JComboBox Marca, JDateChooser fecha) {
         String sql = "UPDATE detalle_compraproductosmateriales SET id_producto=?, numeroRecibo=?, cantidad=?, precioUnit=?, id_proveedor=?, id_Marca=?, fecha=?";
@@ -365,6 +371,24 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         cbxTipoProducto = new javax.swing.JComboBox<>();
         txtIdTipoPro = new javax.swing.JTextField();
         btnRefresh = new javax.swing.JButton();
+        jLabel19 = new javax.swing.JLabel();
+        txt_Inicial = new javax.swing.JTextField();
+        jLabel20 = new javax.swing.JLabel();
+        txt_diferencia = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        txtTotal1 = new javax.swing.JTextField();
+        jLabel12 = new javax.swing.JLabel();
+        txtFrecuencia = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        txtInteres = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel21 = new javax.swing.JLabel();
+        dateFechaPagoCred = new com.toedter.calendar.JDateChooser();
+        btnRegistrarCredito = new javax.swing.JButton();
+        jLabel11 = new javax.swing.JLabel();
+        txtNumeroCuotas = new javax.swing.JTextField();
+        jLabel18 = new javax.swing.JLabel();
+        txtValorCuota = new javax.swing.JTextField();
 
         setBackground(new java.awt.Color(0, 51, 153));
         setIconifiable(true);
@@ -391,26 +415,26 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         });
         jScrollPane12.setViewportView(tbCompraProducto);
 
-        jPanel16.add(jScrollPane12, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 147, 1050, 220));
+        jPanel16.add(jScrollPane12, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 160, 1050, 220));
 
         jLabel40.setText("Producto");
-        jPanel16.add(jLabel40, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, -1, -1));
+        jPanel16.add(jLabel40, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 40, -1, -1));
 
         jLabel41.setText("Recibo N°");
-        jPanel16.add(jLabel41, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 20, -1, -1));
+        jPanel16.add(jLabel41, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 20, -1, -1));
 
         jLabel42.setText("Cant");
-        jPanel16.add(jLabel42, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 20, -1, -1));
+        jPanel16.add(jLabel42, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 20, -1, -1));
 
         jLabel43.setText("Precio Unitario");
-        jPanel16.add(jLabel43, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 20, -1, -1));
+        jPanel16.add(jLabel43, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 20, -1, -1));
 
         jLabel44.setText("Total");
-        jPanel16.add(jLabel44, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 20, -1, -1));
-        jPanel16.add(txtNumeroRecibo, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 10, 170, 30));
-        jPanel16.add(txtCant, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 50, 70, 30));
-        jPanel16.add(txtSubTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 50, 70, 30));
-        jPanel16.add(txtTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(690, 50, 70, 30));
+        jPanel16.add(jLabel44, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 20, -1, -1));
+        jPanel16.add(txtNumeroRecibo, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 40, 130, 30));
+        jPanel16.add(txtCant, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 50, 70, 30));
+        jPanel16.add(txtSubTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 50, 70, 30));
+        jPanel16.add(txtTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 50, 70, 30));
 
         btnGenerarCompra.setBackground(new java.awt.Color(204, 204, 204));
         btnGenerarCompra.setFont(new java.awt.Font("Times New Roman", 1, 12)); // NOI18N
@@ -419,26 +443,26 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
         jLabel46.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel46.setText("Proveedor");
-        jPanel16.add(jLabel46, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 420, -1, -1));
+        jPanel16.add(jLabel46, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 130, -1, -1));
 
         cbxProveedor.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cbxProveedorItemStateChanged(evt);
             }
         });
-        jPanel16.add(cbxProveedor, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 420, 220, -1));
+        jPanel16.add(cbxProveedor, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 130, 150, -1));
 
         jLabel47.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel47.setText("Total Pagar");
-        jPanel16.add(jLabel47, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 90, -1, -1));
+        jPanel16.add(jLabel47, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 90, -1, -1));
 
         JLabelTotalCompra.setText("-----------");
-        jPanel16.add(JLabelTotalCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 120, 130, -1));
+        jPanel16.add(JLabelTotalCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 120, 130, -1));
 
         jLabel49.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel49.setText("Pagar con");
-        jPanel16.add(jLabel49, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 390, -1, -1));
-        jPanel16.add(txtTaxes, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 110, 70, 30));
+        jPanel16.add(jLabel49, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 400, -1, -1));
+        jPanel16.add(txtTaxes, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 110, 70, 30));
 
         btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
         btnSalir.setText("Salir");
@@ -452,44 +476,44 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/clear.png"))); // NOI18N
         jButton2.setText("Limpiar");
         jPanel16.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 50, -1, -1));
-        jPanel16.add(txtIdProveedor, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 420, 80, -1));
+        jPanel16.add(txtIdProveedor, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 130, 80, -1));
 
         cbxProducto.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cbxProductoItemStateChanged(evt);
             }
         });
-        jPanel16.add(cbxProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 70, 150, -1));
-        jPanel16.add(txtIdMarca, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 460, 80, -1));
+        jPanel16.add(cbxProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 40, 150, -1));
+        jPanel16.add(txtIdMarca, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 100, 80, -1));
 
         jLabel51.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel51.setText("Marca");
-        jPanel16.add(jLabel51, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 460, -1, -1));
+        jPanel16.add(jLabel51, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 100, -1, 20));
 
         cbxMarca.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cbxMarcaItemStateChanged(evt);
             }
         });
-        jPanel16.add(cbxMarca, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 460, 220, -1));
-        jPanel16.add(txtIdProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 70, 80, -1));
+        jPanel16.add(cbxMarca, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 100, 150, -1));
+        jPanel16.add(txtIdProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 40, 80, -1));
 
         jLabel1.setText("Impuestos");
-        jPanel16.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 90, -1, -1));
+        jPanel16.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 90, -1, -1));
 
         cbxPagarCon.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cbxPagarConItemStateChanged(evt);
             }
         });
-        jPanel16.add(cbxPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 390, 190, -1));
-        jPanel16.add(txtIdPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 390, 90, -1));
+        jPanel16.add(cbxPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 400, 190, -1));
+        jPanel16.add(txtIdPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 400, 90, -1));
 
         dateFecha.setDateFormatString("yyyy-MM-dd");
-        jPanel16.add(dateFecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 380, 220, -1));
+        jPanel16.add(dateFecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 120, 130, -1));
 
         jLabel2.setText("Fecha de Compra");
-        jPanel16.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 390, -1, -1));
+        jPanel16.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 90, -1, -1));
 
         btnGuardar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/guardar.png"))); // NOI18N
         btnGuardar.setText("Guardar");
@@ -520,19 +544,19 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(txtId_CompraProMat, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 100, -1));
 
         jLabel3.setText("Otros");
-        jPanel16.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 90, -1, -1));
-        jPanel16.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 110, 80, 30));
+        jPanel16.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 90, -1, -1));
+        jPanel16.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 110, 80, 30));
 
         jLabel4.setText("Tipo");
-        jPanel16.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 110, -1, -1));
+        jPanel16.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, -1, -1));
 
         cbxTipoProducto.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cbxTipoProductoItemStateChanged(evt);
             }
         });
-        jPanel16.add(cbxTipoProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 110, 150, -1));
-        jPanel16.add(txtIdTipoPro, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 110, 80, -1));
+        jPanel16.add(cbxTipoProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 70, 150, -1));
+        jPanel16.add(txtIdTipoPro, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 70, 80, -1));
 
         btnRefresh.setText("Refresh");
         btnRefresh.addActionListener(new java.awt.event.ActionListener() {
@@ -542,7 +566,58 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         });
         jPanel16.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 10, -1, -1));
 
-        getContentPane().add(jPanel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1080, 510));
+        jLabel19.setText("Inicial");
+        jPanel16.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 440, -1, -1));
+        jPanel16.add(txt_Inicial, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 440, 88, -1));
+
+        jLabel20.setText("Diferencia");
+        jPanel16.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 470, -1, -1));
+
+        txt_diferencia.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txt_diferenciaKeyReleased(evt);
+            }
+        });
+        jPanel16.add(txt_diferencia, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 470, 92, -1));
+
+        jLabel7.setText("Total");
+        jPanel16.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 410, -1, -1));
+        jPanel16.add(txtTotal1, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 410, 100, -1));
+
+        jLabel12.setText("Frecuencia de Pago");
+        jPanel16.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 440, -1, -1));
+        jPanel16.add(txtFrecuencia, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 440, 100, -1));
+
+        jLabel8.setText("Tasa de Interes");
+        jPanel16.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 470, -1, -1));
+        jPanel16.add(txtInteres, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 470, 100, -1));
+
+        jLabel10.setText("%");
+        jPanel16.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 470, -1, -1));
+
+        jLabel21.setText("Proxima Fecha de Pago");
+        jPanel16.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 440, -1, -1));
+
+        dateFechaPagoCred.setDateFormatString("yyyy-MM-dd");
+        jPanel16.add(dateFechaPagoCred, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 460, 150, -1));
+
+        btnRegistrarCredito.setText("Registrar Credito");
+        btnRegistrarCredito.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRegistrarCreditoActionPerformed(evt);
+            }
+        });
+        jPanel16.add(btnRegistrarCredito, new org.netbeans.lib.awtextra.AbsoluteConstraints(780, 470, -1, -1));
+
+        jLabel11.setText("Numero de cuotas");
+        jPanel16.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 390, -1, 30));
+        jPanel16.add(txtNumeroCuotas, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 390, 100, -1));
+
+        jLabel18.setText("Valor de cuota");
+        jPanel16.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 420, -1, -1));
+        jPanel16.add(txtValorCuota, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 420, 100, -1));
+
+        getContentPane().add(jPanel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 1080, 510));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -592,6 +667,17 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
          repaint(); // Actualizar el JInternalFrame al hacer clic en el botón "Refresh"
     }//GEN-LAST:event_btnRefreshActionPerformed
 
+    private void txt_diferenciaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_diferenciaKeyReleased
+
+    }//GEN-LAST:event_txt_diferenciaKeyReleased
+
+    private void btnRegistrarCreditoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegistrarCreditoActionPerformed
+
+        registrarPagosPendientes();
+//        GuardarCredito();
+        LimpiartxtCred();
+    }//GEN-LAST:event_btnRegistrarCreditoActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JLabel JLabelTotalCompra;
@@ -600,6 +686,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnModificar;
     private javax.swing.JButton btnRefresh;
+    private javax.swing.JButton btnRegistrarCredito;
     private javax.swing.JButton btnSalir;
     private javax.swing.ButtonGroup buttonGroup1;
     public javax.swing.JComboBox<Object> cbxMarca;
@@ -608,9 +695,17 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     public javax.swing.JComboBox<Object> cbxProveedor;
     private javax.swing.JComboBox<String> cbxTipoProducto;
     private com.toedter.calendar.JDateChooser dateFecha;
+    private com.toedter.calendar.JDateChooser dateFechaPagoCred;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel40;
@@ -622,21 +717,30 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel47;
     private javax.swing.JLabel jLabel49;
     private javax.swing.JLabel jLabel51;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     public javax.swing.JPanel jPanel16;
     private javax.swing.JScrollPane jScrollPane12;
     private javax.swing.JTextField jTextField1;
     public javax.swing.JTable tbCompraProducto;
     public javax.swing.JTextField txtCant;
+    private javax.swing.JTextField txtFrecuencia;
     private javax.swing.JTextField txtIdMarca;
     private javax.swing.JTextField txtIdPagarCon;
     private javax.swing.JTextField txtIdProducto;
     private javax.swing.JTextField txtIdProveedor;
     private javax.swing.JTextField txtIdTipoPro;
     private javax.swing.JTextField txtId_CompraProMat;
+    private javax.swing.JTextField txtInteres;
+    private javax.swing.JTextField txtNumeroCuotas;
     public javax.swing.JTextField txtNumeroRecibo;
     public javax.swing.JTextField txtSubTotal;
     public javax.swing.JTextField txtTaxes;
     public javax.swing.JTextField txtTotal;
+    private javax.swing.JTextField txtTotal1;
+    private javax.swing.JTextField txtValorCuota;
+    private javax.swing.JTextField txt_Inicial;
+    private javax.swing.JTextField txt_diferencia;
     // End of variables declaration//GEN-END:variables
 
     public void MostrarProveedor(JComboBox cbxProveedorNC) {
@@ -950,6 +1054,185 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
         }
+    }
+    
+    // Método para hallar el id_venta que se está ejecutando en ese momento
+    public int IdCompra() {
+        int id = 0;
+        String sql = "SELECT MAX(id_equipos) FROM equipos";
+        Conectar con = new Conectar();
+        Connection connect = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            connect = con.getConexion();
+            ps = connect.prepareStatement(sql);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                id = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+                if (connect != null) {
+                    connect.close();
+                }
+            } catch (SQLException e) {
+            }
+        }
+        return id;
+    }
+    
+    public void registrarPagosPendientes() {
+    Conectar con = new Conectar();
+    Connection connect = null;
+    PreparedStatement stmt = null;
+    try {
+        connect = con.getConexion();
+
+        // Obtener los datos de las cajas de texto
+        int id = IdCompra();
+        int frecuencia = Integer.parseInt(txtFrecuencia.getText());
+        double interes = Double.parseDouble(txtInteres.getText());
+        int numeroCuotas = Integer.parseInt(txtNumeroCuotas.getText());
+        double valorCuota = Double.parseDouble(txtValorCuota.getText());
+        double total = Double.parseDouble(txtTotal.getText());
+        double diferencia = total;
+
+        // Obtener la fecha de inicio
+        Date fechaInicio = dateFechaPagoCred.getDate();
+        if (fechaInicio == null) {
+            JOptionPane.showMessageDialog(null, "La fecha de inicio es nula. Por favor selecciona una fecha válida.");
+            return; // Añadido return para evitar continuar si la fecha es nula
+        }
+
+        // Preparar la inserción de pagos en la base de datos
+        String sql = "INSERT INTO credito (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
+        stmt = connect.prepareStatement(sql);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(fechaInicio);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        for (int i = 1; i <= numeroCuotas; i++) {
+            calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
+
+            Date fechaPago = calendar.getTime();
+            double cuotaActual = valorCuota;
+
+            // Ajustar la última cuota si la diferencia es menor que el valor de la cuota
+            if (i == numeroCuotas && diferencia < valorCuota) {
+                cuotaActual = diferencia;
+            }
+
+            diferencia -= cuotaActual;
+
+
+            stmt.setInt(1, id);
+            stmt.setInt(2, frecuencia);
+            stmt.setString(3, dateFormat.format(fechaPago));
+            stmt.setDouble(4, interes);
+            stmt.setInt(5, i); // Número de la cuota actual
+            stmt.setDouble(6, cuotaActual);
+            stmt.setDouble(7, diferencia); // Diferencia actualizada
+
+            stmt.executeUpdate();
+
+//            // Mostrar aviso dos días antes de la fecha de pago
+//            Calendar avisoCalendar = Calendar.getInstance();
+//            avisoCalendar.setTime(fechaPago);
+//            avisoCalendar.add(Calendar.DAY_OF_MONTH, -2);
+//            Date fechaAviso = avisoCalendar.getTime();
+//            DateFormat avisoFormat = new SimpleDateFormat("dd/MM/yyyy");
+//            JOptionPane.showMessageDialog(null, "¡Atención! Quedan 2 días para la fecha de pago de la cuota " + i + ": " + avisoFormat.format(fechaAviso));
+        }
+
+        JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
+
+    } catch (NumberFormatException ex) {
+        System.out.println("Error " + ex);
+        JOptionPane.showMessageDialog(null, "Error al parsear un valor numérico: " + ex.getMessage());
+    } catch (SQLException ex) {
+        JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
+    } finally {
+        try {
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (connect != null) {
+                connect.close();
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
+        }
+    }
+}
+    
+    private void LimpiartxtCred(){
+        txtTotal1.setText("");
+        txtFrecuencia.setText("");
+        txtNumeroCuotas.setText("");
+        txtValorCuota.setText("");
+        txtInteres.setText("");
+        txt_Inicial.setText("");
+        txt_diferencia.setText("");
+        cbxPagarCon.setSelectedItem("");
+        cbxMarca.setSelectedItem("");
+        cbxProveedor.setSelectedItem("");
+        cbxTipoProducto.setSelectedItem("");
+        
+    }
+    
+    private void LimpiarCampos() {
+        txt_diferencia.setText("");
+        txtFrecuencia.setText("");
+        txt_Inicial.setText("");
+        txtInteres.setText("");
+        txtNumeroCuotas.setText("");
+        txtValorCuota.setText("");
+        dateFechaPagoCred.setDateFormatString("");
+        txtTotal.setText("");
+    }
+    
+    
+    private void initListeners() {
+        txt_Inicial.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                calcularDiferencia();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                calcularDiferencia();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                calcularDiferencia();
+            }
+        });
+    }
+
+    private void calcularDiferencia() {
+        try {
+            double total = Double.parseDouble(txtTotal.getText());
+            double inicial = Double.parseDouble(txt_Inicial.getText());
+            double diferencia = total - inicial;
+            txt_diferencia.setText(String.valueOf(diferencia));
+        } catch (NumberFormatException ex) {
+            // Manejo de excepción en caso de que los textos no sean números válidos
+            JOptionPane.showMessageDialog(this, "Por favor, ingrese valores numéricos válidos.");
+        }
+        
     }
 
 }
