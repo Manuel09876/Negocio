@@ -151,8 +151,8 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         MostrarTipoPagos(cbxTipodeGastGen);
         MostrarFormaDePago(cbxPagarCon);
         MostrarProveedor(cbxProveedor);
+        txtId.setEnabled(false);
         MostrarDatos("");
-
     }
 
     public void MostrarDatos(String Valores) {
@@ -162,11 +162,12 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
             model = new DefaultTableModel(null, TitulosTabla);
 
-            String ConsultaSQL = "SELECT dpg.id_PagosGenerales AS id, tpg.nombre AS Tipo, dpg.reciboNumero AS Recibo, dpg.subTotal As SubTotal, dpg.taxes AS Taxes, dpg.tip AS Tip, dpg.total AS Total, s.nameSuplier AS Proveedor, f.nombre AS 'Forma de Pago', dpg.fecha AS Fecha, dpg.estado\n"
+            String ConsultaSQL = "SELECT dpg.id_PagosGenerales AS id, tpg.nombre AS Tipo, dpg.reciboNumero AS Recibo, dpg.subTotal AS SubTotal, dpg.taxes AS Taxes, dpg.tip AS Tip, dpg.total AS Total, s.nameSuplier AS Proveedor, fp.nombre AS 'Forma de Pago', dpg.fecha AS Fecha, dpg.estado AS Estado\n"
                     + "FROM detallepagosgenerales dpg\n"
                     + "INNER JOIN tipos_pagosgenerales tpg ON dpg.id_tipodePago=tpg.id_pagos\n"
                     + "INNER JOIN suplier s ON dpg.id_proveedor=s.idSuplier\n"
-                    + "INNER Join formadepago f ON dpg.id_PagosGenerales=f.id_formadepago ORDER BY dpg.id_PagosGenerales ASC";
+                    + "INNER JOIN formadepago fp ON dpg.id_formadepago=fp.id_formadepago\n"
+                    + "ORDER BY dpg.id_PagosGenerales ASC";
 
             Statement st = connect.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
@@ -245,7 +246,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             if (n > 0) {
                 JOptionPane.showMessageDialog(null, "El registro se  Guardo con exito");
             }
-            
+
             txtRecibo.setText("");
             txtSubTotal.setText("");
             txtTaxes.setText("");
@@ -259,8 +260,8 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         }
 
     }
-    
-   public void GuardarCredito() {
+
+    public void GuardarCredito() {
         int id_PagosGenerales;
         int tipodePago;
         String reciboNumero;
@@ -310,15 +311,14 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             if (n > 0) {
                 JOptionPane.showMessageDialog(null, "El registro se  Guardo con exito");
             }
-            
+
             txtRecibo.setText("");
             txtSubTotal.setText("");
             txtTaxes.setText("");
             txtTip.setText("");
             txtTotal.setText("");
             txtRecibo.requestFocus();
-            MostrarDatos("");
-
+            
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al guardar registro " + e.toString());
         }
@@ -418,13 +418,21 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                 FormaPago.setSelectedItem(tbGastosGenerales.getValueAt(fila, 8).toString());
                 fecha.setDate((Date) tbGastosGenerales.getValueAt(fila, 9));
 
+                Object selectedItem = cbxProveedor.getSelectedItem();
+                if (selectedItem != null) {
+                    // Hacer algo con el elemento seleccionado
+                    String selectedItemAsString = selectedItem.toString();
+                } else {
+                    // Manejo de caso en el que el elemento seleccionado es null
+                }
+
             }
 
         } catch (Exception e) {
         }
     }
-    
-    public void Limpiar(){
+
+    public void Limpiar() {
         txtRecibo.setText("");
         txtRecibo.requestFocus();
         txtSubTotal.setText("");
@@ -467,7 +475,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         jLabel11 = new javax.swing.JLabel();
         txtBuscar = new javax.swing.JTextField();
         btnBuscar = new javax.swing.JButton();
-        btnNew = new javax.swing.JButton();
+        btnNuevo = new javax.swing.JButton();
         btnGuardar = new javax.swing.JButton();
         btnModificar = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
@@ -514,25 +522,25 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         jPanel3.add(txtSubTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(99, 63, 178, -1));
 
         jLabel16.setText("Total");
-        jPanel3.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(319, 72, -1, -1));
-        jPanel3.add(txtTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(373, 69, 142, -1));
+        jPanel3.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 20, -1, -1));
+        jPanel3.add(txtTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 20, 142, -1));
 
         jLabel17.setText("Fecha");
-        jPanel3.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(314, 106, -1, -1));
+        jPanel3.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 60, -1, -1));
 
         dateFecha.setDateFormatString("yyyy-MM-dd");
-        jPanel3.add(dateFecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(373, 113, 142, -1));
+        jPanel3.add(dateFecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 60, 142, -1));
 
         jLabel1.setText("Tipo");
-        jPanel3.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(326, 22, -1, -1));
+        jPanel3.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 110, -1, -1));
 
         cbxTipodeGastGen.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cbxTipodeGastGenItemStateChanged(evt);
             }
         });
-        jPanel3.add(cbxTipodeGastGen, new org.netbeans.lib.awtextra.AbsoluteConstraints(367, 19, 148, -1));
-        jPanel3.add(txtIdTipodeGastGen, new org.netbeans.lib.awtextra.AbsoluteConstraints(545, 21, 77, -1));
+        jPanel3.add(cbxTipodeGastGen, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 110, 148, -1));
+        jPanel3.add(txtIdTipodeGastGen, new org.netbeans.lib.awtextra.AbsoluteConstraints(930, 110, 77, -1));
 
         jLabel2.setText("Propina");
         jPanel3.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(43, 138, -1, -1));
@@ -571,7 +579,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             }
         });
         jPanel3.add(txtIdProveedor, new org.netbeans.lib.awtextra.AbsoluteConstraints(920, 21, 89, -1));
-        jPanel3.add(txtId, new org.netbeans.lib.awtextra.AbsoluteConstraints(929, 114, 80, 32));
+        jPanel3.add(txtId, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 110, 80, 32));
 
         getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, 1040, -1));
 
@@ -586,7 +594,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                 btnBorrarActionPerformed(evt);
             }
         });
-        jPanel2.add(btnBorrar, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 11, -1, 30));
+        jPanel2.add(btnBorrar, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 10, -1, 30));
 
         jScrollPane1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -612,7 +620,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         });
         jScrollPane1.setViewportView(tbGastosGenerales);
 
-        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(22, 53, 1005, 140));
+        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(22, 53, 1005, 160));
 
         jLabel11.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         jLabel11.setText("Descripción");
@@ -639,16 +647,16 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         });
         jPanel2.add(btnBuscar, new org.netbeans.lib.awtextra.AbsoluteConstraints(288, 11, -1, 30));
 
-        btnNew.setBackground(new java.awt.Color(0, 102, 255));
-        btnNew.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
-        btnNew.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/new product.png"))); // NOI18N
-        btnNew.setText("Nuevo");
-        btnNew.addActionListener(new java.awt.event.ActionListener() {
+        btnNuevo.setBackground(new java.awt.Color(0, 102, 255));
+        btnNuevo.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
+        btnNuevo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/new product.png"))); // NOI18N
+        btnNuevo.setText("Nuevo");
+        btnNuevo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnNewActionPerformed(evt);
+                btnNuevoActionPerformed(evt);
             }
         });
-        jPanel2.add(btnNew, new org.netbeans.lib.awtextra.AbsoluteConstraints(848, 202, -1, 30));
+        jPanel2.add(btnNuevo, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 10, -1, 30));
 
         btnGuardar.setBackground(new java.awt.Color(0, 102, 255));
         btnGuardar.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
@@ -659,7 +667,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                 btnGuardarActionPerformed(evt);
             }
         });
-        jPanel2.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(848, 257, -1, 30));
+        jPanel2.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 10, -1, 30));
 
         btnModificar.setBackground(new java.awt.Color(0, 102, 255));
         btnModificar.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
@@ -670,7 +678,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                 btnModificarActionPerformed(evt);
             }
         });
-        jPanel2.add(btnModificar, new org.netbeans.lib.awtextra.AbsoluteConstraints(839, 315, -1, 30));
+        jPanel2.add(btnModificar, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 10, -1, 30));
 
         btnCancel.setBackground(new java.awt.Color(0, 102, 255));
         btnCancel.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
@@ -681,7 +689,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                 btnCancelActionPerformed(evt);
             }
         });
-        jPanel2.add(btnCancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(678, 257, -1, 30));
+        jPanel2.add(btnCancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 10, -1, 30));
 
         btnExit.setBackground(new java.awt.Color(0, 102, 255));
         btnExit.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
@@ -692,11 +700,11 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                 btnExitActionPerformed(evt);
             }
         });
-        jPanel2.add(btnExit, new org.netbeans.lib.awtextra.AbsoluteConstraints(948, 11, -1, 30));
+        jPanel2.add(btnExit, new org.netbeans.lib.awtextra.AbsoluteConstraints(950, 230, -1, 30));
 
         jButton1.setBackground(new java.awt.Color(0, 102, 255));
         jButton1.setText("Limpiar");
-        jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(686, 204, -1, -1));
+        jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(850, 10, -1, -1));
         jPanel2.add(txtFrecuencia, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 250, 100, -1));
 
         jLabel19.setText("Inicial");
@@ -778,10 +786,15 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
     }//GEN-LAST:event_btnBuscarActionPerformed
 
-    private void btnNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewActionPerformed
+    private void btnNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNuevoActionPerformed
+        txtRecibo.setText("");
+        txtSubTotal.setText("");
+        txtTaxes.setText("");
+        txtTip.setText("");
+        txtTotal.setText("");
+        txtRecibo.requestFocus();
 
-
-    }//GEN-LAST:event_btnNewActionPerformed
+    }//GEN-LAST:event_btnNuevoActionPerformed
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
         Guardar();
@@ -834,6 +847,16 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         registrarPagosPendientes();
         GuardarCredito();
         LimpiartxtCred();
+        MostrarDatos("");
+        txt_Inicial.setEnabled(false);
+        txt_diferencia.setEnabled(false);
+        btnRegistrarCredito.setEnabled(false);
+        btnGuardar.setEnabled(true);
+        txtTotal1.setEnabled(false);
+        txtFrecuencia.setEnabled(false);
+        txtInteres.setEnabled(false);
+        txtNumeroCuotas.setEnabled(false);
+        txtValorCuota.setEnabled(false);
     }//GEN-LAST:event_btnRegistrarCreditoActionPerformed
 
 
@@ -844,7 +867,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnModificar;
-    private javax.swing.JButton btnNew;
+    private javax.swing.JButton btnNuevo;
     private javax.swing.JButton btnRegistrarCredito;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<String> cbxPagarCon;
@@ -956,7 +979,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         try {
             // Validar si hay un item seleccionado en el JComboBox
             if (cbxPagarCon.getSelectedIndex() == -1) {
-//            JOptionPane.showMessageDialog(null, "Error: No se ha seleccionado ningún proveedor.");
+//            JOptionPane.showMessageDialog(null, "Error: No se ha seleccionado ninguna forme de pago.");
                 return;
             }
 
@@ -966,13 +989,35 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             if (selectedValue != null) {
                 String valorSeleccionado = selectedValue.toString();
                 cs.setString(1, valorSeleccionado);
-
                 cs.execute();
 
                 ResultSet rs = cs.executeQuery();
 
                 if (rs.next()) {
                     idPagarCon.setText(rs.getString("id_formadepago"));
+
+                    // Validar el código de forma de pago y habilitar componentes
+                    if (Integer.parseInt(rs.getString("id_formadepago")) == 3 || Integer.parseInt(rs.getString("id_formadepago")) == 6) {
+                        txt_Inicial.setEnabled(true);
+                        txt_diferencia.setEnabled(true);
+                        btnRegistrarCredito.setEnabled(true);
+                        btnGuardar.setEnabled(false);
+                        txtTotal1.setEnabled(true);
+                        txtFrecuencia.setEnabled(true);
+                        txtInteres.setEnabled(true);
+                        txtNumeroCuotas.setEnabled(true);
+                        txtValorCuota.setEnabled(true);
+                    } else {
+                        txt_Inicial.setEnabled(false);
+                        txt_diferencia.setEnabled(false);
+                        btnRegistrarCredito.setEnabled(false);
+                        btnGuardar.setEnabled(true);
+                        txtTotal1.setEnabled(false);
+                        txtFrecuencia.setEnabled(false);
+                        txtInteres.setEnabled(false);
+                        txtNumeroCuotas.setEnabled(false);
+                        txtValorCuota.setEnabled(false);
+                    }
                 }
             }
 
@@ -1044,12 +1089,11 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
         }
     }
-    
-    
+
     // Método para hallar el id_venta que se está ejecutando en ese momento
-    public int Id_PagosGenerales() {
+    public int IdCompra() {
         int id = 0;
-        String sql = "SELECT MAX(id_equipos) FROM equipos";
+        String sql = "SELECT MAX(id_pagosgenerales) FROM detallepagosgenerales";
         Conectar con = new Conectar();
         Connection connect = null;
         PreparedStatement ps = null;
@@ -1079,62 +1123,61 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         }
         return id;
     }
-    
+
     public void registrarPagosPendientes() {
-    Conectar con = new Conectar();
-    Connection connect = null;
-    PreparedStatement stmt = null;
-    try {
-        connect = con.getConexion();
+        Conectar con = new Conectar();
+        Connection connect = null;
+        PreparedStatement stmt = null;
+        try {
+            connect = con.getConexion();
 
-        // Obtener los datos de las cajas de texto
-        int id = Id_PagosGenerales();
-        int frecuencia = Integer.parseInt(txtFrecuencia.getText());
-        double interes = Double.parseDouble(txtInteres.getText());
-        int numeroCuotas = Integer.parseInt(txtNumeroCuotas.getText());
-        double valorCuota = Double.parseDouble(txtValorCuota.getText());
-        double total = Double.parseDouble(txtTotal.getText());
-        double diferencia = total;
+            // Obtener los datos de las cajas de texto
+            int id = IdCompra();
+            int frecuencia = Integer.parseInt(txtFrecuencia.getText());
+            double interes = Double.parseDouble(txtInteres.getText());
+            int numeroCuotas = Integer.parseInt(txtNumeroCuotas.getText());
+            double valorCuota = Double.parseDouble(txtValorCuota.getText());
+            double total = Double.parseDouble(txtTotal.getText());
+            double diferencia = total;
 
-        // Obtener la fecha de inicio
-        Date fechaInicio = dateFechaPagoCred.getDate();
-        if (fechaInicio == null) {
-            JOptionPane.showMessageDialog(null, "La fecha de inicio es nula. Por favor selecciona una fecha válida.");
-            return; // Añadido return para evitar continuar si la fecha es nula
-        }
-
-        // Preparar la inserción de pagos en la base de datos
-        String sql = "INSERT INTO credito (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
-        stmt = connect.prepareStatement(sql);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(fechaInicio);
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-        for (int i = 1; i <= numeroCuotas; i++) {
-            calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
-
-            Date fechaPago = calendar.getTime();
-            double cuotaActual = valorCuota;
-
-            // Ajustar la última cuota si la diferencia es menor que el valor de la cuota
-            if (i == numeroCuotas && diferencia < valorCuota) {
-                cuotaActual = diferencia;
+            // Obtener la fecha de inicio
+            Date fechaInicio = dateFechaPagoCred.getDate();
+            if (fechaInicio == null) {
+                JOptionPane.showMessageDialog(null, "La fecha de inicio es nula. Por favor selecciona una fecha válida.");
+                return; // Añadido return para evitar continuar si la fecha es nula
             }
 
-            diferencia -= cuotaActual;
+            // Preparar la inserción de pagos en la base de datos
+            String sql = "INSERT INTO creditopg (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
+            stmt = connect.prepareStatement(sql);
 
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(fechaInicio);
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-            stmt.setInt(1, id);
-            stmt.setInt(2, frecuencia);
-            stmt.setString(3, dateFormat.format(fechaPago));
-            stmt.setDouble(4, interes);
-            stmt.setInt(5, i); // Número de la cuota actual
-            stmt.setDouble(6, cuotaActual);
-            stmt.setDouble(7, diferencia); // Diferencia actualizada
+            for (int i = 1; i <= numeroCuotas; i++) {
+                calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
 
-            stmt.executeUpdate();
+                Date fechaPago = calendar.getTime();
+                double cuotaActual = valorCuota;
+
+                // Ajustar la última cuota si la diferencia es menor que el valor de la cuota
+                if (i == numeroCuotas && diferencia < valorCuota) {
+                    cuotaActual = diferencia;
+                }
+
+                diferencia -= cuotaActual;
+
+                stmt.setInt(1, id);
+                stmt.setInt(2, frecuencia);
+                stmt.setString(3, dateFormat.format(fechaPago));
+                stmt.setDouble(4, interes);
+                stmt.setInt(5, i); // Número de la cuota actual
+                stmt.setDouble(6, cuotaActual);
+                stmt.setDouble(7, diferencia); // Diferencia actualizada
+
+                stmt.executeUpdate();
 
 //            // Mostrar aviso dos días antes de la fecha de pago
 //            Calendar avisoCalendar = Calendar.getInstance();
@@ -1143,30 +1186,30 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 //            Date fechaAviso = avisoCalendar.getTime();
 //            DateFormat avisoFormat = new SimpleDateFormat("dd/MM/yyyy");
 //            JOptionPane.showMessageDialog(null, "¡Atención! Quedan 2 días para la fecha de pago de la cuota " + i + ": " + avisoFormat.format(fechaAviso));
-        }
-
-        JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
-
-    } catch (NumberFormatException ex) {
-        System.out.println("Error " + ex);
-        JOptionPane.showMessageDialog(null, "Error al parsear un valor numérico: " + ex.getMessage());
-    } catch (SQLException ex) {
-        JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
-    } finally {
-        try {
-            if (stmt != null) {
-                stmt.close();
             }
-            if (connect != null) {
-                connect.close();
-            }
+
+            JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
+
+        } catch (NumberFormatException ex) {
+            System.out.println("Error " + ex);
+            JOptionPane.showMessageDialog(null, "Error al parsear un valor numérico: " + ex.getMessage());
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (connect != null) {
+                    connect.close();
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
+            }
         }
     }
-}
-    
-    private void LimpiartxtCred(){
+
+    private void LimpiartxtCred() {
         txtTotal1.setText("");
         txtFrecuencia.setText("");
         txtNumeroCuotas.setText("");
@@ -1176,10 +1219,9 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         txt_diferencia.setText("");
         cbxPagarCon.setSelectedItem("");
         cbxProveedor.setSelectedItem("");
-        
-        
+
     }
-    
+
     private void LimpiarCampos() {
         txt_diferencia.setText("");
         txtFrecuencia.setText("");
@@ -1190,8 +1232,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         dateFechaPagoCred.setDateFormatString("");
         txtTotal.setText("");
     }
-    
-    
+
     private void initListeners() {
         txt_Inicial.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -1221,6 +1262,6 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             // Manejo de excepción en caso de que los textos no sean números válidos
             JOptionPane.showMessageDialog(this, "Por favor, ingrese valores numéricos válidos.");
         }
-        
+
     }
 }

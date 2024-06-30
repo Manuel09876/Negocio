@@ -237,9 +237,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         initListeners();
 
     }
-    
-    
-
 
     public void Limpiar() {
         txtEquipo.setText("");
@@ -963,6 +960,15 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         registrarPagosPendientes();
         GuardarCredito();
         LimpiartxtCred();
+        txt_Inicial.setEnabled(false);
+        txt_diferencia.setEnabled(false);
+        btnRegistrarCredito.setEnabled(false);
+        btnGuardar.setEnabled(true);
+        txtTotal1.setEnabled(false);
+        txtFrecuencia.setEnabled(false);
+        txtInteres.setEnabled(false);
+        txtNumeroCuotas.setEnabled(false);
+        txtValorCuota.setEnabled(false);
     }//GEN-LAST:event_btnRegistrarCreditoActionPerformed
 
     private void cbxPagarConActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxPagarConActionPerformed
@@ -984,15 +990,11 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnLimpiarActionPerformed
 
     private void txt_InicialKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_InicialKeyPressed
-        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            double total = Double.parseDouble(txtTotal.getText());
-            double inicial = Double.parseDouble(txt_Inicial.getText());
-            double diferencia = total - inicial;
-        }
+
     }//GEN-LAST:event_txt_InicialKeyPressed
 
     private void txtTaxesKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTaxesKeyPressed
-       
+
     }//GEN-LAST:event_txtTaxesKeyPressed
 
     private void txtTotalKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTotalKeyPressed
@@ -1362,7 +1364,7 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
             }
 
             // Preparar la inserción de pagos en la base de datos
-            String sql = "INSERT INTO credito (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
+            String sql = "INSERT INTO creditopg (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
             stmt = connect.prepareStatement(sql);
 

@@ -121,7 +121,8 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
     public DeudasPorPagar() {
         initComponents();
-        MostrarTabla("");
+        MostrarTablaEquipos("");
+        MostrarTablaPagosGenerales("");
         
 
     }
@@ -138,20 +139,20 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
     }
 
     //Muestra la Relación de Pendientes de Pago
-    private void MostrarTabla(String Valores) {
+    private void MostrarTablaEquipos(String Valores) {
     try {
         // Configurar las columnas del modelo de la tabla
         String[] titulosTabla = {"Seleccion", "id", "Descripcion", "Fecha de Pago", "Cuota Numero", "Monto a Pagar", "Deuda", "Estado"};
         modelo.setColumnIdentifiers(titulosTabla);
 
         // Configurar la tabla con el modelo
-        tbDeudas.setModel(modelo);
+        tbDeudasEquipos.setModel(modelo);
 
         // Consulta SQL para obtener los datos
         String sql = """
                      SELECT c.id, e.nombre AS Descripcion, c.fechaPago AS 'Fecha de Pago', c.NumeroCuotas AS 'Cuota Numero', c.cuota AS 'Monto a Pagar', c.Diferencia AS Deuda, c.estado AS Estado 
                      FROM credito AS c
-                     INNER JOIN equipos AS e ON c.id_compra=e.id_equipos WHERE c.estado = 'Pendiente'""";
+                     INNER JOIN equipos AS e ON c.id_compra=e.id_equipos WHERE c.estado = 'Pendiente' ORDER BY c.fechaPago ASC""";
 
         // Conexión a la base de datos
         Conectar con = new Conectar();
@@ -174,14 +175,68 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         }
 
         // Añadir CheckBox a la primera columna
-        addCheckBox(0, tbDeudas);
+        addCheckBox(0, tbDeudasEquipos);
 
         // Ocultar la columna "id"
-        TableColumn ci = tbDeudas.getColumn("id");
+        TableColumn ci = tbDeudasEquipos.getColumn("id");
         ci.setMaxWidth(0);
         ci.setMinWidth(0);
         ci.setPreferredWidth(0);
-        tbDeudas.doLayout();
+        tbDeudasEquipos.doLayout();
+
+    } catch (SQLException e) {
+    }
+}
+    
+    private void MostrarTablaPagosGenerales(String Valores) {
+    try {
+        // Configurar las columnas del modelo de la tabla
+        String[] titulosTabla = {"Seleccion", "id", "Descripcion", "Fecha de Pago", "Cuota Numero", "Monto a Pagar", "Deuda", "Estado"};
+        modelo.setColumnIdentifiers(titulosTabla);
+
+        // Configurar la tabla con el modelo
+        tbDeudasPagosG.setModel(modelo);
+
+        // Consulta SQL para obtener los datos
+        String sql = """
+                     SELECT cpg.id, 
+                     (SELECT nombre FROM tipos_pagosgenerales tpg WHERE tpg.id_pagos = (SELECT id_tipodePago FROM detallepagosgenerales dpg WHERE dpg.id_PagosGenerales = cpg.id_compra)) AS Descripcion, 
+                     cpg.fechaPago AS 'Fecha de Pago', 
+                     cpg.NumeroCuotas AS 'Cuota Numero', 
+                     cpg.cuota AS 'Monto a Pagar', 
+                     cpg.Diferencia AS Deuda, 
+                     cpg.estado AS Estado 
+                     FROM creditopg cpg WHERE cpg.estado = 'Pendiente' ORDER BY cpg.fechaPago ASC""";
+
+        // Conexión a la base de datos
+        Conectar con = new Conectar();
+        Connection connect = con.getConexion();
+        Statement st = connect.createStatement();
+        ResultSet result = st.executeQuery(sql);
+
+        // Añadir filas al modelo de la tabla
+        while (result.next()) {
+            Object[] RegistroBD = new Object[8];
+            RegistroBD[0] = Boolean.FALSE; // Inicializa la celda de selección con false
+            RegistroBD[1] = result.getString("id");
+            RegistroBD[2] = result.getString("Descripcion");
+            RegistroBD[3] = result.getString("Fecha de Pago");
+            RegistroBD[4] = result.getString("Cuota Numero");
+            RegistroBD[5] = result.getString("Monto a Pagar");
+            RegistroBD[6] = result.getString("Deuda");
+            RegistroBD[7] = result.getString("Estado");
+            modelo.addRow(RegistroBD);
+        }
+
+        // Añadir CheckBox a la primera columna
+        addCheckBox(0, tbDeudasPagosG);
+
+        // Ocultar la columna "id"
+        TableColumn ci = tbDeudasPagosG.getColumn("id");
+        ci.setMaxWidth(0);
+        ci.setMinWidth(0);
+        ci.setPreferredWidth(0);
+        tbDeudasPagosG.doLayout();
 
     } catch (SQLException e) {
     }
@@ -195,7 +250,7 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         modelo.setColumnIdentifiers(titulosTabla);
 
         // Configurar la tabla con el modelo
-        tbDeudas.setModel(modelo);
+        tbDeudasEquipos.setModel(modelo);
 
         // Consulta SQL para obtener los datos
         String sql = """
@@ -224,14 +279,14 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         }
 
         // Añadir CheckBox a la primera columna
-        addCheckBox(0, tbDeudas);
+        addCheckBox(0, tbDeudasEquipos);
 
         // Ocultar la columna "id"
-        TableColumn ci = tbDeudas.getColumn("id");
+        TableColumn ci = tbDeudasEquipos.getColumn("id");
         ci.setMaxWidth(0);
         ci.setMinWidth(0);
         ci.setPreferredWidth(0);
-        tbDeudas.doLayout();
+        tbDeudasEquipos.doLayout();
 
     } catch (SQLException e) {
     }
@@ -246,7 +301,7 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
             Connection connect = con.getConexion();
 
 // Obtener el modelo de la tabla
-            DefaultTableModel modelo = (DefaultTableModel) tbDeudas.getModel();
+            DefaultTableModel modelo = (DefaultTableModel) tbDeudasEquipos.getModel();
 
 // Crear un ArrayList para almacenar las filas seleccionadas
             ArrayList<Integer> filasSeleccionadas = new ArrayList<>();
@@ -289,7 +344,7 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
         jPanel12 = new javax.swing.JPanel();
         jScrollPane14 = new javax.swing.JScrollPane();
-        tbDeudas = new javax.swing.JTable();
+        tbDeudasEquipos = new javax.swing.JTable();
         txtBuscarCompra = new javax.swing.JTextField();
         btnHistorialCompra = new javax.swing.JButton();
         btnSalir = new javax.swing.JButton();
@@ -300,6 +355,14 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tbDeudasPagosG = new javax.swing.JTable();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tbDeudasProductos = new javax.swing.JTable();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        btnEliminar = new javax.swing.JButton();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -308,7 +371,7 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         jPanel12.setBackground(new java.awt.Color(204, 204, 204));
         jPanel12.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        tbDeudas.setModel(new javax.swing.table.DefaultTableModel(
+        tbDeudasEquipos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -316,15 +379,15 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
             }
         ));
-        tbDeudas.setRowHeight(23);
-        jScrollPane14.setViewportView(tbDeudas);
+        tbDeudasEquipos.setRowHeight(23);
+        jScrollPane14.setViewportView(tbDeudasEquipos);
 
-        jPanel12.add(jScrollPane14, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 140, 1060, 420));
-        jPanel12.add(txtBuscarCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 90, 240, 30));
+        jPanel12.add(jScrollPane14, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 110, 1060, 130));
+        jPanel12.add(txtBuscarCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 30, 240, 30));
 
         btnHistorialCompra.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/lupa.png"))); // NOI18N
         btnHistorialCompra.setText("Buscar");
-        jPanel12.add(btnHistorialCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 60, 100, 40));
+        jPanel12.add(btnHistorialCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 20, 100, 40));
 
         btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
         btnSalir.setText("Salir");
@@ -341,7 +404,7 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
                 cbSeleccionaTodoActionPerformed(evt);
             }
         });
-        jPanel12.add(cbSeleccionaTodo, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 100, 120, -1));
+        jPanel12.add(cbSeleccionaTodo, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 80, 120, -1));
 
         btnPagadas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
         btnPagadas.setText("Pagar");
@@ -350,18 +413,60 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
                 btnPagadasActionPerformed(evt);
             }
         });
-        jPanel12.add(btnPagadas, new org.netbeans.lib.awtextra.AbsoluteConstraints(930, 30, -1, -1));
-        jPanel12.add(jDateChooser1, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 40, 120, -1));
-        jPanel12.add(jDateChooser2, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 40, 110, -1));
+        jPanel12.add(btnPagadas, new org.netbeans.lib.awtextra.AbsoluteConstraints(970, 30, -1, -1));
+        jPanel12.add(jDateChooser1, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 40, 120, -1));
+        jPanel12.add(jDateChooser2, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 40, 110, -1));
 
         jLabel1.setText("Inicio");
-        jPanel12.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 10, -1, -1));
+        jPanel12.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 10, -1, -1));
 
         jLabel2.setText("Termino");
-        jPanel12.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 10, -1, -1));
+        jPanel12.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 10, -1, -1));
 
         jButton1.setText("Canceladas");
-        jPanel12.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(930, 90, 100, -1));
+        jPanel12.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 30, 100, -1));
+
+        tbDeudasPagosG.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {},
+                {},
+                {},
+                {}
+            },
+            new String [] {
+
+            }
+        ));
+        jScrollPane1.setViewportView(tbDeudasPagosG);
+
+        jPanel12.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 260, 1060, 130));
+
+        tbDeudasProductos.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {},
+                {},
+                {},
+                {}
+            },
+            new String [] {
+
+            }
+        ));
+        jScrollPane2.setViewportView(tbDeudasProductos);
+
+        jPanel12.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 410, 1060, 120));
+
+        jLabel3.setText("Equipos - Maquinarias y Vehiculos");
+        jPanel12.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 90, -1, -1));
+
+        jLabel4.setText("Pagos Generales");
+        jPanel12.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 240, -1, -1));
+
+        jLabel5.setText("Productos - Materiales");
+        jPanel12.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 390, -1, -1));
+
+        btnEliminar.setText("Eliminar");
+        jPanel12.add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(870, 70, -1, -1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -376,8 +481,8 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, 589, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -391,13 +496,13 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
                                                        
         if (cbSeleccionaTodo.isSelected()) {
             cbSeleccionaTodo.setText("Deseleccionar Todo");
-            for (int i = 0; i < tbDeudas.getRowCount(); i++) {
-                tbDeudas.setValueAt(true, i, 0);
+            for (int i = 0; i < tbDeudasEquipos.getRowCount(); i++) {
+                tbDeudasEquipos.setValueAt(true, i, 0);
             }
         } else {
             cbSeleccionaTodo.setText("Seleccionar Todo");
-            for (int i = 0; i < tbDeudas.getRowCount(); i++) {
-                tbDeudas.setValueAt(false, i, 0);
+            for (int i = 0; i < tbDeudasEquipos.getRowCount(); i++) {
+                tbDeudasEquipos.setValueAt(false, i, 0);
             }
         }
     }//GEN-LAST:event_cbSeleccionaTodoActionPerformed
@@ -408,6 +513,7 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnEliminar;
     public javax.swing.JButton btnHistorialCompra;
     private javax.swing.JButton btnPagadas;
     private javax.swing.JButton btnSalir;
@@ -417,9 +523,16 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
     private com.toedter.calendar.JDateChooser jDateChooser2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel12;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane14;
-    public javax.swing.JTable tbDeudas;
+    private javax.swing.JScrollPane jScrollPane2;
+    public javax.swing.JTable tbDeudasEquipos;
+    private javax.swing.JTable tbDeudasPagosG;
+    private javax.swing.JTable tbDeudasProductos;
     public javax.swing.JTextField txtBuscarCompra;
     // End of variables declaration//GEN-END:variables
 

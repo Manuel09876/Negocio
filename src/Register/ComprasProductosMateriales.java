@@ -475,6 +475,11 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
         jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/clear.png"))); // NOI18N
         jButton2.setText("Limpiar");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
         jPanel16.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 50, -1, -1));
         jPanel16.add(txtIdProveedor, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 130, 80, -1));
 
@@ -677,6 +682,10 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 //        GuardarCredito();
         LimpiartxtCred();
     }//GEN-LAST:event_btnRegistrarCreditoActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        LimpiarCampos();
+    }//GEN-LAST:event_jButton2ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -900,7 +909,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         try {
             // Validar si hay un item seleccionado en el JComboBox
             if (cbxPagarCon.getSelectedIndex() == -1) {
-//            JOptionPane.showMessageDialog(null, "Error: No se ha seleccionado ningún proveedor.");
+//            JOptionPane.showMessageDialog(null, "Error: No se ha seleccionado ninguna forme de pago.");
                 return;
             }
 
@@ -917,6 +926,30 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
                 if (rs.next()) {
                     idPagarCon.setText(rs.getString("id_formadepago"));
+                    
+                    // Validar el código de forma de pago y habilitar componentes
+                    if (Integer.parseInt(rs.getString("id_formadepago")) == 3 || Integer.parseInt(rs.getString("id_formadepago")) == 6) {
+                        txt_Inicial.setEnabled(true);
+                        txt_diferencia.setEnabled(true);
+                        btnRegistrarCredito.setEnabled(true);
+                        btnGuardar.setEnabled(false);
+                        txtTotal1.setEnabled(true);
+                        txtFrecuencia.setEnabled(true);
+                        txtInteres.setEnabled(true);
+                        txtNumeroCuotas.setEnabled(true);
+                        txtValorCuota.setEnabled(true);
+                    } else {
+                        txt_Inicial.setEnabled(false);
+                        txt_diferencia.setEnabled(false);
+                        btnRegistrarCredito.setEnabled(false);
+                        btnGuardar.setEnabled(true);
+                        txtTotal1.setEnabled(false);
+                        txtFrecuencia.setEnabled(false);
+                        txtInteres.setEnabled(false);
+                        txtNumeroCuotas.setEnabled(false);
+                        txtValorCuota.setEnabled(false);
+                    }
+                    
                 }
             }
 
@@ -1059,7 +1092,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     // Método para hallar el id_venta que se está ejecutando en ese momento
     public int IdCompra() {
         int id = 0;
-        String sql = "SELECT MAX(id_equipos) FROM equipos";
+        String sql = "SELECT MAX(id_CompraProMat) FROM compraproductosmateriales";
         Conectar con = new Conectar();
         Connection connect = null;
         PreparedStatement ps = null;
@@ -1114,7 +1147,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         }
 
         // Preparar la inserción de pagos en la base de datos
-        String sql = "INSERT INTO credito (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
+        String sql = "INSERT INTO creditoprod (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
         stmt = connect.prepareStatement(sql);
 
