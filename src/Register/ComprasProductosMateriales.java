@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import javax.swing.JComboBox;
@@ -21,6 +22,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+import java.awt.event.KeyEvent;
 
 public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
@@ -38,6 +40,8 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     int id_Marca;
     Date fecha;
     String estado;
+
+    int item;
 
     public ComprasProductosMateriales(int id_CompraProMat, String numeroRecibo, int id_Tipo, int id_Producto, int cantidad, double precioUnit, int id_proveedor, int id_Marca, Date fecha, String estado) {
         this.id_CompraProMat = id_CompraProMat;
@@ -143,13 +147,13 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         AutoCompleteDecorator.decorate(cbxProducto);
         AutoCompleteDecorator.decorate(cbxPagarCon);
         AutoCompleteDecorator.decorate(cbxTipoProducto);
-        
+
         MostrarProveedor(cbxProveedor);
         MostrarMarca(cbxMarca);
         MostrarProducto(cbxProducto);
         MostrarFormaDePago(cbxPagarCon);
         MostrarTipo(cbxTipoProducto);
-                
+
         txtIdMarca.setEnabled(false);
         txtIdProducto.setEnabled(false);
         txtIdProveedor.setEnabled(false);
@@ -157,9 +161,11 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         txtId_CompraProMat.setEnabled(false);
         txtIdPagarCon.setEnabled(false);
         txtId_CompraProMat.setEnabled(false);
-
-        MostrarDatos("");
         
+        initListeners();
+
+//        MostrarDatos("");
+
     }
 
     public void MostrarDatos(String Valores) {
@@ -235,7 +241,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             pst.setInt(5, id_proveedor);
             pst.setInt(6, id_Marca);
             pst.setDate(7, (java.sql.Date) fecha);
-            
+
             //Declarar otra variable para validar los registros
             int n = pst.executeUpdate();
 
@@ -252,8 +258,6 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         }
 
     }
-    
-    
 
     public void Modificar(JTextField idProducto, JTextField Recibo, JTextField cantidad, JTextField precioUnit, JComboBox Proveedor, JComboBox Marca, JDateChooser fecha) {
         String sql = "UPDATE detalle_compraproductosmateriales SET id_producto=?, numeroRecibo=?, cantidad=?, precioUnit=?, id_proveedor=?, id_Marca=?, fecha=?";
@@ -366,7 +370,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         btnEliminar = new javax.swing.JButton();
         txtId_CompraProMat = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
+        txtStock = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         cbxTipoProducto = new javax.swing.JComboBox<>();
         txtIdTipoPro = new javax.swing.JTextField();
@@ -424,16 +428,28 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(jLabel41, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 20, -1, -1));
 
         jLabel42.setText("Cant");
-        jPanel16.add(jLabel42, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 20, -1, -1));
+        jPanel16.add(jLabel42, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 20, -1, -1));
 
         jLabel43.setText("Precio Unitario");
-        jPanel16.add(jLabel43, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 20, -1, -1));
+        jPanel16.add(jLabel43, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 20, -1, -1));
 
         jLabel44.setText("Total");
         jPanel16.add(jLabel44, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 20, -1, -1));
         jPanel16.add(txtNumeroRecibo, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 40, 130, 30));
-        jPanel16.add(txtCant, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 50, 70, 30));
-        jPanel16.add(txtSubTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 50, 70, 30));
+
+        txtCant.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtCantKeyPressed(evt);
+            }
+        });
+        jPanel16.add(txtCant, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 50, 70, 30));
+
+        txtSubTotal.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtSubTotalKeyPressed(evt);
+            }
+        });
+        jPanel16.add(txtSubTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 50, 70, 30));
         jPanel16.add(txtTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 50, 70, 30));
 
         btnGenerarCompra.setBackground(new java.awt.Color(204, 204, 204));
@@ -454,10 +470,10 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
         jLabel47.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel47.setText("Total Pagar");
-        jPanel16.add(jLabel47, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 90, -1, -1));
+        jPanel16.add(jLabel47, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 100, -1, -1));
 
         JLabelTotalCompra.setText("-----------");
-        jPanel16.add(JLabelTotalCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 120, 130, -1));
+        jPanel16.add(JLabelTotalCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 130, 130, -1));
 
         jLabel49.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel49.setText("Pagar con");
@@ -548,9 +564,9 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 470, 120, -1));
         jPanel16.add(txtId_CompraProMat, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 100, -1));
 
-        jLabel3.setText("Otros");
+        jLabel3.setText("Stock");
         jPanel16.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 90, -1, -1));
-        jPanel16.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 110, 80, 30));
+        jPanel16.add(txtStock, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 110, 80, 30));
 
         jLabel4.setText("Tipo");
         jPanel16.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, -1, -1));
@@ -669,7 +685,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbxTipoProductoItemStateChanged
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
-         repaint(); // Actualizar el JInternalFrame al hacer clic en el botón "Refresh"
+        repaint(); // Actualizar el JInternalFrame al hacer clic en el botón "Refresh"
     }//GEN-LAST:event_btnRefreshActionPerformed
 
     private void txt_diferenciaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_diferenciaKeyReleased
@@ -686,6 +702,72 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         LimpiarCampos();
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void txtSubTotalKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSubTotalKeyPressed
+    
+    
+    }//GEN-LAST:event_txtSubTotalKeyPressed
+
+    private void txtCantKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCantKeyPressed
+            System.out.println("Key Pressed: " + evt.getKeyCode()); // Debug line
+
+    if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+        System.out.println("Enter key detected"); // Debug line
+
+        if (!txtCant.getText().isEmpty()) {
+            System.out.println("Cantidad no está vacía"); // Debug line
+
+            if (!txtStock.getText().isEmpty() && !txtSubTotal.getText().isEmpty()) {
+                System.out.println("Stock no está vacío"); // Debug line
+
+                try {
+                    int cant = Integer.parseInt(txtCant.getText());
+                    double subTotal = Double.parseDouble(txtSubTotal.getText());
+                    double total = cant * subTotal;
+                    int stock = Integer.parseInt(txtStock.getText());
+
+                    // Convertir el total a String y actualizar el JTextField
+                    txtTotal.setText(String.valueOf(total));
+
+                    System.out.println("Cantidad: " + cant); // Debug line
+                    System.out.println("Subtotal: " + subTotal); // Debug line
+                    System.out.println("Total: " + total); // Debug line
+
+                    item = item + 1;
+                    model = (DefaultTableModel) tbCompraProducto.getModel();
+                    ArrayList<Object> lista = new ArrayList<>();
+                    lista.add(item);
+                    Object selectedItem = cbxProducto.getSelectedItem();
+                    String descripcion = selectedItem.toString();
+                    lista.add(descripcion);
+                    lista.add(cant);
+                    lista.add(subTotal);
+                    lista.add(total);
+
+                    // Ordenar correctamente los elementos en la fila
+                    Object[] O = new Object[5];
+                    O[0] = lista.get(1); // Descripción del producto
+                    O[1] = lista.get(2); // Cantidad
+                    O[2] = lista.get(3); // Subtotal
+                    O[3] = lista.get(4); // Total
+                    O[4] = lista.get(0); // Item
+
+                    model.addRow(O);
+                    tbCompraProducto.setModel(model);
+
+                    System.out.println("Fila añadida a la tabla"); // Debug line
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(null, "Error en el formato de los datos: " + e.getMessage());
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Stock o SubTotal vacío");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Ingrese una cantidad");
+        }
+    }
+    
+    }//GEN-LAST:event_txtCantKeyPressed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -730,7 +812,6 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel8;
     public javax.swing.JPanel jPanel16;
     private javax.swing.JScrollPane jScrollPane12;
-    private javax.swing.JTextField jTextField1;
     public javax.swing.JTable tbCompraProducto;
     public javax.swing.JTextField txtCant;
     private javax.swing.JTextField txtFrecuencia;
@@ -743,6 +824,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     private javax.swing.JTextField txtInteres;
     private javax.swing.JTextField txtNumeroCuotas;
     public javax.swing.JTextField txtNumeroRecibo;
+    private javax.swing.JTextField txtStock;
     public javax.swing.JTextField txtSubTotal;
     public javax.swing.JTextField txtTaxes;
     public javax.swing.JTextField txtTotal;
@@ -926,7 +1008,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
                 if (rs.next()) {
                     idPagarCon.setText(rs.getString("id_formadepago"));
-                    
+
                     // Validar el código de forma de pago y habilitar componentes
                     if (Integer.parseInt(rs.getString("id_formadepago")) == 3 || Integer.parseInt(rs.getString("id_formadepago")) == 6) {
                         txt_Inicial.setEnabled(true);
@@ -949,7 +1031,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                         txtNumeroCuotas.setEnabled(false);
                         txtValorCuota.setEnabled(false);
                     }
-                    
+
                 }
             }
 
@@ -1088,7 +1170,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
         }
     }
-    
+
     // Método para hallar el id_venta que se está ejecutando en ese momento
     public int IdCompra() {
         int id = 0;
@@ -1122,62 +1204,61 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         }
         return id;
     }
-    
+
     public void registrarPagosPendientes() {
-    Conectar con = new Conectar();
-    Connection connect = null;
-    PreparedStatement stmt = null;
-    try {
-        connect = con.getConexion();
+        Conectar con = new Conectar();
+        Connection connect = null;
+        PreparedStatement stmt = null;
+        try {
+            connect = con.getConexion();
 
-        // Obtener los datos de las cajas de texto
-        int id = IdCompra();
-        int frecuencia = Integer.parseInt(txtFrecuencia.getText());
-        double interes = Double.parseDouble(txtInteres.getText());
-        int numeroCuotas = Integer.parseInt(txtNumeroCuotas.getText());
-        double valorCuota = Double.parseDouble(txtValorCuota.getText());
-        double total = Double.parseDouble(txtTotal.getText());
-        double diferencia = total;
+            // Obtener los datos de las cajas de texto
+            int id = IdCompra();
+            int frecuencia = Integer.parseInt(txtFrecuencia.getText());
+            double interes = Double.parseDouble(txtInteres.getText());
+            int numeroCuotas = Integer.parseInt(txtNumeroCuotas.getText());
+            double valorCuota = Double.parseDouble(txtValorCuota.getText());
+            double total = Double.parseDouble(txtTotal.getText());
+            double diferencia = total;
 
-        // Obtener la fecha de inicio
-        Date fechaInicio = dateFechaPagoCred.getDate();
-        if (fechaInicio == null) {
-            JOptionPane.showMessageDialog(null, "La fecha de inicio es nula. Por favor selecciona una fecha válida.");
-            return; // Añadido return para evitar continuar si la fecha es nula
-        }
-
-        // Preparar la inserción de pagos en la base de datos
-        String sql = "INSERT INTO creditoprod (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
-        stmt = connect.prepareStatement(sql);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(fechaInicio);
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-        for (int i = 1; i <= numeroCuotas; i++) {
-            calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
-
-            Date fechaPago = calendar.getTime();
-            double cuotaActual = valorCuota;
-
-            // Ajustar la última cuota si la diferencia es menor que el valor de la cuota
-            if (i == numeroCuotas && diferencia < valorCuota) {
-                cuotaActual = diferencia;
+            // Obtener la fecha de inicio
+            Date fechaInicio = dateFechaPagoCred.getDate();
+            if (fechaInicio == null) {
+                JOptionPane.showMessageDialog(null, "La fecha de inicio es nula. Por favor selecciona una fecha válida.");
+                return; // Añadido return para evitar continuar si la fecha es nula
             }
 
-            diferencia -= cuotaActual;
+            // Preparar la inserción de pagos en la base de datos
+            String sql = "INSERT INTO creditoprod (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
+            stmt = connect.prepareStatement(sql);
 
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(fechaInicio);
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-            stmt.setInt(1, id);
-            stmt.setInt(2, frecuencia);
-            stmt.setString(3, dateFormat.format(fechaPago));
-            stmt.setDouble(4, interes);
-            stmt.setInt(5, i); // Número de la cuota actual
-            stmt.setDouble(6, cuotaActual);
-            stmt.setDouble(7, diferencia); // Diferencia actualizada
+            for (int i = 1; i <= numeroCuotas; i++) {
+                calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
 
-            stmt.executeUpdate();
+                Date fechaPago = calendar.getTime();
+                double cuotaActual = valorCuota;
+
+                // Ajustar la última cuota si la diferencia es menor que el valor de la cuota
+                if (i == numeroCuotas && diferencia < valorCuota) {
+                    cuotaActual = diferencia;
+                }
+
+                diferencia -= cuotaActual;
+
+                stmt.setInt(1, id);
+                stmt.setInt(2, frecuencia);
+                stmt.setString(3, dateFormat.format(fechaPago));
+                stmt.setDouble(4, interes);
+                stmt.setInt(5, i); // Número de la cuota actual
+                stmt.setDouble(6, cuotaActual);
+                stmt.setDouble(7, diferencia); // Diferencia actualizada
+
+                stmt.executeUpdate();
 
 //            // Mostrar aviso dos días antes de la fecha de pago
 //            Calendar avisoCalendar = Calendar.getInstance();
@@ -1186,30 +1267,30 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 //            Date fechaAviso = avisoCalendar.getTime();
 //            DateFormat avisoFormat = new SimpleDateFormat("dd/MM/yyyy");
 //            JOptionPane.showMessageDialog(null, "¡Atención! Quedan 2 días para la fecha de pago de la cuota " + i + ": " + avisoFormat.format(fechaAviso));
-        }
-
-        JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
-
-    } catch (NumberFormatException ex) {
-        System.out.println("Error " + ex);
-        JOptionPane.showMessageDialog(null, "Error al parsear un valor numérico: " + ex.getMessage());
-    } catch (SQLException ex) {
-        JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
-    } finally {
-        try {
-            if (stmt != null) {
-                stmt.close();
             }
-            if (connect != null) {
-                connect.close();
-            }
+
+            JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
+
+        } catch (NumberFormatException ex) {
+            System.out.println("Error " + ex);
+            JOptionPane.showMessageDialog(null, "Error al parsear un valor numérico: " + ex.getMessage());
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (connect != null) {
+                    connect.close();
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
+            }
         }
     }
-}
-    
-    private void LimpiartxtCred(){
+
+    private void LimpiartxtCred() {
         txtTotal1.setText("");
         txtFrecuencia.setText("");
         txtNumeroCuotas.setText("");
@@ -1221,9 +1302,9 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         cbxMarca.setSelectedItem("");
         cbxProveedor.setSelectedItem("");
         cbxTipoProducto.setSelectedItem("");
-        
+
     }
-    
+
     private void LimpiarCampos() {
         txt_diferencia.setText("");
         txtFrecuencia.setText("");
@@ -1234,8 +1315,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         dateFechaPagoCred.setDateFormatString("");
         txtTotal.setText("");
     }
-    
-    
+
     private void initListeners() {
         txt_Inicial.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -1265,7 +1345,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             // Manejo de excepción en caso de que los textos no sean números válidos
             JOptionPane.showMessageDialog(this, "Por favor, ingrese valores numéricos válidos.");
         }
-        
+
     }
 
 }
