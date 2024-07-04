@@ -2,6 +2,7 @@ package Register;
 
 import com.toedter.calendar.JDateChooser;
 import conectar.Conectar;
+import java.awt.BorderLayout;
 import java.awt.HeadlessException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -23,13 +24,20 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import java.awt.event.KeyEvent;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
     Conectar con = new Conectar();
     Connection connect = con.getConexion();
-
     DefaultTableModel model = new DefaultTableModel();
+    private int item = 0;
+    double Totalpagar = 0.00;
+
+    // Variables para la compra
     int id_CompraProMat;
     String numeroRecibo;
     int id_Tipo;
@@ -40,8 +48,6 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     int id_Marca;
     Date fecha;
     String estado;
-
-    int item;
 
     public ComprasProductosMateriales(int id_CompraProMat, String numeroRecibo, int id_Tipo, int id_Producto, int cantidad, double precioUnit, int id_proveedor, int id_Marca, Date fecha, String estado) {
         this.id_CompraProMat = id_CompraProMat;
@@ -136,7 +142,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         this.estado = estado;
     }
 
-    //Conexión
+    // Conexión
     PreparedStatement ps;
     ResultSet rs;
 
@@ -161,55 +167,64 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         txtId_CompraProMat.setEnabled(false);
         txtIdPagarCon.setEnabled(false);
         txtId_CompraProMat.setEnabled(false);
-        
+
         initListeners();
 
-//        MostrarDatos("");
+        // Inicialización del JTable y su modelo
+        model.setColumnIdentifiers(new Object[]{"Descripción", "Cantidad", "SubTotal", "Total", "Item"});
+        tbCompraProducto.setModel(model); // Asignar el modelo a la tabla
 
-    }
+        // Permitir la selección de filas en la tabla
+        tbCompraProducto.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tbCompraProducto.setColumnSelectionAllowed(false);
+        tbCompraProducto.setRowSelectionAllowed(true);
 
-    public void MostrarDatos(String Valores) {
-        try {
-            String[] TitulosTabla = {"id", "Recibo", "Tipo", "Descripcion", "Cantidad", "Proveedor", "Marca", "PrecioUnit"};
-            String[] RegistroBD = new String[8];
 
-            model = new DefaultTableModel(null, TitulosTabla);
+        // Añadir ListSelectionListener para manejar la selección de filas
+        tbCompraProducto.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent event) {
+                if (!event.getValueIsAdjusting()) {
+                    int selectedRow = tbCompraProducto.getSelectedRow();
+                    if (selectedRow != -1) {
+                        // Obtener los datos de la fila seleccionada
+                        Object descripcion = tbCompraProducto.getValueAt(selectedRow, 0);
+                        Object cantidad = tbCompraProducto.getValueAt(selectedRow, 1);
+                        Object subTotal = tbCompraProducto.getValueAt(selectedRow, 2);
+                        Object total = tbCompraProducto.getValueAt(selectedRow, 3);
 
-            String ConsultaSQL = "SELECT * FROM detalle_compraproductosmateriales";
+                        // Mostrar los datos de la fila seleccionada en la consola
+                        System.out.println("Fila seleccionada: " + selectedRow);
+                        System.out.println("Descripción: " + descripcion);
+                        System.out.println("Cantidad: " + cantidad);
+                        System.out.println("Subtotal: " + subTotal);
+                        System.out.println("Total: " + total);
 
-            Statement st = connect.createStatement();
-            ResultSet result = st.executeQuery(ConsultaSQL);
-
-            while (result.next()) {
-
-                RegistroBD[0] = result.getString(1);
-                RegistroBD[1] = result.getString(2);
-                RegistroBD[2] = result.getString(3);
-                RegistroBD[3] = result.getString(4);
-                RegistroBD[4] = result.getString(5);
-                RegistroBD[5] = result.getString(6);
-                RegistroBD[6] = result.getString(7);
-
-                model.addRow(RegistroBD);
-
+                        // Aquí puedes actualizar cualquier campo de texto o componente con los datos de la fila seleccionada
+                        // Ejemplo: actualizar componentes con los valores seleccionados
+                        cbxProducto.setSelectedItem(descripcion.toString());
+                        txtCant.setText(cantidad.toString());
+                        txtSubTotal.setText(subTotal.toString());
+                        txtTotal.setText(total.toString());
+                    }
+                }
             }
+        });
 
-        } catch (SQLException e) {
-//            System.out.println("Error "+e);
-        }
+        // Configurar el botón de eliminación
+        btnEliminar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEliminarActionPerformed(evt);
+            }
+        });
+
+        // Debugging: Verificar que el modelo tiene las columnas configuradas
+        System.out.println("Columnas en el modelo: " + model.getColumnCount()); // Debe ser 5
+        System.out.println("Filas en el modelo (inicial): " + model.getRowCount()); // Debe ser 0
+   
+
     }
 
     public void Guardar() {
-        int id_CompraProMat;
-        String numeroRecibo;
-        int id_Tipo;
-        int id_Producto;
-        int cantidad;
-        double precioUnit;
-        int id_proveedor;
-        int id_Marca;
-        Date fecha;
-        String estado;
 
         id_CompraProMat = Integer.parseInt(txtId_CompraProMat.getText());
         numeroRecibo = txtNumeroRecibo.getText();
@@ -249,84 +264,53 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             if (n > 0) {
                 JOptionPane.showMessageDialog(null, "El registro se  Guardo con exito");
 
-                MostrarDatos("");
             }
-            MostrarDatos("");
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al gusrdar registro " + e.toString());
         }
 
     }
+    
+    // Método para eliminar una fila de la tabla
+    private void eliminarFila() {
+    int selectedRow = tbCompraProducto.getSelectedRow();
 
-    public void Modificar(JTextField idProducto, JTextField Recibo, JTextField cantidad, JTextField precioUnit, JComboBox Proveedor, JComboBox Marca, JDateChooser fecha) {
-        String sql = "UPDATE detalle_compraproductosmateriales SET id_producto=?, numeroRecibo=?, cantidad=?, precioUnit=?, id_proveedor=?, id_Marca=?, fecha=?";
+    if (selectedRow != -1) {
+        System.out.println("Fila seleccionada: " + selectedRow);
+        DefaultTableModel model = (DefaultTableModel) tbCompraProducto.getModel();
+        // Obtener los datos de la fila seleccionada
+        Object descripcion = tbCompraProducto.getValueAt(selectedRow, 0);
+        Object cantidad = tbCompraProducto.getValueAt(selectedRow, 1);
+        Object subTotal = tbCompraProducto.getValueAt(selectedRow, 2);
+        Object total = tbCompraProducto.getValueAt(selectedRow, 3);
 
-        try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
-            ps.setInt(1, getId_Producto());
-            ps.setString(2, getNumeroRecibo());
-            ps.setInt(3, getCantidad());
-            ps.setDouble(4, getPrecioUnit());
-            ps.setInt(5, getId_proveedor());
-            ps.setInt(6, getId_Marca());
-            ps.setDate(7, (java.sql.Date) getFecha());
-            ps.execute();
+        // Mostrar los datos de la fila seleccionada en la consola
+        System.out.println("Fila seleccionada: " + selectedRow);
+        System.out.println("Descripción: " + descripcion);
+        System.out.println("Cantidad: " + cantidad);
+        System.out.println("Subtotal: " + subTotal);
+        System.out.println("Total: " + total);
 
-            JOptionPane.showMessageDialog(null, "Registro se odifico con exito");
-            MostrarDatos(sql);
+        // Aquí puedes actualizar cualquier campo de texto o componente con los datos de la fila seleccionada
+        cbxProducto.setSelectedItem(descripcion.toString());
+        txtCant.setText(cantidad.toString());
+        txtSubTotal.setText(subTotal.toString());
+        txtTotal.setText(total.toString());
 
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.toString());
+        // Eliminar la fila seleccionada
+        model.removeRow(selectedRow);
+        TotalPagar(); // Actualiza el total a pagar
+        LimpiarCompra();
+        cbxProducto.requestFocus();
+    } else {
+//        JOptionPane.showMessageDialog(null, "No se ha seleccionado ninguna fila. Por favor, seleccione una fila para eliminar.");
+   }
+}
 
-        }
-    }
-
-    public void Borrar(JTextField id) {
-
-        setId_CompraProMat(Integer.parseInt(id.getText()));
-
-        String consulta = "DELETE FROM detalle_compraproductosmateriales WHERE id_CompraProMat=?";
-
-        try {
-
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
-            cs.setInt(1, getId_CompraProMat());
-            cs.executeUpdate();
-
-            JOptionPane.showMessageDialog(null, "Se Elimino");
-
-            MostrarDatos("");
-
-        } catch (HeadlessException | SQLException e) {
-
-            JOptionPane.showMessageDialog(null, "No se Elimino registro " + e.toString());
-        }
-
-    }
-
-    public void Seleccionar(JTable Tabla, JTextField id, JTextField Recibo, JComboBox Producto, JTextField cantidad, JTextField precioUnit, JComboBox Proveedor, JComboBox Marca, JDateChooser fecha) {
-
-        try {
-            int fila = tbCompraProducto.getSelectedRow();
-
-            if (fila >= 0) {
-                id.setText(tbCompraProducto.getValueAt(fila, 0).toString());
-                Producto.setSelectedItem(tbCompraProducto.getValueAt(fila, 1).toString());
-                Recibo.setText(tbCompraProducto.getValueAt(fila, 2).toString());
-                cantidad.setText(tbCompraProducto.getValueAt(fila, 3).toString());
-                precioUnit.setText(tbCompraProducto.getValueAt(fila, 4).toString());
-                Proveedor.setSelectedItem(tbCompraProducto.getValueAt(fila, 5).toString());
-                Marca.setSelectedItem(tbCompraProducto.getValueAt(fila, 6));
-                fecha.setDateFormatString(tbCompraProducto.getValueAt(fila, 7).toString());
-
-            }
-
-        } catch (Exception e) {
-        }
-
-    }
+    
+    
+    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -340,12 +324,9 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jLabel41 = new javax.swing.JLabel();
         jLabel42 = new javax.swing.JLabel();
         jLabel43 = new javax.swing.JLabel();
-        jLabel44 = new javax.swing.JLabel();
         txtNumeroRecibo = new javax.swing.JTextField();
         txtCant = new javax.swing.JTextField();
         txtSubTotal = new javax.swing.JTextField();
-        txtTotal = new javax.swing.JTextField();
-        btnGenerarCompra = new javax.swing.JButton();
         jLabel46 = new javax.swing.JLabel();
         cbxProveedor = new javax.swing.JComboBox<>();
         jLabel47 = new javax.swing.JLabel();
@@ -353,7 +334,6 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jLabel49 = new javax.swing.JLabel();
         txtTaxes = new javax.swing.JTextField();
         btnSalir = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
         txtIdProveedor = new javax.swing.JTextField();
         cbxProducto = new javax.swing.JComboBox<>();
         txtIdMarca = new javax.swing.JTextField();
@@ -366,15 +346,12 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         dateFecha = new com.toedter.calendar.JDateChooser();
         jLabel2 = new javax.swing.JLabel();
         btnGuardar = new javax.swing.JButton();
-        btnModificar = new javax.swing.JButton();
-        btnEliminar = new javax.swing.JButton();
         txtId_CompraProMat = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         txtStock = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         cbxTipoProducto = new javax.swing.JComboBox<>();
         txtIdTipoPro = new javax.swing.JTextField();
-        btnRefresh = new javax.swing.JButton();
         jLabel19 = new javax.swing.JLabel();
         txt_Inicial = new javax.swing.JTextField();
         jLabel20 = new javax.swing.JLabel();
@@ -393,6 +370,9 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         txtNumeroCuotas = new javax.swing.JTextField();
         jLabel18 = new javax.swing.JLabel();
         txtValorCuota = new javax.swing.JTextField();
+        txtTotal = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        btnEliminar = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(0, 51, 153));
         setIconifiable(true);
@@ -419,43 +399,34 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         });
         jScrollPane12.setViewportView(tbCompraProducto);
 
-        jPanel16.add(jScrollPane12, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 160, 1050, 220));
+        jPanel16.add(jScrollPane12, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 170, 1050, 210));
 
         jLabel40.setText("Producto");
         jPanel16.add(jLabel40, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 40, -1, -1));
 
         jLabel41.setText("Recibo N°");
-        jPanel16.add(jLabel41, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 20, -1, -1));
+        jPanel16.add(jLabel41, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 10, -1, -1));
 
         jLabel42.setText("Cant");
-        jPanel16.add(jLabel42, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 20, -1, -1));
+        jPanel16.add(jLabel42, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 100, -1, -1));
 
         jLabel43.setText("Precio Unitario");
-        jPanel16.add(jLabel43, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 20, -1, -1));
-
-        jLabel44.setText("Total");
-        jPanel16.add(jLabel44, new org.netbeans.lib.awtextra.AbsoluteConstraints(740, 20, -1, -1));
-        jPanel16.add(txtNumeroRecibo, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 40, 130, 30));
+        jPanel16.add(jLabel43, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 60, -1, -1));
+        jPanel16.add(txtNumeroRecibo, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 2, 130, 30));
 
         txtCant.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtCantKeyPressed(evt);
             }
         });
-        jPanel16.add(txtCant, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 50, 70, 30));
+        jPanel16.add(txtCant, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 90, 70, 30));
 
         txtSubTotal.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtSubTotalKeyPressed(evt);
             }
         });
-        jPanel16.add(txtSubTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 50, 70, 30));
-        jPanel16.add(txtTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 50, 70, 30));
-
-        btnGenerarCompra.setBackground(new java.awt.Color(204, 204, 204));
-        btnGenerarCompra.setFont(new java.awt.Font("Times New Roman", 1, 12)); // NOI18N
-        btnGenerarCompra.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/nuevo-producto.png"))); // NOI18N
-        jPanel16.add(btnGenerarCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(980, 100, 60, 30));
+        jPanel16.add(txtSubTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 50, 70, 30));
 
         jLabel46.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel46.setText("Proveedor");
@@ -470,15 +441,15 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
         jLabel47.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel47.setText("Total Pagar");
-        jPanel16.add(jLabel47, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 100, -1, -1));
+        jPanel16.add(jLabel47, new org.netbeans.lib.awtextra.AbsoluteConstraints(950, 440, -1, -1));
 
         JLabelTotalCompra.setText("-----------");
-        jPanel16.add(JLabelTotalCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 130, 130, -1));
+        jPanel16.add(JLabelTotalCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 470, 130, 20));
 
         jLabel49.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel49.setText("Pagar con");
         jPanel16.add(jLabel49, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 400, -1, -1));
-        jPanel16.add(txtTaxes, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 110, 70, 30));
+        jPanel16.add(txtTaxes, new org.netbeans.lib.awtextra.AbsoluteConstraints(1000, 390, 70, 30));
 
         btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
         btnSalir.setText("Salir");
@@ -488,15 +459,6 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             }
         });
         jPanel16.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 10, -1, -1));
-
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/clear.png"))); // NOI18N
-        jButton2.setText("Limpiar");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
-            }
-        });
-        jPanel16.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 50, -1, -1));
         jPanel16.add(txtIdProveedor, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 130, 80, -1));
 
         cbxProducto.addItemListener(new java.awt.event.ItemListener() {
@@ -520,7 +482,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(txtIdProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 40, 80, -1));
 
         jLabel1.setText("Impuestos");
-        jPanel16.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 90, -1, -1));
+        jPanel16.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 400, -1, -1));
 
         cbxPagarCon.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -531,10 +493,10 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(txtIdPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 400, 90, -1));
 
         dateFecha.setDateFormatString("yyyy-MM-dd");
-        jPanel16.add(dateFecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 120, 130, -1));
+        jPanel16.add(dateFecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 60, 130, -1));
 
         jLabel2.setText("Fecha de Compra");
-        jPanel16.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 90, -1, -1));
+        jPanel16.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 30, -1, -1));
 
         btnGuardar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/guardar.png"))); // NOI18N
         btnGuardar.setText("Guardar");
@@ -543,30 +505,12 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                 btnGuardarActionPerformed(evt);
             }
         });
-        jPanel16.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 380, 120, -1));
-
-        btnModificar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/exchange.png"))); // NOI18N
-        btnModificar.setText("Modificar");
-        btnModificar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnModificarActionPerformed(evt);
-            }
-        });
-        jPanel16.add(btnModificar, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 420, 120, -1));
-
-        btnEliminar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/eliminar.png"))); // NOI18N
-        btnEliminar.setText("Eliminar");
-        btnEliminar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnEliminarActionPerformed(evt);
-            }
-        });
-        jPanel16.add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 470, 120, -1));
+        jPanel16.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 110, 110, -1));
         jPanel16.add(txtId_CompraProMat, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 100, -1));
 
         jLabel3.setText("Stock");
-        jPanel16.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(650, 90, -1, -1));
-        jPanel16.add(txtStock, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 110, 80, 30));
+        jPanel16.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 20, -1, -1));
+        jPanel16.add(txtStock, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 10, 70, 30));
 
         jLabel4.setText("Tipo");
         jPanel16.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, -1, -1));
@@ -578,14 +522,6 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         });
         jPanel16.add(cbxTipoProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 70, 150, -1));
         jPanel16.add(txtIdTipoPro, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 70, 80, -1));
-
-        btnRefresh.setText("Refresh");
-        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnRefreshActionPerformed(evt);
-            }
-        });
-        jPanel16.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 10, -1, -1));
 
         jLabel19.setText("Inicial");
         jPanel16.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 440, -1, -1));
@@ -602,12 +538,12 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(txt_diferencia, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 470, 92, -1));
 
         jLabel7.setText("Total");
-        jPanel16.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 410, -1, -1));
-        jPanel16.add(txtTotal1, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 410, 100, -1));
+        jPanel16.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 390, -1, -1));
+        jPanel16.add(txtTotal1, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 390, 100, -1));
 
         jLabel12.setText("Frecuencia de Pago");
-        jPanel16.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 440, -1, -1));
-        jPanel16.add(txtFrecuencia, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 440, 100, -1));
+        jPanel16.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 430, -1, -1));
+        jPanel16.add(txtFrecuencia, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 430, 100, -1));
 
         jLabel8.setText("Tasa de Interes");
         jPanel16.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 470, -1, -1));
@@ -638,6 +574,20 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 420, -1, -1));
         jPanel16.add(txtValorCuota, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 420, 100, -1));
 
+        txtTotal.setToolTipText("");
+        jPanel16.add(txtTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 130, 80, 30));
+
+        jLabel5.setText("Total");
+        jPanel16.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 140, -1, -1));
+
+        btnEliminar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/eliminar.png"))); // NOI18N
+        btnEliminar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEliminarActionPerformed(evt);
+            }
+        });
+        jPanel16.add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1010, 120, -1, -1));
+
         getContentPane().add(jPanel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 1080, 510));
 
         pack();
@@ -667,26 +617,37 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         Guardar();
     }//GEN-LAST:event_btnGuardarActionPerformed
 
-    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-        Modificar(txtIdProducto, txtNumeroRecibo, txtCant, txtSubTotal, cbxProveedor, cbxMarca, dateFecha);
-    }//GEN-LAST:event_btnModificarActionPerformed
-
-    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        Seleccionar(tbCompraProducto, txtCant, txtCant, cbxProducto, txtTotal, txtCant, cbxProveedor, cbxMarca, dateFecha);
-        Borrar(txtId_CompraProMat);
-    }//GEN-LAST:event_btnEliminarActionPerformed
-
     private void tbCompraProductoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbCompraProductoMouseClicked
-        Seleccionar(tbCompraProducto, txtCant, txtCant, cbxProducto, txtTotal, txtCant, cbxProveedor, cbxMarca, dateFecha);
+        // Obtener el índice de la fila seleccionada
+        int selectedRow = tbCompraProducto.getSelectedRow();
+        if (selectedRow != -1) {
+            // Obtener los datos de la fila seleccionada
+            Object descripcion = tbCompraProducto.getValueAt(selectedRow, 0);
+            Object cantidad = tbCompraProducto.getValueAt(selectedRow, 1);
+            Object subTotal = tbCompraProducto.getValueAt(selectedRow, 2);
+            Object total = tbCompraProducto.getValueAt(selectedRow, 3);
+
+            // Mostrar los datos de la fila seleccionada en la consola
+            System.out.println("Fila seleccionada: " + selectedRow);
+            System.out.println("Descripción: " + descripcion);
+            System.out.println("Cantidad: " + cantidad);
+            System.out.println("Subtotal: " + subTotal);
+            System.out.println("Total: " + total);
+
+            // Aquí puedes actualizar cualquier campo de texto o componente con los datos de la fila seleccionada
+            cbxProducto.setSelectedItem(descripcion.toString());
+            txtCant.setText(cantidad.toString());
+            txtSubTotal.setText(subTotal.toString());
+            txtTotal.setText(total.toString());
+        } else {
+            System.out.println("No se ha seleccionado ninguna fila.");
+        }
+
     }//GEN-LAST:event_tbCompraProductoMouseClicked
 
     private void cbxTipoProductoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxTipoProductoItemStateChanged
         MostrarCodigoTipo(cbxTipoProducto, txtIdTipoPro);
     }//GEN-LAST:event_cbxTipoProductoItemStateChanged
-
-    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
-        repaint(); // Actualizar el JInternalFrame al hacer clic en el botón "Refresh"
-    }//GEN-LAST:event_btnRefreshActionPerformed
 
     private void txt_diferenciaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_diferenciaKeyReleased
 
@@ -699,84 +660,79 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         LimpiartxtCred();
     }//GEN-LAST:event_btnRegistrarCreditoActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        LimpiarCampos();
-    }//GEN-LAST:event_jButton2ActionPerformed
-
     private void txtSubTotalKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSubTotalKeyPressed
-    
-    
+
+
     }//GEN-LAST:event_txtSubTotalKeyPressed
 
     private void txtCantKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCantKeyPressed
-            System.out.println("Key Pressed: " + evt.getKeyCode()); // Debug line
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            if (!txtCant.getText().isEmpty()) {
+                if (!txtStock.getText().isEmpty() && !txtSubTotal.getText().isEmpty()) {
+                    try {
+                        int cant = Integer.parseInt(txtCant.getText());
+                        double subTotal = Double.parseDouble(txtSubTotal.getText());
+                        double total = cant * subTotal;
 
-    if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-        System.out.println("Enter key detected"); // Debug line
+                        txtTotal.setText(String.valueOf(total));
 
-        if (!txtCant.getText().isEmpty()) {
-            System.out.println("Cantidad no está vacía"); // Debug line
+                        item = item + 1;
+                        DefaultTableModel model = (DefaultTableModel) tbCompraProducto.getModel();
 
-            if (!txtStock.getText().isEmpty() && !txtSubTotal.getText().isEmpty()) {
-                System.out.println("Stock no está vacío"); // Debug line
+                        // Verifica si el producto ya está en la tabla
+                        boolean productoExistente = false;
+                        for (int i = 0; i < model.getRowCount(); i++) {
+                            if (model.getValueAt(i, 0).equals(cbxProducto.getSelectedItem().toString())) {
+                                JOptionPane.showMessageDialog(null, "El producto ya está registrado");
+                                productoExistente = true;
+                                break;
+                            }
+                        }
 
-                try {
-                    int cant = Integer.parseInt(txtCant.getText());
-                    double subTotal = Double.parseDouble(txtSubTotal.getText());
-                    double total = cant * subTotal;
-                    int stock = Integer.parseInt(txtStock.getText());
+                        if (!productoExistente) {
+                            Object selectedItem = cbxProducto.getSelectedItem();
+                            String descripcion = selectedItem.toString();
 
-                    // Convertir el total a String y actualizar el JTextField
-                    txtTotal.setText(String.valueOf(total));
+                            // Añadir los valores a una nueva fila
+                            Object[] fila = new Object[5];
+                            fila[0] = descripcion; // Descripción del producto
+                            fila[1] = cant; // Cantidad
+                            fila[2] = subTotal; // Subtotal
+                            fila[3] = total; // Total
+                            fila[4] = item; // Item
 
-                    System.out.println("Cantidad: " + cant); // Debug line
-                    System.out.println("Subtotal: " + subTotal); // Debug line
-                    System.out.println("Total: " + total); // Debug line
+                            model.addRow(fila);
+                            model.fireTableDataChanged(); // Asegurarse de que la tabla se actualiza
 
-                    item = item + 1;
-                    model = (DefaultTableModel) tbCompraProducto.getModel();
-                    ArrayList<Object> lista = new ArrayList<>();
-                    lista.add(item);
-                    Object selectedItem = cbxProducto.getSelectedItem();
-                    String descripcion = selectedItem.toString();
-                    lista.add(descripcion);
-                    lista.add(cant);
-                    lista.add(subTotal);
-                    lista.add(total);
+                            TotalPagar();
+                            LimpiarCompra();
+                            cbxProducto.requestFocus();
 
-                    // Ordenar correctamente los elementos en la fila
-                    Object[] O = new Object[5];
-                    O[0] = lista.get(1); // Descripción del producto
-                    O[1] = lista.get(2); // Cantidad
-                    O[2] = lista.get(3); // Subtotal
-                    O[3] = lista.get(4); // Total
-                    O[4] = lista.get(0); // Item
-
-                    model.addRow(O);
-                    tbCompraProducto.setModel(model);
-
-                    System.out.println("Fila añadida a la tabla"); // Debug line
-                } catch (NumberFormatException e) {
-                    JOptionPane.showMessageDialog(null, "Error en el formato de los datos: " + e.getMessage());
+                            System.out.println("Fila añadida a la tabla"); // Debug line
+                            System.out.println("Filas en el modelo (después de añadir): " + model.getRowCount()); // Debug line
+                        }
+                    } catch (NumberFormatException e) {
+                        JOptionPane.showMessageDialog(null, "Error en el formato de los datos: " + e.getMessage());
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Stock o SubTotal vacío");
                 }
             } else {
-                JOptionPane.showMessageDialog(null, "Stock o SubTotal vacío");
+                JOptionPane.showMessageDialog(null, "Ingrese una cantidad");
             }
-        } else {
-            JOptionPane.showMessageDialog(null, "Ingrese una cantidad");
         }
-    }
-    
     }//GEN-LAST:event_txtCantKeyPressed
+
+    //eliminar Producto ingresado por error
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        eliminarFila();
+    }//GEN-LAST:event_btnEliminarActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JLabel JLabelTotalCompra;
     private javax.swing.JButton btnEliminar;
-    public javax.swing.JButton btnGenerarCompra;
     private javax.swing.JButton btnGuardar;
-    private javax.swing.JButton btnModificar;
-    private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnRegistrarCredito;
     private javax.swing.JButton btnSalir;
     private javax.swing.ButtonGroup buttonGroup1;
@@ -787,7 +743,6 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     private javax.swing.JComboBox<String> cbxTipoProducto;
     private com.toedter.calendar.JDateChooser dateFecha;
     private com.toedter.calendar.JDateChooser dateFechaPagoCred;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -803,10 +758,10 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel41;
     private javax.swing.JLabel jLabel42;
     private javax.swing.JLabel jLabel43;
-    private javax.swing.JLabel jLabel44;
     private javax.swing.JLabel jLabel46;
     private javax.swing.JLabel jLabel47;
     private javax.swing.JLabel jLabel49;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel51;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
@@ -827,7 +782,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     private javax.swing.JTextField txtStock;
     public javax.swing.JTextField txtSubTotal;
     public javax.swing.JTextField txtTaxes;
-    public javax.swing.JTextField txtTotal;
+    private javax.swing.JTextField txtTotal;
     private javax.swing.JTextField txtTotal1;
     private javax.swing.JTextField txtValorCuota;
     private javax.swing.JTextField txt_Inicial;
@@ -1116,61 +1071,6 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         }
     }
 
-    //Implementacion Posterior
-    public void MostrarLocalizacion(JComboBox cbxLocalizacion) {
-
-        String sql = "";
-        sql = "select * from localizacion";
-        Statement st;
-
-        try {
-
-            st = con.getConexion().createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            cbxLocalizacion.removeAllItems();
-
-            while (rs.next()) {
-
-                cbxLocalizacion.addItem(rs.getString("nombre"));
-            }
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
-        }
-    }
-
-    public void MostrarCodigoLocalizacion(JComboBox cbxLocalizacion, JTextField idLocalizacion) {
-
-        String consuta = "select localizacion.id_localizacion from localizacion where localizacion.nombre=?";
-
-        try {
-            // Validar si hay un item seleccionado en el JComboBox
-            if (cbxLocalizacion.getSelectedIndex() == -1) {
-//            JOptionPane.showMessageDialog(null, "Error: No se ha seleccionado ningún proveedor.");
-                return;
-            }
-
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
-
-            Object selectedValue = cbxLocalizacion.getSelectedItem();
-            if (selectedValue != null) {
-                String valorSeleccionado = selectedValue.toString();
-                cs.setString(1, valorSeleccionado);
-
-                cs.execute();
-
-                ResultSet rs = cs.executeQuery();
-
-                if (rs.next()) {
-                    idLocalizacion.setText(rs.getString("id_localizacion"));
-                }
-            }
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
-        }
-    }
-
     // Método para hallar el id_venta que se está ejecutando en ese momento
     public int IdCompra() {
         int id = 0;
@@ -1260,13 +1160,6 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
                 stmt.executeUpdate();
 
-//            // Mostrar aviso dos días antes de la fecha de pago
-//            Calendar avisoCalendar = Calendar.getInstance();
-//            avisoCalendar.setTime(fechaPago);
-//            avisoCalendar.add(Calendar.DAY_OF_MONTH, -2);
-//            Date fechaAviso = avisoCalendar.getTime();
-//            DateFormat avisoFormat = new SimpleDateFormat("dd/MM/yyyy");
-//            JOptionPane.showMessageDialog(null, "¡Atención! Quedan 2 días para la fecha de pago de la cuota " + i + ": " + avisoFormat.format(fechaAviso));
             }
 
             JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
@@ -1345,7 +1238,30 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             // Manejo de excepción en caso de que los textos no sean números válidos
             JOptionPane.showMessageDialog(this, "Por favor, ingrese valores numéricos válidos.");
         }
-
     }
 
+    // Método para calcular el total a pagar
+    private void TotalPagar() {
+        Totalpagar = 0.00;
+        int numFila = tbCompraProducto.getRowCount();
+        for (int i = 0; i < numFila; i++) {
+            double cal = Double.parseDouble(String.valueOf(tbCompraProducto.getModel().getValueAt(i, 3)));
+            Totalpagar = Totalpagar + cal;
+        }
+        JLabelTotalCompra.setText(String.format("%.2f", Totalpagar));
+    }
+
+    // Método para limpiar los campos después de añadir un producto
+    private void LimpiarCompra() {
+        txtCant.setText("");
+        txtStock.setText("");
+        txtSubTotal.setText("");
+        txtTotal.setText("");
+        txtInteres.setText("");
+    }
+
+    // Método para refrescar la JTable
+    private void refreshTable(JTable table) {
+        ((DefaultTableModel) table.getModel()).fireTableDataChanged();
+    }
 }

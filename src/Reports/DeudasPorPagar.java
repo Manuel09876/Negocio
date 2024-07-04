@@ -336,7 +336,13 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         }
     }
     
-    
+    //            // Mostrar aviso dos días antes de la fecha de pago
+//            Calendar avisoCalendar = Calendar.getInstance();
+//            avisoCalendar.setTime(fechaPago);
+//            avisoCalendar.add(Calendar.DAY_OF_MONTH, -2);
+//            Date fechaAviso = avisoCalendar.getTime();
+//            DateFormat avisoFormat = new SimpleDateFormat("dd/MM/yyyy");
+//            JOptionPane.showMessageDialog(null, "¡Atención! Quedan 2 días para la fecha de pago de la cuota " + i + ": " + avisoFormat.format(fechaAviso));
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents

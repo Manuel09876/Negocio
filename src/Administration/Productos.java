@@ -26,7 +26,7 @@ public class Productos extends javax.swing.JInternalFrame {
     int idProduct;
     String nameProduct;
     int categoria;
-    double presentation;
+    String presentation;
     int units;
     int location;
     double stock, stock2;
@@ -56,11 +56,11 @@ public class Productos extends javax.swing.JInternalFrame {
         this.categoria = categoria;
     }
 
-    public double getPresentation() {
+    public String getPresentation() {
         return presentation;
     }
 
-    public void setPresentation(double presentation) {
+    public void setPresentation(String presentation) {
         this.presentation = presentation;
     }
 
@@ -196,14 +196,14 @@ public class Productos extends javax.swing.JInternalFrame {
 
         // Variables
         String nameProduct;
-        double presentation;
+        String presentation;
         int id_units;
         double stock, stock2;
         String sql = "";
 
         //Obtenemos la informacion de las cajas de texto
         nameProduct = txtName.getText();
-        presentation = Double.parseDouble(txtPresentation.getText());
+        presentation = txtPresentation.getText();
         id_units = Integer.parseInt(txtIdUnidades.getText());
         stock = Double.parseDouble(txtStock.getText());
         stock2 = Double.parseDouble(txtOr.getText());
@@ -221,7 +221,7 @@ public class Productos extends javax.swing.JInternalFrame {
             PreparedStatement pst = connect.prepareStatement(sql);
 
             pst.setString(1, nameProduct);
-            pst.setDouble(2, presentation);
+            pst.setString(2, presentation);
             pst.setInt(3, id_units);
             pst.setDouble(4,stock);
             pst.setDouble(5, stock2);
@@ -258,7 +258,7 @@ public class Productos extends javax.swing.JInternalFrame {
 
             JOptionPane.showMessageDialog(null, "Se Elimino");
 
-        } catch (Exception e) {
+        } catch (HeadlessException | SQLException e) {
 
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
 
@@ -298,7 +298,7 @@ public class Productos extends javax.swing.JInternalFrame {
             
             setIdProduct(Integer.parseInt(IdProducto.getText()));
             setNameProduct(Name.getText());
-            setPresentation(Double.parseDouble(Presentation.getText()));
+            setPresentation(Presentation.getText());
             setUnits(Integer.parseInt(IdUnits.getText())); // ¿Debería ser IdUnits?
             setStock(Double.parseDouble(Stock.getText()));
             setStock2(Double.parseDouble(Or.getText()));
@@ -309,7 +309,7 @@ public class Productos extends javax.swing.JInternalFrame {
             CallableStatement cs = con.getConexion().prepareCall(consulta);
 
             cs.setString(1, getNameProduct());
-            cs.setDouble(2, getPresentation());
+            cs.setString(2, getPresentation());
             cs.setInt(3, getUnits());
             cs.setDouble(4, getStock());
             cs.setDouble(5, getStock2());
@@ -323,7 +323,7 @@ public class Productos extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Error al convertir un valor a número. Asegúrate de ingresar números válidos en los campos numéricos.", "Error de conversión", JOptionPane.ERROR_MESSAGE);
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al ejecutar la actualización en la base de datos: " + ex.getMessage(), "Error de base de datos", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception ex) {
+        } catch (HeadlessException ex) {
             JOptionPane.showMessageDialog(null, "Ocurrió un error durante la modificación: " + ex.getMessage(), "Error inesperado", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -333,9 +333,10 @@ public class Productos extends javax.swing.JInternalFrame {
         String[] RegistroBD = new String[8];                                   //Registros de la Basede Datos
 
         Productos productos = new Productos();
-        String ConsultaSQL = "SELECT product.idProduct, product.nameProduct, product.presentation, product.units, product.stock, product.stock2, product.estado \n"
-                + "FROM product \n"
-                + "WHERE nameProduct LIKE '%" + txtBuscarProductos.getText() + "%'";
+        String ConsultaSQL = """
+                             SELECT product.idProduct, product.nameProduct, product.presentation, product.units, product.stock, product.stock2, product.estado 
+                             FROM product 
+                             WHERE nameProduct LIKE '%""" + txtBuscarProductos.getText() + "%'";
         model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
         try {
             Statement st = connect.createStatement();
