@@ -178,7 +178,7 @@ public class Usuarios extends javax.swing.JInternalFrame {
         int idUsuarios;
         String nombre, usuario, password, rol, estado;
         String sql = "";
-        //Obtenemos la informacion de las cajas de texto
+        
         idUsuarios = Integer.parseInt(txtIdUsuario.getText());
         nombre = txtNombre.getText();
         usuario = txtUsuario.getText();

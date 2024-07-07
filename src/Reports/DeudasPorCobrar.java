@@ -1,13 +1,30 @@
 package Reports;
 
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import conectar.Conectar;
+import java.awt.Desktop;
 import java.awt.event.MouseListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -15,6 +32,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.text.Document;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class DeudasPorCobrar extends javax.swing.JInternalFrame {
@@ -26,7 +44,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         initComponents();
         MostrarEmpresa(cbxEmpresa);
         AutoCompleteDecorator.decorate(cbxEmpresa);
-        MostrarTabla();
+        MostrarTablaDeuda();
 
     }
 
@@ -40,7 +58,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         return table.getValueAt(row, column) != null;
     }
 
-    public void MostrarTabla() {
+    public void MostrarTablaDeuda() {
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -56,6 +74,66 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                     + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness "
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'deuda' "
+                    + "ORDER BY o.fechaT ASC";
+            Statement st = connect.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+            while (rs.next()) {
+                RegistroBD[1] = rs.getString("id");
+                RegistroBD[2] = rs.getString("Empresa");
+                RegistroBD[3] = rs.getString("Fecha");
+                RegistroBD[4] = rs.getString("Nombre");
+                RegistroBD[5] = rs.getString("Tamaño");
+                RegistroBD[6] = rs.getString("Direccion");
+                RegistroBD[7] = rs.getString("Ciudad");
+                RegistroBD[8] = rs.getString("Estado");
+                RegistroBD[9] = rs.getString("Zip Code");
+                RegistroBD[10] = rs.getString("Celular");
+                RegistroBD[11] = rs.getString("Servicio");
+                RegistroBD[12] = rs.getString("Precio");
+                RegistroBD[13] = rs.getString("Status");
+                RegistroBD[14] = rs.getString("Estado de Cuenta");
+                modelo.addRow(RegistroBD);
+            }
+            tbDeudasPorCobrar.setModel(modelo);
+            // Añadir checkbox a cada fila
+            for (int i = 0; i < modelo.getRowCount(); i++) {
+                addCheckBox(0, tbDeudasPorCobrar); // Agregar checkbox a la columna 0 de cada fila
+            }
+            tbDeudasPorCobrar.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tbDeudasPorCobrar.getColumnModel().getColumn(1).setPreferredWidth(30);
+            tbDeudasPorCobrar.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tbDeudasPorCobrar.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tbDeudasPorCobrar.getColumnModel().getColumn(4).setPreferredWidth(80);
+            tbDeudasPorCobrar.getColumnModel().getColumn(5).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(6).setPreferredWidth(80);
+            tbDeudasPorCobrar.getColumnModel().getColumn(7).setPreferredWidth(60);
+            tbDeudasPorCobrar.getColumnModel().getColumn(8).setPreferredWidth(60);
+            tbDeudasPorCobrar.getColumnModel().getColumn(9).setPreferredWidth(80);
+            tbDeudasPorCobrar.getColumnModel().getColumn(10).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(11).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(12).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(13).setPreferredWidth(150);
+        } catch (SQLException e) {
+            System.out.println("Error al mostrar la Tabla " + e.toString());
+        }
+    }
+    
+    public void MostrarTablaPagadas() {
+        DefaultTableModel modelo = new DefaultTableModel();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio", "Status", "Estado de Cuenta"};
+            String[] RegistroBD = new String[15];
+            modelo = new DefaultTableModel(null, tituloTabla);
+            addCheckBox(0, tbDeudasPorCobrar);
+            String sql = "SELECT o.id, bussiness.nameBusiness AS Empresa, o.fechaT AS Fecha, customer.nameCustomer "
+                    + "AS Nombre, customer.area AS Tamaño, customer.address AS Direccion, customer.city AS Ciudad, customer.state AS Estado, "
+                    + "customer.zipCode AS 'Zip Code', customer.phoneNumber AS Celular, o.servicio AS Servicio, "
+                    + "o.precio AS Precio, o.estado AS Status, o.eeCta AS 'Estado de Cuenta' "
+                    + "FROM orderservice AS o "
+                    + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness "
+                    + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
+                    + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'Cancelada' "
                     + "ORDER BY o.fechaT ASC";
             Statement st = connect.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -184,6 +262,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         btnMostrarTodo = new javax.swing.JButton();
         txtId = new javax.swing.JTextField();
         jLabel15 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         txtEmpresa = new javax.swing.JTextField();
@@ -238,7 +317,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         });
         jScrollPane14.setViewportView(tbDeudasPorCobrar);
 
-        jPanel12.add(jScrollPane14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 120, 1200, 270));
+        jPanel12.add(jScrollPane14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 120, 1220, 270));
 
         btnBusquedaEmpresa.setText("Busqueda Empresa");
         btnBusquedaEmpresa.addActionListener(new java.awt.event.ActionListener() {
@@ -256,7 +335,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                 btnSalirActionPerformed(evt);
             }
         });
-        jPanel12.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(1100, 80, -1, -1));
+        jPanel12.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(1140, 10, -1, -1));
         jPanel12.add(dateInicio, new org.netbeans.lib.awtextra.AbsoluteConstraints(780, 40, 150, -1));
         jPanel12.add(dateFin, new org.netbeans.lib.awtextra.AbsoluteConstraints(970, 40, 140, -1));
 
@@ -302,17 +381,25 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         });
         jPanel12.add(btnBusquedaFechaEmpresa, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 80, 250, -1));
 
-        btnMostrarTodo.setText("Mostrar Todo");
+        btnMostrarTodo.setText("Mostrar Todo Deuda");
         btnMostrarTodo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnMostrarTodoActionPerformed(evt);
             }
         });
-        jPanel12.add(btnMostrarTodo, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 80, 170, -1));
+        jPanel12.add(btnMostrarTodo, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 30, 170, -1));
         jPanel12.add(txtId, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 80, 90, 30));
 
         jLabel15.setText("Cliente");
         jPanel12.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, -1, -1));
+
+        jButton2.setText("Mostrar todo Canceladas");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+        jPanel12.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 80, 170, -1));
 
         jPanel1.setBackground(new java.awt.Color(153, 255, 153));
 
@@ -447,10 +534,12 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, 1227, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 10, Short.MAX_VALUE))
+                    .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -630,7 +719,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnBusquedaFechaEmpresaActionPerformed
 
     private void btnMostrarTodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarTodoActionPerformed
-        MostrarTabla();
+        MostrarTablaDeuda();
     }//GEN-LAST:event_btnMostrarTodoActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -684,6 +773,10 @@ double subtotal = 0.0;
     }
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        MostrarTablaPagadas();
+    }//GEN-LAST:event_jButton2ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton btnBusquedaEmpresa;
@@ -695,6 +788,7 @@ double subtotal = 0.0;
     private com.toedter.calendar.JDateChooser dateFin;
     private com.toedter.calendar.JDateChooser dateInicio;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -778,4 +872,136 @@ double subtotal = 0.0;
         }
         return bandera;
     }
+    
+//    private void pdf() throws FileNotFoundException, IOException {
+//        try {
+//            int id = Vdao.IdVenta();
+//            FileOutputStream archivo;
+//            File file = new File("src/pdf/venta" + id + ".pdf");
+//            archivo = new FileOutputStream(file);
+//            Document doc = new Document();
+//            PdfWriter.getInstance((com.itextpdf.text.Document) doc, archivo);
+//            doc.open();
+//            //Insertamos Logo
+//            Image img = Image.getInstance("src/img/logo_pdf.png");
+//            //Nuevo Paragraph
+//            Paragraph fecha = new Paragraph();
+//            Font negrita = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD, BaseColor.BLUE);
+//            fecha.add(Chunk.NEWLINE);
+//            Date date = new Date();
+//            fecha.add("Factura:" + id + "\n" + "Fecha: " + new SimpleDateFormat("dd-mm-yyyy").format(date) + "\n\n");
+//            //Tabla Encabezado
+//            PdfPTable Encabezado = new PdfPTable(4);
+//            Encabezado.setWidthPercentage(100);
+//            Encabezado.getDefaultCell().setBorder(0);
+//            float[] ColumnaEncabezado = new float[]{20f, 30f, 70f, 40f};
+//            Encabezado.setWidths(ColumnaEncabezado);
+//            Encabezado.setHorizontalAlignment(Element.ALIGN_LEFT);
+//
+//            Encabezado.addCell(img);
+//
+//            String ruc = txtRucConfig.getText();
+//            String nom = txtNombreConfig.getText();
+//            String tel = txtTelefonoConfig.getText();
+//            String dir = txtDireccionConfig.getText();
+//            String ra = txtRazonConf.getText();
+//
+//            Encabezado.addCell("");
+//            Encabezado.addCell("Ruc: " + ruc + "\nNombre: " + nom + "\nTelefono: " + tel + "\nDireccion: " + dir + "\nRazon: " + ra);
+//            Encabezado.addCell(fecha);
+//            doc.add(Encabezado);
+//            //Cliente
+//            Paragraph cli = new Paragraph();
+//            cli.add(Chunk.NEWLINE);
+//            cli.add("Datos de los Clientes" + "\n\n");
+//            doc.add(cli);
+//            //Tabla para los datos del cliente
+//            PdfPTable tablacli = new PdfPTable(4);
+//            tablacli.setWidthPercentage(100);
+//            tablacli.getDefaultCell().setBorder(0);
+//            float[] Columnacli = new float[]{20f, 50f, 30f, 40f};
+//            tablacli.setWidths(Columnacli);
+//            tablacli.setHorizontalAlignment(Element.ALIGN_LEFT);
+//            //Agregamos los titulos
+//            PdfPCell cl1 = new PdfPCell(new Phrase("Dni/Ruc", negrita));
+//            PdfPCell cl2 = new PdfPCell(new Phrase("Nombre", negrita));
+//            PdfPCell cl3 = new PdfPCell(new Phrase("Telefono", negrita));
+//            PdfPCell cl4 = new PdfPCell(new Phrase("Direccion", negrita));
+//            cl1.setBorder(0);
+//            cl2.setBorder(0);
+//            cl3.setBorder(0);
+//            cl4.setBorder(0);
+//            //Agregamos las celdas a la Tabla
+//            tablacli.addCell(cl1);
+//            tablacli.addCell(cl2);
+//            tablacli.addCell(cl3);
+//            tablacli.addCell(cl4);
+//            tablacli.addCell(txtRucVenta.getText());
+//            tablacli.addCell(txtNombreClienteventa.getText());
+//            tablacli.addCell(txtTelefonoCliente.getText());
+//            tablacli.addCell(txtDirecionCliente.getText());
+//            //Agregamos al Documento
+//            doc.add(tablacli);
+//
+////Poductos
+//            PdfPTable tablapro = new PdfPTable(4);
+//            tablapro.setWidthPercentage(100);
+//            tablapro.getDefaultCell().setBorder(0);
+//            float[] Columnapro = new float[]{10f, 50f, 15f, 20f};
+//            tablapro.setWidths(Columnapro);
+//            tablapro.setHorizontalAlignment(Element.ALIGN_LEFT);
+//            PdfPCell pro1 = new PdfPCell(new Phrase("Cant.", negrita));
+//            PdfPCell pro2 = new PdfPCell(new Phrase("Descripcion", negrita));
+//            PdfPCell pro3 = new PdfPCell(new Phrase("Precio U.", negrita));
+//            PdfPCell pro4 = new PdfPCell(new Phrase("Precio T.", negrita));
+//            pro1.setBorder(0);
+//            pro2.setBorder(0);
+//            pro3.setBorder(0);
+//            pro4.setBorder(0);
+//            pro1.setBackgroundColor(BaseColor.DARK_GRAY);
+//            pro2.setBackgroundColor(BaseColor.DARK_GRAY);
+//            pro3.setBackgroundColor(BaseColor.DARK_GRAY);
+//            pro4.setBackgroundColor(BaseColor.DARK_GRAY);
+//            tablapro.addCell(pro1);
+//            tablapro.addCell(pro2);
+//            tablapro.addCell(pro3);
+//            tablapro.addCell(pro4);
+//            for (int i = 0; i < tbDeudasPorCobrar.getRowCount(); i++) {
+//                String producto = tbDeudasPorCobrar.getValueAt(i, 1).toString();
+//                String cantidad = tbDeudasPorCobrar.getValueAt(i, 2).toString();
+//                String precio = tbDeudasPorCobrar.getValueAt(i, 3).toString();
+//                String total = tbDeudasPorCobrar.getValueAt(i, 4).toString();
+//                tablapro.addCell(cantidad);
+//                tablapro.addCell(producto);
+//                tablapro.addCell(precio);
+//                tablapro.addCell(total);
+//            }
+//            doc.add(tablapro);
+//            //Nuevo Paragraph para el total
+//            Paragraph info = new Paragraph();
+//            info.add(Chunk.NEWLINE);
+//            info.add("Total a Pagar: " + Totalpagar);
+//            info.setAlignment(Element.ALIGN_RIGHT);
+//            doc.add(info);
+//            //Paragraph para la firma
+//            Paragraph firma = new Paragraph();
+//            firma.add(Chunk.NEWLINE);
+//            firma.add("Cancelacion y Firma\n\n");
+//            firma.add("------------------------");
+//            firma.setAlignment(Element.ALIGN_CENTER);
+//            doc.add(firma);
+//            //Paragraph para el Mensaje
+//            Paragraph mensaje = new Paragraph();
+//            mensaje.add(Chunk.NEWLINE);
+//            mensaje.add("Gracias por su Preferencia");
+//            mensaje.setAlignment(Element.ALIGN_CENTER);
+//            doc.add(mensaje);
+//
+//            doc.close();
+//            archivo.close();
+//            Desktop.getDesktop().open(file);
+//        } catch (DocumentException e) {
+//            System.out.println(e.toString());
+//        }
+//    }
 }

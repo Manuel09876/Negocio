@@ -50,6 +50,10 @@ public class Orden extends javax.swing.JInternalFrame {
         MostrarEmpresa(cbxBusiness);
         MostrarCiente(cbxCustomer);
         MostrarTrabajador(cbxTrabajador);
+        txtIdBusiness.setVisible(false);
+        txtIdCustomer.setEnabled(false);
+        txtIdTrabajador.setEnabled(false);
+        txtIdNC.setEnabled(false);
 
     }
 
@@ -839,7 +843,6 @@ public class Orden extends javax.swing.JInternalFrame {
             JOptionPane.showInternalMessageDialog(null, "Ordenes de servicio registradas correctamente");
 
         } catch (SQLException ex) {
-            ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
         } finally {
             try {
@@ -850,9 +853,10 @@ public class Orden extends javax.swing.JInternalFrame {
                     connect.close();
                 }
             } catch (SQLException ex) {
-                ex.printStackTrace();
             }
         }
     }
+    
+    
 
 }
