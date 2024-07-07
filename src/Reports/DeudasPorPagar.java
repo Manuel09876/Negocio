@@ -6,7 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -24,8 +28,7 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
             return String.class; // Otras columnas
         }
     };
-    
-    
+
     //Variable
     int id, id_compra, frecuencia;
     Date fechaPago;
@@ -119,180 +122,200 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         this.estado = estado;
     }
 
-    public DeudasPorPagar() {
+    public DeudasPorPagar() throws SQLException {
         initComponents();
-        MostrarTablaEquipos("");
-        MostrarTablaPagosGenerales("");
-        
+
+        MostrarTablaCombinada("");
 
     }
-    
+
     // Método que agrega el CheckBox
     public void addCheckBox(int column, JTable table) {
         TableColumn tc = table.getColumnModel().getColumn(column);
         tc.setCellEditor(table.getDefaultEditor(Boolean.class));
         tc.setCellRenderer(table.getDefaultRenderer(Boolean.class));
     }
-    
+
     public boolean IsSelected(int row, int column, JTable table) {
         return table.getValueAt(row, column) != null;
     }
 
-    //Muestra la Relación de Pendientes de Pago
-    private void MostrarTablaEquipos(String Valores) {
-    try {
-        // Configurar las columnas del modelo de la tabla
-        String[] titulosTabla = {"Seleccion", "id", "Descripcion", "Fecha de Pago", "Cuota Numero", "Monto a Pagar", "Deuda", "Estado"};
-        modelo.setColumnIdentifiers(titulosTabla);
+    // Método para mostrar el aviso
+    public void mostrarAviso(Date fechaPago, int numeroCuota) {
+        Calendar avisoCalendar = Calendar.getInstance();
+        avisoCalendar.setTime(fechaPago);
+        avisoCalendar.add(Calendar.DAY_OF_MONTH, -2);
+        Date fechaAviso = avisoCalendar.getTime();
+        DateFormat avisoFormat = new SimpleDateFormat("dd/MM/yyyy");
 
-        // Configurar la tabla con el modelo
-        tbDeudasEquipos.setModel(modelo);
+        // Obtener la fecha actual sin la hora (solo día, mes y año)
+        Calendar hoyCalendar = Calendar.getInstance();
+        hoyCalendar.set(Calendar.HOUR_OF_DAY, 0);
+        hoyCalendar.set(Calendar.MINUTE, 0);
+        hoyCalendar.set(Calendar.SECOND, 0);
+        hoyCalendar.set(Calendar.MILLISECOND, 0);
+        Date hoy = hoyCalendar.getTime();
 
-        // Consulta SQL para obtener los datos
-        String sql = """
-                     SELECT c.id, e.nombre AS Descripcion, c.fechaPago AS 'Fecha de Pago', c.NumeroCuotas AS 'Cuota Numero', c.cuota AS 'Monto a Pagar', c.Diferencia AS Deuda, c.estado AS Estado 
-                     FROM credito AS c
-                     INNER JOIN equipos AS e ON c.id_compra=e.id_equipos WHERE c.estado = 'Pendiente' ORDER BY c.fechaPago ASC""";
-
-        // Conexión a la base de datos
-        Conectar con = new Conectar();
-        Connection connect = con.getConexion();
-        Statement st = connect.createStatement();
-        ResultSet result = st.executeQuery(sql);
-
-        // Añadir filas al modelo de la tabla
-        while (result.next()) {
-            Object[] RegistroBD = new Object[8];
-            RegistroBD[0] = Boolean.FALSE; // Inicializa la celda de selección con false
-            RegistroBD[1] = result.getString("id");
-            RegistroBD[2] = result.getString("Descripcion");
-            RegistroBD[3] = result.getString("Fecha de Pago");
-            RegistroBD[4] = result.getString("Cuota Numero");
-            RegistroBD[5] = result.getString("Monto a Pagar");
-            RegistroBD[6] = result.getString("Deuda");
-            RegistroBD[7] = result.getString("Estado");
-            modelo.addRow(RegistroBD);
+        // Verificar si hoy es la fecha de aviso
+        if (hoy.equals(fechaAviso)) {
+            JOptionPane.showMessageDialog(null, "¡Atención! Quedan 2 días para la fecha de pago de la cuota " + numeroCuota + ": " + avisoFormat.format(fechaPago));
         }
-
-        // Añadir CheckBox a la primera columna
-        addCheckBox(0, tbDeudasEquipos);
-
-        // Ocultar la columna "id"
-        TableColumn ci = tbDeudasEquipos.getColumn("id");
-        ci.setMaxWidth(0);
-        ci.setMinWidth(0);
-        ci.setPreferredWidth(0);
-        tbDeudasEquipos.doLayout();
-
-    } catch (SQLException e) {
     }
-}
-    
-    private void MostrarTablaPagosGenerales(String Valores) {
-    try {
-        // Configurar las columnas del modelo de la tabla
-        String[] titulosTabla = {"Seleccion", "id", "Descripcion", "Fecha de Pago", "Cuota Numero", "Monto a Pagar", "Deuda", "Estado"};
-        modelo.setColumnIdentifiers(titulosTabla);
 
-        // Configurar la tabla con el modelo
-        tbDeudasPagosG.setModel(modelo);
+    // Método para mostrar la tabla combinada y verificar los avisos
+    private void MostrarTablaCombinada(String Valores) throws SQLException {
+        try {
+            // Configurar las columnas del modelo de la tabla
+            String[] titulosTabla = {"Seleccion", "id", "Descripcion", "Fecha de Pago", "Numero de Cuota", "Cuota", "Deuda", "Estado"};
+            DefaultTableModel modeloCombinado = new DefaultTableModel();
+            modeloCombinado.setColumnIdentifiers(titulosTabla);
 
-        // Consulta SQL para obtener los datos
-        String sql = """
+            // Configurar la tabla con el modelo
+            tbDeudasCombinadas.setModel(modeloCombinado);
+
+            // Consulta SQL combinada para obtener los datos de las tres tablas
+            String sql = """
+                     SELECT cp.id, 
+                            COALESCE(p.nameProduct, 'Sin Descripción') AS Descripcion, 
+                            cp.fechaPago AS 'Fecha de Pago', 
+                            cp.NumeroCuotas AS 'Numero de Cuota', 
+                            cp.cuota AS Cuota, 
+                            cp.Diferencia AS Deuda, 
+                            cp.estado AS Estado 
+                     FROM creditoprod AS cp
+                     INNER JOIN detalle_compraproductosmateriales AS dcpm ON cp.id_compra = dcpm.id_CompProMat
+                     INNER JOIN product AS p ON dcpm.id_producto = p.idProduct
+                     WHERE cp.estado = 'Pendiente'
+                     UNION ALL
                      SELECT cpg.id, 
-                     (SELECT nombre FROM tipos_pagosgenerales tpg WHERE tpg.id_pagos = (SELECT id_tipodePago FROM detallepagosgenerales dpg WHERE dpg.id_PagosGenerales = cpg.id_compra)) AS Descripcion, 
-                     cpg.fechaPago AS 'Fecha de Pago', 
-                     cpg.NumeroCuotas AS 'Cuota Numero', 
-                     cpg.cuota AS 'Monto a Pagar', 
-                     cpg.Diferencia AS Deuda, 
-                     cpg.estado AS Estado 
-                     FROM creditopg cpg WHERE cpg.estado = 'Pendiente' ORDER BY cpg.fechaPago ASC""";
+                            (SELECT nombre FROM tipos_pagosgenerales tpg WHERE tpg.id_pagos = (SELECT id_tipodePago FROM detallepagosgenerales dpg WHERE dpg.id_PagosGenerales = cpg.id_compra)) AS Descripcion, 
+                            cpg.fechaPago AS 'Fecha de Pago', 
+                            cpg.NumeroCuotas AS 'Cuota Numero', 
+                            cpg.cuota AS 'Monto a Pagar', 
+                            cpg.Diferencia AS Deuda, 
+                            cpg.estado AS Estado 
+                     FROM creditopg cpg 
+                     WHERE cpg.estado = 'Pendiente'
+                     UNION ALL
+                     SELECT c.id, 
+                            e.nombre AS Descripcion, 
+                            c.fechaPago AS 'Fecha de Pago', 
+                            c.NumeroCuotas AS 'Numero de Cuota', 
+                            c.cuota AS Cuota, 
+                            c.Diferencia AS Deuda, 
+                            c.estado AS Estado 
+                     FROM credito AS c 
+                     INNER JOIN equipos AS e ON c.id_compra = e.id_equipos 
+                     WHERE c.estado = 'Pendiente'
+                     ORDER BY `Fecha de Pago` ASC""";
 
-        // Conexión a la base de datos
-        Conectar con = new Conectar();
-        Connection connect = con.getConexion();
-        Statement st = connect.createStatement();
-        ResultSet result = st.executeQuery(sql);
+            // Conexión a la base de datos
+            Conectar con = new Conectar();
+            Connection connect = con.getConexion();
+            if (connect == null) {
+                System.out.println("Error: No se pudo establecer la conexión con la base de datos.");
+                return;
+            }
 
-        // Añadir filas al modelo de la tabla
-        while (result.next()) {
-            Object[] RegistroBD = new Object[8];
-            RegistroBD[0] = Boolean.FALSE; // Inicializa la celda de selección con false
-            RegistroBD[1] = result.getString("id");
-            RegistroBD[2] = result.getString("Descripcion");
-            RegistroBD[3] = result.getString("Fecha de Pago");
-            RegistroBD[4] = result.getString("Cuota Numero");
-            RegistroBD[5] = result.getString("Monto a Pagar");
-            RegistroBD[6] = result.getString("Deuda");
-            RegistroBD[7] = result.getString("Estado");
-            modelo.addRow(RegistroBD);
+            Statement st = connect.createStatement();
+            ResultSet result = st.executeQuery(sql);
+
+            // Depuración: Mostrar si hay resultados
+            if (!result.isBeforeFirst()) {
+                System.out.println("No se encontraron resultados.");
+            }
+
+            // Añadir filas al modelo de la tabla
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            while (result.next()) {
+                Object[] RegistroBD = new Object[8];
+                RegistroBD[0] = Boolean.FALSE; // Inicializa la celda de selección con false
+                RegistroBD[1] = result.getString("id");
+                RegistroBD[2] = result.getString("Descripcion");
+                RegistroBD[3] = result.getString("Fecha de Pago");
+                RegistroBD[4] = result.getString("Numero de Cuota");
+                RegistroBD[5] = result.getString("Cuota");
+                RegistroBD[6] = result.getString("Deuda");
+                RegistroBD[7] = result.getString("Estado");
+
+                // Depuración: Mostrar los datos obtenidos
+//            System.out.println("ID: " + RegistroBD[1] + ", Descripcion: " + RegistroBD[2]);
+                modeloCombinado.addRow(RegistroBD);
+
+                // Verificar y mostrar el aviso si corresponde
+                try {
+                    Date fechaPago = df.parse(result.getString("Fecha de Pago"));
+                    int numeroCuota = result.getInt("Numero de Cuota");
+                    mostrarAviso(fechaPago, numeroCuota);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+            // Añadir CheckBox a la primera columna
+            addCheckBox(0, tbDeudasCombinadas);
+
+            // Ocultar la columna "id"
+            TableColumn ci = tbDeudasCombinadas.getColumn("id");
+            ci.setMaxWidth(0);
+            ci.setMinWidth(0);
+            ci.setPreferredWidth(0);
+            tbDeudasCombinadas.doLayout();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
-        // Añadir CheckBox a la primera columna
-        addCheckBox(0, tbDeudasPagosG);
-
-        // Ocultar la columna "id"
-        TableColumn ci = tbDeudasPagosG.getColumn("id");
-        ci.setMaxWidth(0);
-        ci.setMinWidth(0);
-        ci.setPreferredWidth(0);
-        tbDeudasPagosG.doLayout();
-
-    } catch (SQLException e) {
     }
-}
-    
+
     //Muestra la Relación de Canceladas
     private void MostrarPagadas(String Valores) {
-    try {
-        // Configurar las columnas del modelo de la tabla
-        String[] titulosTabla = {"Seleccion", "id", "Descripcion", "Fecha de Pago", "Cuota Numero", "Monto a Pagar", "Deuda", "Estado"};
-        modelo.setColumnIdentifiers(titulosTabla);
+        try {
+            // Configurar las columnas del modelo de la tabla
+            String[] titulosTabla = {"Seleccion", "id", "Descripcion", "Fecha de Pago", "Cuota Numero", "Monto a Pagar", "Deuda", "Estado"};
+            modelo.setColumnIdentifiers(titulosTabla);
 
-        // Configurar la tabla con el modelo
-        tbDeudasEquipos.setModel(modelo);
+            // Configurar la tabla con el modelo
+            tbDeudasCombinadas.setModel(modelo);
 
-        // Consulta SQL para obtener los datos
-        String sql = """
+            // Consulta SQL para obtener los datos
+            String sql = """
                      SELECT c.id, e.nombre AS Descripcion, c.fechaPago AS 'Fecha de Pago', c.NumeroCuotas AS 'Cuota Numero', c.cuota AS 'Monto a Pagar', c.Diferencia AS Deuda, c.estado AS Estado 
                      FROM credito AS c
                      INNER JOIN equipos AS e ON c.id_compra=e.id_equipos WHERE c.estado = 'Cancelado'""";
 
-        // Conexión a la base de datos
-        Conectar con = new Conectar();
-        Connection connect = con.getConexion();
-        Statement st = connect.createStatement();
-        ResultSet result = st.executeQuery(sql);
+            // Conexión a la base de datos
+            Conectar con = new Conectar();
+            Connection connect = con.getConexion();
+            Statement st = connect.createStatement();
+            ResultSet result = st.executeQuery(sql);
 
-        // Añadir filas al modelo de la tabla
-        while (result.next()) {
-            Object[] RegistroBD = new Object[8];
-            RegistroBD[0] = Boolean.FALSE; // Inicializa la celda de selección con false
-            RegistroBD[1] = result.getString("id");
-            RegistroBD[2] = result.getString("Descripcion");
-            RegistroBD[3] = result.getString("Fecha de Pago");
-            RegistroBD[4] = result.getString("Cuota Numero");
-            RegistroBD[5] = result.getString("Monto a Pagar");
-            RegistroBD[6] = result.getString("Deuda");
-            RegistroBD[7] = result.getString("Estado");
-            modelo.addRow(RegistroBD);
+            // Añadir filas al modelo de la tabla
+            while (result.next()) {
+                Object[] RegistroBD = new Object[8];
+                RegistroBD[0] = Boolean.FALSE; // Inicializa la celda de selección con false
+                RegistroBD[1] = result.getString("id");
+                RegistroBD[2] = result.getString("Descripcion");
+                RegistroBD[3] = result.getString("Fecha de Pago");
+                RegistroBD[4] = result.getString("Cuota Numero");
+                RegistroBD[5] = result.getString("Monto a Pagar");
+                RegistroBD[6] = result.getString("Deuda");
+                RegistroBD[7] = result.getString("Estado");
+                modelo.addRow(RegistroBD);
+            }
+
+            // Añadir CheckBox a la primera columna
+            addCheckBox(0, tbDeudasCombinadas);
+
+            // Ocultar la columna "id"
+            TableColumn ci = tbDeudasCombinadas.getColumn("id");
+            ci.setMaxWidth(0);
+            ci.setMinWidth(0);
+            ci.setPreferredWidth(0);
+            tbDeudasCombinadas.doLayout();
+
+        } catch (SQLException e) {
         }
-
-        // Añadir CheckBox a la primera columna
-        addCheckBox(0, tbDeudasEquipos);
-
-        // Ocultar la columna "id"
-        TableColumn ci = tbDeudasEquipos.getColumn("id");
-        ci.setMaxWidth(0);
-        ci.setMinWidth(0);
-        ci.setPreferredWidth(0);
-        tbDeudasEquipos.doLayout();
-
-    } catch (SQLException e) {
     }
-}
-    
-    
+
     //Guardar selección y modificar estado, eliminando fila
     public void guardarSeleccion() {
         try {
@@ -301,7 +324,7 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
             Connection connect = con.getConexion();
 
 // Obtener el modelo de la tabla
-            DefaultTableModel modelo = (DefaultTableModel) tbDeudasEquipos.getModel();
+            DefaultTableModel modelo = (DefaultTableModel) tbDeudasCombinadas.getModel();
 
 // Crear un ArrayList para almacenar las filas seleccionadas
             ArrayList<Integer> filasSeleccionadas = new ArrayList<>();
@@ -312,8 +335,6 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
                 if (seleccionado != null && seleccionado) {
                     filasSeleccionadas.add(i);
                     int id = Integer.parseInt(modelo.getValueAt(i, 1).toString()); // Obtener el ID de la tabla
-                    
-
 
 // Actualizar el estado del registro a "Cancelado"
                     String sqlUpdate = "UPDATE credito SET estado = 'Cancelado' WHERE id = ?";
@@ -335,22 +356,12 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
             System.out.println("Error al guardar en la base de datos: " + e.getMessage());
         }
     }
-    
-    //            // Mostrar aviso dos días antes de la fecha de pago
-//            Calendar avisoCalendar = Calendar.getInstance();
-//            avisoCalendar.setTime(fechaPago);
-//            avisoCalendar.add(Calendar.DAY_OF_MONTH, -2);
-//            Date fechaAviso = avisoCalendar.getTime();
-//            DateFormat avisoFormat = new SimpleDateFormat("dd/MM/yyyy");
-//            JOptionPane.showMessageDialog(null, "¡Atención! Quedan 2 días para la fecha de pago de la cuota " + i + ": " + avisoFormat.format(fechaAviso));
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jPanel12 = new javax.swing.JPanel();
-        jScrollPane14 = new javax.swing.JScrollPane();
-        tbDeudasEquipos = new javax.swing.JTable();
         txtBuscarCompra = new javax.swing.JTextField();
         btnHistorialCompra = new javax.swing.JButton();
         btnSalir = new javax.swing.JButton();
@@ -361,12 +372,8 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        tbDeudasPagosG = new javax.swing.JTable();
         jScrollPane2 = new javax.swing.JScrollPane();
-        tbDeudasProductos = new javax.swing.JTable();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
+        tbDeudasCombinadas = new javax.swing.JTable();
         jLabel5 = new javax.swing.JLabel();
         btnEliminar = new javax.swing.JButton();
 
@@ -376,19 +383,6 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
         jPanel12.setBackground(new java.awt.Color(204, 204, 204));
         jPanel12.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        tbDeudasEquipos.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-
-            }
-        ));
-        tbDeudasEquipos.setRowHeight(23);
-        jScrollPane14.setViewportView(tbDeudasEquipos);
-
-        jPanel12.add(jScrollPane14, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 110, 1060, 130));
         jPanel12.add(txtBuscarCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 30, 240, 30));
 
         btnHistorialCompra.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/lupa.png"))); // NOI18N
@@ -410,7 +404,7 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
                 cbSeleccionaTodoActionPerformed(evt);
             }
         });
-        jPanel12.add(cbSeleccionaTodo, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 80, 120, -1));
+        jPanel12.add(cbSeleccionaTodo, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 100, 120, -1));
 
         btnPagadas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
         btnPagadas.setText("Pagar");
@@ -432,7 +426,7 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         jButton1.setText("Canceladas");
         jPanel12.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 30, 100, -1));
 
-        tbDeudasPagosG.setModel(new javax.swing.table.DefaultTableModel(
+        tbDeudasCombinadas.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {},
                 {},
@@ -443,33 +437,12 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
             }
         ));
-        jScrollPane1.setViewportView(tbDeudasPagosG);
+        jScrollPane2.setViewportView(tbDeudasCombinadas);
 
-        jPanel12.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 260, 1060, 130));
-
-        tbDeudasProductos.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {},
-                {},
-                {},
-                {}
-            },
-            new String [] {
-
-            }
-        ));
-        jScrollPane2.setViewportView(tbDeudasProductos);
-
-        jPanel12.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 410, 1060, 120));
-
-        jLabel3.setText("Equipos - Maquinarias y Vehiculos");
-        jPanel12.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 90, -1, -1));
-
-        jLabel4.setText("Pagos Generales");
-        jPanel12.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 240, -1, -1));
+        jPanel12.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 140, 1060, 350));
 
         jLabel5.setText("Productos - Materiales");
-        jPanel12.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 390, -1, -1));
+        jPanel12.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 110, -1, -1));
 
         btnEliminar.setText("Eliminar");
         jPanel12.add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(870, 70, -1, -1));
@@ -499,22 +472,22 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnSalirActionPerformed
 
     private void cbSeleccionaTodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbSeleccionaTodoActionPerformed
-                                                       
+
         if (cbSeleccionaTodo.isSelected()) {
             cbSeleccionaTodo.setText("Deseleccionar Todo");
-            for (int i = 0; i < tbDeudasEquipos.getRowCount(); i++) {
-                tbDeudasEquipos.setValueAt(true, i, 0);
+            for (int i = 0; i < tbDeudasCombinadas.getRowCount(); i++) {
+                tbDeudasCombinadas.setValueAt(true, i, 0);
             }
         } else {
             cbSeleccionaTodo.setText("Seleccionar Todo");
-            for (int i = 0; i < tbDeudasEquipos.getRowCount(); i++) {
-                tbDeudasEquipos.setValueAt(false, i, 0);
+            for (int i = 0; i < tbDeudasCombinadas.getRowCount(); i++) {
+                tbDeudasCombinadas.setValueAt(false, i, 0);
             }
         }
     }//GEN-LAST:event_cbSeleccionaTodoActionPerformed
 
     private void btnPagadasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPagadasActionPerformed
-        
+
     }//GEN-LAST:event_btnPagadasActionPerformed
 
 
@@ -529,16 +502,10 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
     private com.toedter.calendar.JDateChooser jDateChooser2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel12;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane14;
     private javax.swing.JScrollPane jScrollPane2;
-    public javax.swing.JTable tbDeudasEquipos;
-    private javax.swing.JTable tbDeudasPagosG;
-    private javax.swing.JTable tbDeudasProductos;
+    private javax.swing.JTable tbDeudasCombinadas;
     public javax.swing.JTextField txtBuscarCompra;
     // End of variables declaration//GEN-END:variables
 

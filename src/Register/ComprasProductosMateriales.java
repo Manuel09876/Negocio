@@ -1,9 +1,11 @@
 package Register;
 
+import Administration.Productos;
 import com.toedter.calendar.JDateChooser;
 import conectar.Conectar;
 import java.awt.BorderLayout;
 import java.awt.HeadlessException;
+import java.awt.event.KeyAdapter;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,6 +26,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import java.awt.event.KeyEvent;
+import java.text.DecimalFormat;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -36,10 +39,12 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     DefaultTableModel model = new DefaultTableModel();
     private int item = 0;
     double Totalpagar = 0.00;
+    Productos pro = new Productos();
 
     // Variables para la compra
+    int id;
     int id_CompraProMat;
-    String numeroRecibo;
+    String Recibo;
     int id_Tipo;
     int id_Producto;
     int cantidad;
@@ -48,34 +53,74 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     int id_Marca;
     Date fecha;
     String estado;
-
-    public ComprasProductosMateriales(int id_CompraProMat, String numeroRecibo, int id_Tipo, int id_Producto, int cantidad, double precioUnit, int id_proveedor, int id_Marca, Date fecha, String estado) {
-        this.id_CompraProMat = id_CompraProMat;
-        this.numeroRecibo = numeroRecibo;
-        this.id_Tipo = id_Tipo;
-        this.id_Producto = id_Producto;
-        this.cantidad = cantidad;
-        this.precioUnit = precioUnit;
-        this.id_proveedor = id_proveedor;
-        this.id_Marca = id_Marca;
-        this.fecha = fecha;
-        this.estado = estado;
-    }
+    double SubTotal;
+    double Taxes;
+    double total;
+    double Total;
+    int id_FormaPago;
 
     public int getId_CompraProMat() {
         return id_CompraProMat;
+    }
+
+    public double getTotalpagar() {
+        return Totalpagar;
+    }
+
+    public void setTotalpagar(double Totalpagar) {
+        this.Totalpagar = Totalpagar;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public double getSubTotal() {
+        return SubTotal;
+    }
+
+    public void setSubTotal(double SubTotal) {
+        this.SubTotal = SubTotal;
+    }
+
+    public double getTaxes() {
+        return Taxes;
+    }
+
+    public void setTaxes(double Taxes) {
+        this.Taxes = Taxes;
+    }
+
+    public double getTotal() {
+        return total;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
+    }
+
+    public int getId_FormaPago() {
+        return id_FormaPago;
+    }
+
+    public void setId_FormaPago(int id_FormaPago) {
+        this.id_FormaPago = id_FormaPago;
     }
 
     public void setId_CompraProMat(int id_CompraProMat) {
         this.id_CompraProMat = id_CompraProMat;
     }
 
-    public String getNumeroRecibo() {
-        return numeroRecibo;
+    public String getRecibo() {
+        return Recibo;
     }
 
-    public void setNumeroRecibo(String numeroRecibo) {
-        this.numeroRecibo = numeroRecibo;
+    public void setRecibo(String Recibo) {
+        this.Recibo = Recibo;
     }
 
     public int getId_Tipo() {
@@ -164,21 +209,21 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         txtIdProducto.setEnabled(false);
         txtIdProveedor.setEnabled(false);
         txtIdTipoPro.setEnabled(false);
-        txtId_CompraProMat.setEnabled(false);
+        txtId.setEnabled(false);
         txtIdPagarCon.setEnabled(false);
-        txtId_CompraProMat.setEnabled(false);
+        txtId.setEnabled(false);
+        txtTotalxP.setEnabled(false);
 
         initListeners();
 
         // Inicialización del JTable y su modelo
-        model.setColumnIdentifiers(new Object[]{"Descripción", "Cantidad", "SubTotal", "Total", "Item"});
+        model.setColumnIdentifiers(new Object[]{"Descripción", "Tipo", "Marca", "Cantidad", "Precio Unitario", "Total", "Item"});
         tbCompraProducto.setModel(model); // Asignar el modelo a la tabla
 
         // Permitir la selección de filas en la tabla
         tbCompraProducto.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tbCompraProducto.setColumnSelectionAllowed(false);
         tbCompraProducto.setRowSelectionAllowed(true);
-
 
         // Añadir ListSelectionListener para manejar la selección de filas
         tbCompraProducto.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -188,23 +233,24 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                     if (selectedRow != -1) {
                         // Obtener los datos de la fila seleccionada
                         Object descripcion = tbCompraProducto.getValueAt(selectedRow, 0);
-                        Object cantidad = tbCompraProducto.getValueAt(selectedRow, 1);
-                        Object subTotal = tbCompraProducto.getValueAt(selectedRow, 2);
-                        Object total = tbCompraProducto.getValueAt(selectedRow, 3);
+                        Object Tipo = tbCompraProducto.getValueAt(selectedRow, 1);
+                        Object Marca = tbCompraProducto.getValueAt(selectedRow, 2);
+                        Object cantidad = tbCompraProducto.getValueAt(selectedRow, 3);
+                        Object subTotal = tbCompraProducto.getValueAt(selectedRow, 4);
+                        Object total = tbCompraProducto.getValueAt(selectedRow, 5);
 
                         // Mostrar los datos de la fila seleccionada en la consola
-                        System.out.println("Fila seleccionada: " + selectedRow);
-                        System.out.println("Descripción: " + descripcion);
-                        System.out.println("Cantidad: " + cantidad);
-                        System.out.println("Subtotal: " + subTotal);
-                        System.out.println("Total: " + total);
-
+//                        System.out.println("Fila seleccionada: " + selectedRow);
+//                        System.out.println("Descripción: " + descripcion);
+//                        System.out.println("Cantidad: " + cantidad);
+//                        System.out.println("Subtotal: " + subTotal);
+//                        System.out.println("Total: " + total);
                         // Aquí puedes actualizar cualquier campo de texto o componente con los datos de la fila seleccionada
                         // Ejemplo: actualizar componentes con los valores seleccionados
                         cbxProducto.setSelectedItem(descripcion.toString());
                         txtCant.setText(cantidad.toString());
-                        txtSubTotal.setText(subTotal.toString());
-                        txtTotal.setText(total.toString());
+                        txtPrecioUnitario.setText(subTotal.toString());
+                        txtTotalxP.setText(total.toString());
                     }
                 }
             }
@@ -217,100 +263,188 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             }
         });
 
-        // Debugging: Verificar que el modelo tiene las columnas configuradas
-        System.out.println("Columnas en el modelo: " + model.getColumnCount()); // Debe ser 5
-        System.out.println("Filas en el modelo (inicial): " + model.getRowCount()); // Debe ser 0
-   
+        cbxProducto.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent evt) {
+                cbxProductoKeyPressed(evt);
+            }
+        });
 
+        // Prueba de la conexión y consulta SQL
+        mostrarStock("NombreDelProducto");
+
+        // Debugging: Verificar que el modelo tiene las columnas configuradas
+//        System.out.println("Columnas en el modelo: " + model.getColumnCount()); // Debe ser 5
+//        System.out.println("Filas en el modelo (inicial): " + model.getRowCount()); // Debe ser 0
     }
 
-    public void Guardar() {
+    public void RegistrarCompra() {
+        String recibo = txtNumeroRecibo.getText().trim();
+        if (recibo.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Error: El recibo no puede estar vacío.");
+            return;
+        }
 
-        id_CompraProMat = Integer.parseInt(txtId_CompraProMat.getText());
-        numeroRecibo = txtNumeroRecibo.getText();
-        id_Tipo = Integer.parseInt(txtIdTipoPro.getText());
-        int id_producto = Integer.parseInt(txtIdProducto.getText());
-        cantidad = Integer.parseInt(txtCant.getText());
-        precioUnit = Double.parseDouble(txtSubTotal.getText());
-        id_proveedor = Integer.parseInt(txtIdProveedor.getText());
-        id_Marca = Integer.parseInt(txtIdMarca.getText());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        fecha = dateFecha.getDate();
-
-        //Consulta para evitar duplicados
-        String consulta = "SELECT * detalle_compraproductosmateriales WHERE id_producto=? AND fecha=?";
-
-        //Consulta para insertar los datos
-        String sql = "INSERT INTO detalle_compraproductosmateriales (id_producto,numeroRecibo,cantidad, "
-                + "precioUnit,id_proveedor,id_Marca, fecha)VALUES(?,?,?,?,?,?,?)";
-
-        //Para almacenar los datos empleo un try cash
         try {
-            //Preparando la conexion a sql
-            PreparedStatement pst = connect.prepareStatement(sql);
+            id_proveedor = Integer.parseInt(txtIdProveedor.getText());
+            SubTotal = Double.parseDouble(txtSubTotal.getText().trim());
+            Taxes = Double.parseDouble(txtTaxes.getText().trim());
+            Total = Double.parseDouble(JLabelTotalCompra.getText().trim());
+            id_FormaPago = Integer.parseInt(txtIdPagarCon.getText().trim());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Error: Por favor verifica los valores numéricos.");
+            return;
+        }
 
-            pst.setInt(1, id_producto);
-            pst.setString(2, numeroRecibo);
-            pst.setInt(3, cantidad);
-            pst.setDouble(4, precioUnit);
-            pst.setInt(5, id_proveedor);
-            pst.setInt(6, id_Marca);
-            pst.setDate(7, (java.sql.Date) fecha);
+        fecha = dateFecha.getDate();
+        if (fecha == null) {
+            JOptionPane.showMessageDialog(null, "Error: La fecha no puede estar vacía.");
+            return;
+        }
+        java.sql.Date sqlDate = new java.sql.Date(fecha.getTime());
 
-            //Declarar otra variable para validar los registros
+        // Consulta para insertar los datos
+        String sql = "INSERT INTO compraproductosmateriales (Recibo, id_proveedor, SubTotal, Taxes, Total, id_FormaPago, fecha) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        try {
+            PreparedStatement pst = connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            pst.setString(1, recibo);
+            pst.setInt(2, id_proveedor);
+            pst.setDouble(3, SubTotal);
+            pst.setDouble(4, Taxes);
+            pst.setDouble(5, Total);
+            pst.setInt(6, id_FormaPago);
+            pst.setDate(7, sqlDate);
+
             int n = pst.executeUpdate();
 
-            //si existe un registro en la BD el registro se guardo con exito
             if (n > 0) {
-                JOptionPane.showMessageDialog(null, "El registro se  Guardo con exito");
-
+                ResultSet rs = pst.getGeneratedKeys();
+                if (rs.next()) {
+                    id_CompraProMat = rs.getInt(1); // Obtener el ID generado
+                    txtId.setText(String.valueOf(id_CompraProMat)); // Actualizar el campo de texto
+                    JOptionPane.showMessageDialog(null, "El registro se guardó con éxito");
+                }
             }
 
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al gusrdar registro " + e.toString());
+            JOptionPane.showMessageDialog(null, "Error al guardar registro: " + e.toString());
+        }
+    }
+
+    public void RegistrarDetalleCompra() {
+        if (id_CompraProMat <= 0) {
+            JOptionPane.showMessageDialog(null, "Error: El ID de la compra no es válido.");
+            return;
         }
 
+        fecha = dateFecha.getDate();
+        if (fecha == null) {
+            JOptionPane.showMessageDialog(null, "Error: La fecha no puede estar vacía.");
+            return;
+        }
+        java.sql.Date sqlDate = new java.sql.Date(fecha.getTime());
+
+        for (int i = 0; i < tbCompraProducto.getRowCount(); i++) {
+            // Validación de los valores en la tabla
+            String id_productoStr = txtIdProducto.getText().trim();
+            String id_TipoStr = txtIdTipoPro.getText().trim();
+            String id_MarcaStr = txtIdMarca.getText().trim();
+            String CantidadStr = tbCompraProducto.getValueAt(i, 3).toString().trim(); // Cantidad
+            String PrecioStr = tbCompraProducto.getValueAt(i, 4).toString().trim(); // Precio Unitario
+            String TotalStr = tbCompraProducto.getValueAt(i, 5).toString().trim(); // Total
+
+            // Verificación de entradas vacías
+            if (id_productoStr.isEmpty() || id_TipoStr.isEmpty() || id_MarcaStr.isEmpty()
+                    || CantidadStr.isEmpty() || PrecioStr.isEmpty() || TotalStr.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Error: Hay campos vacíos en la fila " + (i + 1));
+                continue;
+            }
+
+            try {
+                int id_producto = Integer.parseInt(id_productoStr);
+                int id_Tipo = Integer.parseInt(id_TipoStr);
+                int id_Marca = Integer.parseInt(id_MarcaStr);
+                int Cantidad = Integer.parseInt(CantidadStr);
+                double Precio = Double.parseDouble(PrecioStr);
+                double Total = Double.parseDouble(TotalStr);
+
+                // Consulta para insertar los datos
+                String sql = "INSERT INTO detalle_compraproductosmateriales (id_CompProMat, id_producto, id_Tipo, id_Marca, cantidad, precio_Unitario, Total, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+                // Para almacenar los datos empleo un try-catch
+                try {
+                    PreparedStatement pst = connect.prepareStatement(sql);
+
+                    pst.setInt(1, id_CompraProMat);
+                    pst.setInt(2, id_producto);
+                    pst.setInt(3, id_Tipo);
+                    pst.setInt(4, id_Marca);
+                    pst.setInt(5, Cantidad);
+                    pst.setDouble(6, Precio);
+                    pst.setDouble(7, Total);
+                    pst.setDate(8, sqlDate);
+
+                    int n = pst.executeUpdate();
+
+                    if (n > 0) {
+                        JOptionPane.showMessageDialog(null, "El detalle se guardó con éxito");
+                    }
+
+                } catch (SQLException e) {
+                    JOptionPane.showMessageDialog(null, "Error al guardar detalle: " + e.toString());
+                }
+
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Error en la fila " + (i + 1) + ": " + e.getMessage());
+            }
+        }
     }
-    
+
     // Método para eliminar una fila de la tabla
     private void eliminarFila() {
-    int selectedRow = tbCompraProducto.getSelectedRow();
+        int selectedRow = tbCompraProducto.getSelectedRow();
 
-    if (selectedRow != -1) {
-        System.out.println("Fila seleccionada: " + selectedRow);
-        DefaultTableModel model = (DefaultTableModel) tbCompraProducto.getModel();
-        // Obtener los datos de la fila seleccionada
-        Object descripcion = tbCompraProducto.getValueAt(selectedRow, 0);
-        Object cantidad = tbCompraProducto.getValueAt(selectedRow, 1);
-        Object subTotal = tbCompraProducto.getValueAt(selectedRow, 2);
-        Object total = tbCompraProducto.getValueAt(selectedRow, 3);
+        if (selectedRow != -1) {
+            System.out.println("Fila seleccionada: " + selectedRow);
+            DefaultTableModel model = (DefaultTableModel) tbCompraProducto.getModel();
+            // Obtener los datos de la fila seleccionada
+            Object descripcion = tbCompraProducto.getValueAt(selectedRow, 0);
+            Object cantidad = tbCompraProducto.getValueAt(selectedRow, 1);
+            Object subTotal = tbCompraProducto.getValueAt(selectedRow, 2);
+            Object total = tbCompraProducto.getValueAt(selectedRow, 3);
 
-        // Mostrar los datos de la fila seleccionada en la consola
-        System.out.println("Fila seleccionada: " + selectedRow);
-        System.out.println("Descripción: " + descripcion);
-        System.out.println("Cantidad: " + cantidad);
-        System.out.println("Subtotal: " + subTotal);
-        System.out.println("Total: " + total);
+            // Mostrar los datos de la fila seleccionada en la consola
+            System.out.println("Fila seleccionada: " + selectedRow);
+            System.out.println("Descripción: " + descripcion);
+            System.out.println("Cantidad: " + cantidad);
+            System.out.println("Subtotal: " + subTotal);
+            System.out.println("Total: " + total);
 
-        // Aquí puedes actualizar cualquier campo de texto o componente con los datos de la fila seleccionada
-        cbxProducto.setSelectedItem(descripcion.toString());
-        txtCant.setText(cantidad.toString());
-        txtSubTotal.setText(subTotal.toString());
-        txtTotal.setText(total.toString());
+            // Aquí puedes actualizar cualquier campo de texto o componente con los datos de la fila seleccionada
+            cbxProducto.setSelectedItem(descripcion.toString());
+            txtCant.setText(cantidad.toString());
+            txtPrecioUnitario.setText(subTotal.toString());
+            txtTotalxP.setText(total.toString());
 
-        // Eliminar la fila seleccionada
-        model.removeRow(selectedRow);
-        TotalPagar(); // Actualiza el total a pagar
-        LimpiarCompra();
-        cbxProducto.requestFocus();
-    } else {
+            // Eliminar la fila seleccionada
+            model.removeRow(selectedRow);
+            TotalPagar(); // Actualiza el total a pagar
+            LimpiarCompra();
+            cbxProducto.requestFocus();
+        } else {
 //        JOptionPane.showMessageDialog(null, "No se ha seleccionado ninguna fila. Por favor, seleccione una fila para eliminar.");
-   }
-}
+        }
+    }
 
-    
-    
-    
+    private void LimpiarTablaCompra() {
+        model = (DefaultTableModel) tbCompraProducto.getModel();
+        int fila = tbCompraProducto.getRowCount();
+        for (int i = 0; i < fila; i++) {
+            model.removeRow(0);
+        }
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -326,7 +460,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jLabel43 = new javax.swing.JLabel();
         txtNumeroRecibo = new javax.swing.JTextField();
         txtCant = new javax.swing.JTextField();
-        txtSubTotal = new javax.swing.JTextField();
+        txtPrecioUnitario = new javax.swing.JTextField();
         jLabel46 = new javax.swing.JLabel();
         cbxProveedor = new javax.swing.JComboBox<>();
         jLabel47 = new javax.swing.JLabel();
@@ -346,8 +480,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         dateFecha = new com.toedter.calendar.JDateChooser();
         jLabel2 = new javax.swing.JLabel();
         btnGuardar = new javax.swing.JButton();
-        txtId_CompraProMat = new javax.swing.JTextField();
-        jLabel3 = new javax.swing.JLabel();
+        txtId = new javax.swing.JTextField();
         txtStock = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         cbxTipoProducto = new javax.swing.JComboBox<>();
@@ -370,9 +503,12 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         txtNumeroCuotas = new javax.swing.JTextField();
         jLabel18 = new javax.swing.JLabel();
         txtValorCuota = new javax.swing.JTextField();
-        txtTotal = new javax.swing.JTextField();
+        txtTotalxP = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         btnEliminar = new javax.swing.JButton();
+        btnMostrarStock = new javax.swing.JButton();
+        txtSubTotal = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(0, 51, 153));
         setIconifiable(true);
@@ -412,21 +548,21 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
         jLabel43.setText("Precio Unitario");
         jPanel16.add(jLabel43, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 60, -1, -1));
-        jPanel16.add(txtNumeroRecibo, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 2, 130, 30));
+        jPanel16.add(txtNumeroRecibo, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 2, 110, 30));
 
         txtCant.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtCantKeyPressed(evt);
             }
         });
-        jPanel16.add(txtCant, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 90, 70, 30));
+        jPanel16.add(txtCant, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 90, 80, 30));
 
-        txtSubTotal.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtPrecioUnitario.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
-                txtSubTotalKeyPressed(evt);
+                txtPrecioUnitarioKeyPressed(evt);
             }
         });
-        jPanel16.add(txtSubTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 50, 70, 30));
+        jPanel16.add(txtPrecioUnitario, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 50, 80, 30));
 
         jLabel46.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel46.setText("Proveedor");
@@ -441,15 +577,21 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
         jLabel47.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel47.setText("Total Pagar");
-        jPanel16.add(jLabel47, new org.netbeans.lib.awtextra.AbsoluteConstraints(950, 440, -1, -1));
+        jPanel16.add(jLabel47, new org.netbeans.lib.awtextra.AbsoluteConstraints(870, 470, -1, -1));
 
         JLabelTotalCompra.setText("-----------");
-        jPanel16.add(JLabelTotalCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 470, 130, 20));
+        jPanel16.add(JLabelTotalCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(970, 470, 90, 20));
 
         jLabel49.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel49.setText("Pagar con");
-        jPanel16.add(jLabel49, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 400, -1, -1));
-        jPanel16.add(txtTaxes, new org.netbeans.lib.awtextra.AbsoluteConstraints(1000, 390, 70, 30));
+        jPanel16.add(jLabel49, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 70, -1, -1));
+
+        txtTaxes.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtTaxesKeyPressed(evt);
+            }
+        });
+        jPanel16.add(txtTaxes, new org.netbeans.lib.awtextra.AbsoluteConstraints(980, 420, 70, 30));
 
         btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
         btnSalir.setText("Salir");
@@ -461,9 +603,20 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 10, -1, -1));
         jPanel16.add(txtIdProveedor, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 130, 80, -1));
 
+        cbxProducto.setEditable(true);
         cbxProducto.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cbxProductoItemStateChanged(evt);
+            }
+        });
+        cbxProducto.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                cbxProductoMouseClicked(evt);
+            }
+        });
+        cbxProducto.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                cbxProductoKeyPressed(evt);
             }
         });
         jPanel16.add(cbxProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 40, 150, -1));
@@ -481,22 +634,22 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(cbxMarca, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 100, 150, -1));
         jPanel16.add(txtIdProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 40, 80, -1));
 
-        jLabel1.setText("Impuestos");
-        jPanel16.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 400, -1, -1));
+        jLabel1.setText("tax");
+        jPanel16.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 430, -1, -1));
 
         cbxPagarCon.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cbxPagarConItemStateChanged(evt);
             }
         });
-        jPanel16.add(cbxPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 400, 190, -1));
-        jPanel16.add(txtIdPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 400, 90, -1));
+        jPanel16.add(cbxPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(690, 70, 140, -1));
+        jPanel16.add(txtIdPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(870, 70, 80, -1));
 
         dateFecha.setDateFormatString("yyyy-MM-dd");
-        jPanel16.add(dateFecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 60, 130, -1));
+        jPanel16.add(dateFecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 20, 130, -1));
 
         jLabel2.setText("Fecha de Compra");
-        jPanel16.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 30, -1, -1));
+        jPanel16.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 20, -1, -1));
 
         btnGuardar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/guardar.png"))); // NOI18N
         btnGuardar.setText("Guardar");
@@ -506,11 +659,8 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             }
         });
         jPanel16.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 110, 110, -1));
-        jPanel16.add(txtId_CompraProMat, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 100, -1));
-
-        jLabel3.setText("Stock");
-        jPanel16.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 20, -1, -1));
-        jPanel16.add(txtStock, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 10, 70, 30));
+        jPanel16.add(txtId, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 100, -1));
+        jPanel16.add(txtStock, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 10, 80, 30));
 
         jLabel4.setText("Tipo");
         jPanel16.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, -1, -1));
@@ -524,18 +674,24 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(txtIdTipoPro, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 70, 80, -1));
 
         jLabel19.setText("Inicial");
-        jPanel16.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 440, -1, -1));
-        jPanel16.add(txt_Inicial, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 440, 88, -1));
+        jPanel16.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 420, -1, -1));
+
+        txt_Inicial.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txt_InicialKeyPressed(evt);
+            }
+        });
+        jPanel16.add(txt_Inicial, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 420, 88, -1));
 
         jLabel20.setText("Diferencia");
-        jPanel16.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 470, -1, -1));
+        jPanel16.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 450, -1, -1));
 
         txt_diferencia.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 txt_diferenciaKeyReleased(evt);
             }
         });
-        jPanel16.add(txt_diferencia, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 470, 92, -1));
+        jPanel16.add(txt_diferencia, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 450, 92, -1));
 
         jLabel7.setText("Total");
         jPanel16.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 390, -1, -1));
@@ -553,10 +709,10 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 470, -1, -1));
 
         jLabel21.setText("Proxima Fecha de Pago");
-        jPanel16.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 440, -1, -1));
+        jPanel16.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 420, -1, -1));
 
         dateFechaPagoCred.setDateFormatString("yyyy-MM-dd");
-        jPanel16.add(dateFechaPagoCred, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 460, 150, -1));
+        jPanel16.add(dateFechaPagoCred, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 440, 150, -1));
 
         btnRegistrarCredito.setText("Registrar Credito");
         btnRegistrarCredito.addActionListener(new java.awt.event.ActionListener() {
@@ -564,7 +720,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                 btnRegistrarCreditoActionPerformed(evt);
             }
         });
-        jPanel16.add(btnRegistrarCredito, new org.netbeans.lib.awtextra.AbsoluteConstraints(780, 470, -1, -1));
+        jPanel16.add(btnRegistrarCredito, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 470, -1, -1));
 
         jLabel11.setText("Numero de cuotas");
         jPanel16.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 390, -1, 30));
@@ -574,8 +730,8 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jPanel16.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 420, -1, -1));
         jPanel16.add(txtValorCuota, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 420, 100, -1));
 
-        txtTotal.setToolTipText("");
-        jPanel16.add(txtTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 130, 80, 30));
+        txtTotalxP.setToolTipText("");
+        jPanel16.add(txtTotalxP, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 130, 80, 30));
 
         jLabel5.setText("Total");
         jPanel16.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 140, -1, -1));
@@ -587,6 +743,19 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             }
         });
         jPanel16.add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1010, 120, -1, -1));
+
+        btnMostrarStock.setFont(new java.awt.Font("Segoe UI", 1, 8)); // NOI18N
+        btnMostrarStock.setText("Mostrar Stock");
+        btnMostrarStock.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnMostrarStockActionPerformed(evt);
+            }
+        });
+        jPanel16.add(btnMostrarStock, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 20, -1, -1));
+        jPanel16.add(txtSubTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(980, 390, 70, -1));
+
+        jLabel3.setText("SubTotal");
+        jPanel16.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(930, 390, -1, -1));
 
         getContentPane().add(jPanel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 1080, 510));
 
@@ -614,7 +783,22 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbxPagarConItemStateChanged
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
-        Guardar();
+        if (tbCompraProducto.getRowCount() > 0) {
+            if (!txtTaxes.getText().trim().isEmpty() && !JLabelTotalCompra.getText().trim().isEmpty()) {
+                RegistrarCompra(); // Registrar la compra y obtener el ID generado
+                RegistrarDetalleCompra(); // Registrar los detalles usando el ID generado
+                ActualizarStock();
+                LimpiarTablaCompra(); // Para limpiar los campos de la Tabla
+                txtSubTotal.setText("");
+                txtTaxes.setText("");
+                JLabelTotalCompra.setText("");
+                txtNumeroRecibo.setText("");
+            } else {
+                JOptionPane.showMessageDialog(null, "Debes llenar casilla Taxes y dar Enter");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "No hay Datos en la Compra");
+        }
     }//GEN-LAST:event_btnGuardarActionPerformed
 
     private void tbCompraProductoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbCompraProductoMouseClicked
@@ -637,8 +821,8 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             // Aquí puedes actualizar cualquier campo de texto o componente con los datos de la fila seleccionada
             cbxProducto.setSelectedItem(descripcion.toString());
             txtCant.setText(cantidad.toString());
-            txtSubTotal.setText(subTotal.toString());
-            txtTotal.setText(total.toString());
+            txtPrecioUnitario.setText(subTotal.toString());
+            txtTotalxP.setText(total.toString());
         } else {
             System.out.println("No se ha seleccionado ninguna fila.");
         }
@@ -654,27 +838,44 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_txt_diferenciaKeyReleased
 
     private void btnRegistrarCreditoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegistrarCreditoActionPerformed
-
-        registrarPagosPendientes();
-//        GuardarCredito();
-        LimpiartxtCred();
+        if (tbCompraProducto.getRowCount() > 0) {
+            if (!txtTaxes.getText().trim().isEmpty() && !JLabelTotalCompra.getText().trim().isEmpty()) {
+                RegistrarCompra(); // Registrar la compra y obtener el ID generado
+                RegistrarDetalleCompra(); // Registrar los detalles usando el ID generado
+                registrarPagosPendientes();
+                ActualizarStock();
+                LimpiarTablaCompra(); // Para limpiar los campos de la Tabla
+                LimpiartxtCred();
+                txtSubTotal.setText("");
+                txtTaxes.setText("");
+                JLabelTotalCompra.setText("");
+                txtNumeroRecibo.setText("");
+            } else {
+                JOptionPane.showMessageDialog(null, "Debes llenar casilla Taxes y dar Enter");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "No hay Datos en la Compra");
+        }
+        
     }//GEN-LAST:event_btnRegistrarCreditoActionPerformed
 
-    private void txtSubTotalKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSubTotalKeyPressed
+    private void txtPrecioUnitarioKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPrecioUnitarioKeyPressed
 
 
-    }//GEN-LAST:event_txtSubTotalKeyPressed
+    }//GEN-LAST:event_txtPrecioUnitarioKeyPressed
 
     private void txtCantKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCantKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             if (!txtCant.getText().isEmpty()) {
-                if (!txtStock.getText().isEmpty() && !txtSubTotal.getText().isEmpty()) {
+                if (!txtStock.getText().isEmpty() && !txtPrecioUnitario.getText().isEmpty()) {
                     try {
                         int cant = Integer.parseInt(txtCant.getText());
-                        double subTotal = Double.parseDouble(txtSubTotal.getText());
-                        double total = cant * subTotal;
+                        double precioUnit = Double.parseDouble(txtPrecioUnitario.getText());
+                        double total = cant * precioUnit;
+                        String Tipo = (String) cbxTipoProducto.getSelectedItem();
+                        String Marca = (String) cbxMarca.getSelectedItem();
 
-                        txtTotal.setText(String.valueOf(total));
+                        txtTotalxP.setText(String.valueOf(total));
 
                         item = item + 1;
                         DefaultTableModel model = (DefaultTableModel) tbCompraProducto.getModel();
@@ -694,12 +895,14 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                             String descripcion = selectedItem.toString();
 
                             // Añadir los valores a una nueva fila
-                            Object[] fila = new Object[5];
+                            Object[] fila = new Object[7];
                             fila[0] = descripcion; // Descripción del producto
-                            fila[1] = cant; // Cantidad
-                            fila[2] = subTotal; // Subtotal
-                            fila[3] = total; // Total
-                            fila[4] = item; // Item
+                            fila[1] = Tipo;
+                            fila[2] = Marca;
+                            fila[3] = cant; // Cantidad
+                            fila[4] = precioUnit; // Precio Unitario
+                            fila[5] = total; // Total
+                            fila[6] = item; // Item
 
                             model.addRow(fila);
                             model.fireTableDataChanged(); // Asegurarse de que la tabla se actualiza
@@ -707,9 +910,10 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                             TotalPagar();
                             LimpiarCompra();
                             cbxProducto.requestFocus();
+                            txtStock.setText("0");
 
-                            System.out.println("Fila añadida a la tabla"); // Debug line
-                            System.out.println("Filas en el modelo (después de añadir): " + model.getRowCount()); // Debug line
+//                            System.out.println("Fila añadida a la tabla"); // Debug line
+//                            System.out.println("Filas en el modelo (después de añadir): " + model.getRowCount()); // Debug line
                         }
                     } catch (NumberFormatException e) {
                         JOptionPane.showMessageDialog(null, "Error en el formato de los datos: " + e.getMessage());
@@ -728,11 +932,67 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         eliminarFila();
     }//GEN-LAST:event_btnEliminarActionPerformed
 
+    private void cbxProductoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_cbxProductoKeyPressed
+
+    }//GEN-LAST:event_cbxProductoKeyPressed
+
+    private void cbxProductoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cbxProductoMouseClicked
+
+    }//GEN-LAST:event_cbxProductoMouseClicked
+
+    private void btnMostrarStockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarStockActionPerformed
+        String selectedProduct = (String) cbxProducto.getSelectedItem();
+        if (selectedProduct != null) {
+            mostrarStock(selectedProduct);
+//                System.out.println("Producto: " + selectedProduct);
+        } else {
+            System.out.println("error"
+            );
+        }
+    }//GEN-LAST:event_btnMostrarStockActionPerformed
+
+    private void txtTaxesKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtTaxesKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            if (!txtTaxes.getText().isEmpty()) {
+                try {
+                    double tax = Double.parseDouble(txtTaxes.getText());
+                    // Formatear el valor tax a dos decimales
+                    DecimalFormat df = new DecimalFormat("#.00");
+                    String formattedTax = df.format(tax);
+
+                    // Supongo que Totalpagar es una variable que ya tienes definida
+                    double totalPagarConTax = Totalpagar + tax;
+
+                    // Formatear el total a dos decimales
+                    String formattedTotal = df.format(totalPagarConTax);
+
+                    // Establecer el texto en el JLabel
+                    JLabelTotalCompra.setText(formattedTotal);
+
+                    // Para depuración
+//                System.out.println("Tax: " + formattedTax);
+//                System.out.println("Total a pagar con Tax: " + formattedTotal);
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(null, "Ingrese un valor numérico válido.");
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Ingrese los taxes");
+            }
+        }
+    }//GEN-LAST:event_txtTaxesKeyPressed
+
+    private void txt_InicialKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_InicialKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+        calcularDiferencia();
+    }
+    }//GEN-LAST:event_txt_InicialKeyPressed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JLabel JLabelTotalCompra;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnMostrarStock;
     private javax.swing.JButton btnRegistrarCredito;
     private javax.swing.JButton btnSalir;
     private javax.swing.ButtonGroup buttonGroup1;
@@ -770,25 +1030,27 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     public javax.swing.JTable tbCompraProducto;
     public javax.swing.JTextField txtCant;
     private javax.swing.JTextField txtFrecuencia;
+    private javax.swing.JTextField txtId;
     private javax.swing.JTextField txtIdMarca;
     private javax.swing.JTextField txtIdPagarCon;
     private javax.swing.JTextField txtIdProducto;
     private javax.swing.JTextField txtIdProveedor;
     private javax.swing.JTextField txtIdTipoPro;
-    private javax.swing.JTextField txtId_CompraProMat;
     private javax.swing.JTextField txtInteres;
     private javax.swing.JTextField txtNumeroCuotas;
     public javax.swing.JTextField txtNumeroRecibo;
+    public javax.swing.JTextField txtPrecioUnitario;
     private javax.swing.JTextField txtStock;
-    public javax.swing.JTextField txtSubTotal;
+    private javax.swing.JTextField txtSubTotal;
     public javax.swing.JTextField txtTaxes;
-    private javax.swing.JTextField txtTotal;
     private javax.swing.JTextField txtTotal1;
+    private javax.swing.JTextField txtTotalxP;
     private javax.swing.JTextField txtValorCuota;
     private javax.swing.JTextField txt_Inicial;
     private javax.swing.JTextField txt_diferencia;
     // End of variables declaration//GEN-END:variables
 
+    // Para llenar el ComboBox de los Proveedores
     public void MostrarProveedor(JComboBox cbxProveedorNC) {
 
         String sql = "";
@@ -831,6 +1093,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         }
     }
 
+    // Para llenar el comboBox de las Marcas
     public void MostrarCodigoMarca(JComboBox cbxMarca, JTextField idMarca) {
 
         String consuta = "select marca.id_marca from marca where marca.nombre=?";
@@ -885,10 +1148,11 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         }
     }
 
+    // Para llenar el ComboBox de los Productos
     public void MostrarProducto(JComboBox cbxProducto) {
 
         String sql = "";
-        sql = "select * from product";
+        sql = "select nameProduct from product";
         Statement st;
 
         try {
@@ -903,7 +1167,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
             }
 
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+            JOptionPane.showMessageDialog(null, "Error al Mostrar Producto " + e.toString());
         }
     }
 
@@ -939,6 +1203,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         }
     }
 
+    //Para llenar el ComboBox Formas de Pago
     public void MostrarCodigoFormaDePago(JComboBox cbxPagarCon, JTextField idPagarCon) {
 
         String consuta = "select formadepago.id_formadepago from formadepago where formadepago.nombre=?";
@@ -1017,6 +1282,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         }
     }
 
+    //Para llenar el ComboBox Tipos de Productos
     public void MostrarTipo(JComboBox cbxTipoProducto) {
 
         String sql = "";
@@ -1071,7 +1337,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         }
     }
 
-    // Método para hallar el id_venta que se está ejecutando en ese momento
+    // Método para hallar el id_Compra que se está ejecutando en ese momento
     public int IdCompra() {
         int id = 0;
         String sql = "SELECT MAX(id_CompraProMat) FROM compraproductosmateriales";
@@ -1104,21 +1370,23 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         }
         return id;
     }
-
+    
+    
+//Registrar los Pagos pendientes Por Credito o Prestamos
     public void registrarPagosPendientes() {
-        Conectar con = new Conectar();
-        Connection connect = null;
-        PreparedStatement stmt = null;
-        try {
-            connect = con.getConexion();
+    Conectar con = new Conectar();
+    Connection connect = null;
+    PreparedStatement stmt = null;
+    try {
+        connect = con.getConexion();
 
-            // Obtener los datos de las cajas de texto
+        // Obtener los datos de las cajas de texto
             int id = IdCompra();
             int frecuencia = Integer.parseInt(txtFrecuencia.getText());
             double interes = Double.parseDouble(txtInteres.getText());
             int numeroCuotas = Integer.parseInt(txtNumeroCuotas.getText());
             double valorCuota = Double.parseDouble(txtValorCuota.getText());
-            double total = Double.parseDouble(txtTotal.getText());
+            double total = Double.parseDouble(JLabelTotalCompra.getText());
             double diferencia = total;
 
             // Obtener la fecha de inicio
@@ -1128,61 +1396,58 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                 return; // Añadido return para evitar continuar si la fecha es nula
             }
 
-            // Preparar la inserción de pagos en la base de datos
-            String sql = "INSERT INTO creditoprod (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
-            stmt = connect.prepareStatement(sql);
+        // Preparar la inserción de pagos en la base de datos
+        String sql = "INSERT INTO creditoprod (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
+        stmt = connect.prepareStatement(sql);
 
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(fechaInicio);
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(fechaInicio);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-            for (int i = 1; i <= numeroCuotas; i++) {
-                calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
+        for (int i = 1; i <= numeroCuotas; i++) {
+            calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
 
-                Date fechaPago = calendar.getTime();
-                double cuotaActual = valorCuota;
+            Date fechaPago = calendar.getTime();
+            double cuotaActual = valorCuota;
 
-                // Ajustar la última cuota si la diferencia es menor que el valor de la cuota
-                if (i == numeroCuotas && diferencia < valorCuota) {
-                    cuotaActual = diferencia;
-                }
-
-                diferencia -= cuotaActual;
-
-                stmt.setInt(1, id);
-                stmt.setInt(2, frecuencia);
-                stmt.setString(3, dateFormat.format(fechaPago));
-                stmt.setDouble(4, interes);
-                stmt.setInt(5, i); // Número de la cuota actual
-                stmt.setDouble(6, cuotaActual);
-                stmt.setDouble(7, diferencia); // Diferencia actualizada
-
-                stmt.executeUpdate();
-
+            // Ajustar la última cuota si la diferencia es menor que el valor de la cuota
+            if (i == numeroCuotas && diferencia < valorCuota) {
+                cuotaActual = diferencia;
             }
 
-            JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
+            diferencia -= cuotaActual;
 
-        } catch (NumberFormatException ex) {
-            System.out.println("Error " + ex);
-            JOptionPane.showMessageDialog(null, "Error al parsear un valor numérico: " + ex.getMessage());
+            stmt.setInt(1, id);
+            stmt.setInt(2, frecuencia);
+            stmt.setString(3, dateFormat.format(fechaPago));
+            stmt.setDouble(4, interes);
+            stmt.setInt(5, i); // Número de la cuota actual
+            stmt.setDouble(6, cuotaActual);
+            stmt.setDouble(7, diferencia); // Diferencia actualizada
+
+            stmt.executeUpdate();
+        }
+
+        JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
+
+    } catch (SQLException ex) {
+        JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
+    } finally {
+        try {
+            if (stmt != null) {
+                stmt.close();
+            }
+            if (connect != null) {
+                connect.close();
+            }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (connect != null) {
-                    connect.close();
-                }
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
-            }
+            JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
         }
     }
-
+}
+    
+//Limpiar las cajas de texto
     private void LimpiartxtCred() {
         txtTotal1.setText("");
         txtFrecuencia.setText("");
@@ -1206,7 +1471,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         txtNumeroCuotas.setText("");
         txtValorCuota.setText("");
         dateFechaPagoCred.setDateFormatString("");
-        txtTotal.setText("");
+        txtTotalxP.setText("");
     }
 
     private void initListeners() {
@@ -1229,39 +1494,121 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     }
 
     private void calcularDiferencia() {
-        try {
-            double total = Double.parseDouble(txtTotal.getText());
-            double inicial = Double.parseDouble(txt_Inicial.getText());
-            double diferencia = total - inicial;
-            txt_diferencia.setText(String.valueOf(diferencia));
-        } catch (NumberFormatException ex) {
-            // Manejo de excepción en caso de que los textos no sean números válidos
-            JOptionPane.showMessageDialog(this, "Por favor, ingrese valores numéricos válidos.");
-        }
+    try {
+        double total = Double.parseDouble(JLabelTotalCompra.getText().trim());
+        double inicial = Double.parseDouble(txt_Inicial.getText().trim());
+        double diferencia = total - inicial;
+        txt_diferencia.setText(String.valueOf(diferencia));
+    } catch (NumberFormatException ex) {
+        JOptionPane.showMessageDialog(this, "Por favor, ingrese valores numéricos válidos.");
     }
+}
+
 
     // Método para calcular el total a pagar
     private void TotalPagar() {
         Totalpagar = 0.00;
+
         int numFila = tbCompraProducto.getRowCount();
         for (int i = 0; i < numFila; i++) {
-            double cal = Double.parseDouble(String.valueOf(tbCompraProducto.getModel().getValueAt(i, 3)));
+            double cal = Double.parseDouble(String.valueOf(tbCompraProducto.getModel().getValueAt(i, 5)));
+
             Totalpagar = Totalpagar + cal;
         }
-        JLabelTotalCompra.setText(String.format("%.2f", Totalpagar));
+        txtSubTotal.setText(String.format("%.2f", Totalpagar));
     }
 
     // Método para limpiar los campos después de añadir un producto
     private void LimpiarCompra() {
         txtCant.setText("");
         txtStock.setText("");
-        txtSubTotal.setText("");
-        txtTotal.setText("");
+        txtPrecioUnitario.setText("");
+        txtTotalxP.setText("");
         txtInteres.setText("");
     }
 
     // Método para refrescar la JTable
     private void refreshTable(JTable table) {
         ((DefaultTableModel) table.getModel()).fireTableDataChanged();
+    }
+
+    private void mostrarStock(String producto) {
+        Conectar con = new Conectar();
+        Connection connect = con.getConexion();
+        if (connect != null) {
+            String sql = "SELECT stock FROM product WHERE nameProduct=?";
+            try {
+                PreparedStatement ps = connect.prepareStatement(sql);
+                ps.setString(1, producto);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    int stock = rs.getInt("stock");
+                    txtStock.setText(String.valueOf(stock));
+//                    System.out.println("Stock: " + stock);
+                } else {
+                    txtStock.setText("0");
+//                    System.out.println("Producto no encontrado.");
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error al mostrar stock " + e.toString());
+            } finally {
+                try {
+                    connect.close();
+                } catch (SQLException e) {
+//                    System.out.println("Error al cerrar la conexión: " + e.getMessage());
+                }
+            }
+        } else {
+//            System.out.println("Error: Conexión a la base de datos fallida.");
+        }
+    }
+    
+    //Actualizar Stock
+    public Productos BuscarPro(String nombre){
+        Productos producto = new Productos();
+        String sql = "SELECT * FROM product WHERE nameProduct = ?";
+        try {
+            connect = con.getConexion();
+            ps = connect.prepareStatement(sql);
+            
+            ps.setString(1, nombre);
+            rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                producto.setIdProduct(rs.getInt("id"));
+                producto.setNameProduct(rs.getString("nombre"));
+                producto.setStock(rs.getInt("stock"));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+        }
+        return producto;
+    }
+    
+    public boolean ActualizarStock(int cant, String nombre){
+        String sql = "UPDATE productos SET stock = ? WHERE codigo = ?";
+        try {
+            connect = con.getConexion();
+            ps = connect.prepareStatement(sql);
+            ps.setInt(1,cant);
+            ps.setString(2,nombre);
+            ps.execute();
+            return true;
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+            return false;
+        }
+    }
+    
+    private void ActualizarStock() {
+        for (int i = 0; i < tbCompraProducto.getRowCount(); i++) {
+            String cod = tbCompraProducto.getValueAt(i, 0).toString();
+            int cant = Integer.parseInt(tbCompraProducto.getValueAt(i, 2).toString());
+            String nombre = null;
+            BuscarPro(nombre);
+            int StockActual = (int) (pro.getStock() + cant);
+            ActualizarStock(StockActual, nombre);
+
+        }
     }
 }
