@@ -13,6 +13,9 @@ import Register.Gastos_Generales;
 import Admission.Unidades;
 import Register.*;
 import Reports.*;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 public class VentanaPrincipal extends javax.swing.JFrame {
@@ -666,7 +669,12 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuRComprasActionPerformed
 
     private void menuDeudasPorPagarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDeudasPorPagarActionPerformed
-        DeudasPorPagar objDeudasPorPagar = new DeudasPorPagar();
+        DeudasPorPagar objDeudasPorPagar = null;
+        try {
+            objDeudasPorPagar = new DeudasPorPagar();
+        } catch (SQLException ex) {
+            Logger.getLogger(VentanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        }
         jpEscritorio.add(objDeudasPorPagar);
         objDeudasPorPagar.show();
 
