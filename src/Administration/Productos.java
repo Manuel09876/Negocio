@@ -29,7 +29,8 @@ public class Productos extends javax.swing.JInternalFrame {
     String presentation;
     int units;
     int location;
-    double stock, stock2;
+    int stock;
+    double stock2;
     String estado;
 
     public int getIdProduct() {
@@ -72,11 +73,11 @@ public class Productos extends javax.swing.JInternalFrame {
         this.units = units;
     }
 
-    public double getStock() {
+    public int getStock() {
         return stock;
     }
 
-    public void setStock(double stock) {
+    public void setStock(int stock) {
         this.stock = stock;
     }
 
@@ -300,7 +301,7 @@ public class Productos extends javax.swing.JInternalFrame {
             setNameProduct(Name.getText());
             setPresentation(Presentation.getText());
             setUnits(Integer.parseInt(IdUnits.getText())); // ¿Debería ser IdUnits?
-            setStock(Double.parseDouble(Stock.getText()));
+            setStock(Integer.parseInt(txtStock.getText()));
             setStock2(Double.parseDouble(Or.getText()));
 
             // Consulta de actualización

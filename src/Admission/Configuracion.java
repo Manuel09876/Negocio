@@ -2,21 +2,22 @@ package Admission;
 
 import conectar.Conectar;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.SQLException;
+import javax.swing.*;
 
 public class Configuracion extends javax.swing.JInternalFrame {
 
     Conectar con = new Conectar();
     Connection connect = con.getConexion();
-    Statement st;
+    PreparedStatement ps;
     ResultSet rs;
 
-    int id;
-    String nombreNegocio, direccion, ciudad;
-    int zipcode;
-    String estado, telefono, email, webpage, mensaje;
-    byte[] imagen;
+    private int id;
+    private String nombre, direccion, ciudad;
+    private int zipcode;
+    private String estado, telefono, email, webpage, mensaje;
 
     public int getId() {
         return id;
@@ -26,12 +27,20 @@ public class Configuracion extends javax.swing.JInternalFrame {
         this.id = id;
     }
 
-    public String getNombreNegocio() {
-        return nombreNegocio;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setNombreNegocio(String nombreNegocio) {
-        this.nombreNegocio = nombreNegocio;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
     }
 
     public String getCiudad() {
@@ -50,14 +59,6 @@ public class Configuracion extends javax.swing.JInternalFrame {
         this.zipcode = zipcode;
     }
 
-    public String getDireccion() {
-        return direccion;
-    }
-
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
-    }
-
     public String getEstado() {
         return estado;
     }
@@ -66,12 +67,12 @@ public class Configuracion extends javax.swing.JInternalFrame {
         this.estado = estado;
     }
 
-    public String getCellphone() {
+    public String getTelefono() {
         return telefono;
     }
 
-    public void setCellphone(String cellphone) {
-        this.telefono = cellphone;
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
 
     public String getEmail() {
@@ -81,7 +82,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
     public void setEmail(String email) {
         this.email = email;
     }
-    
+
     public String getWebpage() {
         return webpage;
     }
@@ -98,36 +99,117 @@ public class Configuracion extends javax.swing.JInternalFrame {
         this.mensaje = mensaje;
     }
 
-    public byte[] getImagen() {
-        return imagen;
+    public Configuracion BuscarDatos() {
+    String sql = "SELECT * FROM configuracion";
+    try {
+        connect = con.getConexion();
+        ps = connect.prepareStatement(sql);
+        rs = ps.executeQuery();
+        if (rs.next()) {
+            setId(rs.getInt("id"));
+            setNombre(rs.getString("nombre"));
+            setDireccion(rs.getString("direccion"));
+            setCiudad(rs.getString("ciudad"));
+            setZipcode(rs.getInt("zipcode"));
+            setEstado(rs.getString("estado"));
+            setTelefono(rs.getString("telefono"));
+            setEmail(rs.getString("email"));
+            setWebpage(rs.getString("webpage"));
+            setMensaje(rs.getString("mensaje"));
+        }
+    } catch (SQLException e) {
+        System.out.println(e.toString());
+    } finally {
+        try {
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
+            if (connect != null) connect.close();
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+        }
+    }
+    return this;
+}
+
+public void ListarConfig() {
+    BuscarDatos();
+    txtId.setText("" + getId());
+    txtNombre.setText(getNombre());
+    txtDireccion.setText(getDireccion());
+    txtCiudad.setText(getCiudad());
+    txtZipCode.setText("" + getZipcode());
+    txtEstado.setText(getEstado());
+    txtTelefono.setText(getTelefono());
+    txtEmail.setText(getEmail());
+    txtWebPage.setText(getWebpage());
+    txtMensaje.setText(getMensaje());
+}
+
+    public boolean ModificarDatos() {
+        String sql = "UPDATE configuracion SET nombre=?, direccion=?, ciudad=?, zipcode=?, estado=?, telefono=?, email=?, webpage=? WHERE id=?";
+        try {
+            ps = connect.prepareStatement(sql);
+            ps.setString(1, getNombre());
+            ps.setString(2, getDireccion());
+            ps.setString(3, getCiudad());
+            ps.setInt(4, getZipcode());
+            ps.setString(5, getEstado());
+            ps.setString(6, getTelefono());
+            ps.setString(7, getEmail());
+            ps.setString(8, getWebpage());
+            ps.setString(9, getMensaje());
+            ps.setInt(10, getId());
+            ps.execute();
+            return true;
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+            return false;
+        } finally {
+            try {
+                connect.close();
+            } catch (SQLException e) {
+                System.out.println(e.toString());
+            }
+        }
     }
 
-    public void setImagen(byte[] imagen) {
-        this.imagen = imagen;
+    public boolean GuardarConfig() {
+    String sql = "INSERT INTO configuracion(nombre, direccion, ciudad, zipcode, estado, telefono, email, webpage, mensaje) VALUES (?,?,?,?,?,?,?,?,?)";
+    try {
+        connect = con.getConexion();
+        ps = connect.prepareStatement(sql);
+        ps.setString(1, getNombre());
+        ps.setString(2, getDireccion());
+        ps.setString(3, getCiudad());
+        ps.setInt(4, getZipcode());
+        ps.setString(5, getEstado());
+        ps.setString(6, getTelefono());
+        ps.setString(7, getEmail());
+        ps.setString(8, getWebpage());
+        ps.setString(9, getMensaje());
+        
+        System.out.println("Guardando configuración: " + getNombre() + ", " + getDireccion() + ", " + getCiudad() + ", " + getZipcode() + ", " + getEstado() + ", " + getTelefono() + ", " + getEmail() + ", " + getWebpage() + ", " + getMensaje());
+        
+        ps.execute();
+        return true;
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, e.toString());
+        return false;
+    } finally {
+        try {
+            if (ps != null) ps.close();
+            if (connect != null) connect.close();
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+        }
     }
+}
+
+
 
     public Configuracion() {
         initComponents();
-
-    }
-
-    public void Guardar() {
-        //Obtenemos la informacion de las cajas de texto
-        nombreNegocio = txtNombre.getText();
-        direccion = txtDireccion.getText();
-        ciudad = txtCiudad.getText();
-        zipcode = Integer.parseInt(txtZipCode.getText());
-        estado = txtEstado.getText();
-        telefono = txtTelefono.getText();
-        email = txtEmail.getText();
-        webpage = txtWebPage.getText();
-        mensaje = txtMensaje.getText();
-        
-
-    }
-
-    public void Modificar() {
-
+        ListarConfig();
     }
 
     @SuppressWarnings("unchecked")
@@ -158,6 +240,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
         btnGuardar = new javax.swing.JButton();
         btnActualizar = new javax.swing.JButton();
         btnSalir = new javax.swing.JButton();
+        txtId = new javax.swing.JTextField();
 
         setTitle("Configuración");
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -219,10 +302,20 @@ public class Configuracion extends javax.swing.JInternalFrame {
 
         btnGuardar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/guardar.png"))); // NOI18N
         btnGuardar.setText("Guardar");
+        btnGuardar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuardarActionPerformed(evt);
+            }
+        });
         jPanel1.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(277, 319, -1, -1));
 
         btnActualizar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/actualizar.png"))); // NOI18N
         btnActualizar.setText("Actualizar");
+        btnActualizar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnActualizarActionPerformed(evt);
+            }
+        });
         jPanel1.add(btnActualizar, new org.netbeans.lib.awtextra.AbsoluteConstraints(438, 319, -1, -1));
 
         btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
@@ -233,6 +326,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
             }
         });
         jPanel1.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, -1, -1));
+        jPanel1.add(txtId, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 170, 80, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 6, -1, 386));
 
@@ -242,6 +336,55 @@ public class Configuracion extends javax.swing.JInternalFrame {
     private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirActionPerformed
         dispose();
     }//GEN-LAST:event_btnSalirActionPerformed
+
+    private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
+        // Verificar que los campos obligatorios no estén vacíos
+    if (!"".equals(txtNombre.getText()) && !"".equals(txtDireccion.getText()) && 
+        !"".equals(txtCiudad.getText()) && !"".equals(txtZipCode.getText()) && 
+        !"".equals(txtEstado.getText()) && !"".equals(txtTelefono.getText()) && 
+        !"".equals(txtEmail.getText()) && !"".equals(txtWebPage.getText()) && 
+        !"".equals(txtMensaje.getText())) {
+        
+        // Establecer los valores a la instancia actual de Configuracion
+        setNombre(txtNombre.getText());
+        setDireccion(txtDireccion.getText());
+        setCiudad(txtCiudad.getText());
+        setZipcode(Integer.parseInt(txtZipCode.getText()));
+        setEstado(txtEstado.getText());
+        setTelefono(txtTelefono.getText());
+        setEmail(txtEmail.getText());
+        setWebpage(txtWebPage.getText());
+        setMensaje(txtMensaje.getText());
+        
+        // Guardar la configuración
+        if (GuardarConfig()) {
+            JOptionPane.showMessageDialog(null, "Datos guardados exitosamente");
+        } else {
+            JOptionPane.showMessageDialog(null, "Error al guardar datos");
+        }
+    } else {
+        JOptionPane.showMessageDialog(null, "Todos los campos son obligatorios");
+    }
+    }//GEN-LAST:event_btnGuardarActionPerformed
+
+    private void btnActualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActualizarActionPerformed
+        if (!"".equals(txtNombre.getText()) || !"".equals(txtDireccion.getText()) || !"".equals(txtCiudad.getText()) || !"".equals(txtZipCode.getText()) || !"".equals(txtEstado.getText()) || !"".equals(txtTelefono.getText()) || !"".equals(txtEmail.getText()) || !"".equals(txtWebPage.getText()) || !"".equals(txtMensaje.getText())) {
+            setNombre(txtNombre.getText());
+            setDireccion(txtDireccion.getText());
+            setCiudad(txtCiudad.getText());
+            setZipcode(Integer.parseInt(txtZipCode.getText()));
+            setEstado(txtEstado.getText());
+            setTelefono(txtTelefono.getText());
+            setEmail(txtEmail.getText());
+            setWebpage(txtWebPage.getText());
+            setMensaje(txtMensaje.getText());
+            ModificarDatos();
+            JOptionPane.showMessageDialog(null, "Datos de la empresa modificado");
+            ListarConfig();
+        } else {
+            JOptionPane.showMessageDialog(null, "Los campos estan vacios");
+        }
+    }//GEN-LAST:event_btnActualizarActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -264,6 +407,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
     private javax.swing.JTextField txtDireccion;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtEstado;
+    private javax.swing.JTextField txtId;
     private javax.swing.JTextField txtMensaje;
     private javax.swing.JTextField txtNombre;
     private javax.swing.JTextField txtTelefono;

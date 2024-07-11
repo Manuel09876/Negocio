@@ -259,15 +259,15 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         txtBusqueda = new javax.swing.JTextField();
         cbSeleccionaTodo = new javax.swing.JCheckBox();
         btnBusquedaFechaEmpresa = new javax.swing.JButton();
-        btnMostrarTodo = new javax.swing.JButton();
+        btnMostrarDeudas = new javax.swing.JButton();
         txtId = new javax.swing.JTextField();
         jLabel15 = new javax.swing.JLabel();
-        jButton2 = new javax.swing.JButton();
+        btnMostrarCanceladas = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
         txtEmpresa = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
-        txtCustomer = new javax.swing.JTextField();
+        txtCliente = new javax.swing.JTextField();
         txtDireccion = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
@@ -284,7 +284,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         jTextField9 = new javax.swing.JTextField();
         jLabel14 = new javax.swing.JLabel();
         jTextField10 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        btnPagar = new javax.swing.JButton();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -381,25 +381,25 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         });
         jPanel12.add(btnBusquedaFechaEmpresa, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 80, 250, -1));
 
-        btnMostrarTodo.setText("Mostrar Todo Deuda");
-        btnMostrarTodo.addActionListener(new java.awt.event.ActionListener() {
+        btnMostrarDeudas.setText("Mostrar Todo Deuda");
+        btnMostrarDeudas.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnMostrarTodoActionPerformed(evt);
+                btnMostrarDeudasActionPerformed(evt);
             }
         });
-        jPanel12.add(btnMostrarTodo, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 30, 170, -1));
+        jPanel12.add(btnMostrarDeudas, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 30, 170, -1));
         jPanel12.add(txtId, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 80, 90, 30));
 
         jLabel15.setText("Cliente");
         jPanel12.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, -1, -1));
 
-        jButton2.setText("Mostrar todo Canceladas");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnMostrarCanceladas.setText("Mostrar todo Canceladas");
+        btnMostrarCanceladas.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnMostrarCanceladasActionPerformed(evt);
             }
         });
-        jPanel12.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 80, 170, -1));
+        jPanel12.add(btnMostrarCanceladas, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 80, 170, -1));
 
         jPanel1.setBackground(new java.awt.Color(153, 255, 153));
 
@@ -423,11 +423,11 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
         jLabel14.setText("Total");
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
-        jButton1.setText("PAGAR");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnPagar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
+        btnPagar.setText("PAGAR");
+        btnPagar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnPagarActionPerformed(evt);
             }
         });
 
@@ -447,7 +447,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(txtDireccion, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)
                             .addComponent(txtEmpresa)
-                            .addComponent(txtCustomer))
+                            .addComponent(txtCliente))
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(34, 34, 34)
@@ -481,7 +481,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                         .addGap(18, 18, 18)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jTextField10, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
+                    .addComponent(btnPagar))
                 .addContainerGap(28, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -501,7 +501,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel13)
                             .addComponent(jTextField9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton1)))
+                            .addComponent(btnPagar)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel5)
@@ -511,7 +511,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                         .addGap(17, 17, 17)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel6)
-                            .addComponent(txtCustomer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtCliente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel9)
                             .addComponent(txtTax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -558,7 +558,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         int seleccionar = tbDeudasPorCobrar.rowAtPoint(evt.getPoint());
         txtId.setText(String.valueOf(tbDeudasPorCobrar.getValueAt(seleccionar, 1)));
         txtEmpresa.setText(tbDeudasPorCobrar.getValueAt(seleccionar, 2).toString());
-        txtCustomer.setText(tbDeudasPorCobrar.getValueAt(seleccionar, 4).toString());
+        txtCliente.setText(tbDeudasPorCobrar.getValueAt(seleccionar, 4).toString());
         txtDireccion.setText(tbDeudasPorCobrar.getValueAt(seleccionar, 6).toString());
         txtST.setText(tbDeudasPorCobrar.getValueAt(seleccionar, 12).toString());
     }//GEN-LAST:event_tbDeudasPorCobrarMouseClicked
@@ -718,11 +718,11 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_btnBusquedaFechaEmpresaActionPerformed
 
-    private void btnMostrarTodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarTodoActionPerformed
+    private void btnMostrarDeudasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarDeudasActionPerformed
         MostrarTablaDeuda();
-    }//GEN-LAST:event_btnMostrarTodoActionPerformed
+    }//GEN-LAST:event_btnMostrarDeudasActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnPagarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPagarActionPerformed
 double subtotal = 0.0;
     double impuesto = 0.06; // Impuesto del 6%
     double total = 0.0;
@@ -771,24 +771,24 @@ double subtotal = 0.0;
         JOptionPane.showMessageDialog(null, "Antes de obtener los datos, debe de seleccionar por lo menos un checkbox.",
                 "Mensaje", JOptionPane.WARNING_MESSAGE);
     }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnPagarActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnMostrarCanceladasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarCanceladasActionPerformed
         MostrarTablaPagadas();
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btnMostrarCanceladasActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton btnBusquedaEmpresa;
     private javax.swing.JButton btnBusquedaFechaEmpresa;
-    private javax.swing.JButton btnMostrarTodo;
+    private javax.swing.JButton btnMostrarCanceladas;
+    private javax.swing.JButton btnMostrarDeudas;
+    private javax.swing.JButton btnPagar;
     private javax.swing.JButton btnSalir;
     private javax.swing.JCheckBox cbSeleccionaTodo;
     private javax.swing.JComboBox<String> cbxEmpresa;
     private com.toedter.calendar.JDateChooser dateFin;
     private com.toedter.calendar.JDateChooser dateInicio;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -812,7 +812,7 @@ double subtotal = 0.0;
     private javax.swing.JTextField jTextField9;
     public javax.swing.JTable tbDeudasPorCobrar;
     private javax.swing.JTextField txtBusqueda;
-    private javax.swing.JTextField txtCustomer;
+    private javax.swing.JTextField txtCliente;
     private javax.swing.JTextField txtDireccion;
     private javax.swing.JTextField txtEmpresa;
     private javax.swing.JTextField txtId;
@@ -873,9 +873,9 @@ double subtotal = 0.0;
         return bandera;
     }
     
-//    private void pdf() throws FileNotFoundException, IOException {
+//    private void pdf(String tipo) throws FileNotFoundException, IOException {
 //        try {
-//            int id = Vdao.IdVenta();
+//            int id = Integer.parseInt(txtId.getText());
 //            FileOutputStream archivo;
 //            File file = new File("src/pdf/venta" + id + ".pdf");
 //            archivo = new FileOutputStream(file);
@@ -889,7 +889,7 @@ double subtotal = 0.0;
 //            Font negrita = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD, BaseColor.BLUE);
 //            fecha.add(Chunk.NEWLINE);
 //            Date date = new Date();
-//            fecha.add("Factura:" + id + "\n" + "Fecha: " + new SimpleDateFormat("dd-mm-yyyy").format(date) + "\n\n");
+//            fecha.add("Factura:" + id + "\n" + "Fecha: " + new SimpleDateFormat("dd-MM-yyyy").format(date) + "\n\n");
 //            //Tabla Encabezado
 //            PdfPTable Encabezado = new PdfPTable(4);
 //            Encabezado.setWidthPercentage(100);
@@ -937,9 +937,9 @@ double subtotal = 0.0;
 //            tablacli.addCell(cl3);
 //            tablacli.addCell(cl4);
 //            tablacli.addCell(txtRucVenta.getText());
-//            tablacli.addCell(txtNombreClienteventa.getText());
+//            tablacli.addCell(txtCliente.getText());
 //            tablacli.addCell(txtTelefonoCliente.getText());
-//            tablacli.addCell(txtDirecionCliente.getText());
+//            tablacli.addCell(txtDireccion.getText());
 //            //Agregamos al Documento
 //            doc.add(tablacli);
 //
@@ -966,21 +966,35 @@ double subtotal = 0.0;
 //            tablapro.addCell(pro2);
 //            tablapro.addCell(pro3);
 //            tablapro.addCell(pro4);
-//            for (int i = 0; i < tbDeudasPorCobrar.getRowCount(); i++) {
-//                String producto = tbDeudasPorCobrar.getValueAt(i, 1).toString();
-//                String cantidad = tbDeudasPorCobrar.getValueAt(i, 2).toString();
-//                String precio = tbDeudasPorCobrar.getValueAt(i, 3).toString();
-//                String total = tbDeudasPorCobrar.getValueAt(i, 4).toString();
-//                tablapro.addCell(cantidad);
-//                tablapro.addCell(producto);
-//                tablapro.addCell(precio);
-//                tablapro.addCell(total);
+//            
+//            if (tipo.equals("individual")) {
+//                // Generar PDF para un cliente individual
+//                tablapro.addCell("1");
+//                tablapro.addCell(txtCliente.getText());
+//                tablapro.addCell(txtST.getText());
+//                tablapro.addCell(txtTotal.getText());
+//            } else {
+//                // Generar PDF para un grupo de clientes seleccionados
+//                for (int i = 0; i < tbDeudasPorCobrar.getRowCount(); i++) {
+//                    boolean isSelected = (boolean) tbDeudasPorCobrar.getValueAt(i, 0);
+//                    if (isSelected) {
+//                        String producto = tbDeudasPorCobrar.getValueAt(i, 2).toString();
+//                        String cantidad = "1";
+//                        String precio = tbDeudasPorCobrar.getValueAt(i, 12).toString();
+//                        String total = tbDeudasPorCobrar.getValueAt(i, 12).toString();
+//                        tablapro.addCell(cantidad);
+//                        tablapro.addCell(producto);
+//                        tablapro.addCell(precio);
+//                        tablapro.addCell(total);
+//                    }
+//                }
 //            }
+//            
 //            doc.add(tablapro);
 //            //Nuevo Paragraph para el total
 //            Paragraph info = new Paragraph();
 //            info.add(Chunk.NEWLINE);
-//            info.add("Total a Pagar: " + Totalpagar);
+//            info.add("Total a Pagar: " + txtTotal.getText());
 //            info.setAlignment(Element.ALIGN_RIGHT);
 //            doc.add(info);
 //            //Paragraph para la firma

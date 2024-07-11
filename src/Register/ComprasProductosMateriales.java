@@ -856,7 +856,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         } else {
             JOptionPane.showMessageDialog(null, "No hay Datos en la Compra");
         }
-        
+
     }//GEN-LAST:event_btnRegistrarCreditoActionPerformed
 
     private void txtPrecioUnitarioKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtPrecioUnitarioKeyPressed
@@ -983,8 +983,8 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
     private void txt_InicialKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_InicialKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-        calcularDiferencia();
-    }
+            calcularDiferencia();
+        }
     }//GEN-LAST:event_txt_InicialKeyPressed
 
 
@@ -1370,17 +1370,16 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         }
         return id;
     }
-    
-    
+
 //Registrar los Pagos pendientes Por Credito o Prestamos
     public void registrarPagosPendientes() {
-    Conectar con = new Conectar();
-    Connection connect = null;
-    PreparedStatement stmt = null;
-    try {
-        connect = con.getConexion();
+        Conectar con = new Conectar();
+        Connection connect = null;
+        PreparedStatement stmt = null;
+        try {
+            connect = con.getConexion();
 
-        // Obtener los datos de las cajas de texto
+            // Obtener los datos de las cajas de texto
             int id = IdCompra();
             int frecuencia = Integer.parseInt(txtFrecuencia.getText());
             double interes = Double.parseDouble(txtInteres.getText());
@@ -1396,57 +1395,57 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                 return; // Añadido return para evitar continuar si la fecha es nula
             }
 
-        // Preparar la inserción de pagos en la base de datos
-        String sql = "INSERT INTO creditoprod (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
-        stmt = connect.prepareStatement(sql);
+            // Preparar la inserción de pagos en la base de datos
+            String sql = "INSERT INTO creditoprod (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
+            stmt = connect.prepareStatement(sql);
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(fechaInicio);
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(fechaInicio);
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        for (int i = 1; i <= numeroCuotas; i++) {
-            calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
+            for (int i = 1; i <= numeroCuotas; i++) {
+                calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
 
-            Date fechaPago = calendar.getTime();
-            double cuotaActual = valorCuota;
+                Date fechaPago = calendar.getTime();
+                double cuotaActual = valorCuota;
 
-            // Ajustar la última cuota si la diferencia es menor que el valor de la cuota
-            if (i == numeroCuotas && diferencia < valorCuota) {
-                cuotaActual = diferencia;
+                // Ajustar la última cuota si la diferencia es menor que el valor de la cuota
+                if (i == numeroCuotas && diferencia < valorCuota) {
+                    cuotaActual = diferencia;
+                }
+
+                diferencia -= cuotaActual;
+
+                stmt.setInt(1, id);
+                stmt.setInt(2, frecuencia);
+                stmt.setString(3, dateFormat.format(fechaPago));
+                stmt.setDouble(4, interes);
+                stmt.setInt(5, i); // Número de la cuota actual
+                stmt.setDouble(6, cuotaActual);
+                stmt.setDouble(7, diferencia); // Diferencia actualizada
+
+                stmt.executeUpdate();
             }
 
-            diferencia -= cuotaActual;
+            JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
 
-            stmt.setInt(1, id);
-            stmt.setInt(2, frecuencia);
-            stmt.setString(3, dateFormat.format(fechaPago));
-            stmt.setDouble(4, interes);
-            stmt.setInt(5, i); // Número de la cuota actual
-            stmt.setDouble(6, cuotaActual);
-            stmt.setDouble(7, diferencia); // Diferencia actualizada
-
-            stmt.executeUpdate();
-        }
-
-        JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
-
-    } catch (SQLException ex) {
-        JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
-    } finally {
-        try {
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (connect != null) {
-                connect.close();
-            }
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (connect != null) {
+                    connect.close();
+                }
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
+            }
         }
     }
-}
-    
+
 //Limpiar las cajas de texto
     private void LimpiartxtCred() {
         txtTotal1.setText("");
@@ -1494,16 +1493,15 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     }
 
     private void calcularDiferencia() {
-    try {
-        double total = Double.parseDouble(JLabelTotalCompra.getText().trim());
-        double inicial = Double.parseDouble(txt_Inicial.getText().trim());
-        double diferencia = total - inicial;
-        txt_diferencia.setText(String.valueOf(diferencia));
-    } catch (NumberFormatException ex) {
-        JOptionPane.showMessageDialog(this, "Por favor, ingrese valores numéricos válidos.");
+        try {
+            double total = Double.parseDouble(JLabelTotalCompra.getText().trim());
+            double inicial = Double.parseDouble(txt_Inicial.getText().trim());
+            double diferencia = total - inicial;
+            txt_diferencia.setText(String.valueOf(diferencia));
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Por favor, ingrese valores numéricos válidos.");
+        }
     }
-}
-
 
     // Método para calcular el total a pagar
     private void TotalPagar() {
@@ -1532,6 +1530,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         ((DefaultTableModel) table.getModel()).fireTableDataChanged();
     }
 
+    // Método para mostrar el stock de un producto
     private void mostrarStock(String producto) {
         Conectar con = new Conectar();
         Connection connect = con.getConexion();
@@ -1544,71 +1543,82 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
                 if (rs.next()) {
                     int stock = rs.getInt("stock");
                     txtStock.setText(String.valueOf(stock));
-//                    System.out.println("Stock: " + stock);
                 } else {
                     txtStock.setText("0");
-//                    System.out.println("Producto no encontrado.");
                 }
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error al mostrar stock " + e.toString());
+                JOptionPane.showMessageDialog(null, "Error al mostrar stock: " + e.toString());
             } finally {
                 try {
                     connect.close();
                 } catch (SQLException e) {
-//                    System.out.println("Error al cerrar la conexión: " + e.getMessage());
+                    System.out.println("Error al cerrar la conexión: " + e.getMessage());
                 }
             }
         } else {
-//            System.out.println("Error: Conexión a la base de datos fallida.");
+            System.out.println("Error: Conexión a la base de datos fallida.");
         }
     }
-    
-    //Actualizar Stock
-    public Productos BuscarPro(String nombre){
+
+// Método para buscar un producto por nombre
+// Método para buscar un producto por nombre
+    public Productos BuscarPro(String nombre) {
         Productos producto = new Productos();
         String sql = "SELECT * FROM product WHERE nameProduct = ?";
-        try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
-            
+        try (Connection connect = con.getConexion(); PreparedStatement ps = connect.prepareStatement(sql)) {
+
             ps.setString(1, nombre);
-            rs = ps.executeQuery();
-            
-            if (rs.next()) {
-                producto.setIdProduct(rs.getInt("id"));
-                producto.setNameProduct(rs.getString("nombre"));
-                producto.setStock(rs.getInt("stock"));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    producto.setIdProduct(rs.getInt("idProduct"));  // Ajusta el nombre de la columna según tu base de datos
+                    producto.setNameProduct(rs.getString("nameProduct"));  // Ajusta el nombre de la columna según tu base de datos
+                    producto.setStock(rs.getInt("stock"));
+                }
             }
         } catch (SQLException e) {
-            System.out.println(e.toString());
+            System.out.println("Error al buscar producto: " + e.toString());
         }
         return producto;
     }
-    
-    public boolean ActualizarStock(int cant, String nombre){
-        String sql = "UPDATE productos SET stock = ? WHERE codigo = ?";
-        try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
-            ps.setInt(1,cant);
-            ps.setString(2,nombre);
+
+// Método para actualizar el stock de un producto
+    public boolean ActualizarStock(int cant, String nombre) {
+        String sql = "UPDATE product SET stock = ? WHERE nameProduct = ?";  // Ajusta el nombre de la tabla y columna según tu base de datos
+        try (Connection connect = con.getConexion(); PreparedStatement ps = connect.prepareStatement(sql)) {
+
+            ps.setInt(1, cant);
+            ps.setString(2, nombre);
             ps.execute();
             return true;
         } catch (SQLException e) {
-            System.out.println(e.toString());
+            System.out.println("Error al actualizar el stock: " + e.toString());
             return false;
         }
     }
-    
+
+// Método para actualizar el stock de todos los productos en la tabla
     private void ActualizarStock() {
         for (int i = 0; i < tbCompraProducto.getRowCount(); i++) {
-            String cod = tbCompraProducto.getValueAt(i, 0).toString();
-            int cant = Integer.parseInt(tbCompraProducto.getValueAt(i, 2).toString());
-            String nombre = null;
-            BuscarPro(nombre);
-            int StockActual = (int) (pro.getStock() + cant);
-            ActualizarStock(StockActual, nombre);
+            try {
+                String nombre = tbCompraProducto.getValueAt(i, 0).toString();
+                int cant = Integer.parseInt(tbCompraProducto.getValueAt(i, 3).toString());
+                Productos pro = BuscarPro(nombre);
 
+                if (pro != null) {
+                    int StockActual = pro.getStock() + cant;  // Sumamos el stock actual con la cantidad ingresada
+                    if (ActualizarStock(StockActual, nombre)) {
+                        System.out.println("Stock actualizado para " + nombre);
+                    } else {
+                        System.out.println("Error al actualizar el stock para " + nombre);
+                    }
+                } else {
+                    System.out.println("Producto no encontrado: " + nombre);
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Cantidad inválida en la fila " + (i + 1) + ": " + e.toString());
+            } catch (Exception e) {
+                System.out.println("Error al actualizar el stock para la fila " + (i + 1) + ": " + e.getMessage());
+            }
         }
     }
 }
