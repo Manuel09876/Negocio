@@ -1179,13 +1179,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
                 stmt.executeUpdate();
 
-//            // Mostrar aviso dos días antes de la fecha de pago
-//            Calendar avisoCalendar = Calendar.getInstance();
-//            avisoCalendar.setTime(fechaPago);
-//            avisoCalendar.add(Calendar.DAY_OF_MONTH, -2);
-//            Date fechaAviso = avisoCalendar.getTime();
-//            DateFormat avisoFormat = new SimpleDateFormat("dd/MM/yyyy");
-//            JOptionPane.showMessageDialog(null, "¡Atención! Quedan 2 días para la fecha de pago de la cuota " + i + ": " + avisoFormat.format(fechaAviso));
+
             }
 
             JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");

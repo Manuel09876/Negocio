@@ -11,42 +11,63 @@ import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.PageSize;
 import conectar.Conectar;
+import java.awt.Component;
 import java.awt.Desktop;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-import javax.swing.text.Document;
+
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
     Conectar con = new Conectar();
     Connection connect = con.getConexion();
+    DefaultTableModel modelo = new DefaultTableModel();
 
     public DeudasPorCobrar() {
         initComponents();
-        MostrarEmpresa(cbxEmpresa);
         AutoCompleteDecorator.decorate(cbxEmpresa);
+        AutoCompleteDecorator.decorate(cbxPagarCon);
+        MostrarEmpresa(cbxEmpresa);
+        MostrarFormaDePago(cbxPagarCon);
         MostrarTablaDeuda();
         txtId.setEnabled(false);
         txtIdEmpresa.setEnabled(false);
+
+        getNextInvoiceNumber();
+
+        
 
     }
 
@@ -61,124 +82,140 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }
 
     public void MostrarTablaDeuda() {
-        DefaultTableModel modelo = new DefaultTableModel();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio", "Status", "Estado de Cuenta"};
-            String[] RegistroBD = new String[15];
-            modelo = new DefaultTableModel(null, tituloTabla);
-            addCheckBox(0, tbDeudasPorCobrar);
-            String sql = "SELECT o.id, bussiness.nameBusiness AS Empresa, o.fechaT AS Fecha, customer.nameCustomer "
-                    + "AS Nombre, customer.area AS Tamaño, customer.address AS Direccion, customer.city AS Ciudad, customer.state AS Estado, "
-                    + "customer.zipCode AS 'Zip Code', customer.phoneNumber AS Celular, o.servicio AS Servicio, "
-                    + "o.precio AS Precio, o.estado AS Status, o.eeCta AS 'Estado de Cuenta' "
-                    + "FROM orderservice AS o "
-                    + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness "
-                    + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
-                    + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'deuda' "
-                    + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            while (rs.next()) {
-                RegistroBD[1] = rs.getString("id");
-                RegistroBD[2] = rs.getString("Empresa");
-                RegistroBD[3] = rs.getString("Fecha");
-                RegistroBD[4] = rs.getString("Nombre");
-                RegistroBD[5] = rs.getString("Tamaño");
-                RegistroBD[6] = rs.getString("Direccion");
-                RegistroBD[7] = rs.getString("Ciudad");
-                RegistroBD[8] = rs.getString("Estado");
-                RegistroBD[9] = rs.getString("Zip Code");
-                RegistroBD[10] = rs.getString("Celular");
-                RegistroBD[11] = rs.getString("Servicio");
-                RegistroBD[12] = rs.getString("Precio");
-                RegistroBD[13] = rs.getString("Status");
-                RegistroBD[14] = rs.getString("Estado de Cuenta");
-                modelo.addRow(RegistroBD);
-            }
-            tbDeudasPorCobrar.setModel(modelo);
-            // Añadir checkbox a cada fila
-            for (int i = 0; i < modelo.getRowCount(); i++) {
-                addCheckBox(0, tbDeudasPorCobrar); // Agregar checkbox a la columna 0 de cada fila
-            }
-            tbDeudasPorCobrar.getColumnModel().getColumn(0).setPreferredWidth(50);
-            tbDeudasPorCobrar.getColumnModel().getColumn(1).setPreferredWidth(30);
-            tbDeudasPorCobrar.getColumnModel().getColumn(2).setPreferredWidth(100);
-            tbDeudasPorCobrar.getColumnModel().getColumn(3).setPreferredWidth(100);
-            tbDeudasPorCobrar.getColumnModel().getColumn(4).setPreferredWidth(80);
-            tbDeudasPorCobrar.getColumnModel().getColumn(5).setPreferredWidth(150);
-            tbDeudasPorCobrar.getColumnModel().getColumn(6).setPreferredWidth(80);
-            tbDeudasPorCobrar.getColumnModel().getColumn(7).setPreferredWidth(60);
-            tbDeudasPorCobrar.getColumnModel().getColumn(8).setPreferredWidth(60);
-            tbDeudasPorCobrar.getColumnModel().getColumn(9).setPreferredWidth(80);
-            tbDeudasPorCobrar.getColumnModel().getColumn(10).setPreferredWidth(150);
-            tbDeudasPorCobrar.getColumnModel().getColumn(11).setPreferredWidth(150);
-            tbDeudasPorCobrar.getColumnModel().getColumn(12).setPreferredWidth(150);
-            tbDeudasPorCobrar.getColumnModel().getColumn(13).setPreferredWidth(150);
-        } catch (SQLException e) {
-            System.out.println("Error al mostrar la Tabla " + e.toString());
+    DefaultTableModel modelo = new DefaultTableModel();
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    try {
+        String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio", "Status", "Estado de Cuenta", "Número Factura", "Ver PDF"};
+        String[] RegistroBD = new String[17];
+        modelo = new DefaultTableModel(null, tituloTabla);
+        addCheckBox(0, tbDeudasPorCobrar);
+        String sql = "SELECT o.id, bussiness.nameBusiness AS Empresa, o.fechaT AS Fecha, customer.nameCustomer "
+                + "AS Nombre, customer.area AS Tamaño, customer.address AS Direccion, customer.city AS Ciudad, customer.state AS Estado, "
+                + "customer.zipCode AS 'Zip Code', customer.phoneNumber AS Celular, o.servicio AS Servicio, "
+                + "o.precio AS Precio, o.estado AS Status, o.eeCta AS 'Estado de Cuenta', f.numeroFactura "
+                + "FROM orderservice AS o "
+                + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness "
+                + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
+                + "LEFT JOIN facturas AS f ON o.id = f.id_ordenServicio " // Asegúrate de que tienes la relación correcta
+                + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'deuda' "
+                + "ORDER BY o.fechaT ASC";
+        Statement st = connect.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        while (rs.next()) {
+            RegistroBD[1] = rs.getString("id");
+            RegistroBD[2] = rs.getString("Empresa");
+            RegistroBD[3] = rs.getString("Fecha");
+            RegistroBD[4] = rs.getString("Nombre");
+            RegistroBD[5] = rs.getString("Tamaño");
+            RegistroBD[6] = rs.getString("Direccion");
+            RegistroBD[7] = rs.getString("Ciudad");
+            RegistroBD[8] = rs.getString("Estado");
+            RegistroBD[9] = rs.getString("Zip Code");
+            RegistroBD[10] = rs.getString("Celular");
+            RegistroBD[11] = rs.getString("Servicio");
+            RegistroBD[12] = rs.getString("Precio");
+            RegistroBD[13] = rs.getString("Status");
+            RegistroBD[14] = rs.getString("Estado de Cuenta");
+            RegistroBD[15] = rs.getString("numeroFactura");
+            RegistroBD[16] = (rs.getString("numeroFactura") == null) ? "Sin PDF" : "Ver PDF";
+            modelo.addRow(RegistroBD);
         }
+        tbDeudasPorCobrar.setModel(modelo);
+        // Añadir checkbox a cada fila
+        for (int i = 0; i < modelo.getRowCount(); i++) {
+            addCheckBox(0, tbDeudasPorCobrar); // Agregar checkbox a la columna 0 de cada fila
+        }
+        tbDeudasPorCobrar.getColumnModel().getColumn(0).setPreferredWidth(50);
+        tbDeudasPorCobrar.getColumnModel().getColumn(1).setPreferredWidth(30);
+        tbDeudasPorCobrar.getColumnModel().getColumn(2).setPreferredWidth(100);
+        tbDeudasPorCobrar.getColumnModel().getColumn(3).setPreferredWidth(100);
+        tbDeudasPorCobrar.getColumnModel().getColumn(4).setPreferredWidth(80);
+        tbDeudasPorCobrar.getColumnModel().getColumn(5).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(6).setPreferredWidth(80);
+        tbDeudasPorCobrar.getColumnModel().getColumn(7).setPreferredWidth(60);
+        tbDeudasPorCobrar.getColumnModel().getColumn(8).setPreferredWidth(60);
+        tbDeudasPorCobrar.getColumnModel().getColumn(9).setPreferredWidth(80);
+        tbDeudasPorCobrar.getColumnModel().getColumn(10).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(11).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(12).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(13).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(14).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(15).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(16).setPreferredWidth(80); // Ajustar el ancho de la columna del botón
+        addButtonToTable(tbDeudasPorCobrar, 16); // Agregar el botón después de configurar el modelo
+    } catch (SQLException e) {
+        System.out.println("Error al mostrar la Tabla " + e.toString());
     }
-    
+}
+
+
     public void MostrarTablaPagadas() {
-        DefaultTableModel modelo = new DefaultTableModel();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio", "Status", "Estado de Cuenta"};
-            String[] RegistroBD = new String[15];
-            modelo = new DefaultTableModel(null, tituloTabla);
-            addCheckBox(0, tbDeudasPorCobrar);
-            String sql = "SELECT o.id, bussiness.nameBusiness AS Empresa, o.fechaT AS Fecha, customer.nameCustomer "
-                    + "AS Nombre, customer.area AS Tamaño, customer.address AS Direccion, customer.city AS Ciudad, customer.state AS Estado, "
-                    + "customer.zipCode AS 'Zip Code', customer.phoneNumber AS Celular, o.servicio AS Servicio, "
-                    + "o.precio AS Precio, o.estado AS Status, o.eeCta AS 'Estado de Cuenta' "
-                    + "FROM orderservice AS o "
-                    + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness "
-                    + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
-                    + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'Cancelada' "
-                    + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            while (rs.next()) {
-                RegistroBD[1] = rs.getString("id");
-                RegistroBD[2] = rs.getString("Empresa");
-                RegistroBD[3] = rs.getString("Fecha");
-                RegistroBD[4] = rs.getString("Nombre");
-                RegistroBD[5] = rs.getString("Tamaño");
-                RegistroBD[6] = rs.getString("Direccion");
-                RegistroBD[7] = rs.getString("Ciudad");
-                RegistroBD[8] = rs.getString("Estado");
-                RegistroBD[9] = rs.getString("Zip Code");
-                RegistroBD[10] = rs.getString("Celular");
-                RegistroBD[11] = rs.getString("Servicio");
-                RegistroBD[12] = rs.getString("Precio");
-                RegistroBD[13] = rs.getString("Status");
-                RegistroBD[14] = rs.getString("Estado de Cuenta");
-                modelo.addRow(RegistroBD);
-            }
-            tbDeudasPorCobrar.setModel(modelo);
-            // Añadir checkbox a cada fila
-            for (int i = 0; i < modelo.getRowCount(); i++) {
-                addCheckBox(0, tbDeudasPorCobrar); // Agregar checkbox a la columna 0 de cada fila
-            }
-            tbDeudasPorCobrar.getColumnModel().getColumn(0).setPreferredWidth(50);
-            tbDeudasPorCobrar.getColumnModel().getColumn(1).setPreferredWidth(30);
-            tbDeudasPorCobrar.getColumnModel().getColumn(2).setPreferredWidth(100);
-            tbDeudasPorCobrar.getColumnModel().getColumn(3).setPreferredWidth(100);
-            tbDeudasPorCobrar.getColumnModel().getColumn(4).setPreferredWidth(80);
-            tbDeudasPorCobrar.getColumnModel().getColumn(5).setPreferredWidth(150);
-            tbDeudasPorCobrar.getColumnModel().getColumn(6).setPreferredWidth(80);
-            tbDeudasPorCobrar.getColumnModel().getColumn(7).setPreferredWidth(60);
-            tbDeudasPorCobrar.getColumnModel().getColumn(8).setPreferredWidth(60);
-            tbDeudasPorCobrar.getColumnModel().getColumn(9).setPreferredWidth(80);
-            tbDeudasPorCobrar.getColumnModel().getColumn(10).setPreferredWidth(150);
-            tbDeudasPorCobrar.getColumnModel().getColumn(11).setPreferredWidth(150);
-            tbDeudasPorCobrar.getColumnModel().getColumn(12).setPreferredWidth(150);
-            tbDeudasPorCobrar.getColumnModel().getColumn(13).setPreferredWidth(150);
-        } catch (SQLException e) {
-            System.out.println("Error al mostrar la Tabla " + e.toString());
+    DefaultTableModel modelo = new DefaultTableModel();
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    try {
+        String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio", "Status", "Estado de Cuenta", "Número Factura", "Ver PDF"};
+        String[] RegistroBD = new String[17];
+        modelo = new DefaultTableModel(null, tituloTabla);
+        addCheckBox(0, tbDeudasPorCobrar);
+        String sql = "SELECT o.id, bussiness.nameBusiness AS Empresa, o.fechaT AS Fecha, customer.nameCustomer "
+                + "AS Nombre, customer.area AS Tamaño, customer.address AS Direccion, customer.city AS Ciudad, customer.state AS Estado, "
+                + "customer.zipCode AS 'Zip Code', customer.phoneNumber AS Celular, o.servicio AS Servicio, "
+                + "o.precio AS Precio, o.estado AS Status, o.eeCta AS 'Estado de Cuenta', f.numeroFactura "
+                + "FROM orderservice AS o "
+                + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness "
+                + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
+                + "LEFT JOIN facturas AS f ON o.id = f.id_ordenServicio " // Asegúrate de que tienes la relación correcta
+                + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'Cancelada' "
+                + "ORDER BY o.fechaT ASC";
+        Statement st = connect.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        while (rs.next()) {
+            RegistroBD[1] = rs.getString("id");
+            RegistroBD[2] = rs.getString("Empresa");
+            RegistroBD[3] = rs.getString("Fecha");
+            RegistroBD[4] = rs.getString("Nombre");
+            RegistroBD[5] = rs.getString("Tamaño");
+            RegistroBD[6] = rs.getString("Direccion");
+            RegistroBD[7] = rs.getString("Ciudad");
+            RegistroBD[8] = rs.getString("Estado");
+            RegistroBD[9] = rs.getString("Zip Code");
+            RegistroBD[10] = rs.getString("Celular");
+            RegistroBD[11] = rs.getString("Servicio");
+            RegistroBD[12] = rs.getString("Precio");
+            RegistroBD[13] = rs.getString("Status");
+            RegistroBD[14] = rs.getString("Estado de Cuenta");
+            RegistroBD[15] = rs.getString("numeroFactura");
+            RegistroBD[16] = (rs.getString("numeroFactura") == null) ? "Sin PDF" : "Ver PDF";
+            modelo.addRow(RegistroBD);
         }
+        tbDeudasPorCobrar.setModel(modelo);
+        // Añadir checkbox a cada fila
+        for (int i = 0; i < modelo.getRowCount(); i++) {
+            addCheckBox(0, tbDeudasPorCobrar); // Agregar checkbox a la columna 0 de cada fila
+        }
+        tbDeudasPorCobrar.getColumnModel().getColumn(0).setPreferredWidth(50);
+        tbDeudasPorCobrar.getColumnModel().getColumn(1).setPreferredWidth(30);
+        tbDeudasPorCobrar.getColumnModel().getColumn(2).setPreferredWidth(100);
+        tbDeudasPorCobrar.getColumnModel().getColumn(3).setPreferredWidth(100);
+        tbDeudasPorCobrar.getColumnModel().getColumn(4).setPreferredWidth(80);
+        tbDeudasPorCobrar.getColumnModel().getColumn(5).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(6).setPreferredWidth(80);
+        tbDeudasPorCobrar.getColumnModel().getColumn(7).setPreferredWidth(60);
+        tbDeudasPorCobrar.getColumnModel().getColumn(8).setPreferredWidth(60);
+        tbDeudasPorCobrar.getColumnModel().getColumn(9).setPreferredWidth(80);
+        tbDeudasPorCobrar.getColumnModel().getColumn(10).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(11).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(12).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(13).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(14).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(15).setPreferredWidth(150);
+        tbDeudasPorCobrar.getColumnModel().getColumn(16).setPreferredWidth(80); // Ajustar el ancho de la columna del botón
+        addButtonToTable(tbDeudasPorCobrar, 16); // Agregar el botón después de configurar el modelo
+    } catch (SQLException e) {
+        System.out.println("Error al mostrar la Tabla " + e.toString());
     }
+}
+
 
     //Codigo Para buscar dentro de la tabla por medio del txtField Busqueda
     public DefaultTableModel buscarTabla(String buscar) {
@@ -241,6 +278,275 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         return modelo;
     }
 
+    public class InvoiceGenerator {
+
+        public void generateInvoicePDF(String filePath, JTable table, List<Integer> selectedRows, String company, String client, String address, double subtotal, double tax, double total, String paymentMethod, double tip) {
+            Document document = new Document(PageSize.A4);
+            try {
+                PdfWriter.getInstance(document, new FileOutputStream(filePath));
+                document.open();
+
+                // Agregar título
+                Font fontTitle = new Font(Font.FontFamily.TIMES_ROMAN, 18, Font.BOLD);
+                Paragraph title = new Paragraph("Factura", fontTitle);
+                title.setAlignment(Element.ALIGN_CENTER);
+                document.add(title);
+
+                // Agregar información de la empresa
+                document.add(new Paragraph("Empresa: " + company));
+                document.add(new Paragraph("Cliente: " + client));
+                document.add(new Paragraph("Dirección: " + address));
+                document.add(new Paragraph("Fecha: " + new Date().toString()));
+                document.add(new Paragraph("Método de Pago: " + paymentMethod));
+                document.add(new Paragraph("\n"));
+
+                // Crear la tabla de productos/servicios
+                PdfPTable pdfTable = new PdfPTable(8); // Número de columnas
+                pdfTable.setWidthPercentage(100); // Ancho total de la tabla
+
+                // Definir los anchos relativos de las columnas
+                float[] columnWidths = {1.5f, 3f, 1f, 1f, 1.5f, 1f, 2f, 2f}; // Ajusta estos valores según sea necesario
+                pdfTable.setWidths(columnWidths);
+
+                // Agregar encabezados de columna
+                String[] headers = {"Nombre", "Dirección", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio"};
+                for (String header : headers) {
+                    PdfPCell cell = new PdfPCell(new Phrase(header));
+                    cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                    pdfTable.addCell(cell);
+                }
+
+                // Agregar filas de datos seleccionadas
+                for (int rowIndex : selectedRows) {
+                    pdfTable.addCell(table.getValueAt(rowIndex, 4).toString()); // Nombre
+                    pdfTable.addCell(table.getValueAt(rowIndex, 6).toString()); // Dirección
+                    pdfTable.addCell(table.getValueAt(rowIndex, 7).toString()); // Ciudad
+                    pdfTable.addCell(table.getValueAt(rowIndex, 8).toString()); // Estado
+                    pdfTable.addCell(table.getValueAt(rowIndex, 9).toString()); // Zip Code
+                    pdfTable.addCell(table.getValueAt(rowIndex, 10).toString()); // Celular
+                    pdfTable.addCell(table.getValueAt(rowIndex, 11).toString()); // Servicio
+                    pdfTable.addCell(table.getValueAt(rowIndex, 12).toString()); // Precio
+                }
+                document.add(pdfTable);
+                document.add(new Paragraph("\n"));
+
+                // Agregar totales
+                document.add(new Paragraph("Subtotal: $" + String.format("%.2f", subtotal)));
+                document.add(new Paragraph("Impuesto: $" + String.format("%.2f", tax)));
+                document.add(new Paragraph("Propina: $" + String.format("%.2f", tip)));
+                document.add(new Paragraph("Total: $" + String.format("%.2f", total)));
+
+                document.close();
+                JOptionPane.showMessageDialog(null, "Factura generada correctamente en: " + filePath);
+
+            } catch (DocumentException | IOException e) {
+                JOptionPane.showMessageDialog(null, "Error al generar la factura: " + e.getMessage());
+            }
+        }
+
+        public void savePDFToDatabase(String filePath, int orderId, int paymentMethodId, int invoiceNumber) {
+            Connection connection = null;
+            PreparedStatement pstmt = null;
+            FileInputStream fis = null;
+
+            try {
+                connection = con.getConexion(); // Obtener conexión a la base de datos
+                String sql = "INSERT INTO facturas (pdf, id_ordenServicio, id_pagarcon, numeroFactura) VALUES (?, ?, ?, ?)";
+                pstmt = connection.prepareStatement(sql);
+
+                File pdfFile = new File(filePath);
+                fis = new FileInputStream(pdfFile);
+                pstmt.setBinaryStream(1, fis, (int) pdfFile.length());
+                pstmt.setInt(2, orderId);
+                pstmt.setInt(3, paymentMethodId);
+                pstmt.setInt(4, invoiceNumber);
+                pstmt.executeUpdate();
+
+                JOptionPane.showMessageDialog(null, "PDF guardado en la base de datos exitosamente.");
+
+            } catch (SQLException | FileNotFoundException e) {
+                JOptionPane.showMessageDialog(null, "Error al guardar el PDF en la base de datos: " + e.getMessage());
+            } finally {
+                try {
+                    if (fis != null) {
+                        fis.close();
+                    }
+                    if (pstmt != null) {
+                        pstmt.close();
+                    }
+                    if (connection != null) {
+                        connection.close();
+                    }
+                } catch (IOException | SQLException e) {
+                    JOptionPane.showMessageDialog(null, "Error al cerrar recursos: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private int getNextInvoiceNumber() {
+        Connection connection = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        int nextInvoiceNumber = 1;
+
+        try {
+            connection = con.getConexion(); // Obtener conexión a la base de datos
+            String sql = "SELECT MAX(numeroFactura) AS maxInvoiceNumber FROM facturas";
+            stmt = connection.createStatement();
+            rs = stmt.executeQuery(sql);
+
+            if (rs.next()) {
+                nextInvoiceNumber = rs.getInt("maxInvoiceNumber") + 1;
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al obtener el siguiente número de factura: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error al cerrar recursos: " + e.getMessage());
+            }
+        }
+
+        txtProximoNumeroFactura.setText(String.valueOf(nextInvoiceNumber));
+        return nextInvoiceNumber;
+    }
+
+    private void updateOrderStatus(int orderId, String status) {
+        Connection connection = null;
+        PreparedStatement pstmt = null;
+
+        try {
+            connection = con.getConexion(); // Obtener conexión a la base de datos
+            String sql = "UPDATE orderservice SET eeCta = ? WHERE id = ?";
+            pstmt = connection.prepareStatement(sql);
+            pstmt.setString(1, status);
+            pstmt.setInt(2, orderId);
+            pstmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(null, "El estado de la orden ha sido actualizado a " + status);
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al actualizar el estado de la orden: " + e.getMessage());
+        } finally {
+            try {
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error al cerrar recursos: " + e.getMessage());
+            }
+        }
+    }
+
+    private int getPaymentMethodId(String paymentMethodName) {
+        Connection connection = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        int paymentMethodId = -1;
+
+        try {
+            connection = con.getConexion(); // Obtener conexión a la base de datos
+            String sql = "SELECT id_formadepago FROM formadepago WHERE nombre = ?";
+            pstmt = connection.prepareStatement(sql);
+            pstmt.setString(1, paymentMethodName);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                paymentMethodId = rs.getInt("id");
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al obtener el ID del método de pago: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error al cerrar recursos: " + e.getMessage());
+            }
+        }
+
+        return paymentMethodId;
+    }
+
+    private byte[] getPDFByInvoiceNumber(int invoiceNumber) {
+        Connection connection = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        byte[] pdfData = null;
+
+        try {
+            connection = con.getConexion(); // Obtener conexión a la base de datos
+            String sql = "SELECT pdf FROM facturas WHERE numeroFactura = ?";
+            pstmt = connection.prepareStatement(sql);
+            pstmt.setInt(1, invoiceNumber);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                pdfData = rs.getBytes("pdf");
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al obtener el PDF de la base de datos: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (pstmt != null) {
+                    pstmt.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error al cerrar recursos: " + e.getMessage());
+            }
+        }
+
+        return pdfData;
+    }
+
+    private void openPDF(byte[] pdfData) {
+        try {
+            File tempFile = File.createTempFile("factura", ".pdf");
+            FileOutputStream fos = new FileOutputStream(tempFile);
+            fos.write(pdfData);
+            fos.close();
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(tempFile);
+            } else {
+                JOptionPane.showMessageDialog(null, "No se puede abrir el PDF en este sistema.");
+            }
+
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Error al abrir el PDF: " + e.getMessage());
+        }
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -287,10 +593,18 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         jLabel14 = new javax.swing.JLabel();
         jTextField10 = new javax.swing.JTextField();
         btnPagar = new javax.swing.JButton();
+        jLabel16 = new javax.swing.JLabel();
+        cbxPagarCon = new javax.swing.JComboBox<>();
+        txtIdPagarCon = new javax.swing.JTextField();
+        txtProximoNumeroFactura = new javax.swing.JTextField();
+        jLabel17 = new javax.swing.JLabel();
+        btnAbrirPDF = new javax.swing.JButton();
+        txtNumeroFactura = new javax.swing.JTextField();
 
         setIconifiable(true);
         setMaximizable(true);
         setTitle("Deudas por Cobrar");
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel12.setBackground(new java.awt.Color(204, 255, 204));
         jPanel12.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -319,7 +633,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         });
         jScrollPane14.setViewportView(tbDeudasPorCobrar);
 
-        jPanel12.add(jScrollPane14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 120, 1220, 270));
+        jPanel12.add(jScrollPane14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 120, 1220, 240));
 
         btnBusquedaEmpresa.setText("Busqueda Empresa");
         btnBusquedaEmpresa.addActionListener(new java.awt.event.ActionListener() {
@@ -403,27 +717,56 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         });
         jPanel12.add(btnMostrarCanceladas, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 80, 170, -1));
 
+        getContentPane().add(jPanel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, 1268, 376));
+
         jPanel1.setBackground(new java.awt.Color(153, 255, 153));
+        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel5.setText("Empresa");
+        jPanel1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 18, -1, -1));
+        jPanel1.add(txtEmpresa, new org.netbeans.lib.awtextra.AbsoluteConstraints(109, 15, 233, -1));
 
         jLabel6.setText("Cliente");
+        jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 57, -1, -1));
+        jPanel1.add(txtCliente, new org.netbeans.lib.awtextra.AbsoluteConstraints(109, 54, 233, -1));
+        jPanel1.add(txtDireccion, new org.netbeans.lib.awtextra.AbsoluteConstraints(109, 76, 233, -1));
 
         jLabel7.setText("Dirección");
+        jPanel1.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 79, -1, -1));
 
         jLabel8.setText("Deuda Cliente");
+        jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(376, 18, -1, -1));
 
         jLabel9.setText("Tax");
+        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(432, 57, -1, -1));
 
         jLabel10.setText("Total");
+        jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 90, -1, -1));
+        jPanel1.add(txtST, new org.netbeans.lib.awtextra.AbsoluteConstraints(471, 15, 175, -1));
+        jPanel1.add(txtTax, new org.netbeans.lib.awtextra.AbsoluteConstraints(471, 54, 175, -1));
+        jPanel1.add(txtTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 90, 175, -1));
 
         jLabel11.setText("DeudaTotal");
+        jPanel1.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(692, 18, -1, -1));
+        jPanel1.add(txtSubtotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 20, 120, -1));
 
         jLabel12.setText("Tax");
+        jPanel1.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 60, -1, -1));
+        jPanel1.add(jTextField8, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 60, 120, -1));
 
         jLabel13.setText("Tip");
+        jPanel1.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 90, -1, -1));
+        jPanel1.add(jTextField9, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 90, 120, -1));
 
         jLabel14.setText("Total");
+        jPanel1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 120, -1, -1));
+
+        jTextField10.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField10ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jTextField10, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 120, 118, -1));
 
         btnPagar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
         btnPagar.setText("PAGAR");
@@ -432,137 +775,56 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                 btnPagarActionPerformed(evt);
             }
         });
+        jPanel1.add(btnPagar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1057, 112, -1, -1));
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(24, 24, 24)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel5)
-                            .addComponent(jLabel6)
-                            .addComponent(jLabel7))
-                        .addGap(35, 35, 35)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtDireccion, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)
-                            .addComponent(txtEmpresa)
-                            .addComponent(txtCliente))
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(34, 34, 34)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jLabel8)
-                                    .addComponent(jLabel9))
-                                .addGap(21, 21, 21))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel10)
-                                .addGap(18, 18, 18)))
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtST)
-                            .addComponent(txtTax)
-                            .addComponent(txtTotal, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE))
-                        .addGap(95, 95, 95)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel11)
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel13)
-                                .addComponent(jLabel12)))
-                        .addGap(21, 21, 21)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtSubtotal)
-                            .addComponent(jTextField8)
-                            .addComponent(jTextField9, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(84, 84, 84))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel14)
-                        .addGap(18, 18, 18)))
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTextField10, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnPagar))
-                .addContainerGap(28, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel11)
-                            .addComponent(txtSubtotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(17, 17, 17)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel12)
-                            .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel13)
-                            .addComponent(jTextField9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnPagar)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel5)
-                            .addComponent(txtEmpresa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel8)
-                            .addComponent(txtST, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(17, 17, 17)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel6)
-                            .addComponent(txtCliente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel9)
-                            .addComponent(txtTax, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(txtDireccion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel7)
-                            .addComponent(jLabel10)
-                            .addComponent(txtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(19, 19, 19)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jTextField10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel14))))
-                .addContainerGap(35, Short.MAX_VALUE))
-        );
+        jLabel16.setText("Pagar con:");
+        jPanel1.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(933, 18, -1, -1));
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 10, Short.MAX_VALUE))
-                    .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, 406, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(23, 23, 23))
-        );
+        cbxPagarCon.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " " }));
+        cbxPagarCon.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbxPagarConItemStateChanged(evt);
+            }
+        });
+        jPanel1.add(cbxPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(1007, 15, 128, -1));
+        jPanel1.add(txtIdPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(1147, 15, -1, -1));
+        jPanel1.add(txtProximoNumeroFactura, new org.netbeans.lib.awtextra.AbsoluteConstraints(933, 121, 82, -1));
+
+        jLabel17.setText("Factura Número");
+        jPanel1.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(933, 93, -1, -1));
+
+        btnAbrirPDF.setText("Abrir PDF");
+        btnAbrirPDF.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAbrirPDFActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnAbrirPDF, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 140, -1, -1));
+        jPanel1.add(txtNumeroFactura, new org.netbeans.lib.awtextra.AbsoluteConstraints(404, 140, 80, -1));
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 394, 1270, 200));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void tbDeudasPorCobrarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbDeudasPorCobrarMouseClicked
-        int seleccionar = tbDeudasPorCobrar.rowAtPoint(evt.getPoint());
-        txtId.setText(String.valueOf(tbDeudasPorCobrar.getValueAt(seleccionar, 1)));
-        txtEmpresa.setText(tbDeudasPorCobrar.getValueAt(seleccionar, 2).toString());
-        txtCliente.setText(tbDeudasPorCobrar.getValueAt(seleccionar, 4).toString());
-        txtDireccion.setText(tbDeudasPorCobrar.getValueAt(seleccionar, 6).toString());
-        txtST.setText(tbDeudasPorCobrar.getValueAt(seleccionar, 12).toString());
+        int column = tbDeudasPorCobrar.getColumnModel().getColumnIndexAtX(evt.getX()); // get the column of the button
+        int row = evt.getY() / tbDeudasPorCobrar.getRowHeight(); // get the row of the button
+
+        // Checking the row or column is valid or not
+        if (row < tbDeudasPorCobrar.getRowCount() && row >= 0 && column < tbDeudasPorCobrar.getColumnCount() && column >= 0) {
+            Object value = tbDeudasPorCobrar.getValueAt(row, column);
+            if (value.equals("Ver PDF")) {
+                int invoiceNumber = Integer.parseInt(tbDeudasPorCobrar.getValueAt(row, 15).toString());
+                byte[] pdfData = getPDFByInvoiceNumber(invoiceNumber);
+
+                if (pdfData != null) {
+                    openPDF(pdfData);
+                } else {
+                    JOptionPane.showMessageDialog(null, "No se encontró un PDF con el número de factura especificado.");
+                }
+            }
+        }
     }//GEN-LAST:event_tbDeudasPorCobrarMouseClicked
 
     private void btnBusquedaEmpresaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBusquedaEmpresaActionPerformed
@@ -725,62 +987,128 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnMostrarDeudasActionPerformed
 
     private void btnPagarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPagarActionPerformed
-double subtotal = 0.0;
-    double impuesto = 0.06; // Impuesto del 6%
-    double total = 0.0;
-    double tip = 0.0; // Propina inicialmente en 0
-    String Reportes = "";
-    JTextArea area = new JTextArea();
-    
-    if (Seleccionados(0)) {
-        for (int i = 0; i < tbDeudasPorCobrar.getRowCount(); i++) {
-            Object value = tbDeudasPorCobrar.getValueAt(i, 0);
-            if (value instanceof Boolean) {
-                boolean sel = (boolean) value;
-                if (sel) {
-                    double precio = Double.parseDouble(tbDeudasPorCobrar.getValueAt(i, 12).toString());
-                    subtotal += precio;
-                    Reportes += "Empresa : " + tbDeudasPorCobrar.getValueAt(i, 2) + " ; Cliente : " + tbDeudasPorCobrar.getValueAt(i, 4)
-                            + " precio : " + String.format("%.2f", precio) + "\n";
-                }
-            }
-        }
-        
-        // Calcular impuesto
-        double impuestoTotal = subtotal * impuesto;
-        
-        // Calcular total sin propina
-        total = subtotal + impuestoTotal;
-        
-        // Mostrar subtotal, impuesto y total antes de propina
-        area.setText("Subtotal: " + String.format("%.2f", subtotal) + "\nImpuesto (6%): " + String.format("%.2f", impuestoTotal) + "\nTotal sin propina: " + String.format("%.2f", total) + "\n\n" + Reportes);
-        
-        JOptionPane.showMessageDialog(this, area, "Información Detallada de Ventas", JOptionPane.INFORMATION_MESSAGE);
-        
-        // Agregar campo para ingresar propina
-        String input = JOptionPane.showInputDialog(this, "Ingrese el monto de propina a añadir:", "Propina", JOptionPane.QUESTION_MESSAGE);
         try {
-            tip = Double.parseDouble(input);
-            total += tip;
-            // Mostrar total final con propina
-            JOptionPane.showMessageDialog(this, "Subtotal: " + String.format("%.2f", subtotal) + "\nImpuesto (6%): " + String.format("%.2f", impuestoTotal) + "\nTotal + Propina: " + String.format("%.2f", total), "Total Detallado con Propina", JOptionPane.INFORMATION_MESSAGE);
-        } catch (NumberFormatException e) {
-            // Manejar error de ingreso inválido
-            JOptionPane.showMessageDialog(this, "Error al ingresar la propina. Se aplicará propina de $0.", "Error", JOptionPane.ERROR_MESSAGE);
+            double subtotal = 0.0;
+            double impuesto = 0.06; // Impuesto del 6%
+            double total = 0.0;
+            double tip = 0.0; // Propina inicialmente en 0
+            String Reportes = "";
+            JTextArea area = new JTextArea();
+            int paymentMethodId = Integer.parseInt(txtIdPagarCon.getText()); // Obtener ID del método de pago seleccionado
+            int nextInvoiceNumber = getNextInvoiceNumber(); // Obtener el siguiente número de factura
+
+            List<Integer> selectedRows = new ArrayList<>();
+            List<Integer> orderIds = new ArrayList<>();
+
+            if (Seleccionados(0)) {
+                for (int i = 0; i < tbDeudasPorCobrar.getRowCount(); i++) {
+                    Object value = tbDeudasPorCobrar.getValueAt(i, 0);
+                    if (value instanceof Boolean) {
+                        boolean sel = (boolean) value;
+                        if (sel) {
+                            selectedRows.add(i);
+                            orderIds.add(Integer.parseInt(tbDeudasPorCobrar.getValueAt(i, 1).toString())); // Obtener ID de la orden de servicio
+                            double precio = Double.parseDouble(tbDeudasPorCobrar.getValueAt(i, 12).toString());
+                            subtotal += precio;
+                            Reportes += "Empresa : " + tbDeudasPorCobrar.getValueAt(i, 2) + " ; Cliente : " + tbDeudasPorCobrar.getValueAt(i, 4)
+                                    + " precio : " + String.format("%.2f", precio) + "\n";
+                        }
+                    }
+                }
+
+                // Calcular impuesto
+                double impuestoTotal = subtotal * impuesto;
+
+                // Calcular total sin propina
+                total = subtotal + impuestoTotal;
+
+                // Mostrar subtotal, impuesto y total antes de propina
+                area.setText("Subtotal: " + String.format("%.2f", subtotal) + "\nImpuesto (6%): " + String.format("%.2f", impuestoTotal) + "\nTotal sin propina: " + String.format("%.2f", total) + "\n\n" + Reportes);
+
+                JOptionPane.showMessageDialog(this, area, "Información Detallada de Ventas", JOptionPane.INFORMATION_MESSAGE);
+
+                // Agregar campo para ingresar propina
+                String input = JOptionPane.showInputDialog(this, "Ingrese el monto de propina a añadir:", "Propina", JOptionPane.QUESTION_MESSAGE);
+                try {
+                    if (input != null && !input.isEmpty()) {
+                        tip = Double.parseDouble(input);
+                    }
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this, "Monto de propina inválido. Se aplicará propina de $0.", "Error", JOptionPane.ERROR_MESSAGE);
+                    tip = 0.0;
+                }
+
+                total += tip;
+
+                if ("Tarjeta de crédito/débito".equals(cbxPagarCon.getSelectedItem())) { // Tarjeta de crédito/débito
+                    total *= 1.03; // Añadir recargo del 3%
+                    JOptionPane.showMessageDialog(this, "El total con recargo del 3% es: $" + String.format("%.2f", total), "Total con Recargo", JOptionPane.INFORMATION_MESSAGE);
+                }
+
+                // Generar PDF de la factura
+                InvoiceGenerator invoiceGenerator = new InvoiceGenerator();
+                String filePath = "factura_" + System.currentTimeMillis() + ".pdf"; // Genera un nombre de archivo único
+                String company = txtEmpresa.getText();
+                String client = txtCliente.getText();
+                String address = txtDireccion.getText();
+                invoiceGenerator.generateInvoicePDF(filePath, tbDeudasPorCobrar, selectedRows, company, client, address, subtotal, impuestoTotal, total, (String) cbxPagarCon.getSelectedItem(), tip);
+
+                // Guardar el PDF en la base de datos y actualizar el estado de la orden de servicio
+                for (int orderId : orderIds) {
+                    invoiceGenerator.savePDFToDatabase(filePath, orderId, paymentMethodId, nextInvoiceNumber);
+                    updateOrderStatus(orderId, "Cancelada");
+                }
+
+                // Actualizar el próximo número de factura
+                getNextInvoiceNumber();
+
+                // Abrir el PDF generado
+                File file = new File(filePath);
+                if (file.exists()) {
+                    Desktop.getDesktop().open(file);
+                }
+
+            } else {
+                JOptionPane.showMessageDialog(null, "Antes de obtener los datos, debe de seleccionar por lo menos un checkbox.",
+                        "Mensaje", JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al generar el PDF: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-        
-    } else {
-        JOptionPane.showMessageDialog(null, "Antes de obtener los datos, debe de seleccionar por lo menos un checkbox.",
-                "Mensaje", JOptionPane.WARNING_MESSAGE);
-    }
     }//GEN-LAST:event_btnPagarActionPerformed
 
     private void btnMostrarCanceladasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarCanceladasActionPerformed
         MostrarTablaPagadas();
     }//GEN-LAST:event_btnMostrarCanceladasActionPerformed
 
+    private void cbxPagarConItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxPagarConItemStateChanged
+        MostrarCodigoFormaDePago(cbxPagarCon, txtIdPagarCon);
+    }//GEN-LAST:event_cbxPagarConItemStateChanged
+
+    private void btnAbrirPDFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAbrirPDFActionPerformed
+        try {
+            int invoiceNumber = Integer.parseInt(txtNumeroFactura.getText());
+            byte[] pdfData = getPDFByInvoiceNumber(invoiceNumber);
+
+            if (pdfData != null) {
+                openPDF(pdfData);
+            } else {
+                JOptionPane.showMessageDialog(null, "No se encontró un PDF con el número de factura especificado.");
+            }
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Número de factura inválido.");
+        }
+    }//GEN-LAST:event_btnAbrirPDFActionPerformed
+
+    private void jTextField10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField10ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField10ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAbrirPDF;
     public javax.swing.JButton btnBusquedaEmpresa;
     private javax.swing.JButton btnBusquedaFechaEmpresa;
     private javax.swing.JButton btnMostrarCanceladas;
@@ -789,6 +1117,7 @@ double subtotal = 0.0;
     private javax.swing.JButton btnSalir;
     private javax.swing.JCheckBox cbSeleccionaTodo;
     private javax.swing.JComboBox<String> cbxEmpresa;
+    private javax.swing.JComboBox<String> cbxPagarCon;
     private com.toedter.calendar.JDateChooser dateFin;
     private com.toedter.calendar.JDateChooser dateInicio;
     private javax.swing.JLabel jLabel1;
@@ -798,6 +1127,8 @@ double subtotal = 0.0;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -819,6 +1150,9 @@ double subtotal = 0.0;
     private javax.swing.JTextField txtEmpresa;
     private javax.swing.JTextField txtId;
     public javax.swing.JTextField txtIdEmpresa;
+    private javax.swing.JTextField txtIdPagarCon;
+    private javax.swing.JTextField txtNumeroFactura;
+    private javax.swing.JTextField txtProximoNumeroFactura;
     private javax.swing.JTextField txtST;
     private javax.swing.JTextField txtSubtotal;
     private javax.swing.JTextField txtTax;
@@ -855,7 +1189,61 @@ double subtotal = 0.0;
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
         }
     }
-    
+
+    public void MostrarCodigoFormaDePago(JComboBox cbxPagarCon, JTextField idPagarCon) {
+
+        String consuta = "select formadepago.id_formadepago from formadepago where formadepago.nombre=?";
+
+        try {
+            // Validar si hay un item seleccionado en el JComboBox
+            if (cbxPagarCon.getSelectedIndex() == -1) {
+//            JOptionPane.showMessageDialog(null, "Error: No se ha seleccionado ninguna forme de pago.");
+                return;
+            }
+
+            CallableStatement cs = con.getConexion().prepareCall(consuta);
+
+            Object selectedValue = cbxPagarCon.getSelectedItem();
+            if (selectedValue != null) {
+                String valorSeleccionado = selectedValue.toString();
+                cs.setString(1, valorSeleccionado);
+                cs.execute();
+
+                ResultSet rs = cs.executeQuery();
+
+                if (rs.next()) {
+                    idPagarCon.setText(rs.getString("id_formadepago"));
+
+                }
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }
+    }
+
+    public void MostrarFormaDePago(JComboBox cbxPagarCon) {
+
+        String sql = "";
+        sql = "select * from formadepago";
+        Statement st;
+
+        try {
+
+            st = con.getConexion().createStatement();
+            ResultSet rs = st.executeQuery(sql);
+            cbxPagarCon.removeAllItems();
+
+            while (rs.next()) {
+
+                cbxPagarCon.addItem(rs.getString("nombre"));
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+        }
+    }
+
     private boolean Seleccionados(int pos) {
         int contador = 0;
         boolean bandera = true;
@@ -875,7 +1263,66 @@ double subtotal = 0.0;
         return bandera;
     }
 
-    
+    public void addButtonToTable(JTable table, int columnIndex) {
+    table.getColumnModel().getColumn(columnIndex).setCellRenderer(new ButtonRenderer());
+    table.getColumnModel().getColumn(columnIndex).setCellEditor(new ButtonEditor(new JCheckBox()));
+}
 
-    
+class ButtonRenderer extends JButton implements TableCellRenderer {
+    public ButtonRenderer() {
+        setOpaque(true);
+    }
+
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        if (isSelected) {
+            setForeground(table.getSelectionForeground());
+            setBackground(table.getSelectionBackground());
+        } else {
+            setForeground(table.getForeground());
+            setBackground(UIManager.getColor("Button.background"));
+        }
+        setText((value == null) ? "" : value.toString());
+        return this;
+    }
+}
+
+class ButtonEditor extends DefaultCellEditor {
+    private String label;
+    private JButton button;
+
+    public ButtonEditor(JCheckBox checkBox) {
+        super(checkBox);
+        button = new JButton();
+        button.setOpaque(true);
+        button.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                fireEditingStopped();
+                if (!label.equals("Ver PDF")) {
+                    JOptionPane.showMessageDialog(null, "No se encontró un PDF asociado.");
+                    return;
+                }
+                int row = tbDeudasPorCobrar.getSelectedRow();
+                int invoiceNumber = Integer.parseInt(tbDeudasPorCobrar.getValueAt(row, 15).toString());
+                byte[] pdfData = getPDFByInvoiceNumber(invoiceNumber);
+                if (pdfData != null) {
+                    openPDF(pdfData);
+                } else {
+                    JOptionPane.showMessageDialog(null, "No se encontró un PDF con el número de factura especificado.");
+                }
+            }
+        });
+    }
+
+    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+        label = (value == null) ? "" : value.toString();
+        button.setText(label);
+        return button;
+    }
+
+    public Object getCellEditorValue() {
+        return label;
+    }
+}
+
+
 }
