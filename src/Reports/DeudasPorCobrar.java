@@ -67,8 +67,6 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
         getNextInvoiceNumber();
 
-        
-
     }
 
     public void addCheckBox(int column, JTable table) {
@@ -82,140 +80,138 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }
 
     public void MostrarTablaDeuda() {
-    DefaultTableModel modelo = new DefaultTableModel();
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    try {
-        String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio", "Status", "Estado de Cuenta", "Número Factura", "Ver PDF"};
-        String[] RegistroBD = new String[17];
-        modelo = new DefaultTableModel(null, tituloTabla);
-        addCheckBox(0, tbDeudasPorCobrar);
-        String sql = "SELECT o.id, bussiness.nameBusiness AS Empresa, o.fechaT AS Fecha, customer.nameCustomer "
-                + "AS Nombre, customer.area AS Tamaño, customer.address AS Direccion, customer.city AS Ciudad, customer.state AS Estado, "
-                + "customer.zipCode AS 'Zip Code', customer.phoneNumber AS Celular, o.servicio AS Servicio, "
-                + "o.precio AS Precio, o.estado AS Status, o.eeCta AS 'Estado de Cuenta', f.numeroFactura "
-                + "FROM orderservice AS o "
-                + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness "
-                + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
-                + "LEFT JOIN facturas AS f ON o.id = f.id_ordenServicio " // Asegúrate de que tienes la relación correcta
-                + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'deuda' "
-                + "ORDER BY o.fechaT ASC";
-        Statement st = connect.createStatement();
-        ResultSet rs = st.executeQuery(sql);
-        while (rs.next()) {
-            RegistroBD[1] = rs.getString("id");
-            RegistroBD[2] = rs.getString("Empresa");
-            RegistroBD[3] = rs.getString("Fecha");
-            RegistroBD[4] = rs.getString("Nombre");
-            RegistroBD[5] = rs.getString("Tamaño");
-            RegistroBD[6] = rs.getString("Direccion");
-            RegistroBD[7] = rs.getString("Ciudad");
-            RegistroBD[8] = rs.getString("Estado");
-            RegistroBD[9] = rs.getString("Zip Code");
-            RegistroBD[10] = rs.getString("Celular");
-            RegistroBD[11] = rs.getString("Servicio");
-            RegistroBD[12] = rs.getString("Precio");
-            RegistroBD[13] = rs.getString("Status");
-            RegistroBD[14] = rs.getString("Estado de Cuenta");
-            RegistroBD[15] = rs.getString("numeroFactura");
-            RegistroBD[16] = (rs.getString("numeroFactura") == null) ? "Sin PDF" : "Ver PDF";
-            modelo.addRow(RegistroBD);
+        DefaultTableModel modelo = new DefaultTableModel();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio", "Status", "Estado de Cuenta", "Número Factura", "Ver PDF"};
+            String[] RegistroBD = new String[17];
+            modelo = new DefaultTableModel(null, tituloTabla);
+            addCheckBox(0, tbDeudasPorCobrar);
+            String sql = "SELECT o.id, bussiness.nameBusiness AS Empresa, o.fechaT AS Fecha, customer.nameCustomer "
+                    + "AS Nombre, customer.area AS Tamaño, customer.address AS Direccion, customer.city AS Ciudad, customer.state AS Estado, "
+                    + "customer.zipCode AS 'Zip Code', customer.phoneNumber AS Celular, o.servicio AS Servicio, "
+                    + "o.precio AS Precio, o.estado AS Status, o.eeCta AS 'Estado de Cuenta', f.numeroFactura "
+                    + "FROM orderservice AS o "
+                    + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness "
+                    + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
+                    + "LEFT JOIN facturas AS f ON o.id = f.id_ordenServicio " // Asegúrate de que tienes la relación correcta
+                    + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'deuda' "
+                    + "ORDER BY o.fechaT ASC";
+            Statement st = connect.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+            while (rs.next()) {
+                RegistroBD[1] = rs.getString("id");
+                RegistroBD[2] = rs.getString("Empresa");
+                RegistroBD[3] = rs.getString("Fecha");
+                RegistroBD[4] = rs.getString("Nombre");
+                RegistroBD[5] = rs.getString("Tamaño");
+                RegistroBD[6] = rs.getString("Direccion");
+                RegistroBD[7] = rs.getString("Ciudad");
+                RegistroBD[8] = rs.getString("Estado");
+                RegistroBD[9] = rs.getString("Zip Code");
+                RegistroBD[10] = rs.getString("Celular");
+                RegistroBD[11] = rs.getString("Servicio");
+                RegistroBD[12] = rs.getString("Precio");
+                RegistroBD[13] = rs.getString("Status");
+                RegistroBD[14] = rs.getString("Estado de Cuenta");
+                RegistroBD[15] = rs.getString("numeroFactura");
+                RegistroBD[16] = (rs.getString("numeroFactura") == null) ? "Sin PDF" : "Ver PDF";
+                modelo.addRow(RegistroBD);
+            }
+            tbDeudasPorCobrar.setModel(modelo);
+            // Añadir checkbox a cada fila
+            for (int i = 0; i < modelo.getRowCount(); i++) {
+                addCheckBox(0, tbDeudasPorCobrar); // Agregar checkbox a la columna 0 de cada fila
+            }
+            tbDeudasPorCobrar.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tbDeudasPorCobrar.getColumnModel().getColumn(1).setPreferredWidth(30);
+            tbDeudasPorCobrar.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tbDeudasPorCobrar.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tbDeudasPorCobrar.getColumnModel().getColumn(4).setPreferredWidth(80);
+            tbDeudasPorCobrar.getColumnModel().getColumn(5).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(6).setPreferredWidth(80);
+            tbDeudasPorCobrar.getColumnModel().getColumn(7).setPreferredWidth(60);
+            tbDeudasPorCobrar.getColumnModel().getColumn(8).setPreferredWidth(60);
+            tbDeudasPorCobrar.getColumnModel().getColumn(9).setPreferredWidth(80);
+            tbDeudasPorCobrar.getColumnModel().getColumn(10).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(11).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(12).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(13).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(14).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(15).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(16).setPreferredWidth(80); // Ajustar el ancho de la columna del botón
+            addButtonToTable(tbDeudasPorCobrar, 16); // Agregar el botón después de configurar el modelo
+        } catch (SQLException e) {
+            System.out.println("Error al mostrar la Tabla " + e.toString());
         }
-        tbDeudasPorCobrar.setModel(modelo);
-        // Añadir checkbox a cada fila
-        for (int i = 0; i < modelo.getRowCount(); i++) {
-            addCheckBox(0, tbDeudasPorCobrar); // Agregar checkbox a la columna 0 de cada fila
-        }
-        tbDeudasPorCobrar.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tbDeudasPorCobrar.getColumnModel().getColumn(1).setPreferredWidth(30);
-        tbDeudasPorCobrar.getColumnModel().getColumn(2).setPreferredWidth(100);
-        tbDeudasPorCobrar.getColumnModel().getColumn(3).setPreferredWidth(100);
-        tbDeudasPorCobrar.getColumnModel().getColumn(4).setPreferredWidth(80);
-        tbDeudasPorCobrar.getColumnModel().getColumn(5).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(6).setPreferredWidth(80);
-        tbDeudasPorCobrar.getColumnModel().getColumn(7).setPreferredWidth(60);
-        tbDeudasPorCobrar.getColumnModel().getColumn(8).setPreferredWidth(60);
-        tbDeudasPorCobrar.getColumnModel().getColumn(9).setPreferredWidth(80);
-        tbDeudasPorCobrar.getColumnModel().getColumn(10).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(11).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(12).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(13).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(14).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(15).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(16).setPreferredWidth(80); // Ajustar el ancho de la columna del botón
-        addButtonToTable(tbDeudasPorCobrar, 16); // Agregar el botón después de configurar el modelo
-    } catch (SQLException e) {
-        System.out.println("Error al mostrar la Tabla " + e.toString());
     }
-}
-
 
     public void MostrarTablaPagadas() {
-    DefaultTableModel modelo = new DefaultTableModel();
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    try {
-        String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio", "Status", "Estado de Cuenta", "Número Factura", "Ver PDF"};
-        String[] RegistroBD = new String[17];
-        modelo = new DefaultTableModel(null, tituloTabla);
-        addCheckBox(0, tbDeudasPorCobrar);
-        String sql = "SELECT o.id, bussiness.nameBusiness AS Empresa, o.fechaT AS Fecha, customer.nameCustomer "
-                + "AS Nombre, customer.area AS Tamaño, customer.address AS Direccion, customer.city AS Ciudad, customer.state AS Estado, "
-                + "customer.zipCode AS 'Zip Code', customer.phoneNumber AS Celular, o.servicio AS Servicio, "
-                + "o.precio AS Precio, o.estado AS Status, o.eeCta AS 'Estado de Cuenta', f.numeroFactura "
-                + "FROM orderservice AS o "
-                + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness "
-                + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
-                + "LEFT JOIN facturas AS f ON o.id = f.id_ordenServicio " // Asegúrate de que tienes la relación correcta
-                + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'Cancelada' "
-                + "ORDER BY o.fechaT ASC";
-        Statement st = connect.createStatement();
-        ResultSet rs = st.executeQuery(sql);
-        while (rs.next()) {
-            RegistroBD[1] = rs.getString("id");
-            RegistroBD[2] = rs.getString("Empresa");
-            RegistroBD[3] = rs.getString("Fecha");
-            RegistroBD[4] = rs.getString("Nombre");
-            RegistroBD[5] = rs.getString("Tamaño");
-            RegistroBD[6] = rs.getString("Direccion");
-            RegistroBD[7] = rs.getString("Ciudad");
-            RegistroBD[8] = rs.getString("Estado");
-            RegistroBD[9] = rs.getString("Zip Code");
-            RegistroBD[10] = rs.getString("Celular");
-            RegistroBD[11] = rs.getString("Servicio");
-            RegistroBD[12] = rs.getString("Precio");
-            RegistroBD[13] = rs.getString("Status");
-            RegistroBD[14] = rs.getString("Estado de Cuenta");
-            RegistroBD[15] = rs.getString("numeroFactura");
-            RegistroBD[16] = (rs.getString("numeroFactura") == null) ? "Sin PDF" : "Ver PDF";
-            modelo.addRow(RegistroBD);
+        DefaultTableModel modelo = new DefaultTableModel();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio", "Status", "Estado de Cuenta", "Número Factura", "Ver PDF"};
+            String[] RegistroBD = new String[17];
+            modelo = new DefaultTableModel(null, tituloTabla);
+            addCheckBox(0, tbDeudasPorCobrar);
+            String sql = "SELECT o.id, bussiness.nameBusiness AS Empresa, o.fechaT AS Fecha, customer.nameCustomer "
+                    + "AS Nombre, customer.area AS Tamaño, customer.address AS Direccion, customer.city AS Ciudad, customer.state AS Estado, "
+                    + "customer.zipCode AS 'Zip Code', customer.phoneNumber AS Celular, o.servicio AS Servicio, "
+                    + "o.precio AS Precio, o.estado AS Status, o.eeCta AS 'Estado de Cuenta', f.numeroFactura "
+                    + "FROM orderservice AS o "
+                    + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness "
+                    + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
+                    + "LEFT JOIN facturas AS f ON o.id = f.id_ordenServicio " // Asegúrate de que tienes la relación correcta
+                    + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'Cancelada' "
+                    + "ORDER BY o.fechaT ASC";
+            Statement st = connect.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+            while (rs.next()) {
+                RegistroBD[1] = rs.getString("id");
+                RegistroBD[2] = rs.getString("Empresa");
+                RegistroBD[3] = rs.getString("Fecha");
+                RegistroBD[4] = rs.getString("Nombre");
+                RegistroBD[5] = rs.getString("Tamaño");
+                RegistroBD[6] = rs.getString("Direccion");
+                RegistroBD[7] = rs.getString("Ciudad");
+                RegistroBD[8] = rs.getString("Estado");
+                RegistroBD[9] = rs.getString("Zip Code");
+                RegistroBD[10] = rs.getString("Celular");
+                RegistroBD[11] = rs.getString("Servicio");
+                RegistroBD[12] = rs.getString("Precio");
+                RegistroBD[13] = rs.getString("Status");
+                RegistroBD[14] = rs.getString("Estado de Cuenta");
+                RegistroBD[15] = rs.getString("numeroFactura");
+                RegistroBD[16] = (rs.getString("numeroFactura") == null) ? "Sin PDF" : "Ver PDF";
+                modelo.addRow(RegistroBD);
+            }
+            tbDeudasPorCobrar.setModel(modelo);
+            // Añadir checkbox a cada fila
+            for (int i = 0; i < modelo.getRowCount(); i++) {
+                addCheckBox(0, tbDeudasPorCobrar); // Agregar checkbox a la columna 0 de cada fila
+            }
+            tbDeudasPorCobrar.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tbDeudasPorCobrar.getColumnModel().getColumn(1).setPreferredWidth(30);
+            tbDeudasPorCobrar.getColumnModel().getColumn(2).setPreferredWidth(100);
+            tbDeudasPorCobrar.getColumnModel().getColumn(3).setPreferredWidth(100);
+            tbDeudasPorCobrar.getColumnModel().getColumn(4).setPreferredWidth(80);
+            tbDeudasPorCobrar.getColumnModel().getColumn(5).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(6).setPreferredWidth(80);
+            tbDeudasPorCobrar.getColumnModel().getColumn(7).setPreferredWidth(60);
+            tbDeudasPorCobrar.getColumnModel().getColumn(8).setPreferredWidth(60);
+            tbDeudasPorCobrar.getColumnModel().getColumn(9).setPreferredWidth(80);
+            tbDeudasPorCobrar.getColumnModel().getColumn(10).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(11).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(12).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(13).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(14).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(15).setPreferredWidth(150);
+            tbDeudasPorCobrar.getColumnModel().getColumn(16).setPreferredWidth(80); // Ajustar el ancho de la columna del botón
+            addButtonToTable(tbDeudasPorCobrar, 16); // Agregar el botón después de configurar el modelo
+        } catch (SQLException e) {
+            System.out.println("Error al mostrar la Tabla " + e.toString());
         }
-        tbDeudasPorCobrar.setModel(modelo);
-        // Añadir checkbox a cada fila
-        for (int i = 0; i < modelo.getRowCount(); i++) {
-            addCheckBox(0, tbDeudasPorCobrar); // Agregar checkbox a la columna 0 de cada fila
-        }
-        tbDeudasPorCobrar.getColumnModel().getColumn(0).setPreferredWidth(50);
-        tbDeudasPorCobrar.getColumnModel().getColumn(1).setPreferredWidth(30);
-        tbDeudasPorCobrar.getColumnModel().getColumn(2).setPreferredWidth(100);
-        tbDeudasPorCobrar.getColumnModel().getColumn(3).setPreferredWidth(100);
-        tbDeudasPorCobrar.getColumnModel().getColumn(4).setPreferredWidth(80);
-        tbDeudasPorCobrar.getColumnModel().getColumn(5).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(6).setPreferredWidth(80);
-        tbDeudasPorCobrar.getColumnModel().getColumn(7).setPreferredWidth(60);
-        tbDeudasPorCobrar.getColumnModel().getColumn(8).setPreferredWidth(60);
-        tbDeudasPorCobrar.getColumnModel().getColumn(9).setPreferredWidth(80);
-        tbDeudasPorCobrar.getColumnModel().getColumn(10).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(11).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(12).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(13).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(14).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(15).setPreferredWidth(150);
-        tbDeudasPorCobrar.getColumnModel().getColumn(16).setPreferredWidth(80); // Ajustar el ancho de la columna del botón
-        addButtonToTable(tbDeudasPorCobrar, 16); // Agregar el botón después de configurar el modelo
-    } catch (SQLException e) {
-        System.out.println("Error al mostrar la Tabla " + e.toString());
     }
-}
-
 
     //Codigo Para buscar dentro de la tabla por medio del txtField Busqueda
     public DefaultTableModel buscarTabla(String buscar) {
@@ -280,7 +276,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
     public class InvoiceGenerator {
 
-        public void generateInvoicePDF(String filePath, JTable table, List<Integer> selectedRows, String company, String client, String address, double subtotal, double tax, double total, String paymentMethod, double tip) {
+        public void generateInvoicePDF(String filePath, JTable table, List<Integer> selectedRows, String company, String client, String address, double subtotal, double tax, double total, String paymentMethod, double tip, int invoiceNumber) {
             Document document = new Document(PageSize.A4);
             try {
                 PdfWriter.getInstance(document, new FileOutputStream(filePath));
@@ -288,7 +284,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
                 // Agregar título
                 Font fontTitle = new Font(Font.FontFamily.TIMES_ROMAN, 18, Font.BOLD);
-                Paragraph title = new Paragraph("Factura", fontTitle);
+                Paragraph title = new Paragraph("Factura: " + invoiceNumber, fontTitle);
                 title.setAlignment(Element.ALIGN_CENTER);
                 document.add(title);
 
@@ -305,7 +301,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                 pdfTable.setWidthPercentage(100); // Ancho total de la tabla
 
                 // Definir los anchos relativos de las columnas
-                float[] columnWidths = {1.5f, 3f, 1f, 1f, 1.5f, 1f, 2f, 2f}; // Ajusta estos valores según sea necesario
+                float[] columnWidths = {1.3f, 1.5f, 1.2f, 1f, 1f, 1f, 1f, 1f}; // Ajusta estos valores según sea necesario
                 pdfTable.setWidths(columnWidths);
 
                 // Agregar encabezados de columna
@@ -1051,7 +1047,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                 String company = txtEmpresa.getText();
                 String client = txtCliente.getText();
                 String address = txtDireccion.getText();
-                invoiceGenerator.generateInvoicePDF(filePath, tbDeudasPorCobrar, selectedRows, company, client, address, subtotal, impuestoTotal, total, (String) cbxPagarCon.getSelectedItem(), tip);
+                invoiceGenerator.generateInvoicePDF(filePath, tbDeudasPorCobrar, selectedRows, company, client, address, subtotal, impuestoTotal, total, (String) cbxPagarCon.getSelectedItem(), tip, nextInvoiceNumber);
 
                 // Guardar el PDF en la base de datos y actualizar el estado de la orden de servicio
                 for (int orderId : orderIds) {
@@ -1061,6 +1057,9 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
                 // Actualizar el próximo número de factura
                 getNextInvoiceNumber();
+
+                //Actualizar Mostrar Tabla
+                MostrarTablaDeuda();
 
                 // Abrir el PDF generado
                 File file = new File(filePath);
@@ -1264,65 +1263,66 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }
 
     public void addButtonToTable(JTable table, int columnIndex) {
-    table.getColumnModel().getColumn(columnIndex).setCellRenderer(new ButtonRenderer());
-    table.getColumnModel().getColumn(columnIndex).setCellEditor(new ButtonEditor(new JCheckBox()));
-}
-
-class ButtonRenderer extends JButton implements TableCellRenderer {
-    public ButtonRenderer() {
-        setOpaque(true);
+        table.getColumnModel().getColumn(columnIndex).setCellRenderer(new ButtonRenderer());
+        table.getColumnModel().getColumn(columnIndex).setCellEditor(new ButtonEditor(new JCheckBox()));
     }
 
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        if (isSelected) {
-            setForeground(table.getSelectionForeground());
-            setBackground(table.getSelectionBackground());
-        } else {
-            setForeground(table.getForeground());
-            setBackground(UIManager.getColor("Button.background"));
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+
+        public ButtonRenderer() {
+            setOpaque(true);
         }
-        setText((value == null) ? "" : value.toString());
-        return this;
-    }
-}
 
-class ButtonEditor extends DefaultCellEditor {
-    private String label;
-    private JButton button;
-
-    public ButtonEditor(JCheckBox checkBox) {
-        super(checkBox);
-        button = new JButton();
-        button.setOpaque(true);
-        button.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                fireEditingStopped();
-                if (!label.equals("Ver PDF")) {
-                    JOptionPane.showMessageDialog(null, "No se encontró un PDF asociado.");
-                    return;
-                }
-                int row = tbDeudasPorCobrar.getSelectedRow();
-                int invoiceNumber = Integer.parseInt(tbDeudasPorCobrar.getValueAt(row, 15).toString());
-                byte[] pdfData = getPDFByInvoiceNumber(invoiceNumber);
-                if (pdfData != null) {
-                    openPDF(pdfData);
-                } else {
-                    JOptionPane.showMessageDialog(null, "No se encontró un PDF con el número de factura especificado.");
-                }
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            if (isSelected) {
+                setForeground(table.getSelectionForeground());
+                setBackground(table.getSelectionBackground());
+            } else {
+                setForeground(table.getForeground());
+                setBackground(UIManager.getColor("Button.background"));
             }
-        });
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
     }
 
-    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        label = (value == null) ? "" : value.toString();
-        button.setText(label);
-        return button;
-    }
+    class ButtonEditor extends DefaultCellEditor {
 
-    public Object getCellEditorValue() {
-        return label;
-    }
-}
+        private String label;
+        private JButton button;
 
+        public ButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    fireEditingStopped();
+                    if (!label.equals("Ver PDF")) {
+                        JOptionPane.showMessageDialog(null, "No se encontró un PDF asociado.");
+                        return;
+                    }
+                    int row = tbDeudasPorCobrar.getSelectedRow();
+                    int invoiceNumber = Integer.parseInt(tbDeudasPorCobrar.getValueAt(row, 15).toString());
+                    byte[] pdfData = getPDFByInvoiceNumber(invoiceNumber);
+                    if (pdfData != null) {
+                        openPDF(pdfData);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "No se encontró un PDF con el número de factura especificado.");
+                    }
+                }
+            });
+        }
+
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            label = (value == null) ? "" : value.toString();
+            button.setText(label);
+            return button;
+        }
+
+        public Object getCellEditorValue() {
+            return label;
+        }
+    }
 
 }
