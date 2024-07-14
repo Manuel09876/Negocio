@@ -1,11 +1,19 @@
 package Admission;
 
 import conectar.Conectar;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Configuracion extends javax.swing.JInternalFrame {
 
@@ -15,9 +23,9 @@ public class Configuracion extends javax.swing.JInternalFrame {
     ResultSet rs;
 
     private int id;
-    private String nombre, direccion, ciudad;
+    private String nombre, direccion, ciudad, estado, telefono, email, webpage, mensaje;
     private int zipcode;
-    private String estado, telefono, email, webpage, mensaje;
+    private byte[] logo;
 
     public int getId() {
         return id;
@@ -99,82 +107,56 @@ public class Configuracion extends javax.swing.JInternalFrame {
         this.mensaje = mensaje;
     }
 
-    public Configuracion BuscarDatos() {
-    String sql = "SELECT * FROM configuracion";
-    try {
-        connect = con.getConexion();
-        ps = connect.prepareStatement(sql);
-        rs = ps.executeQuery();
-        if (rs.next()) {
-            setId(rs.getInt("id"));
-            setNombre(rs.getString("nombre"));
-            setDireccion(rs.getString("direccion"));
-            setCiudad(rs.getString("ciudad"));
-            setZipcode(rs.getInt("zipcode"));
-            setEstado(rs.getString("estado"));
-            setTelefono(rs.getString("telefono"));
-            setEmail(rs.getString("email"));
-            setWebpage(rs.getString("webpage"));
-            setMensaje(rs.getString("mensaje"));
-        }
-    } catch (SQLException e) {
-        System.out.println(e.toString());
-    } finally {
-        try {
-            if (rs != null) rs.close();
-            if (ps != null) ps.close();
-            if (connect != null) connect.close();
-        } catch (SQLException e) {
-            System.out.println(e.toString());
-        }
+    public byte[] getLogo() {
+        return logo;
     }
-    return this;
-}
 
-public void ListarConfig() {
-    BuscarDatos();
-    txtId.setText("" + getId());
-    txtNombre.setText(getNombre());
-    txtDireccion.setText(getDireccion());
-    txtCiudad.setText(getCiudad());
-    txtZipCode.setText("" + getZipcode());
-    txtEstado.setText(getEstado());
-    txtTelefono.setText(getTelefono());
-    txtEmail.setText(getEmail());
-    txtWebPage.setText(getWebpage());
-    txtMensaje.setText(getMensaje());
-}
+    public void setLogo(byte[] logo) {
+        this.logo = logo;
+    }
 
-    public boolean ModificarDatos() {
-        String sql = "UPDATE configuracion SET nombre=?, direccion=?, ciudad=?, zipcode=?, estado=?, telefono=?, email=?, webpage=? WHERE id=?";
+    public Configuracion BuscarDatos() {
+        String sql = "SELECT * FROM configuracion";
         try {
+            connect = con.getConexion();
             ps = connect.prepareStatement(sql);
-            ps.setString(1, getNombre());
-            ps.setString(2, getDireccion());
-            ps.setString(3, getCiudad());
-            ps.setInt(4, getZipcode());
-            ps.setString(5, getEstado());
-            ps.setString(6, getTelefono());
-            ps.setString(7, getEmail());
-            ps.setString(8, getWebpage());
-            ps.setString(9, getMensaje());
-            ps.setInt(10, getId());
-            ps.execute();
-            return true;
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                setId(rs.getInt("id"));
+                setNombre(rs.getString("nombre"));
+                setDireccion(rs.getString("direccion"));
+                setCiudad(rs.getString("ciudad"));
+                setZipcode(rs.getInt("zipcode"));
+                setEstado(rs.getString("estado"));
+                setTelefono(rs.getString("telefono"));
+                setEmail(rs.getString("email"));
+                setWebpage(rs.getString("webpage"));
+                setMensaje(rs.getString("mensaje"));
+                setLogo(rs.getBytes("logo")); // Obtener el logo como byte[]
+//                System.out.println("Logo recuperado de la base de datos, tamaño: " + (getLogo() != null ? getLogo().length : 0) + " bytes");
+            }
         } catch (SQLException e) {
             System.out.println(e.toString());
-            return false;
         } finally {
             try {
-                connect.close();
+                if (rs != null) {
+                    rs.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+                if (connect != null) {
+                    connect.close();
+                }
             } catch (SQLException e) {
                 System.out.println(e.toString());
             }
         }
+        return this;
     }
 
     public boolean GuardarConfig() {
-    String sql = "INSERT INTO configuracion(nombre, direccion, ciudad, zipcode, estado, telefono, email, webpage, mensaje) VALUES (?,?,?,?,?,?,?,?,?)";
+    String sql = "INSERT INTO configuracion(nombre, direccion, ciudad, zipcode, estado, telefono, email, webpage, mensaje, logo) VALUES (?,?,?,?,?,?,?,?,?,?)";
     try {
         connect = con.getConexion();
         ps = connect.prepareStatement(sql);
@@ -187,25 +169,122 @@ public void ListarConfig() {
         ps.setString(7, getEmail());
         ps.setString(8, getWebpage());
         ps.setString(9, getMensaje());
+        ps.setBytes(10, getLogo()); // Guardar el logo como byte[]
         
-        System.out.println("Guardando configuración: " + getNombre() + ", " + getDireccion() + ", " + getCiudad() + ", " + getZipcode() + ", " + getEstado() + ", " + getTelefono() + ", " + getEmail() + ", " + getWebpage() + ", " + getMensaje());
+        System.out.println("Guardando datos con logo de tamaño: " + (getLogo() != null ? getLogo().length : 0) + " bytes");
         
-        ps.execute();
-        return true;
+        int rowsInserted = ps.executeUpdate();
+        if (rowsInserted > 0) {
+            JOptionPane.showConfirmDialog(null, "Datos guardados correctamente.");
+            return true;
+        } else {
+            JOptionPane.showMessageDialog(null, "No se pudo guardar los datos.");
+            return false;
+        }
     } catch (SQLException e) {
-        JOptionPane.showMessageDialog(null, e.toString());
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, "Error al guardar los datos: " + e.getMessage());
         return false;
     } finally {
         try {
             if (ps != null) ps.close();
-            if (connect != null) connect.close();
+            // No cierres la conexión aquí para mantenerla abierta
         } catch (SQLException e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
         }
     }
 }
 
+public boolean ModificarDatos() {
+    String sql = "UPDATE configuracion SET nombre=?, direccion=?, ciudad=?, zipcode=?, estado=?, telefono=?, email=?, webpage=?, mensaje=?, logo=? WHERE id=?";
+    // Abre la conexión aquí
+    try {
+        connect = con.getConexion();
+        ps = connect.prepareStatement(sql);
+        ps.setString(1, getNombre());
+        ps.setString(2, getDireccion());
+        ps.setString(3, getCiudad());
+        ps.setInt(4, getZipcode());
+        ps.setString(5, getEstado());
+        ps.setString(6, getTelefono());
+        ps.setString(7, getEmail());
+        ps.setString(8, getWebpage());
+        ps.setString(9, getMensaje());
+        ps.setBytes(10, getLogo()); // Guardar el logo como byte[]
+        ps.setInt(11, getId());
+        
+        System.out.println("Actualizando datos con logo de tamaño: " + (getLogo() != null ? getLogo().length : 0) + " bytes");
+        
+        int rowsUpdated = ps.executeUpdate();
+        if (rowsUpdated > 0) {
+            JOptionPane.showMessageDialog(null, "Datos actualizados correctamente.");
+            return true;
+        } else {
+            JOptionPane.showMessageDialog(null, "No se pudo actualizar los datos.");
+            return false;
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, "Error al actualizar los datos: " + e.getMessage());
+        return false;
+    } finally {
+        try {
+            if (ps != null) ps.close();
+            if (connect != null) connect.close(); // Cierra la conexión aquí al finalizar la operación
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
 
+    // Método para cargar una imagen desde el sistema de archivos
+    public byte[] cargarImagen() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Imágenes", "jpg", "jpeg", "png"));
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int result = fileChooser.showOpenDialog(null);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try (FileInputStream fis = new FileInputStream(file)) {
+                byte[] imageBytes = new byte[(int) file.length()];
+                int bytesRead = fis.read(imageBytes);
+//                System.out.println("Bytes leídos: " + bytesRead);
+                return imageBytes;
+            } catch (IOException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Error al leer la imagen: " + e.getMessage());
+            }
+        }
+        return null;
+    }
+
+// Método para obtener la configuración actual
+    public Configuracion getConfiguracionActual() {
+        Configuracion config = new Configuracion();
+        return config.BuscarDatos();
+    }
+
+    public void ListarConfig() {
+    BuscarDatos();
+    txtId.setText("" + getId());
+    txtNombre.setText(getNombre());
+    txtDireccion.setText(getDireccion());
+    txtCiudad.setText(getCiudad());
+    txtZipCode.setText("" + getZipcode());
+    txtEstado.setText(getEstado());
+    txtTelefono.setText(getTelefono());
+    txtEmail.setText(getEmail());
+    txtWebPage.setText(getWebpage());
+    txtMensaje.setText(getMensaje());
+    
+    // Mostrar la imagen en el JLabel LabelLogo
+    if (getLogo() != null) {
+        ImageIcon imageIcon = new ImageIcon(getLogo());
+        LabelLogo.setIcon(imageIcon);
+    } else {
+        LabelLogo.setIcon(null); // Si no hay imagen, vaciar el JLabel
+    }
+}
 
     public Configuracion() {
         initComponents();
@@ -235,12 +314,12 @@ public void ListarConfig() {
         txtWebPage = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         txtMensaje = new javax.swing.JTextField();
-        jLabel10 = new javax.swing.JLabel();
         LabelLogo = new javax.swing.JLabel();
         btnGuardar = new javax.swing.JButton();
         btnActualizar = new javax.swing.JButton();
         btnSalir = new javax.swing.JButton();
         txtId = new javax.swing.JTextField();
+        btnCargarLogo = new javax.swing.JButton();
 
         setTitle("Configuración");
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -292,13 +371,7 @@ public void ListarConfig() {
         jLabel9.setText("Mensaje");
         jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(277, 238, -1, -1));
         jPanel1.add(txtMensaje, new org.netbeans.lib.awtextra.AbsoluteConstraints(277, 267, 154, -1));
-
-        jLabel10.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
-        jLabel10.setText("Logo");
-        jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(501, 29, -1, -1));
-
-        LabelLogo.setText("jLabel11");
-        jPanel1.add(LabelLogo, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 52, 124, 120));
+        jPanel1.add(LabelLogo, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 50, 260, 210));
 
         btnGuardar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/guardar.png"))); // NOI18N
         btnGuardar.setText("Guardar");
@@ -307,7 +380,7 @@ public void ListarConfig() {
                 btnGuardarActionPerformed(evt);
             }
         });
-        jPanel1.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(277, 319, -1, -1));
+        jPanel1.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 290, -1, -1));
 
         btnActualizar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/actualizar.png"))); // NOI18N
         btnActualizar.setText("Actualizar");
@@ -316,7 +389,7 @@ public void ListarConfig() {
                 btnActualizarActionPerformed(evt);
             }
         });
-        jPanel1.add(btnActualizar, new org.netbeans.lib.awtextra.AbsoluteConstraints(438, 319, -1, -1));
+        jPanel1.add(btnActualizar, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 290, -1, -1));
 
         btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
         btnSalir.setText("Salir");
@@ -325,10 +398,18 @@ public void ListarConfig() {
                 btnSalirActionPerformed(evt);
             }
         });
-        jPanel1.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 250, -1, -1));
-        jPanel1.add(txtId, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 170, 80, -1));
+        jPanel1.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 340, -1, -1));
+        jPanel1.add(txtId, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 340, 80, -1));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 6, -1, 386));
+        btnCargarLogo.setText("Cargar Imagen");
+        btnCargarLogo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCargarLogoActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnCargarLogo, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 340, -1, -1));
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 6, 730, 386));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -339,32 +420,32 @@ public void ListarConfig() {
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
         // Verificar que los campos obligatorios no estén vacíos
-    if (!"".equals(txtNombre.getText()) && !"".equals(txtDireccion.getText()) && 
-        !"".equals(txtCiudad.getText()) && !"".equals(txtZipCode.getText()) && 
-        !"".equals(txtEstado.getText()) && !"".equals(txtTelefono.getText()) && 
-        !"".equals(txtEmail.getText()) && !"".equals(txtWebPage.getText()) && 
-        !"".equals(txtMensaje.getText())) {
-        
-        // Establecer los valores a la instancia actual de Configuracion
-        setNombre(txtNombre.getText());
-        setDireccion(txtDireccion.getText());
-        setCiudad(txtCiudad.getText());
-        setZipcode(Integer.parseInt(txtZipCode.getText()));
-        setEstado(txtEstado.getText());
-        setTelefono(txtTelefono.getText());
-        setEmail(txtEmail.getText());
-        setWebpage(txtWebPage.getText());
-        setMensaje(txtMensaje.getText());
-        
-        // Guardar la configuración
-        if (GuardarConfig()) {
-            JOptionPane.showMessageDialog(null, "Datos guardados exitosamente");
+        if (!"".equals(txtNombre.getText()) && !"".equals(txtDireccion.getText())
+                && !"".equals(txtCiudad.getText()) && !"".equals(txtZipCode.getText())
+                && !"".equals(txtEstado.getText()) && !"".equals(txtTelefono.getText())
+                && !"".equals(txtEmail.getText()) && !"".equals(txtWebPage.getText())
+                && !"".equals(txtMensaje.getText())) {
+
+            // Establecer los valores a la instancia actual de Configuracion
+            setNombre(txtNombre.getText());
+            setDireccion(txtDireccion.getText());
+            setCiudad(txtCiudad.getText());
+            setZipcode(Integer.parseInt(txtZipCode.getText()));
+            setEstado(txtEstado.getText());
+            setTelefono(txtTelefono.getText());
+            setEmail(txtEmail.getText());
+            setWebpage(txtWebPage.getText());
+            setMensaje(txtMensaje.getText());
+
+            // Guardar la configuración
+            if (GuardarConfig()) {
+                JOptionPane.showMessageDialog(null, "Datos guardados exitosamente");
+            } else {
+                JOptionPane.showMessageDialog(null, "Error al guardar datos");
+            }
         } else {
-            JOptionPane.showMessageDialog(null, "Error al guardar datos");
+            JOptionPane.showMessageDialog(null, "Todos los campos son obligatorios");
         }
-    } else {
-        JOptionPane.showMessageDialog(null, "Todos los campos son obligatorios");
-    }
     }//GEN-LAST:event_btnGuardarActionPerformed
 
     private void btnActualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActualizarActionPerformed
@@ -386,14 +467,26 @@ public void ListarConfig() {
         }
     }//GEN-LAST:event_btnActualizarActionPerformed
 
+    private void btnCargarLogoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarLogoActionPerformed
+        byte[] logo = cargarImagen();
+        if (logo != null) {
+            setLogo(logo);
+            ImageIcon imageIcon = new ImageIcon(logo);
+            LabelLogo.setIcon(imageIcon);
+            JOptionPane.showMessageDialog(null, "Logo cargado exitosamente");
+        } else {
+            JOptionPane.showMessageDialog(null, "Error al cargar el logo.");
+        }
+    }//GEN-LAST:event_btnCargarLogoActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel LabelLogo;
     private javax.swing.JButton btnActualizar;
+    private javax.swing.JButton btnCargarLogo;
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnSalir;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;

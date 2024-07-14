@@ -1,5 +1,6 @@
 package Reports;
 
+import Admission.Configuracion;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.DocumentException;
@@ -276,22 +277,45 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
     public class InvoiceGenerator {
 
-        public void generateInvoicePDF(String filePath, JTable table, List<Integer> selectedRows, String company, String client, String address, double subtotal, double tax, double total, String paymentMethod, double tip, int invoiceNumber) {
+        public void generateInvoicePDF(String filePath, JTable table, List<Integer> selectedRows, String company, String client, String address, double subtotal, double tax, double total, String paymentMethod, double tip, int invoiceNumber, Configuracion datosEmpresa) {
             Document document = new Document(PageSize.A4);
             try {
                 PdfWriter.getInstance(document, new FileOutputStream(filePath));
                 document.open();
 
-                // Agregar título
-                Font fontTitle = new Font(Font.FontFamily.TIMES_ROMAN, 18, Font.BOLD);
-                Paragraph title = new Paragraph("Factura: " + invoiceNumber, fontTitle);
-                title.setAlignment(Element.ALIGN_CENTER);
-                document.add(title);
+                // Agregar logo si está disponible
+                if (datosEmpresa.getLogo() != null) {
+                    Image logo = Image.getInstance(datosEmpresa.getLogo());
+                    logo.scaleToFit(100, 100); // Ajustar el tamaño del logo a 100x100 píxeles
+                    logo.setAlignment(Element.ALIGN_LEFT);
+                    document.add(logo);
+                }
 
                 // Agregar información de la empresa
-                document.add(new Paragraph("Empresa: " + company));
-                document.add(new Paragraph("Cliente: " + client));
-                document.add(new Paragraph("Dirección: " + address));
+                Paragraph empresa = new Paragraph();
+                empresa.add(new Paragraph(datosEmpresa.getNombre(), new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD)));
+                empresa.add(new Paragraph(datosEmpresa.getDireccion() + " - " + datosEmpresa.getCiudad() + ", " + datosEmpresa.getEstado() + " " + datosEmpresa.getZipcode(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+                empresa.add(new Paragraph("Teléfono: " + datosEmpresa.getTelefono(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+                empresa.add(new Paragraph("Email: " + datosEmpresa.getEmail(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+                empresa.add(new Paragraph("Web: " + datosEmpresa.getWebpage(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+                empresa.setAlignment(Element.ALIGN_CENTER);
+                document.add(empresa);
+
+                document.add(new Paragraph("\n"));
+
+                // Agregar título
+                Font fontTitle = new Font(Font.FontFamily.TIMES_ROMAN, 18, Font.BOLD);
+                Paragraph title = new Paragraph("Invoice N°: " + invoiceNumber, fontTitle);
+                title.setAlignment(Element.ALIGN_CENTER);
+                document.add(title);
+                
+                document.add(new Paragraph("\n"));
+                document.add(new Paragraph("\n"));
+
+                // Agregar información de la factura
+//                document.add(new Paragraph("Empresa: " + company));
+//                document.add(new Paragraph("Cliente: " + client));
+//                document.add(new Paragraph("Dirección: " + address));
                 document.add(new Paragraph("Fecha: " + new Date().toString()));
                 document.add(new Paragraph("Método de Pago: " + paymentMethod));
                 document.add(new Paragraph("\n"));
@@ -305,7 +329,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                 pdfTable.setWidths(columnWidths);
 
                 // Agregar encabezados de columna
-                String[] headers = {"Nombre", "Dirección", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio"};
+                String[] headers = {"Customer", "Address", "City", "State", "Zip Code", "Cellphone", "Service", "Price"};
                 for (String header : headers) {
                     PdfPCell cell = new PdfPCell(new Phrase(header));
                     cell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -984,6 +1008,10 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
     private void btnPagarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPagarActionPerformed
         try {
+            // Crear una instancia de Configuracion para obtener los datos de la empresa
+            Configuracion configuracion = new Configuracion();
+            Configuracion datosEmpresa = configuracion.getConfiguracionActual();
+
             double subtotal = 0.0;
             double impuesto = 0.06; // Impuesto del 6%
             double total = 0.0;
@@ -1047,7 +1075,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                 String company = txtEmpresa.getText();
                 String client = txtCliente.getText();
                 String address = txtDireccion.getText();
-                invoiceGenerator.generateInvoicePDF(filePath, tbDeudasPorCobrar, selectedRows, company, client, address, subtotal, impuestoTotal, total, (String) cbxPagarCon.getSelectedItem(), tip, nextInvoiceNumber);
+                invoiceGenerator.generateInvoicePDF(filePath, tbDeudasPorCobrar, selectedRows, company, client, address, subtotal, impuestoTotal, total, (String) cbxPagarCon.getSelectedItem(), tip, nextInvoiceNumber, datosEmpresa);
 
                 // Guardar el PDF en la base de datos y actualizar el estado de la orden de servicio
                 for (int orderId : orderIds) {
