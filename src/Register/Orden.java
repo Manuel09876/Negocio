@@ -73,7 +73,7 @@ public class Orden extends javax.swing.JInternalFrame {
         }
     }
 
-//Calculo Periodo
+//Calculo Periodo; Cantidad de servicios
     public void CalcularFecha(JDateChooser DateInicio, JDateChooser DateFinal) {
         if (DateInicio.getDate() != null && DateFinal.getDate() != null) {
             Calendar inicio = DateInicio.getCalendar();

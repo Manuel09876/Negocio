@@ -381,7 +381,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         menuRegisters.add(menuKardex);
 
         menuCargosPendientes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/anadir.png"))); // NOI18N
-        menuCargosPendientes.setLabel("Cargos Pendientes");
+        menuCargosPendientes.setText("Cotizaciones");
         menuCargosPendientes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 menuCargosPendientesActionPerformed(evt);
@@ -613,7 +613,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuOrdenesActionPerformed
 
     private void menuCargosPendientesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCargosPendientesActionPerformed
-        CargosPendientes objCargosPendientes = new CargosPendientes();
+        Cotizaciones objCargosPendientes = new Cotizaciones();
         jpEscritorio.add(objCargosPendientes);
         objCargosPendientes.show();
 
