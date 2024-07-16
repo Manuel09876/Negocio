@@ -1,6 +1,20 @@
 package Register;
 
-import com.itextpdf.text.BaseColor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Date;
+import javax.swing.JOptionPane;
+
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -19,33 +33,106 @@ import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import javax.swing.*;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTable.*;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
+
 
 public class Cotizaciones extends javax.swing.JInternalFrame {
+    
+    public class Configuracion {
+    private String nombre;
+    private String direccion;
+    private String ciudad;
+    private String estado;
+    private String zipcode;
+    private String telefono;
+    private String email;
+    private String webpage;
+    private byte[] logo; // assuming the logo is stored as a byte array
+
+    // Getters and Setters for each field
+
+        public String getNombre() {
+            return nombre;
+        }
+
+        public void setNombre(String nombre) {
+            this.nombre = nombre;
+        }
+
+        public String getDireccion() {
+            return direccion;
+        }
+
+        public void setDireccion(String direccion) {
+            this.direccion = direccion;
+        }
+
+        public String getCiudad() {
+            return ciudad;
+        }
+
+        public void setCiudad(String ciudad) {
+            this.ciudad = ciudad;
+        }
+
+        public String getEstado() {
+            return estado;
+        }
+
+        public void setEstado(String estado) {
+            this.estado = estado;
+        }
+
+        public String getZipcode() {
+            return zipcode;
+        }
+
+        public void setZipcode(String zipcode) {
+            this.zipcode = zipcode;
+        }
+
+        public String getTelefono() {
+            return telefono;
+        }
+
+        public void setTelefono(String telefono) {
+            this.telefono = telefono;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getWebpage() {
+            return webpage;
+        }
+
+        public void setWebpage(String webpage) {
+            this.webpage = webpage;
+        }
+
+        public byte[] getLogo() {
+            return logo;
+        }
+
+        public void setLogo(byte[] logo) {
+            this.logo = logo;
+        }
+    
+}
+
 
     DefaultTableModel modelo = new DefaultTableModel();
     DefaultTableModel tmp;
@@ -82,6 +169,8 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
         // Agregar el botón en la columna "PDF"
         tbCotizaciones.getColumnModel().getColumn(12).setCellRenderer(new ButtonRenderer());
         tbCotizaciones.getColumnModel().getColumn(12).setCellEditor(new ButtonEditor(new JCheckBox(), tbCotizaciones));
+        
+        
 
     }
 
@@ -334,120 +423,194 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
     }
 
     private void GuardarCotizacion() {
-        String nombre = txtNombreCot.getText().trim();
-        String direccion = txtDireccionCot.getText().trim();
-        String tamaño = txtTamañoCot.getText().trim();
-        String ciudad = txtCiudadCot.getText().trim();
-        String estado = txtEstadoCot.getText().trim();
-        String zipCode = txtZipcodeCot.getText().trim();
-        String telefono = txtTelefonoCot.getText().trim();
-        Date fechaInicio = DateInicio.getDate();
-        Date fechaFin = DateFinal.getDate();
-        double total = Double.parseDouble(Labeltotalpagar.getText());
-        Date fechaCotizacion = new Date(); // Fecha actual
+    String nombre = txtNombreCot.getText().trim();
+    String direccion = txtDireccionCot.getText().trim();
+    String tamaño = txtTamañoCot.getText().trim();
+    String ciudad = txtCiudadCot.getText().trim();
+    String estado = txtEstadoCot.getText().trim();
+    String zipCode = txtZipcodeCot.getText().trim();
+    String telefono = txtTelefonoCot.getText().trim();
+    Date fechaInicio = DateInicio.getDate();
+    Date fechaFin = DateFinal.getDate();
+    double total = Double.parseDouble(Labeltotalpagar.getText());
+    Date fechaCotizacion = new Date(); // Fecha actual
 
-        if (nombre.isEmpty() || direccion.isEmpty() || tamaño.isEmpty() || ciudad.isEmpty() || estado.isEmpty() || zipCode.isEmpty() || telefono.isEmpty() || fechaInicio == null || fechaFin == null) {
-            JOptionPane.showMessageDialog(null, "Todos los campos deben estar llenos", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        try {
-            String sql = "INSERT INTO cotizaciones (nombre, direccion, tamaño, ciudad, estado, zip_code, telefono, fecha_inicio, fecha_fin, total, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement pst = connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            pst.setString(1, nombre);
-            pst.setString(2, direccion);
-            pst.setString(3, tamaño);
-            pst.setString(4, ciudad);
-            pst.setString(5, estado);
-            pst.setString(6, zipCode);
-            pst.setString(7, telefono);
-            pst.setDate(8, new java.sql.Date(fechaInicio.getTime()));
-            pst.setDate(9, new java.sql.Date(fechaFin.getTime()));
-            pst.setDouble(10, total);
-            pst.setDate(11, new java.sql.Date(fechaCotizacion.getTime()));
-            pst.executeUpdate();
-
-            ResultSet rs = pst.getGeneratedKeys();
-            if (rs.next()) {
-                int cotizacionId = rs.getInt(1);
-                guardarDetalle(cotizacionId);
-                generarPDFCotizacion(cotizacionId, fechaCotizacion);
-                actualizarTablaCotizaciones(); // Actualizar la tabla con la nueva cotización
-                limpiarTablaOrdenDeServicios(); // Limpiar la tabla de orden de servicios
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al guardar la cotización: " + e.getMessage());
-        }
+    if (nombre.isEmpty() || direccion.isEmpty() || tamaño.isEmpty() || ciudad.isEmpty() || estado.isEmpty() || zipCode.isEmpty() || telefono.isEmpty() || fechaInicio == null || fechaFin == null) {
+        JOptionPane.showMessageDialog(null, "Todos los campos deben estar llenos", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
     }
 
+    try {
+        String sql = "INSERT INTO cotizaciones (nombre, direccion, tamaño, ciudad, estado, zip_code, telefono, fecha_inicio, fecha_fin, total, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        PreparedStatement pst = connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        pst.setString(1, nombre);
+        pst.setString(2, direccion);
+        pst.setString(3, tamaño);
+        pst.setString(4, ciudad);
+        pst.setString(5, estado);
+        pst.setString(6, zipCode);
+        pst.setString(7, telefono);
+        pst.setDate(8, new java.sql.Date(fechaInicio.getTime()));
+        pst.setDate(9, new java.sql.Date(fechaFin.getTime()));
+        pst.setDouble(10, total);
+        pst.setDate(11, new java.sql.Date(fechaCotizacion.getTime()));
+        pst.executeUpdate();
+
+        ResultSet rs = pst.getGeneratedKeys();
+        if (rs.next()) {
+            int cotizacionId = rs.getInt(1);
+            guardarDetalle(cotizacionId);
+
+            // Obtener la configuración de la base de datos
+            Configuracion datosEmpresa = obtenerConfiguracion();
+
+            generarPDFCotizacion(cotizacionId, fechaCotizacion, datosEmpresa);
+            actualizarTablaCotizaciones(); // Actualizar la tabla con la nueva cotización
+            limpiarTablaOrdenDeServicios(); // Limpiar la tabla de orden de servicios
+        }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Error al guardar la cotización: " + e.getMessage());
+    }
+}
+
+
+
+
+
+                   
     private void limpiarTablaOrdenDeServicios() {
         DefaultTableModel modelo = (DefaultTableModel) TableOrdenDeServiciosCot.getModel();
         modelo.setRowCount(0); // Esto borra todas las filas de la tabla
     }
+    
+    private Configuracion obtenerConfiguracion() {
+    Configuracion config = new Configuracion();
+    String sql = "SELECT nombre, direccion, ciudad, estado, zipcode, telefono, email, webpage, logo FROM configuracion WHERE id = 1";
+    try {
+        Statement st = connect.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        if (rs.next()) {
+            config.setNombre(rs.getString("nombre"));
+            config.setDireccion(rs.getString("direccion"));
+            config.setCiudad(rs.getString("ciudad"));
+            config.setEstado(rs.getString("estado"));
+            config.setZipcode(rs.getString("zipcode"));
+            config.setTelefono(rs.getString("telefono"));
+            config.setEmail(rs.getString("email"));
+            config.setWebpage(rs.getString("webpage"));
+            config.setLogo(rs.getBytes("logo")); // Obtener el logo como byte array
+        }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Error al obtener la configuración: " + e.getMessage());
+    }
+    return config;
+}
+
 
     //PDF
-    private void generarPDFCotizacion(int cotizacionId, Date fechaCotizacion) {
-        Document document = new Document();
-        try {
-            
-            
-            String filePath = "cotizacion"
-                    + "_" + cotizacionId + ".pdf";
-            PdfWriter.getInstance(document, new FileOutputStream(filePath));
-            document.open();
+   private void generarPDFCotizacion(int cotizacionId, Date fechaCotizacion, Configuracion datosEmpresa) {
+    Document document = new Document(PageSize.A4);
+    try {
+        String filePath = "cotizacion_" + cotizacionId + ".pdf";
+        PdfWriter.getInstance(document, new FileOutputStream(filePath));
+        document.open();
 
-            // Agregar contenido al PDF
-            document.add(new Paragraph("Cotización #" + cotizacionId));
-            document.add(new Paragraph("Fecha: " + fechaCotizacion.toString()));
-            document.add(new Paragraph("Nombre: " + txtNombreCot.getText()));
-            document.add(new Paragraph("Dirección: " + txtDireccionCot.getText()));
-            document.add(new Paragraph("Ciudad: " + txtCiudadCot.getText()));
-            document.add(new Paragraph("Estado: " + txtEstadoCot.getText()));
-            document.add(new Paragraph("Zip Code: " + txtZipcodeCot.getText()));
-            document.add(new Paragraph("Teléfono: " + txtTelefonoCot.getText()));
-            document.add(new Paragraph("Fecha Inicio: " + DateInicio.getDate()));
-            document.add(new Paragraph("Fecha Fin: " + DateFinal.getDate()));
-            document.add(new Paragraph("Total: " + Labeltotalpagar.getText()));
+        // Agregar logo y nombre de la empresa
+        PdfPTable headerTable = new PdfPTable(2);
+        headerTable.setWidthPercentage(100);
+        headerTable.setWidths(new int[]{1, 4});
 
-            // Agregar tabla de detalles
-            PdfPTable table = new PdfPTable(4);
-            table.addCell("Descripción");
-            table.addCell("Cantidad");
-            table.addCell("Precio");
-            table.addCell("Total");
-
-            for (int i = 0; i < TableOrdenDeServiciosCot.getRowCount(); i++) {
-                table.addCell(TableOrdenDeServiciosCot.getValueAt(i, 0).toString());
-                table.addCell(TableOrdenDeServiciosCot.getValueAt(i, 1).toString());
-                table.addCell(TableOrdenDeServiciosCot.getValueAt(i, 2).toString());
-                table.addCell(TableOrdenDeServiciosCot.getValueAt(i, 3).toString());
-            }
-
-            document.add(table);
-            document.close();
-
-            guardarPDFEnBaseDeDatos(cotizacionId, filePath);
-        } catch (DocumentException | FileNotFoundException e) {
-            JOptionPane.showMessageDialog(null, "Error al generar el PDF: " + e.getMessage());
+        // Celda para el logo
+        if (datosEmpresa.getLogo() != null) {
+            Image logo = Image.getInstance(datosEmpresa.getLogo());
+            logo.scaleToFit(100, 100); // Ajustar el tamaño del logo a 100x100 píxeles
+            PdfPCell logoCell = new PdfPCell(logo);
+            logoCell.setBorder(PdfPCell.NO_BORDER);
+            headerTable.addCell(logoCell);
+        } else {
+            PdfPCell emptyCell = new PdfPCell();
+            emptyCell.setBorder(PdfPCell.NO_BORDER);
+            headerTable.addCell(emptyCell);
         }
-    }
 
-    private void guardarPDFEnBaseDeDatos(int cotizacionId, String filePath) {
-        try {
-            String sql = "UPDATE cotizaciones SET pdf = ? WHERE id = ?";
-            PreparedStatement pst = connect.prepareStatement(sql);
-            FileInputStream fis = new FileInputStream(filePath);
-            pst.setBinaryStream(1, fis, (int) new File(filePath).length());
-            pst.setInt(2, cotizacionId);
-            pst.executeUpdate();
-            fis.close();
+        // Celda para la información de la empresa
+        PdfPCell empresaCell = new PdfPCell();
+        empresaCell.setBorder(PdfPCell.NO_BORDER);
+        Paragraph empresaInfo = new Paragraph();
+        empresaInfo.add(new Paragraph(datosEmpresa.getNombre(), new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD)));
+        empresaInfo.add(new Paragraph(datosEmpresa.getDireccion() + " - " + datosEmpresa.getCiudad() + ", " + datosEmpresa.getEstado() + " " + datosEmpresa.getZipcode(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+        empresaInfo.add(new Paragraph("Teléfono: " + datosEmpresa.getTelefono(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+        empresaInfo.add(new Paragraph("Email: " + datosEmpresa.getEmail(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+        empresaInfo.add(new Paragraph("Web: " + datosEmpresa.getWebpage(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+        empresaCell.addElement(empresaInfo);
+        headerTable.addCell(empresaCell);
 
-            JOptionPane.showMessageDialog(null, "PDF guardado en la base de datos correctamente.");
-        } catch (SQLException | IOException e) {
-            JOptionPane.showMessageDialog(null, "Error al guardar el PDF en la base de datos: " + e.getMessage());
+        document.add(headerTable);
+
+        document.add(new Paragraph("\n"));
+
+        // Agregar contenido al PDF
+        document.add(new Paragraph("Cotización #" + cotizacionId, new Font(Font.FontFamily.TIMES_ROMAN, 14, Font.BOLD)));
+        document.add(new Paragraph("Fecha: " + fechaCotizacion.toString(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+        document.add(new Paragraph("Nombre: " + txtNombreCot.getText(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+        document.add(new Paragraph("Dirección: " + txtDireccionCot.getText(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+        document.add(new Paragraph("Ciudad: " + txtCiudadCot.getText(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+        document.add(new Paragraph("Estado: " + txtEstadoCot.getText(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+        document.add(new Paragraph("Zip Code: " + txtZipcodeCot.getText(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+        document.add(new Paragraph("Teléfono: " + txtTelefonoCot.getText(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+        document.add(new Paragraph("Fecha Inicio: " + DateInicio.getDate(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+        document.add(new Paragraph("Fecha Fin: " + DateFinal.getDate(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+        document.add(new Paragraph("Total: " + Labeltotalpagar.getText(), new Font(Font.FontFamily.TIMES_ROMAN, 12)));
+
+        document.add(new Paragraph("\n"));
+
+        // Agregar tabla de detalles
+        PdfPTable table = new PdfPTable(4);
+        table.setWidthPercentage(100);
+        table.setWidths(new int[]{4, 1, 1, 1});
+        table.addCell(new PdfPCell(new Phrase("Descripción", new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD))));
+        table.addCell(new PdfPCell(new Phrase("Cantidad", new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD))));
+        table.addCell(new PdfPCell(new Phrase("Precio", new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD))));
+        table.addCell(new PdfPCell(new Phrase("Total", new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD))));
+
+        for (int i = 0; i < TableOrdenDeServiciosCot.getRowCount(); i++) {
+            table.addCell(TableOrdenDeServiciosCot.getValueAt(i, 0).toString());
+            table.addCell(TableOrdenDeServiciosCot.getValueAt(i, 1).toString());
+            table.addCell(TableOrdenDeServiciosCot.getValueAt(i, 2).toString());
+            table.addCell(TableOrdenDeServiciosCot.getValueAt(i, 3).toString());
         }
-    }
 
+        document.add(table);
+        document.close();
+
+        guardarPDFEnBaseDeDatos(cotizacionId, filePath);
+    } catch (DocumentException | IOException e) {
+        JOptionPane.showMessageDialog(null, "Error al generar el PDF: " + e.getMessage());
+    }
+}
+
+private void guardarPDFEnBaseDeDatos(int cotizacionId, String filePath) {
+    try {
+        String sql = "UPDATE cotizaciones SET pdf = ? WHERE id = ?";
+        PreparedStatement pst = connect.prepareStatement(sql);
+
+        // Leer el archivo PDF y convertirlo en un array de bytes
+        File pdfFile = new File(filePath);
+        FileInputStream fis = new FileInputStream(pdfFile);
+        byte[] pdfData = new byte[(int) pdfFile.length()];
+        fis.read(pdfData);
+        fis.close();
+
+        pst.setBytes(1, pdfData);
+        pst.setInt(2, cotizacionId);
+        pst.executeUpdate();
+
+        JOptionPane.showMessageDialog(null, "PDF guardado en la base de datos correctamente.");
+    } catch (SQLException | IOException e) {
+        JOptionPane.showMessageDialog(null, "Error al guardar el PDF en la base de datos: " + e.getMessage());
+    }
+}
+   
     private void actualizarTablaCotizaciones() {
         try {
             DefaultTableModel modelo = (DefaultTableModel) tbCotizaciones.getModel();
