@@ -507,9 +507,9 @@
             <MenuItem class="javax.swing.JMenuItem" name="menuRCompras">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/Imagenes/compras.png"/>
+                  <Image iconType="3" name="/Imagenes/historial1.png"/>
                 </Property>
-                <Property name="label" type="java.lang.String" value="Compras"/>
+                <Property name="text" type="java.lang.String" value="Estadisticas"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuRComprasActionPerformed"/>

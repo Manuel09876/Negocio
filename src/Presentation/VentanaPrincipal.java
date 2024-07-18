@@ -413,8 +413,8 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         });
         menuReports.add(menuTrabajosRealizados);
 
-        menuRCompras.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/compras.png"))); // NOI18N
-        menuRCompras.setLabel("Compras");
+        menuRCompras.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/historial1.png"))); // NOI18N
+        menuRCompras.setText("Estadisticas");
         menuRCompras.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 menuRComprasActionPerformed(evt);
@@ -662,7 +662,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuTrabajosRealizadosActionPerformed
 
     private void menuRComprasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuRComprasActionPerformed
-        RCompras objCompras = new RCompras();
+        Estadisticas objCompras = new Estadisticas();
         jpEscritorio.add(objCompras);
         objCompras.show();
 
