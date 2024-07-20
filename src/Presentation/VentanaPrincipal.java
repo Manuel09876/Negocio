@@ -13,18 +13,38 @@ import Register.Gastos_Generales;
 import Admission.Unidades;
 import Register.*;
 import Reports.*;
+import conectar.Conectar;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 public class VentanaPrincipal extends javax.swing.JFrame {
+    private int rolId;
+    private Conectar conectar;
+
+     public VentanaPrincipal(int rolId) {
+        this.rolId = rolId;
+        this.conectar = new Conectar();
+        initComponents();
+        
+        this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
+        cargarPermisos();
+    }
 
     public VentanaPrincipal() {
-        initComponents();
-        //this.setLocationRelativeTo(null);
-        this.setExtendedState(6);
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
+    
+    
+
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -34,6 +54,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         btnSalir = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
+        menuAdministration = new javax.swing.JMenu();
         menuUsuarios = new javax.swing.JMenuItem();
         menuTipoUsuarios = new javax.swing.JMenuItem();
         menuAsignacionPermisos = new javax.swing.JMenuItem();
@@ -57,6 +78,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         TipoMaqVe = new javax.swing.JMenuItem();
         Localizacion = new javax.swing.JMenuItem();
         menuConfiguracion = new javax.swing.JMenuItem();
+        menuRegisters = new javax.swing.JMenu();
         menuOrdenes = new javax.swing.JMenuItem();
         menuVerOrdenes = new javax.swing.JMenuItem();
         menuIngreso = new javax.swing.JMenuItem();
@@ -66,6 +88,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         menuKardex = new javax.swing.JMenuItem();
         menuCargosPendientes = new javax.swing.JMenuItem();
         menuCancelaciones = new javax.swing.JMenuItem();
+        menuReports = new javax.swing.JMenu();
         menuTrabajosRealizados = new javax.swing.JMenuItem();
         menuRCompras = new javax.swing.JMenuItem();
         menuDeudasPorPagar = new javax.swing.JMenuItem();
@@ -826,7 +849,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new VentanaPrincipal().setVisible(true);
+                new VentanaPrincipal(1).setVisible(true);
             }
         });
     }
@@ -843,10 +866,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     private javax.swing.JMenuItem equipos;
     private javax.swing.JLabel jLabel1;
     public javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPanel jpEscritorio;
+    public javax.swing.JPanel jpEscritorio;
     public static final javax.swing.JLabel lbUsuario = new javax.swing.JLabel();
-    public static final javax.swing.JMenu menuAdministration = new javax.swing.JMenu();
-    private javax.swing.JMenu menuAdmission;
+    public javax.swing.JMenu menuAdministration;
+    public javax.swing.JMenu menuAdmission;
     public javax.swing.JMenuItem menuAsignacionPermisos;
     public javax.swing.JMenuItem menuAsignaciondeTrabajos;
     public javax.swing.JMenuItem menuBusquedaConvenios;
@@ -869,8 +892,8 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     public javax.swing.JMenuItem menuProveedor;
     public javax.swing.JMenuItem menuPuestoDeTrabajo;
     public javax.swing.JMenuItem menuRCompras;
-    public static final javax.swing.JMenu menuRegisters = new javax.swing.JMenu();
-    public static final javax.swing.JMenu menuReports = new javax.swing.JMenu();
+    public javax.swing.JMenu menuRegisters;
+    public javax.swing.JMenu menuReports;
     public javax.swing.JMenuItem menuStock;
     public javax.swing.JMenuItem menuTarifario;
     public javax.swing.JMenuItem menuTipoUsuarios;
@@ -881,4 +904,42 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     public javax.swing.JMenuItem menuVerOrdenes;
     private javax.swing.JMenuItem tipo_pagosgenerales;
     // End of variables declaration//GEN-END:variables
+
+    private void cargarPermisos() {
+        String sql = "SELECT m.nombre_menu, s.nombre_submenu, p.nombre_permiso " +
+                     "FROM permisos_menus_submenus pms " +
+                     "JOIN permisos p ON pms.permiso_id = p.id " +
+                     "LEFT JOIN menus m ON pms.menu_id = m.id " +
+                     "LEFT JOIN submenus s ON pms.submenu_id = s.id " +
+                     "JOIN roles_permisos rp ON rp.permiso_id = p.id " +
+                     "WHERE rp.rol_id = ?";
+
+        try {
+            PreparedStatement pst = conectar.getConexion().prepareStatement(sql);
+            pst.setInt(1, rolId);
+            ResultSet rs = pst.executeQuery();
+
+            Map<String, JMenu> menuMap = new HashMap<>();
+            while (rs.next()) {
+                String menuName = rs.getString("nombre_menu");
+                String submenuName = rs.getString("nombre_submenu");
+                String permisoName = rs.getString("nombre_permiso");
+
+                JMenu menu = menuMap.computeIfAbsent(menuName, k -> {
+                    JMenu newMenu = new JMenu(menuName);
+                    jMenuBar1.add(newMenu); // Asegúrate de que jMenuBar1 esté correctamente inicializado
+                    return newMenu;
+                });
+
+                if (submenuName != null) {
+                    JMenuItem submenu = new JMenuItem(submenuName);
+                    menu.add(submenu);
+                }
+
+                // Aquí puedes habilitar o deshabilitar los permisos específicos si es necesario
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

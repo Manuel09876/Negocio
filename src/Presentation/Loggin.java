@@ -1,7 +1,7 @@
 package Presentation;
 
 import java.sql.Connection;
-import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -20,69 +20,26 @@ public class Loggin extends javax.swing.JFrame {
     }
 
     public void IngresaSistema(String Usuario, String Contrasena) {
-
-        String capturar = "";
-        String sql = "SELECT * FROM usuarios where usuario = '" + Usuario + "' && password = '" + Contrasena + "'";
-
+        String sql = "SELECT * FROM usuarios WHERE usuario = ? AND password = ?";
         try {
+            PreparedStatement pst = conect.prepareStatement(sql);
+            pst.setString(1, Usuario);
+            pst.setString(2, Contrasena);
+            ResultSet result = pst.executeQuery();
 
-            Statement st = conect.createStatement();
-            ResultSet result = st.executeQuery(sql);
-
-            while (result.next()) {
-                capturar = result.getString("rol");
-            }
-            //Asignación de Permisos
-            if (capturar.equals("Administrador")) {
-
+            if (result.next()) {
+                int rolId = result.getInt("rol_id");
                 this.setVisible(false);
-                //   JOptionPane.showMessageDialog(null, "Welcome System");
-                VentanaPrincipal objVP = new VentanaPrincipal();
+                VentanaPrincipal objVP = new VentanaPrincipal(rolId);
                 objVP.setVisible(true);
                 objVP.pack();
                 VentanaPrincipal.lbUsuario.setText(Usuario);
-
+            } else {
+                JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
             }
-
-            if (capturar.equals("Manager")) {
-
-                this.setVisible(false);
-                //   JOptionPane.showMessageDialog(null, "Welcome System");
-                VentanaPrincipal objVP = new VentanaPrincipal();
-                objVP.setVisible(true);
-                objVP.pack();
-                VentanaPrincipal.lbUsuario.setText(Usuario);
-
-                VentanaPrincipal.menuAdministration.setEnabled(false);
-                VentanaPrincipal.menuReports.setEnabled(false);
-            }
-
-            if (capturar.equals("Customer")) {
-
-                this.setVisible(false);
-                //   JOptionPane.showMessageDialog(null, "Welcome System");
-                VentanaPrincipal objVP = new VentanaPrincipal();
-                objVP.setVisible(true);
-                objVP.pack();
-                VentanaPrincipal.lbUsuario.setText(Usuario);
-
-                VentanaPrincipal.menuAdministration.setEnabled(false);
-                VentanaPrincipal.menuRegisters.setEnabled(false);
-                VentanaPrincipal.menuReports.setEnabled(false);
-
-            }
-
-            if ((!capturar.equals("Administrador")) && (!capturar.equals("Manager")) && (!capturar.equals("Customer"))) {
-
-                JOptionPane.showMessageDialog(this, "El tipo de usuario no existe");
-            }
-
         } catch (SQLException ex) {
-
             Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
-
         }
-
     }
 
     @SuppressWarnings("unchecked")

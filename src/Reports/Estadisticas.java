@@ -1,8 +1,29 @@
 package Reports;
 
+import conectar.Conectar;
+import java.awt.BorderLayout;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.time.Day;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
 
 public class Estadisticas extends javax.swing.JInternalFrame {
+
+    Conectar con = new Conectar();
 
     public Estadisticas() {
         initComponents();
@@ -12,20 +33,94 @@ public class Estadisticas extends javax.swing.JInternalFrame {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String fechaInicio = dateFormat.format(dateInicio.getDate());
         String fechaFin = dateFormat.format(dateFin.getDate());
-        
+
         try {
             String todas = "SELECT SUM(precio) FROM orderservice";
-            String deuda ="SELECT SUM(precio) FROM orderservice WHERE eeCta = 'Deuda'";
+            String deuda = "SELECT SUM(precio) FROM orderservice WHERE eeCta = 'Deuda'";
             String canceladas = "SELECT SUM(precio) FROM orderservice WHERE eeCta = 'Cancelada'";
             String deudasPagar = "SELECT SUM(cuota) FROM credito" + "SELECT SUM(cuota) FROM creditopg" + "SELECT SUM(cuota) FROM creditoprod";
             String todasPorEmpresa = "SELECT SUM(precio) FROM orderservice WHERE id_empresa=3";
-            
-            
+
         } catch (Exception e) {
         }
     }
-    
-    
+
+    private DefaultCategoryDataset crearDataset(String query, String label) {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        try {
+            Connection conn = con.getConexion();
+            PreparedStatement pst = conn.prepareStatement(query);
+            ResultSet rs = pst.executeQuery();
+
+            while (rs.next()) {
+                String fecha = rs.getString("fechaT"); // Reemplaza "fecha_column_name" con el nombre correcto de la columna
+                double ingreso = rs.getDouble("totalIngreso");
+                dataset.addValue(ingreso, label, fecha);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return dataset;
+    }
+
+    private TimeSeriesCollection crearData(String query, String label) {
+        TimeSeries series = new TimeSeries(label);
+        try {
+            Connection conn = con.getConexion();
+            PreparedStatement pst = conn.prepareStatement(query);
+            ResultSet rs = pst.executeQuery();
+
+            while (rs.next()) {
+                Date fecha = rs.getDate("fechaT"); // Asegúrate de que 'fecha' es el nombre correcto de la columna en tu tabla
+                double valor = rs.getDouble("totalEngreso"); // O "totalEgreso" según corresponda
+                series.add(new Day(fecha), valor);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        TimeSeriesCollection dataset = new TimeSeriesCollection();
+        dataset.addSeries(series);
+        return dataset;
+    }
+
+    private void generarGraficas() {
+        String fechaInicio = new SimpleDateFormat("yyyy-MM-dd").format(dateInicio.getDate());
+        String fechaFin = new SimpleDateFormat("yyyy-MM-dd").format(dateFin.getDate());
+
+        String queryIngresos = "SELECT fechaT, SUM(precio) as totalIngreso FROM orderservice WHERE fechaT BETWEEN '" + fechaInicio + "' AND '" + fechaFin + "' GROUP BY fechaT";
+        String queryEgresos = "SELECT fechaT, SUM(precio) as totalEgreso FROM orderservice WHERE eeCta = 'Deuda' AND fechaT BETWEEN '" + fechaInicio + "' AND '" + fechaFin + "' GROUP BY fechaT";
+
+        TimeSeriesCollection datasetIngresos = crearData(queryIngresos, "Ingresos");
+        TimeSeriesCollection datasetEgresos = crearData(queryEgresos, "Egresos");
+
+        JFreeChart chartIngresos = ChartFactory.createTimeSeriesChart("Ingresos por Día", "Fecha", "Ingreso", datasetIngresos, true, true, false);
+        JFreeChart chartEgresos = ChartFactory.createTimeSeriesChart("Egresos por Día", "Fecha", "Egreso", datasetEgresos, true, true, false);
+
+        // Personalizar el eje X para mostrar solo el día
+        XYPlot plotIngresos = (XYPlot) chartIngresos.getPlot();
+        DateAxis axisIngresos = (DateAxis) plotIngresos.getDomainAxis();
+        axisIngresos.setDateFormatOverride(new SimpleDateFormat("dd-MM-yyyy"));
+
+        XYPlot plotEgresos = (XYPlot) chartEgresos.getPlot();
+        DateAxis axisEgresos = (DateAxis) plotEgresos.getDomainAxis();
+        axisEgresos.setDateFormatOverride(new SimpleDateFormat("dd-MM-yyyy"));
+
+        ChartPanel chartPanelIngresos = new ChartPanel(chartIngresos);
+        ChartPanel chartPanelEgresos = new ChartPanel(chartEgresos);
+
+        JPanel panelGraficas = new JPanel();
+        panelGraficas.setLayout(new BoxLayout(panelGraficas, BoxLayout.Y_AXIS));
+        panelGraficas.add(chartPanelIngresos);
+        panelGraficas.add(chartPanelEgresos);
+
+        JFrame frame = new JFrame("Graficas de Ingresos y Egresos");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.getContentPane().add(panelGraficas);
+        frame.pack();
+        frame.setVisible(true);
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -57,6 +152,11 @@ public class Estadisticas extends javax.swing.JInternalFrame {
         jPanel12.add(txtEgreso, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 70, 150, 30));
 
         btnHistorialCompra.setText("Generar Reporte");
+        btnHistorialCompra.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHistorialCompraActionPerformed(evt);
+            }
+        });
         jPanel12.add(btnHistorialCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 20, 120, 50));
         jPanel12.add(txtIngreso, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 30, 150, 30));
 
@@ -117,6 +217,10 @@ public class Estadisticas extends javax.swing.JInternalFrame {
     private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirActionPerformed
         dispose();
     }//GEN-LAST:event_btnSalirActionPerformed
+
+    private void btnHistorialCompraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHistorialCompraActionPerformed
+        generarGraficas();
+    }//GEN-LAST:event_btnHistorialCompraActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

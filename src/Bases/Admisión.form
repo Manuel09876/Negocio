@@ -63,7 +63,7 @@
                   <Data value="1"/>
                 </Column>
                 <Column editable="true" title="Programa" type="java.lang.Object">
-                  <Data value="Ventas"/>
+                  <Data value="Clientes"/>
                 </Column>
                 <Column editable="true" title="Visualizar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Agregar" type="java.lang.Boolean"/>
