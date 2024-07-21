@@ -4,6 +4,7 @@ import Presentation.VentanaPrincipal;
 import java.sql.Statement;
 import conectar.Conectar;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.sql.CallableStatement;
@@ -13,6 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -32,33 +34,55 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         jScrollPane3.setVisible(false);
         jScrollPane5.setVisible(false);
 
-        initTable(tbAdmision, btnAdmision);
-        initTable(tbAdministracion, btnAdministracion);
-        initTable(tbRegistros, btnRegistros);
-        initTable(tbReportes, btnReportes);
+        // Configurar listeners para los botones y checkboxes
+        setupListeners();
+        setupTableModelListener(tbAdministracion);
+        setupTableModelListener(tbAdmision);
+        setupTableModelListener(tbRegistros);
+        setupTableModelListener(tbReportes);
+    }
+    
+    private void setupListeners() {
+        btnAdministracion.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                toggleTableVisibility(jScrollPane1);
+            }
+        });
 
-        //Agregamos la lógica para manejar los cambios en las tablas
-        addTableModelListener(tbAdmision, btnAdmision);
-        addTableModelListener(tbAdministracion, btnAdministracion);
-        addTableModelListener(tbRegistros, btnRegistros);
-        addTableModelListener(tbReportes, btnReportes);
-        
-        
-        //Un ItemListener es una interfaz que recibe eventos de cambio de estado de un ítem.
+        btnAdmision.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                toggleTableVisibility(jScrollPane2);
+            }
+        });
+
+        btnRegistros.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                toggleTableVisibility(jScrollPane3);
+            }
+        });
+
+        btnReportes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                toggleTableVisibility(jScrollPane5);
+            }
+        });
+
         chAdministracion.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                //se hace visible. Si el estado del ítem cambia a deseleccionado
-                jScrollPane1.setVisible(e.getStateChange() == ItemEvent.SELECTED);
-                //ajusta o refresca el diseño de la interfaz gráfica después de cambiar la visibilidad de jScrollPane1.
+                vp.menuAdministration.setVisible(e.getStateChange() == ItemEvent.SELECTED);
                 updateLayout();
             }
         });
-        //añade un listener a chAdministracion para que, cuando su estado cambie (seleccionado o deseleccionado), la visibilidad de jScrollPane1
+
         chAdmision.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                jScrollPane2.setVisible(e.getStateChange() == ItemEvent.SELECTED);
+                vp.menuAdmission.setVisible(e.getStateChange() == ItemEvent.SELECTED);
                 updateLayout();
             }
         });
@@ -66,7 +90,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         chRegistros.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                jScrollPane3.setVisible(e.getStateChange() == ItemEvent.SELECTED);
+                vp.menuRegisters.setVisible(e.getStateChange() == ItemEvent.SELECTED);
                 updateLayout();
             }
         });
@@ -74,14 +98,43 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         chReportes.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                jScrollPane5.setVisible(e.getStateChange() == ItemEvent.SELECTED);
+                vp.menuReports.setVisible(e.getStateChange() == ItemEvent.SELECTED);
                 updateLayout();
+            }
+        });
+        
+        
+    }
+    
+    private void setupTableModelListener(JTable table) {
+        table.getModel().addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                if (e.getType() == TableModelEvent.UPDATE) {
+                    int row = e.getFirstRow();
+                    int column = e.getColumn();
+                    if (column == 6) { // Si se cambia la columna 6 (índice 5, ya que comienza en 0)
+                        Boolean selected = (Boolean) table.getValueAt(row, column);
+                        for (int i = 2; i <= 5; i++) {
+                            table.setValueAt(selected, row, i);
+                        }
+                    }
+                }
             }
         });
     }
 
-    //agrega checkboxes a varias columnas de la tabla
-    private void initTable(javax.swing.JTable table, javax.swing.JButton btn) {
+    private void toggleTableVisibility(JScrollPane scrollPane) {
+        scrollPane.setVisible(!scrollPane.isVisible());
+        updateLayout();
+    }
+
+    private void updateLayout() {
+        revalidate();
+        repaint();
+    }
+    
+       private void initTable(javax.swing.JTable table, javax.swing.JButton btn) {
         addCheckBox(2, table);
         addCheckBox(3, table);
         addCheckBox(4, table);
@@ -91,32 +144,33 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     }
 
     private void addTableModelListener(javax.swing.JTable table, javax.swing.JButton btn) {
-        table.getModel().addTableModelListener(e -> {
-            if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
-                int column = e.getColumn();
-                int row = e.getFirstRow();
+    table.getModel().addTableModelListener(e -> {
+        if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
+            int column = e.getColumn();
+            int row = e.getFirstRow();
 
-                if (column < 1 || column > 4) {
-                    return; // No hacemos nada si se modifica una columna distinta a las primeras 4 columnas
-                }
-
-                boolean allSelected = true;
-
-                for (int i = 1; i <= 4; i++) {
-                    if ((Boolean) table.getValueAt(row, i) == false) {
-                        allSelected = false;
-                        break;
-                    }
-                }
-
-                // Si todas las primeras 4 casillas están marcadas, marcamos la casilla 5, si no, la desmarcamos
-                table.setValueAt(allSelected, row, 5);
-
-                // Mostramos u ocultamos el botón dependiendo del estado de la casilla 5
-                btn.setVisible(allSelected);
-                updateLayout();
+            if (column < 2 || column > 5) {
+                return; // No hacemos nada si se modifica una columna distinta a las primeras 4 columnas
             }
-        });
+
+            boolean allSelected = true;
+
+            for (int i = 2; i <= 5; i++) {
+                Object value = table.getValueAt(row, i);
+                if (!(value instanceof Boolean) || !(Boolean) value) {
+                    allSelected = false;
+                    break;
+                }
+            }
+
+            // Si todas las primeras 4 casillas están marcadas, marcamos la casilla 5, si no, la desmarcamos
+            table.setValueAt(allSelected, row, 6);
+
+            // Mostramos u ocultamos el botón dependiendo del estado de la casilla 5
+            btn.setVisible(allSelected);
+            updateLayout();
+        }
+    });
     }
 
     private void addCheckBox(int column, javax.swing.JTable table) {
@@ -125,21 +179,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         tc.setCellRenderer(table.getDefaultRenderer(Boolean.class));
     }
 
-    private void handleCheckboxChange(ItemEvent evt, javax.swing.JTable table, javax.swing.JButton btn) {
-        if (evt.getStateChange() == ItemEvent.SELECTED) {
-            table.setVisible(true);
-            btn.setVisible(false); // Ocultar el botón al marcar el checkbox
-        } else {
-            table.setVisible(false);
-            btn.setVisible(true); // Mostrar el botón al desmarcar el checkbox
-        }
-        updateLayout();
-    }
 
-    private void updateLayout() {
-        revalidate();
-        repaint();
-    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -610,18 +650,15 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnSalirActionPerformed
 
     private void btnAdministracionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdministracionActionPerformed
-        int scrollValue = jScrollPane1.getVerticalScrollBar().getValue();
-        jScrollPane1.getVerticalScrollBar().setValue(scrollValue + 20); // Desplazar 20 píxeles hacia abajo
+        
     }//GEN-LAST:event_btnAdministracionActionPerformed
 
     private void btnAdmisionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdmisionActionPerformed
-        Bases.Admisión objAdmisión = new Bases.Admisión();
-        objAdmisión.setVisible(true);
+        
     }//GEN-LAST:event_btnAdmisionActionPerformed
 
     private void btnRegistrosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegistrosActionPerformed
-        Bases.Registros objRegistros = new Bases.Registros();
-        objRegistros.setVisible(true);
+        
     }//GEN-LAST:event_btnRegistrosActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
@@ -641,8 +678,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_jButton12ActionPerformed
 
     private void btnReportesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportesActionPerformed
-        Bases.Reportes objReportes = new Bases.Reportes();
-        objReportes.setVisible(true);
+        
     }//GEN-LAST:event_btnReportesActionPerformed
 
     private void cbxTPUItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxTPUItemStateChanged
@@ -655,71 +691,43 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbxTPUActionPerformed
 
     private void chAdministracionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chAdministracionActionPerformed
-        if (vp.menuAdministration != null) {
-        if (chAdministracion.isSelected()) {
-            vp.menuAdministration.setVisible(false);
-            jScrollPane1.setVisible(true);
-            
-        } else {
-            vp.menuAdministration.setVisible(true);
-            jScrollPane1.setVisible(false);
-            
-        }
-        updateLayout();
-    } else {
-        System.out.println("vp.menuAdministracion es null");
-    }
+//        if (vp != null && vp.menuAdministration != null) {
+//            vp.menuAdministration.setVisible(chAdministracion.isSelected());
+//            jScrollPane1.setVisible(chAdministracion.isSelected());
+//            updateLayout();
+//        } else {
+//            System.out.println("vp.menuAdministracion es null");
+//        }
     }//GEN-LAST:event_chAdministracionActionPerformed
 
     private void chAdmisionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chAdmisionActionPerformed
-         if (vp.menuAdmission != null) {
-        if (chAdmision.isSelected()) {
-            vp.menuAdmission.setVisible(false);
-            jScrollPane1.setVisible(true);
-            
-        } else {
-            vp.menuAdmission.setVisible(true);
-            jScrollPane1.setVisible(false);
-            
-        }
-        updateLayout();
-    } else {
-        System.out.println("vp.menuAdministracion es null");
-    }
+//        if (vp != null && vp.menuAdmission != null) {
+//            vp.menuAdmission.setVisible(chAdmision.isSelected());
+//            jScrollPane1.setVisible(chAdmision.isSelected());
+//            updateLayout();
+//        } else {
+//            System.out.println("vp.menuAdmission es null");
+//        }
     }//GEN-LAST:event_chAdmisionActionPerformed
 
     private void chRegistrosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chRegistrosActionPerformed
-        if (vp.menuRegisters != null) {
-        if (chRegistros.isSelected()) {
-            vp.menuRegisters.setVisible(false);
-            jScrollPane1.setVisible(true);
-            
-        } else {
-            vp.menuRegisters.setVisible(true);
-            jScrollPane1.setVisible(false);
-            
-        }
-        updateLayout();
-    } else {
-        System.out.println("vp.menuAdministracion es null");
-    }
+//        if (vp != null && vp.menuRegisters != null) {
+//            vp.menuRegisters.setVisible(chRegistros.isSelected());
+//            jScrollPane1.setVisible(chRegistros.isSelected());
+//            updateLayout();
+//        } else {
+//            System.out.println("vp.menuRegister es null");
+//        }
     }//GEN-LAST:event_chRegistrosActionPerformed
 
     private void chReportesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chReportesActionPerformed
-        if (vp.menuReports != null) {
-        if (chReportes.isSelected()) {
-            vp.menuReports.setVisible(false);
-            jScrollPane1.setVisible(true);
-            
-        } else {
-            vp.menuReports.setVisible(true);
-            jScrollPane1.setVisible(false);
-            
-        }
-        updateLayout();
-    } else {
-        System.out.println("vp.menuAdministracion es null");
-    }
+//        if (vp != null && vp.menuReports != null) {
+//            vp.menuReports.setVisible(chReportes.isSelected());
+//            jScrollPane1.setVisible(chReportes.isSelected());
+//            updateLayout();
+//        } else {
+//            System.out.println("vp.menuReports es null");
+//        }
     }//GEN-LAST:event_chReportesActionPerformed
 
 
@@ -802,10 +810,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
         }
-    }
-
-    private void handleCheckboxChange(ActionEvent evt, JScrollPane jScrollPane1, JButton btnAdministracion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
 }
