@@ -1,25 +1,25 @@
 
 package Bases;
 
+import javax.swing.JCheckBox;
+import javax.swing.JTextField;
+
 
 public class Permiso {
-    private int id;
-    private String nombrePermiso;
+    private JCheckBox checkBox;
+    private JTextField[] textFields;
 
-    public int getId() {
-        return id;
+    public Permiso(JCheckBox checkBox, JTextField... textFields) {
+        this.checkBox = checkBox;
+        this.textFields = textFields;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public JCheckBox getCheckBox() {
+        return checkBox;
     }
 
-    public String getNombrePermiso() {
-        return nombrePermiso;
-    }
-
-    public void setNombrePermiso(String nombrePermiso) {
-        this.nombrePermiso = nombrePermiso;
+    public JTextField[] getTextFields() {
+        return textFields;
     }
     
 }

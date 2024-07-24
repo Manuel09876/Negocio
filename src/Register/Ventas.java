@@ -24,6 +24,7 @@ public class Ventas extends javax.swing.JInternalFrame {
         initComponents();
         AutoCompleteDecorator.decorate(cbxClientes);
         MostrarCiente(cbxClientes);
+        MostrarTabla();
     }
 
     public void addCheckBox(int column, JTable table) {

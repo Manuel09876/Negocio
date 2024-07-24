@@ -1,5 +1,6 @@
 package Administration;
 
+import Bases.Permiso;
 import Presentation.VentanaPrincipal;
 import java.sql.Statement;
 import conectar.Conectar;
@@ -10,6 +11,8 @@ import java.awt.event.ItemListener;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
@@ -24,6 +27,9 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
     Conectar con = new Conectar();
     VentanaPrincipal vp = new VentanaPrincipal();
+    Usuarios u = new Usuarios();
+
+    private List<Permiso> permisos;
 
     public AsignacionPermisos() {
         initComponents();
@@ -34,6 +40,12 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         jScrollPane3.setVisible(false);
         jScrollPane5.setVisible(false);
 
+        // Configurar checkboxes en las tablas
+        setupTableCheckBoxes(tbAdministracion);
+        setupTableCheckBoxes(tbAdmision);
+        setupTableCheckBoxes(tbRegistros);
+        setupTableCheckBoxes(tbReportes);
+
         // Configurar listeners para los botones y checkboxes
         setupListeners();
         setupTableModelListener(tbAdministracion);
@@ -41,7 +53,28 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         setupTableModelListener(tbRegistros);
         setupTableModelListener(tbReportes);
     }
-    
+
+    private void setupPermisos() {
+        permisos = new ArrayList<>();
+        // Definir los JTextField
+        JTextField txtCodigo = new JTextField(20);
+        JTextField txtNombre = new JTextField(20);
+        JTextField txtUsuario = new JTextField(20);
+        JTextField txtPassword = new JTextField(20);
+
+        // Asociar permisos y JTextField
+        permisos.add(new Permiso(chAdministracion, txtCodigo, txtNombre, txtUsuario, txtPassword));
+        // Agregar más permisos según sea necesario...
+    }
+
+    private void setupTableCheckBoxes(JTable table) {
+        for (int i = 2; i <= 6; i++) {
+            TableColumn tc = table.getColumnModel().getColumn(i);
+            tc.setCellEditor(table.getDefaultEditor(Boolean.class));
+            tc.setCellRenderer(table.getDefaultRenderer(Boolean.class));
+        }
+    }
+
     private void setupListeners() {
         btnAdministracion.addActionListener(new ActionListener() {
             @Override
@@ -102,10 +135,9 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 updateLayout();
             }
         });
-        
-        
+
     }
-    
+
     private void setupTableModelListener(JTable table) {
         table.getModel().addTableModelListener(new TableModelListener() {
             @Override
@@ -113,12 +145,57 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 if (e.getType() == TableModelEvent.UPDATE) {
                     int row = e.getFirstRow();
                     int column = e.getColumn();
+
+                    // Lógica específica para la fila 1 y columna 2
+                    if (row == 0 && column == 2) { // Indices empiezan en 0, por eso 0 es la fila 1
+                        Boolean selected = (Boolean) table.getValueAt(row, column);
+                        if (selected) {
+                            u.CargarDatosTable(""); // Llamada al método MostrarTabla de Usuarios
+                        }
+                    }
+
+                    // Lógica para la columna 6
                     if (column == 6) { // Si se cambia la columna 6 (índice 5, ya que comienza en 0)
                         Boolean selected = (Boolean) table.getValueAt(row, column);
                         for (int i = 2; i <= 5; i++) {
                             table.setValueAt(selected, row, i);
                         }
                     }
+                    // Lógica específica para la fila 1 y columna 3
+                    if (row == 0 && column == 3) { // Indices empiezan en 0, por eso 0 es la fila 1
+                        Boolean selected = (Boolean) table.getValueAt(row, column);
+                        if (selected) {
+                            u.Guardar(); // Llamada al método MostrarTabla de Usuarios
+                        }
+                    }
+
+                    // Lógica para la columna 4 en fila 1 (índice 4 en fila 0)
+                    if (row == 0 && column == 4) {
+                        Boolean selected = (Boolean) table.getValueAt(row, column);
+                        if (selected) {
+                            // Iterar sobre permisos y ejecutar ModificarUsuario si corresponde
+                            for (Permiso permiso : permisos) {
+                                if (permiso.getCheckBox().isSelected()) {
+                                    JTextField[] campos = permiso.getTextFields();
+                                    u.ModificarUsuario(campos[0], campos[1], campos[2], campos[3]);
+                                }
+                            }
+                        }
+                    }
+                    // Lógica para la columna 5 en fila 1 (índice 5 en fila 0)
+                    if (row == 0 && column == 5) {
+                        Boolean selected = (Boolean) table.getValueAt(row, column);
+                        if (selected) {
+                            // Iterar sobre permisos y ejecutar ModificarUsuario si corresponde
+                            for (Permiso permiso : permisos) {
+                                if (permiso.getCheckBox().isSelected()) {
+                                    JTextField[] campos = permiso.getTextFields();
+                                    u.Eliminar(campos[0]);
+                                }
+                            }
+                        }
+                    }
+                    
                 }
             }
         });
@@ -133,8 +210,8 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         revalidate();
         repaint();
     }
-    
-       private void initTable(javax.swing.JTable table, javax.swing.JButton btn) {
+
+    private void initTable(javax.swing.JTable table, javax.swing.JButton btn) {
         addCheckBox(2, table);
         addCheckBox(3, table);
         addCheckBox(4, table);
@@ -144,33 +221,33 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     }
 
     private void addTableModelListener(javax.swing.JTable table, javax.swing.JButton btn) {
-    table.getModel().addTableModelListener(e -> {
-        if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
-            int column = e.getColumn();
-            int row = e.getFirstRow();
+        table.getModel().addTableModelListener(e -> {
+            if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
+                int column = e.getColumn();
+                int row = e.getFirstRow();
 
-            if (column < 2 || column > 5) {
-                return; // No hacemos nada si se modifica una columna distinta a las primeras 4 columnas
-            }
-
-            boolean allSelected = true;
-
-            for (int i = 2; i <= 5; i++) {
-                Object value = table.getValueAt(row, i);
-                if (!(value instanceof Boolean) || !(Boolean) value) {
-                    allSelected = false;
-                    break;
+                if (column < 2 || column > 5) {
+                    return; // No hacemos nada si se modifica una columna distinta a las primeras 4 columnas
                 }
+
+                boolean allSelected = true;
+
+                for (int i = 2; i <= 5; i++) {
+                    Object value = table.getValueAt(row, i);
+                    if (!(value instanceof Boolean) || !(Boolean) value) {
+                        allSelected = false;
+                        break;
+                    }
+                }
+
+                // Si todas las primeras 4 casillas están marcadas, marcamos la casilla 5, si no, la desmarcamos
+                table.setValueAt(allSelected, row, 6);
+
+                // Mostramos u ocultamos el botón dependiendo del estado de la casilla 5
+                btn.setVisible(allSelected);
+                updateLayout();
             }
-
-            // Si todas las primeras 4 casillas están marcadas, marcamos la casilla 5, si no, la desmarcamos
-            table.setValueAt(allSelected, row, 6);
-
-            // Mostramos u ocultamos el botón dependiendo del estado de la casilla 5
-            btn.setVisible(allSelected);
-            updateLayout();
-        }
-    });
+        });
     }
 
     private void addCheckBox(int column, javax.swing.JTable table) {
@@ -178,8 +255,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         tc.setCellEditor(table.getDefaultEditor(Boolean.class));
         tc.setCellRenderer(table.getDefaultRenderer(Boolean.class));
     }
-
-
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -650,15 +725,15 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnSalirActionPerformed
 
     private void btnAdministracionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdministracionActionPerformed
-        
+
     }//GEN-LAST:event_btnAdministracionActionPerformed
 
     private void btnAdmisionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdmisionActionPerformed
-        
+
     }//GEN-LAST:event_btnAdmisionActionPerformed
 
     private void btnRegistrosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRegistrosActionPerformed
-        
+
     }//GEN-LAST:event_btnRegistrosActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
@@ -678,7 +753,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_jButton12ActionPerformed
 
     private void btnReportesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportesActionPerformed
-        
+
     }//GEN-LAST:event_btnReportesActionPerformed
 
     private void cbxTPUItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxTPUItemStateChanged
@@ -691,43 +766,19 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbxTPUActionPerformed
 
     private void chAdministracionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chAdministracionActionPerformed
-//        if (vp != null && vp.menuAdministration != null) {
-//            vp.menuAdministration.setVisible(chAdministracion.isSelected());
-//            jScrollPane1.setVisible(chAdministracion.isSelected());
-//            updateLayout();
-//        } else {
-//            System.out.println("vp.menuAdministracion es null");
-//        }
+//        
     }//GEN-LAST:event_chAdministracionActionPerformed
 
     private void chAdmisionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chAdmisionActionPerformed
-//        if (vp != null && vp.menuAdmission != null) {
-//            vp.menuAdmission.setVisible(chAdmision.isSelected());
-//            jScrollPane1.setVisible(chAdmision.isSelected());
-//            updateLayout();
-//        } else {
-//            System.out.println("vp.menuAdmission es null");
-//        }
+//       
     }//GEN-LAST:event_chAdmisionActionPerformed
 
     private void chRegistrosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chRegistrosActionPerformed
-//        if (vp != null && vp.menuRegisters != null) {
-//            vp.menuRegisters.setVisible(chRegistros.isSelected());
-//            jScrollPane1.setVisible(chRegistros.isSelected());
-//            updateLayout();
-//        } else {
-//            System.out.println("vp.menuRegister es null");
-//        }
+//        
     }//GEN-LAST:event_chRegistrosActionPerformed
 
     private void chReportesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chReportesActionPerformed
-//        if (vp != null && vp.menuReports != null) {
-//            vp.menuReports.setVisible(chReportes.isSelected());
-//            jScrollPane1.setVisible(chReportes.isSelected());
-//            updateLayout();
-//        } else {
-//            System.out.println("vp.menuReports es null");
-//        }
+//        
     }//GEN-LAST:event_chReportesActionPerformed
 
 

@@ -6,6 +6,7 @@ import Bases.Venta;
 import com.toedter.calendar.JDateChooser;
 import java.sql.ResultSetMetaData;
 import conectar.Conectar;
+import java.awt.HeadlessException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -40,9 +41,14 @@ public class Orden extends javax.swing.JInternalFrame {
     int item;
     double TotalPagar = 0.00;
 
+    // Variables temporales para almacenar los datos
+    private String tempFrecuenciaStr;
+    private String tempServicioStr;
+    private String tempPrecioStr;
+    private String tempNotaEmpresa;
 
     public Orden() {
-        
+
         initComponents();
         AutoCompleteDecorator.decorate(cbxBusiness);
         AutoCompleteDecorator.decorate(cbxCustomer);
@@ -51,9 +57,9 @@ public class Orden extends javax.swing.JInternalFrame {
         MostrarCiente(cbxCustomer);
         MostrarTrabajador(cbxTrabajador);
         txtIdBusiness.setVisible(false);
-        txtIdCustomer.setEnabled(false);
-        txtIdTrabajador.setEnabled(false);
-        txtIdNC.setEnabled(false);
+        txtIdCustomer.setVisible(false);
+        txtIdTrabajador.setVisible(false);
+        txtIdNC.setVisible(false);
 
     }
 
@@ -68,7 +74,7 @@ public class Orden extends javax.swing.JInternalFrame {
             } else {
                 JOptionPane.showMessageDialog(null, "Fila no seleccionada");
             }
-        } catch (Exception e) {
+        } catch (HeadlessException e) {
             JOptionPane.showMessageDialog(null, "Error en la selección, error " + e.toString());
         }
     }
@@ -78,14 +84,15 @@ public class Orden extends javax.swing.JInternalFrame {
         if (DateInicio.getDate() != null && DateFinal.getDate() != null) {
             Calendar inicio = DateInicio.getCalendar();
             Calendar termino = DateFinal.getCalendar();
-            int dias = -1;
-            while (inicio.before(termino) || inicio.equals(termino)) {
+            int dias = 0;  // Cambiado de -1 a 0 para incluir el primer día en el conteo
+            while (!inicio.after(termino)) {
                 dias++;
                 inicio.add(Calendar.DATE, 1);
             }
-//            int a = Integer.parseInt(txtEntreServicios.getText());
             int n = dias / Integer.parseInt(txtEntreServicios.getText());
-        
+            if (dias % Integer.parseInt(txtEntreServicios.getText()) != 0) {
+                n++;  // Incrementar si hay un resto, para incluir el último servicio
+            }
             txtCantServicios.setText("" + n);
         } else {
             JOptionPane.showMessageDialog(null, "Seleccione la fechas", "", JOptionPane.ERROR_MESSAGE);
@@ -139,11 +146,8 @@ public class Orden extends javax.swing.JInternalFrame {
             tabla.setModel(tmp);
             codigo.requestFocus();
         }
-
     }
 
-   
-    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -193,6 +197,8 @@ public class Orden extends javax.swing.JInternalFrame {
         jLabel2 = new javax.swing.JLabel();
         cbxTrabajador = new javax.swing.JComboBox<>();
         txtIdTrabajador = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        txtComisión = new javax.swing.JTextField();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -222,7 +228,7 @@ public class Orden extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "Descripción", "Cantidad de Servicios", "Precio", "Total"
+                "Descripción", "Cantidad de Servicios", "Precio", "Total", "Frecuencia"
             }
         ));
         TableOrdenDeServicio.setRowHeight(23);
@@ -433,6 +439,10 @@ public class Orden extends javax.swing.JInternalFrame {
         jPanel16.add(cbxTrabajador, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 330, 200, -1));
         jPanel16.add(txtIdTrabajador, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 330, 80, -1));
 
+        jLabel8.setText("Comisión");
+        jPanel16.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 330, -1, -1));
+        jPanel16.add(txtComisión, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 330, 90, -1));
+
         getContentPane().add(jPanel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 1090, 500));
 
         pack();
@@ -515,36 +525,65 @@ public class Orden extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnTotalActionPerformed
 //Adicionar item a la tabla para su venta
     private void btnAdicionarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdicionarActionPerformed
-        if (!"".equals(txtCantServicios.getText())) {
-            String Descripcion = txtServicios.getText();
-            int Servicios = Integer.parseInt(txtCantServicios.getText());
-            double precio = Double.parseDouble(txtPrecioPorServicio.getText());
+        try {
+            String cantidadStr = txtCantServicios.getText().trim();
+            String servicioStr = txtServicios.getText().trim();
+            String precioStr = txtPrecioPorServicio.getText().trim();
+            String entreServiciosStr = txtEntreServicios.getText().trim();
+
+            // Verificar que las entradas no estén vacías
+            if (cantidadStr.isEmpty() || servicioStr.isEmpty() || precioStr.isEmpty() || entreServiciosStr.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos antes de adicionar.", "", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int Servicios = Integer.parseInt(cantidadStr);
+            double precio = Double.parseDouble(precioStr);
             double total = Servicios * precio;
 
             item = item + 1;
             modelo = (DefaultTableModel) TableOrdenDeServicio.getModel();
-            for (int i = 1; i < TableOrdenDeServicio.getRowCount(); i++) {
-                if (TableOrdenDeServicio.getValueAt(i, 1).equals(txtServicios.getText())) {
-                    JOptionPane.showMessageDialog(null, "El Servicio ya esta ingresado");
+            for (int i = 0; i < TableOrdenDeServicio.getRowCount(); i++) {
+                if (TableOrdenDeServicio.getValueAt(i, 0).equals(servicioStr)) {
+                    JOptionPane.showMessageDialog(null, "El Servicio ya está ingresado");
                     return;
                 }
             }
-            ArrayList lista = new ArrayList();
+            ArrayList<Object> lista = new ArrayList<>();
             lista.add(item);
-            lista.add(Descripcion);
+            lista.add(servicioStr);
             lista.add(Servicios);
             lista.add(precio);
             lista.add(total);
-            Object[] O = new Object[4];
+            lista.add(entreServiciosStr);  // Añadir frecuencia
+            Object[] O = new Object[5];
             O[0] = lista.get(1);
             O[1] = lista.get(2);
             O[2] = lista.get(3);
             O[3] = lista.get(4);
+            O[4] = lista.get(5);  // Añadir frecuencia
             modelo.addRow(O);
             TableOrdenDeServicio.setModel(modelo);
             TotalPagar();
-            LimpiarOrden();
-            txtEntreServicios.requestFocus();
+
+            // Guardar datos en variables temporales antes de limpiar los campos
+            tempFrecuenciaStr = entreServiciosStr;
+            tempServicioStr = servicioStr;
+            tempPrecioStr = precioStr;
+            tempNotaEmpresa = txtNotaE.getText().trim();
+
+            // Limpiar los campos después de adicionar
+            txtServicios.setText("");
+            txtPrecioPorServicio.setText("");
+            txtEntreServicios.setText("");
+            txtCantServicios.setText("");
+            txtSubtotal.setText("");
+            txtNotaE.setText("");
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Error en el formato de los datos: " + e.getMessage(), "", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error al adicionar el servicio: " + e.getMessage(), "", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnAdicionarActionPerformed
 //Eliminar item de la tabla venta
@@ -561,10 +600,25 @@ public class Orden extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbxTrabajadorItemStateChanged
 //Registra venta a la base de datos
     private void btnGenerarCompraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerarCompraActionPerformed
-        RegistrarVenta();
-//        RegistrarDetalle();
-        registrarOrden();
+        if (verificarCamposCompletos()) {
+            System.out.println("Todos los campos están completos. Procediendo a registrar la orden.");
+            RegistrarVenta();
+            registrarOrden();
 
+            // Limpiar la tabla después de generar la compra
+            DefaultTableModel model = (DefaultTableModel) TableOrdenDeServicio.getModel();
+            model.setRowCount(0);
+
+            // Limpiar los campos
+            txtServicios.setText("");
+            txtPrecioPorServicio.setText("");
+            txtEntreServicios.setText("");
+            txtCantServicios.setText("");
+            txtSubtotal.setText("");
+            txtNotaE.setText("");
+        } else {
+            JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos antes de registrar la orden.", "", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_btnGenerarCompraActionPerformed
 
 
@@ -595,6 +649,7 @@ public class Orden extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     public javax.swing.JPanel jPanel16;
@@ -605,6 +660,7 @@ public class Orden extends javax.swing.JInternalFrame {
     private javax.swing.JTable tbPrecios;
     private javax.swing.JTextField txtArea;
     public javax.swing.JTextField txtCantServicios;
+    private javax.swing.JTextField txtComisión;
     private javax.swing.JTextField txtEntreServicios;
     private javax.swing.JTextField txtIdBusiness;
     private javax.swing.JTextField txtIdCustomer;
@@ -766,7 +822,7 @@ public class Orden extends javax.swing.JInternalFrame {
         txtNotaE.setText("");
     }
 
-//Registra a la venta a BD
+    //Registra a la venta a BD
     private void RegistrarVenta() {
         String empresa = cbxBusiness.getSelectedItem().toString();
         String cliente = cbxCustomer.getSelectedItem().toString();
@@ -792,71 +848,124 @@ public class Orden extends javax.swing.JInternalFrame {
         }
     }
 
+    private boolean verificarCamposCompletos() {
+        boolean completos = !(txtIdBusiness.getText().trim().isEmpty()
+                || txtIdCustomer.getText().trim().isEmpty()
+                || tempFrecuenciaStr == null || tempFrecuenciaStr.isEmpty()
+                || tempServicioStr == null || tempServicioStr.isEmpty()
+                || tempPrecioStr == null || tempPrecioStr.isEmpty());
+
+        if (!completos) {
+            System.out.println("Campos faltantes:");
+            if (txtIdBusiness.getText().trim().isEmpty()) {
+                System.out.println("Falta ID de la empresa");
+            }
+            if (txtIdCustomer.getText().trim().isEmpty()) {
+                System.out.println("Falta ID del cliente");
+            }
+            if (tempFrecuenciaStr == null || tempFrecuenciaStr.isEmpty()) {
+                System.out.println("Falta tiempo entre servicios");
+            }
+            if (tempServicioStr == null || tempServicioStr.isEmpty()) {
+                System.out.println("Falta servicio");
+            }
+            if (tempPrecioStr == null || tempPrecioStr.isEmpty()) {
+                System.out.println("Falta precio por servicio");
+            }
+        }
+
+        return completos;
+    }
+
     private void registrarOrden() {
+    Conectar con = new Conectar();
+    Connection connect = null;
+    PreparedStatement stmt = null;
+    try {
+        connect = con.getConexion();
 
-        Conectar con = new Conectar();
-        Connection connect = con.getConexion();
-        PreparedStatement stmt = null;
-        try {
-            // Obtenemos los datos de las cajas de texto
-            int empresa = Integer.parseInt(txtIdBusiness.getText().trim());
-            int cliente = Integer.parseInt(txtIdCustomer.getText().trim());
+        // Obtenemos los datos de las cajas de texto
+        String empresaStr = txtIdBusiness.getText().trim();
+        String clienteStr = txtIdCustomer.getText().trim();
 
-            //Validacion para la Frecuencia
-            int frecuencia = 0;
-            frecuencia = Integer.parseInt(txtEntreServicios.getText());
+        // Convertir los valores a los tipos adecuados
+        int empresa = Integer.parseInt(empresaStr);
+        int cliente = Integer.parseInt(clienteStr);
 
-            String servicio = txtServicios.getText();
-            double precio = Double.parseDouble(txtPrecioPorServicio.getText());
-            String notaEmpresa = txtNotaE.getText();
-            
-            //obtener la fecha de inicio y fin
-            Date fechaInicio = DateInicio.getDate();
-            Date fechafin = DateFinal.getDate();
+        // Obtener la fecha de inicio y fin
+        Date fechaInicio = DateInicio.getDate();
+        Date fechaFin = DateFinal.getDate();
 
-            //Calcular las fechas intermedias basadas en la frecuencia
+        if (fechaInicio == null || fechaFin == null) {
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione las fechas de inicio y fin.", "", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        for (int i = 0; i < TableOrdenDeServicio.getRowCount(); i++) {
+            String servicioStr = TableOrdenDeServicio.getValueAt(i, 0).toString();
+            int frecuencia = Integer.parseInt(TableOrdenDeServicio.getValueAt(i, 4).toString());
+            double precio = Double.parseDouble(TableOrdenDeServicio.getValueAt(i, 2).toString());
+            String notaEmpresa = txtNotaE.getText().trim();
+
+            System.out.println("Datos a registrar:");
+            System.out.println("Empresa: " + empresa);
+            System.out.println("Cliente: " + cliente);
+            System.out.println("Frecuencia: " + frecuencia);
+            System.out.println("Servicio: " + servicioStr);
+            System.out.println("Precio: " + precio);
+            System.out.println("Nota Empresa: " + notaEmpresa);
+            System.out.println("Fecha Inicio: " + fechaInicio);
+            System.out.println("Fecha Fin: " + fechaFin);
+
+            // Calcular las fechas intermedias basadas en la frecuencia
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(fechaInicio);
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-            while (calendar.getTime().before(fechafin)) {
-                //Insertar la orden de servicio para cada fecha intermedia
-                String sql = "INSERT INTO orderservice (fechaT, id_empresa, id_cliente, servicio, precio, notaEmpresa, frecuencia, inicio, fin) VALUES (?,?,?, ?, ?, ?, ?, ?, ?)";
+            while (!calendar.getTime().after(fechaFin)) {
+                // Insertar la orden de servicio para cada fecha intermedia
+                String sql = "INSERT INTO orderservice (fechaT, id_empresa, id_cliente, servicio, precio, notaEmpresa, frecuencia, inicio, fin) VALUES (?,?,?,?,?,?,?,?,?)";
 
                 stmt = connect.prepareStatement(sql);
                 stmt.setString(1, dateFormat.format(calendar.getTime()));
                 stmt.setInt(2, empresa);
                 stmt.setInt(3, cliente);
-                stmt.setString(4, servicio);
+                stmt.setString(4, servicioStr);
                 stmt.setDouble(5, precio);
                 stmt.setString(6, notaEmpresa);
                 stmt.setInt(7, frecuencia);
-                stmt.setString(8, dateFormat.format(DateInicio.getDate()));
-                stmt.setString(9, dateFormat.format(DateFinal.getDate()));
+                stmt.setString(8, dateFormat.format(fechaInicio));
+                stmt.setString(9, dateFormat.format(fechaFin));
 
-                //Ejecutar la consulta
+                System.out.println("Insertando orden de servicio para la fecha: " + dateFormat.format(calendar.getTime()));
+
+                // Ejecutar la consulta
                 stmt.executeUpdate();
 
-                //Incrementar la fecha segun la frecuencia
+                // Incrementar la fecha según la frecuencia
                 calendar.add(Calendar.DAY_OF_MONTH, frecuencia);
             }
-            JOptionPane.showInternalMessageDialog(null, "Ordenes de servicio registradas correctamente");
+        }
+        JOptionPane.showMessageDialog(null, "Ordenes de servicio registradas correctamente");
 
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (connect != null) {
-                    connect.close();
-                }
-            } catch (SQLException ex) {
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
+    } catch (NumberFormatException ex) {
+        JOptionPane.showMessageDialog(null, "Error en los datos ingresados: " + ex.getMessage());
+    } finally {
+        try {
+            if (stmt != null) {
+                stmt.close();
             }
+            if (connect != null) {
+                connect.close();
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
-    
-    
+}
+
 
 }

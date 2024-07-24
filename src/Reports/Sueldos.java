@@ -80,7 +80,7 @@ public class Sueldos extends javax.swing.JInternalFrame {
         jLabel2.setText("Final");
         jPanel12.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(970, 10, -1, -1));
 
-        getContentPane().add(jPanel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1190, 589));
+        getContentPane().add(jPanel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 1200, 589));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
