@@ -706,14 +706,14 @@ public class Usuarios extends javax.swing.JInternalFrame {
 
 public void MostrarCTipoDeUsuario(JComboBox cbxTipoDeUsuario) {
         String sql = "";
-        sql = "SELECT * FROM tipodeusuario;";
+        sql = "SELECT * FROM roles;";
         Statement st;
         try {
             st = con.getConexion().createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxTipoDeUsuario.removeAllItems();
             while (rs.next()) {
-                cbxTipoDeUsuario.addItem(rs.getString("tipoDeUsuario"));
+                cbxTipoDeUsuario.addItem(rs.getString("nombre"));
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Combo " + e.toString());
@@ -721,14 +721,14 @@ public void MostrarCTipoDeUsuario(JComboBox cbxTipoDeUsuario) {
     }
 
     public void MostrarCodigoTipoDeUsuario(JComboBox cbxTipoDeUsuario, JTextField idTPU) {
-        String consuta = "select tipodeusuario.idTipoDeUsuario from tipodeusuario where tipodeusuario.tipoDeUsuario=?";
+        String consuta = "select id from roles where nombre=?";
         try {
             CallableStatement cs = con.getConexion().prepareCall(consuta);
             cs.setString(1, cbxTipoDeUsuario.getSelectedItem().toString());
             cs.execute();
             ResultSet rs = cs.executeQuery();
             if (rs.next()) {
-                idTPU.setText(rs.getString("idTipoDeUsuario"));
+                idTPU.setText(rs.getString("id"));
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());

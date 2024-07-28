@@ -17,13 +17,13 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-public class TipoDeUsuario extends javax.swing.JInternalFrame {
+public class Roles extends javax.swing.JInternalFrame {
 
     DefaultTableModel model;
     private int idTipoDeUsuaio;
     private String tipoDeUsuario, estado;
 
-    public TipoDeUsuario(int idTipoDeUsuaio, String tipoDeUsuario, String estado) {
+    public Roles(int idTipoDeUsuaio, String tipoDeUsuario, String estado) {
         this.idTipoDeUsuaio = idTipoDeUsuaio;
         this.tipoDeUsuario = tipoDeUsuario;
         this.estado = estado;
@@ -53,7 +53,7 @@ public class TipoDeUsuario extends javax.swing.JInternalFrame {
         this.estado = estado;
     }
 
-    public TipoDeUsuario() {
+    public Roles() {
         initComponents();
         
         txtId.setEnabled(false);
@@ -76,14 +76,14 @@ public class TipoDeUsuario extends javax.swing.JInternalFrame {
             
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
             
-            String ConsultaSQL = "SELECT * FROM tipodeusuario";
+            String ConsultaSQL = "SELECT * FROM roles";
             
             Statement st = connect.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
             while (result.next()) {
-                RegistroBD[0] = result.getString("idTipoDeUsuario");
-                RegistroBD[1] = result.getString("tipoDeUsuario");
+                RegistroBD[0] = result.getString("id");
+                RegistroBD[1] = result.getString("nombre");
                 RegistroBD[2] = result.getString("estado");
 
                 model.addRow(RegistroBD);
@@ -110,10 +110,10 @@ public class TipoDeUsuario extends javax.swing.JInternalFrame {
         tipoDeUsuario = txtNuevoTU.getText();
         
         //Consulta para evitar duplicados
-        String consulta = "SELECT * FROM tipodeusuario WHERE tipoDeUsuario = ?";
+        String consulta = "SELECT * FROM roles WHERE nombre = ?";
         
         //Consulta sql para insertar los datos (nombres como en la base de datos)
-        sql = "INSERT INTO tipodeusuario (tipoDeUsuario)VALUES (?)";
+        sql = "INSERT INTO roles (nombre)VALUES (?)";
 
         //Para almacenar los datos empleo un try cash
         try {
@@ -147,7 +147,7 @@ public class TipoDeUsuario extends javax.swing.JInternalFrame {
 
         setIdTipoDeUsuaio(Integer.parseInt(codigo.getText()));
 
-        String consulta = "DELETE from tipodeusuario where idTipoDeUsuario=?";
+        String consulta = "DELETE from roles where id=?";
 
         try {
 
@@ -195,7 +195,7 @@ public class TipoDeUsuario extends javax.swing.JInternalFrame {
             setIdTipoDeUsuaio(Integer.parseInt(id.getText()));
             setName(nombre.getText());
             
-        String sql = "UPDATE tipodeusuario SET tipoDeUsuario = ?  WHERE idTipoDeUsuario = ?";
+        String sql = "UPDATE roles SET nombre = ?  WHERE id = ?";
         
             connect = con.getConexion();
             ps = connect.prepareStatement(sql);
@@ -212,7 +212,7 @@ public class TipoDeUsuario extends javax.swing.JInternalFrame {
     }
 
     public boolean accion(String estado, int idTipoDeUsuario) {
-        String sql = "UPDATE tipodeusuario SET estado = ? WHERE idTipoDeUsuario = ?";
+        String sql = "UPDATE roles SET estado = ? WHERE id = ?";
         try {
             connect = con.getConexion();
             ps = connect.prepareStatement(sql);

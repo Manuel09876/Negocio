@@ -65,7 +65,7 @@ public class Marcas extends javax.swing.JInternalFrame {
         CargarDatosTabla("");
     }
     
-    void CargarDatosTabla(String Valores) {
+    public void CargarDatosTabla(String Valores) {
 
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
@@ -96,7 +96,7 @@ public class Marcas extends javax.swing.JInternalFrame {
         }
     }
 
-    void Guardar() {
+    public void Guardar() {
 
         // Variables
         int id_marca;

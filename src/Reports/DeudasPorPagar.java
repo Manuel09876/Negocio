@@ -248,7 +248,6 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
                     int numeroCuota = result.getInt("Numero de Cuota");
                     mostrarAviso(fechaPago, numeroCuota);
                 } catch (ParseException e) {
-                    e.printStackTrace();
                 }
             }
             // Añadir CheckBox a la primera columna

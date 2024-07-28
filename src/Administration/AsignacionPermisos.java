@@ -1,7 +1,11 @@
 package Administration;
 
+import Admission.*;
+import Register.*;
+import Reports.*;
 import Bases.Permiso;
 import Presentation.VentanaPrincipal;
+import com.toedter.calendar.JDateChooser;
 import java.sql.Statement;
 import conectar.Conectar;
 import java.awt.event.ActionEvent;
@@ -9,8 +13,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JButton;
@@ -18,21 +24,136 @@ import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+import javax.swing.JTextField;
 
 public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
-    Conectar con = new Conectar();
-    VentanaPrincipal vp = new VentanaPrincipal();
-    Usuarios u = new Usuarios();
+    Conectar conexion = new Conectar();
+    Connection conect = conexion.getConexion();
+
+    private VentanaPrincipal vp;
+    private Usuarios u;
+    private Roles r;
+    private AsignacionPermisos ap;
+    private Empresas em;
+    private Trabajadores tb;
+    private Tarifario tf;
+    private Productos p;
+    private Formularios f;
+    private Proveedor pr;
+    private Convenios cv;
+    private BusquedaDeConvenios bc;
+    private AsignacionTrabajos at;
+    private PuestoDeTrabajo pt;
+    private FormaDePago fp;
+    private Menus ms;
+    private Clientes c;
+    private Marcas mc;
+    private Unidades un;
+    private tipos_pagosgenerales tp;
+    private TipoProductosMateriales tpm;
+    private TipoMaquinariasYVehiculos tm;
+    private Localizacion l;
+    private Configuracion cf;
+    private Orden os;
+    private VerOrdenes vo;
+    private Ventas vt;
+    private ComprasProductosMateriales cpm;
+    private CompraEquiposVehiculos cev;
+    private Gastos_Generales gg;
+    private Kardex k;
+    private Cotizaciones ct;
+    private Cancelaciones cc;
+    private RTrabajosRealizados tr;
+    private Estadisticas es;
+    private DeudasPorPagar dpp;
+    private DeudasPorCobrar dpc;
+    private HorasTrabajadas ht;
+    private Sueldos sd;
+    private Stock st;
+    private Trabajos tbs;
+    private BudgetManager b;
+
+    // Definir JTextFields como variables de instancia
+    private JTextField txtNombre;
+    private JTextField txtUsuario;
+    private JTextField txtBuscar;
+    private JTextField txtId;
+    private JTextField txtBusinessName;
+    private JTextField txtAddress; 
+    private JTextField txtZipCode;
+    private JTextField txtCity;
+    private JTextField txtState;
+    private JTextField txtNameOwner;
+    private JTextField txtCellphoneOwner; 
+    private JTextField txtEmailOwner;
+    private JTextField txtNameContact;
+    private JTextField txtCellphoneContact;
+    private JTextField txtEmailContact; 
+    private JTextField txtWebsiteBusiness;
+    private JDateChooser calendar;
+    private JTextField txtCodigo; 
+    private JTextField txtIdBusiness;
+    private JTextField txtNameCustomer; 
+    private JTextField txtNameAddress;
+    private JTextField txtPhoneNumber; 
+    private JTextField txtEmail;
+    private JTextField txtArea;
+    private JTextArea txtNotaCliente;
 
     private List<Permiso> permisos;
 
-    public AsignacionPermisos() {
+    public AsignacionPermisos(VentanaPrincipal vp) throws SQLException {
+        this.vp = vp;
+        this.u = new Usuarios();
+        this.r = new Roles();
+        this.em = new Empresas();
+        this.tb = new Trabajadores();
+        this.tf = new Tarifario();
+        this.p = new Productos();
+        this.cv = new Convenios();
+        this.bc = new BusquedaDeConvenios();
+        this.at = new AsignacionTrabajos();
+        this.pt = new PuestoDeTrabajo();
+        this.fp = new FormaDePago();
+        this.ms = new Menus();
+        this.c = new Clientes();
+        this.mc = new Marcas();
+        this.un = new Unidades();
+        this.tp = new tipos_pagosgenerales();
+        this.tpm = new TipoProductosMateriales();
+        this.tm = new TipoMaquinariasYVehiculos();
+        this.l = new Localizacion();
+        this.cf = new Configuracion();
+        this.os = new Orden();
+        this.vo = new VerOrdenes();
+        this.vt = new Ventas();
+        this.cpm = new ComprasProductosMateriales();
+        this.cev = new CompraEquiposVehiculos();
+        this.gg = new Gastos_Generales();
+        this.k = new Kardex();
+        this.ct = new Cotizaciones();
+        this.cc = new Cancelaciones();
+        this.tr = new RTrabajosRealizados();
+        this.es = new Estadisticas();
+        this.dpp = new DeudasPorPagar();
+        this.dpc = new DeudasPorCobrar();
+        this.ht = new HorasTrabajadas();
+        this.sd = new Sueldos();
+        this.st = new Stock();
+        this.tbs = new Trabajos();
+        this.b = new BudgetManager();
+
         initComponents();
+        conexion = new Conectar();
+        conect = conexion.getConexion();
+        AutoCompleteDecorator.decorate(cbxTPU);
         MostrarTipodeUsuarioCombo(cbxTPU);
 
         jScrollPane1.setVisible(false);
@@ -48,10 +169,12 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
         // Configurar listeners para los botones y checkboxes
         setupListeners();
-        setupTableModelListener(tbAdministracion);
-        setupTableModelListener(tbAdmision);
-        setupTableModelListener(tbRegistros);
-        setupTableModelListener(tbReportes);
+
+        // Configurar oyentes del modelo de tabla para cada tabla
+        setupTableModelListener(tbAdministracion, "Administracion");
+        setupTableModelListener(tbAdmision, "Admision");
+        setupTableModelListener(tbRegistros, "Registros");
+        setupTableModelListener(tbReportes, "Reportes");
     }
 
     private void setupPermisos() {
@@ -138,67 +261,443 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
     }
 
-    private void setupTableModelListener(JTable table) {
-        table.getModel().addTableModelListener(new TableModelListener() {
-            @Override
-            public void tableChanged(TableModelEvent e) {
-                if (e.getType() == TableModelEvent.UPDATE) {
-                    int row = e.getFirstRow();
-                    int column = e.getColumn();
+    // Método actualizado para configurar los oyentes del modelo de tabla
+    private void setupTableModelListener(JTable table, String tableName) {
+    table.getModel().addTableModelListener(new TableModelListener() {
+        @Override
+        public void tableChanged(TableModelEvent e) {
+            if (e.getType() == TableModelEvent.UPDATE) {
+                int row = e.getFirstRow();
+                int column = e.getColumn();
 
-                    // Lógica específica para la fila 1 y columna 2
-                    if (row == 0 && column == 2) { // Indices empiezan en 0, por eso 0 es la fila 1
-                        Boolean selected = (Boolean) table.getValueAt(row, column);
-                        if (selected) {
-                            u.CargarDatosTable(""); // Llamada al método MostrarTabla de Usuarios
-                        }
-                    }
+                // Verificar que la columna sea una de las de permisos
+                if (column >= 2 && column <= 5) {
+                    Boolean selected = (Boolean) table.getValueAt(row, column);
 
-                    // Lógica para la columna 6
-                    if (column == 6) { // Si se cambia la columna 6 (índice 5, ya que comienza en 0)
-                        Boolean selected = (Boolean) table.getValueAt(row, column);
-                        for (int i = 2; i <= 5; i++) {
-                            table.setValueAt(selected, row, i);
-                        }
-                    }
-                    // Lógica específica para la fila 1 y columna 3
-                    if (row == 0 && column == 3) { // Indices empiezan en 0, por eso 0 es la fila 1
-                        Boolean selected = (Boolean) table.getValueAt(row, column);
-                        if (selected) {
-                            u.Guardar(); // Llamada al método MostrarTabla de Usuarios
-                        }
-                    }
+                    // Obtener nombres de menú y submenú
+                    String menuName = getMenuNameByRow(tableName, row);
+                    String submenuName = getSubmenuNameByRow(tableName, row);
 
-                    // Lógica para la columna 4 en fila 1 (índice 4 en fila 0)
-                    if (row == 0 && column == 4) {
-                        Boolean selected = (Boolean) table.getValueAt(row, column);
-                        if (selected) {
-                            // Iterar sobre permisos y ejecutar ModificarUsuario si corresponde
-                            for (Permiso permiso : permisos) {
-                                if (permiso.getCheckBox().isSelected()) {
-                                    JTextField[] campos = permiso.getTextFields();
-                                    u.ModificarUsuario(campos[0], campos[1], campos[2], campos[3]);
-                                }
+                    // Validar que los nombres no estén vacíos
+                    if (!menuName.isEmpty() && !submenuName.isEmpty()) {
+                        // Guardar permisos en la base de datos
+                        guardarPermisoEnBaseDeDatos(menuName, submenuName, column, selected);
+
+                        // Llamar a los métodos específicos basados en el nombre del submenú y la acción
+                        if (menuName.equals("menuAdministration")) {
+                            switch (submenuName) {
+                                case "Usuarios":
+                                    handleUsuarios(column, selected);
+                                    break;
+                                case "Roles":
+                                    handleRoles(column, selected);
+                                    break;
+                                case "Asignación de Permisos":
+                                    handleAsignacionPermisos(column, selected);
+                                    break;
+                                case "Empresas":
+                                    handleEmpresas(column, selected);
+                                    break;
+                                // Añadir más casos según sea necesario...
+                            }
+                        } else if (menuName.equals("menuAdmission")) {
+                            switch (submenuName) {
+                                case "Clientes":
+                                    handleClientes(column, selected);
+                                    break;
+                                case "Marcas":
+                                    handleMarcas(column, selected);
+                                    break;
+                                // Añadir más casos según sea necesario...
+                            }
+                        } else if (menuName.equals("menuRegisters")) {
+                            switch (submenuName) {
+                                case "Orden de Servicio":
+                                    handleOrdenDeServicio(column, selected);
+                                    break;
+                                case "Ver Ordenes":
+                                    handleVerOrdenes(column, selected);
+                                    break;
+                                // Añadir más casos según sea necesario...
+                            }
+                        } else if (menuName.equals("menuReports")) {
+                            switch (submenuName) {
+                                case "Trabajos Realizados":
+                                    handleTrabajosRealizados(column, selected);
+                                    break;
+                                case "Estadísticas":
+                                    handleEstadisticas(column, selected);
+                                    break;
+                                // Añadir más casos según sea necesario...
                             }
                         }
+                    } else {
+                        System.out.println("Error: Nombres de menú o submenú no válidos.");
                     }
-                    // Lógica para la columna 5 en fila 1 (índice 5 en fila 0)
-                    if (row == 0 && column == 5) {
-                        Boolean selected = (Boolean) table.getValueAt(row, column);
-                        if (selected) {
-                            // Iterar sobre permisos y ejecutar ModificarUsuario si corresponde
-                            for (Permiso permiso : permisos) {
-                                if (permiso.getCheckBox().isSelected()) {
-                                    JTextField[] campos = permiso.getTextFields();
-                                    u.Eliminar(campos[0]);
-                                }
-                            }
-                        }
-                    }
-                    
                 }
             }
-        });
+        }
+    });
+}
+
+private void handleUsuarios(int column, Boolean selected) {
+    switch (column) {
+        case 2: // Visualizar
+            if (selected) {
+                u.CargarDatosTable("");
+            }
+            break;
+        case 3: // Agregar
+            if (selected) {
+                u.Guardar();
+            }
+            break;
+        case 4: // Editar
+            if (selected) {
+                u.ModificarUsuario(txtNombre, txtNombre, txtUsuario, txtBuscar);
+            }
+            break;
+        case 5: // Eliminar
+            if (selected) {
+                u.Eliminar(txtIdTPU);
+            }
+            break;
+    }
+}
+
+private void handleRoles(int column, Boolean selected) {
+    switch (column) {
+        case 2: // Visualizar
+            if (selected) {
+                r.CargarDatosTabla("");
+            }
+            break;
+        case 3: // Agregar
+            if (selected) {
+                r.Guardar();
+            }
+            break;
+        case 4: // Editar
+            if (selected) {
+                r.modificar(txtId, txtNombre);
+            }
+            break;
+        case 5: // Eliminar
+            if (selected) {
+                r.Eliminar(txtId);
+            }
+            break;
+    }
+}
+
+private void handleAsignacionPermisos(int column, Boolean selected) {
+    switch (column) {
+        case 2: // Visualizar
+            if (selected) {
+                // Implementar lógica de visualizar
+            }
+            break;
+        case 3: // Agregar
+            if (selected) {
+                // Implementar lógica de agregar
+            }
+            break;
+        case 4: // Editar
+            if (selected) {
+                // Implementar lógica de editar
+            }
+            break;
+        case 5: // Eliminar
+            if (selected) {
+                // Implementar lógica de eliminar
+            }
+            break;
+    }
+}
+
+private void handleEmpresas(int column, Boolean selected) {
+    switch (column) {
+        case 2: // Visualizar
+            if (selected) {
+                em.CargarDatosTable("");
+            }
+            break;
+        case 3: // Agregar
+            if (selected) {
+                em.Guardar();
+            }
+            break;
+        case 4: // Editar
+            if (selected) {
+                em.ModificarEmpresa(txtId, txtBusinessName, txtAddress, txtZipCode, txtCity, txtState, txtNameOwner, txtCellphoneOwner, txtEmailOwner, txtNameContact, txtCellphoneContact, txtEmailContact, txtWebsiteBusiness, calendar);
+            }
+            break;
+        case 5: // Eliminar
+            if (selected) {
+                em.Eliminar(txtId);
+            }
+            break;
+    }
+}
+
+private void handleClientes(int column, Boolean selected) {
+    switch (column) {
+        case 2: // Visualizar
+            if (selected) {
+                c.MostrarClientes("");
+            }
+            break;
+        case 3: // Agregar
+            if (selected) {
+                c.InsertarCliente();
+            }
+            break;
+        case 4: // Editar
+            if (selected) {
+                c.ModificarCliente(txtCodigo, txtIdBusiness, txtNameCustomer, txtNameAddress, txtZipCode, txtCity, txtState, txtPhoneNumber, txtEmail, txtArea, txtNotaCliente);
+            }
+            break;
+        case 5: // Eliminar
+            if (selected) {
+                c.EliminarClientes(txtCodigo);
+            }
+            break;
+    }
+}
+
+private void handleMarcas(int column, Boolean selected) {
+    switch (column) {
+        case 2: // Visualizar
+            if (selected) {
+                mc.CargarDatosTabla("");
+            }
+            break;
+        case 3: // Agregar
+            if (selected) {
+                mc.Guardar();
+            }
+            break;
+        case 4: // Editar
+            if (selected) {
+                mc.Modificar(txtId, txtNombre);
+            }
+            break;
+        case 5: // Eliminar
+            if (selected) {
+                mc.Eliminar(txtId);
+            }
+            break;
+    }
+}
+
+private void handleOrdenDeServicio(int column, Boolean selected) {
+    switch (column) {
+        case 2: // Visualizar
+            if (selected) {
+                ;
+            }
+            break;
+        case 3: // Agregar
+            if (selected) {
+                ;
+            }
+            break;
+        case 4: // Editar
+            if (selected) {
+                ;
+            }
+            break;
+        case 5: // Eliminar
+            if (selected) {
+                ;
+            }
+            break;
+    }
+}
+
+private void handleVerOrdenes(int column, Boolean selected) {
+    switch (column) {
+        case 2: // Visualizar
+            if (selected) {
+                vo.MostrarTabla();
+            }
+            break;
+        case 3: // Agregar
+            if (selected) {
+                ;
+            }
+            break;
+        case 4: // Editar
+            if (selected) {
+                ;
+            }
+            break;
+        case 5: // Eliminar
+            if (selected) {
+                ;
+            }
+            break;
+    }
+}
+
+private void handleTrabajosRealizados(int column, Boolean selected) {
+    switch (column) {
+        case 2: // Visualizar
+            if (selected) {
+                tr.MostrarTabla();
+            }
+            break;
+        case 3: // Agregar
+            if (selected) {
+                ;
+            }
+            break;
+        case 4: // Editar
+            if (selected) {
+                ;
+            }
+            break;
+        case 5: // Eliminar
+            if (selected) {
+                ;
+            }
+            break;
+    }
+}
+
+private void handleEstadisticas(int column, Boolean selected) {
+    switch (column) {
+        case 2: // Visualizar
+            if (selected) {
+                ;
+            }
+            break;
+        case 3: // Agregar
+            if (selected) {
+                ;
+            }
+            break;
+        case 4: // Editar
+            if (selected) {
+                ;
+            }
+            break;
+        case 5: // Eliminar
+            if (selected) {
+                ;
+            }
+            break;
+    }
+}
+
+
+// Métodos auxiliares para obtener nombres de menú y submenú basado en la tabla y la fila
+    private String getMenuNameByRow(String tableName, int row) {
+        switch (tableName) {
+            case "Administracion":
+                return "menuAdministration";
+            case "Admision":
+                return "menuAdmission";
+            case "Registros":
+                return "menuRegisters";
+            case "Reportes":
+                return "menuReports";
+            default:
+                return "";
+        }
+    }
+
+    private String getSubmenuNameByRow(String tableName, int row) {
+        String[] submenuNames;
+        switch (tableName) {
+            case "Administracion":
+                submenuNames = new String[]{"Usuarios", "Roles", "Asignación de Permisos", "Empresas", "Trabajadores", "Tarifario", "Productos", "Formularios", "Proveedor", "Convenios", "Búsqueda de Convenios", "Asignación de Trabajos", "Puesto de Trabajos", "Formas de Pago"};
+                break;
+            case "Admision":
+                submenuNames = new String[]{"Clientes", "Marcas", "Unidades", "Tipo de Pagos", "Tipos de Productos y Materiales", "Tipo de Maquinarias y Vehículos", "Localización", "Configuración"};
+                break;
+            case "Registros":
+                submenuNames = new String[]{"Orden de Servicio", "Ver Ordenes", "Ventas", "Compras de Productos y Materiales", "Compra Equipos y Vehículos", "Gastos Generales", "Kardex", "Cotizaciones", "Cancelaciones"};
+                break;
+            case "Reportes":
+                submenuNames = new String[]{"Trabajos Realizados", "Estadísticas", "Deudas por Pagar", "Deudas por Cobrar", "Horas Trabajadas", "Sueldos", "Stock", "Trabajos", "Presupuestos"};
+                break;
+            default:
+                return "";
+        }
+        return submenuNames.length > row ? submenuNames[row] : "";
+    }
+
+// Método para obtener el ID del menú
+    private int obtenerMenuId(String menuName) {
+        String sql = "SELECT id FROM menus WHERE nombre_menu = ?";
+        try (PreparedStatement ps = conect.prepareStatement(sql)) {
+            ps.setString(1, menuName);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+// Método para obtener el ID del submenú
+    private int obtenerSubmenuId(String submenuName) {
+        String sql = "SELECT id FROM submenus WHERE nombre_submenu = ?";
+        try (PreparedStatement ps = conect.prepareStatement(sql)) {
+            ps.setString(1, submenuName);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+// Método para obtener el ID del permiso basado en la columna
+    private int obtenerPermisoIdPorColumna(int column) {
+        switch (column) {
+            case 2:
+                return 1; // Visualizar
+            case 3:
+                return 2; // Agregar
+            case 4:
+                return 3; // Editar
+            case 5:
+                return 4; // Eliminar
+            default:
+                return -1;
+        }
+    }
+
+// Método para guardar el permiso en la base de datos
+    private void guardarPermisoEnBaseDeDatos(String menuName, String submenuName, int column, Boolean selected) {
+        int menuId = obtenerMenuId(menuName);
+        int submenuId = obtenerSubmenuId(submenuName);
+        int permisoId = obtenerPermisoIdPorColumna(column);
+
+        if (menuId == -1 || submenuId == -1 || permisoId == -1) {
+            System.out.println("Error: No se pudo obtener el ID del menú, submenú o permiso.");
+            return;
+        }
+
+        String sql = "INSERT INTO permisos_menus_submenus (menu_id, submenu_id, permiso_id, estado) VALUES (?, ?, ?, ?) "
+                + "ON DUPLICATE KEY UPDATE estado = ?";
+
+        try (PreparedStatement ps = conect.prepareStatement(sql)) {
+            ps.setInt(1, menuId);
+            ps.setInt(2, submenuId);
+            ps.setInt(3, permisoId);
+            ps.setBoolean(4, selected);
+            ps.setBoolean(5, selected);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void toggleTableVisibility(JScrollPane scrollPane) {
@@ -252,8 +751,12 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
     private void addCheckBox(int column, javax.swing.JTable table) {
         TableColumn tc = table.getColumnModel().getColumn(column);
-        tc.setCellEditor(table.getDefaultEditor(Boolean.class));
-        tc.setCellRenderer(table.getDefaultRenderer(Boolean.class));
+        tc
+                .setCellEditor(table.getDefaultEditor(Boolean.class
+                ));
+        tc
+                .setCellRenderer(table.getDefaultRenderer(Boolean.class
+                ));
     }
 
     @SuppressWarnings("unchecked")
@@ -323,6 +826,11 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
         btnGrabar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/guardar.png"))); // NOI18N
         btnGrabar.setText("Grabar");
+        btnGrabar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGrabarActionPerformed(evt);
+            }
+        });
 
         btnCancelar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/close.png"))); // NOI18N
         btnCancelar.setText("Cancelar");
@@ -546,14 +1054,15 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 {"3", "Asisnación de Permisos", null, null, null, null, null},
                 {"4", "Empresas", null, null, null, null, null},
                 {"5", "Trabajadores", null, null, null, null, null},
-                {"6", "Servicios", null, null, null, null, null},
+                {"6", "Tarifario", null, null, null, null, null},
                 {"7", "Productos", null, null, null, null, null},
                 {"8", "Formularios", null, null, null, null, null},
                 {"9", "Proveedor", null, null, null, null, null},
                 {"10", "Convenios", null, null, null, null, null},
                 {"11", "Busqueda de Convenios", null, null, null, null, null},
                 {"12", "Asignación de Trabajos", null, null, null, null, null},
-                {"13", "Puesto de Trabajos", null, null, null, null, null}
+                {"13", "Puesto de Trabajos", null, null, null, null, null},
+                {"14", "Formas de Pago", null, null, null, null, null}
             },
             new String [] {
                 "N°", "Programa", "Visualizar", "Agregar", "Editar", "Eliminar", "Todo"
@@ -571,7 +1080,14 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
         tbAdmision.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {"1", "Clientes", null, null, null, null, null}
+                {"1", "Clientes", null, null, null, null, null},
+                {"2", "Marcas", null, null, null, null, null},
+                {"3", "Unidades", null, null, null, null, null},
+                {"4", "Tipo de Pagos", null, null, null, null, null},
+                {"5", "Tipos de Productos y Materiales", null, null, null, null, null},
+                {"6", "Tipo de Maquinarias y Vehiculos", null, null, null, null, null},
+                {"7", "Localización", null, null, null, null, null},
+                {"8", "Configuración", null, null, null, null, null}
             },
             new String [] {
                 "N°", "Programa", "Visualizar", "Agregar", "Editar", "Eliminar", "Todo"
@@ -589,14 +1105,15 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
         tbRegistros.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {"1", "Abrir y Cerrar Caja", null, null, null, null, null},
-                {"2", "Orden", null, null, null, null, null},
-                {"3", "Cargos Pendientes", null, null, null, null, null},
-                {"4", "Ventas", null, null, null, null, null},
-                {"5", "Compras", null, null, null, null, null},
-                {"6", "Kardex", null, null, null, null, null},
-                {"7", "Ver Ordenes", null, null, null, null, null},
-                {"8", "Cancelaciones", null, null, null, null, null}
+                {"1", "Orden de Servicio", null, null, null, null, null},
+                {"2", "Ver Ordenes", null, null, null, null, null},
+                {"3", "Ventas", null, null, null, null, null},
+                {"4", "Compras de Productos y Materiales", null, null, null, null, null},
+                {"5", "Compra Equipos y Vehiculos", null, null, null, null, null},
+                {"6", "Gastos Generales", null, null, null, null, null},
+                {"7", "Kardex", null, null, null, null, null},
+                {"8", "Cotizaciones", null, null, null, null, null},
+                {"9", "Cancelaciones", null, null, null, null, null}
             },
             new String [] {
                 "N°", "Programa", "Visualizar", "Agregar", "Editar", "Eliminar", "Todo"
@@ -614,13 +1131,15 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
         tbReportes.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {"1", "Ventas", null, null, null, null, null},
-                {"2", "Compras", null, null, null, null, null},
+                {"1", "Trabajos Realizados", null, null, null, null, null},
+                {"2", "Estadisticas", null, null, null, null, null},
                 {"3", "Deudas por Pagar", null, null, null, null, null},
                 {"4", "Deudas por Cobrar", null, null, null, null, null},
                 {"5", "Horas Trabajadas", null, null, null, null, null},
-                {"6", "Servicios", null, null, null, null, null},
-                {"7", "Stock", null, null, null, null, null}
+                {"6", "Sueldos", null, null, null, null, null},
+                {"7", "Stock", null, null, null, null, null},
+                {"8", "Trabajos", null, null, null, null, null},
+                {"9", "Presupuestos", null, null, null, null, null}
             },
             new String [] {
                 "N°", "Programa", "Visualizar", "Agregar", "Editar", "Eliminar", "Todo"
@@ -642,9 +1161,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jScrollPane5))
                     .addComponent(btnAdministracion, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGap(6, 6, 6)
@@ -658,14 +1174,10 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                                 .addGap(118, 118, 118)
                                 .addComponent(chRegistros)
                                 .addGap(101, 101, 101)
-                                .addComponent(chReportes)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addComponent(chReportes))))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(btnRegistros, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(btnReportes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(btnAdmision, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -673,9 +1185,9 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                         .addContainerGap()
                         .addComponent(jScrollPane2))
                     .addComponent(jScrollPane1)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jScrollPane3)))
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnReportes, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.Alignment.LEADING))
                 .addContainerGap())
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
@@ -696,25 +1208,25 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnAdministracion)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnAdmision)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnRegistros)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 196, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 205, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnReportes)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
-                    .addGap(0, 505, Short.MAX_VALUE)
+                    .addGap(0, 607, Short.MAX_VALUE)
                     .addComponent(jInternalFrame1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(0, 505, Short.MAX_VALUE)))
+                    .addGap(0, 607, Short.MAX_VALUE)))
         );
 
         pack();
@@ -781,6 +1293,10 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 //        
     }//GEN-LAST:event_chReportesActionPerformed
 
+    private void btnGrabarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGrabarActionPerformed
+
+    }//GEN-LAST:event_btnGrabarActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdministracion;
@@ -811,9 +1327,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
-    private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JTable tbAdministracion;
     private javax.swing.JTable tbAdmision;
     private javax.swing.JTable tbRegistros;
@@ -822,20 +1336,16 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarTipodeUsuarioCombo(JComboBox cbxTPU) {
-
-        String sql = "";
-        sql = "select * from tipodeusuario";
+        String sql = "select * from roles"; // Asegúrate de que la tabla se llama 'roles'
         Statement st;
 
         try {
-
-            st = (Statement) con.getConexion().createStatement();
+            st = conect.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxTPU.removeAllItems();
 
             while (rs.next()) {
-
-                cbxTPU.addItem(rs.getString("tipoDeUsuario"));
+                cbxTPU.addItem(rs.getString("nombre")); // Asegúrate de que la columna se llama 'nombre'
             }
 
         } catch (SQLException e) {
@@ -845,17 +1355,17 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
     public void MostrarCodigoPorTPU(JComboBox cbxTPU, JTextField idTPU) {
 
-        String consuta = "select tipodeusuario.idTipoDeUsuario from tipodeusuario where tipodeusuario.tipoDeUsuario=?";
+        String consuta = "select id from roles where nombre=?";
 
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            CallableStatement cs = conect.prepareCall(consuta);
             cs.setString(1, cbxTPU.getSelectedItem().toString());
             cs.execute();
 
             ResultSet rs = cs.executeQuery();
 
             if (rs.next()) {
-                idTPU.setText(rs.getString("idTipoDeUsuario"));
+                idTPU.setText(rs.getString("id"));
             }
 
         } catch (SQLException e) {

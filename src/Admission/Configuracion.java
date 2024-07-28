@@ -23,7 +23,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
     ResultSet rs;
 
     private int id;
-    private String nombre, direccion, ciudad, estado, telefono, email, webpage, mensaje;
+    private String nombre, direccion, ciudad, estado, telefono, email, webpage, mensaje, emailPassword;
     private int zipcode;
     private byte[] logo;
 
@@ -107,6 +107,14 @@ public class Configuracion extends javax.swing.JInternalFrame {
         this.mensaje = mensaje;
     }
 
+    public String getEmailPassword() {
+        return emailPassword;
+    }
+
+    public void setEmailPassword(String emailPassword) {
+        this.emailPassword = emailPassword;
+    }
+
     public byte[] getLogo() {
         return logo;
     }
@@ -156,86 +164,94 @@ public class Configuracion extends javax.swing.JInternalFrame {
     }
 
     public boolean GuardarConfig() {
-    String sql = "INSERT INTO configuracion(nombre, direccion, ciudad, zipcode, estado, telefono, email, webpage, mensaje, logo) VALUES (?,?,?,?,?,?,?,?,?,?)";
-    try {
-        connect = con.getConexion();
-        ps = connect.prepareStatement(sql);
-        ps.setString(1, getNombre());
-        ps.setString(2, getDireccion());
-        ps.setString(3, getCiudad());
-        ps.setInt(4, getZipcode());
-        ps.setString(5, getEstado());
-        ps.setString(6, getTelefono());
-        ps.setString(7, getEmail());
-        ps.setString(8, getWebpage());
-        ps.setString(9, getMensaje());
-        ps.setBytes(10, getLogo()); // Guardar el logo como byte[]
-        
-        System.out.println("Guardando datos con logo de tamaño: " + (getLogo() != null ? getLogo().length : 0) + " bytes");
-        
-        int rowsInserted = ps.executeUpdate();
-        if (rowsInserted > 0) {
-            JOptionPane.showConfirmDialog(null, "Datos guardados correctamente.");
-            return true;
-        } else {
-            JOptionPane.showMessageDialog(null, "No se pudo guardar los datos.");
-            return false;
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-        JOptionPane.showMessageDialog(null, "Error al guardar los datos: " + e.getMessage());
-        return false;
-    } finally {
+        String sql = "INSERT INTO configuracion(nombre, direccion, ciudad, zipcode, estado, telefono, email, webpage, mensaje, logo, email_password) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         try {
-            if (ps != null) ps.close();
-            // No cierres la conexión aquí para mantenerla abierta
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-}
+            connect = con.getConexion();
+            ps = connect.prepareStatement(sql);
+            ps.setString(1, getNombre());
+            ps.setString(2, getDireccion());
+            ps.setString(3, getCiudad());
+            ps.setInt(4, getZipcode());
+            ps.setString(5, getEstado());
+            ps.setString(6, getTelefono());
+            ps.setString(7, getEmail());
+            ps.setString(8, getWebpage());
+            ps.setString(9, getMensaje());
+            ps.setBytes(10, getLogo()); // Guardar el logo como byte[]
+            ps.setString(11, getEmailPassword()); // Guardar la contraseña del email
 
-public boolean ModificarDatos() {
-    String sql = "UPDATE configuracion SET nombre=?, direccion=?, ciudad=?, zipcode=?, estado=?, telefono=?, email=?, webpage=?, mensaje=?, logo=? WHERE id=?";
-    // Abre la conexión aquí
-    try {
-        connect = con.getConexion();
-        ps = connect.prepareStatement(sql);
-        ps.setString(1, getNombre());
-        ps.setString(2, getDireccion());
-        ps.setString(3, getCiudad());
-        ps.setInt(4, getZipcode());
-        ps.setString(5, getEstado());
-        ps.setString(6, getTelefono());
-        ps.setString(7, getEmail());
-        ps.setString(8, getWebpage());
-        ps.setString(9, getMensaje());
-        ps.setBytes(10, getLogo()); // Guardar el logo como byte[]
-        ps.setInt(11, getId());
-        
-        System.out.println("Actualizando datos con logo de tamaño: " + (getLogo() != null ? getLogo().length : 0) + " bytes");
-        
-        int rowsUpdated = ps.executeUpdate();
-        if (rowsUpdated > 0) {
-            JOptionPane.showMessageDialog(null, "Datos actualizados correctamente.");
-            return true;
-        } else {
-            JOptionPane.showMessageDialog(null, "No se pudo actualizar los datos.");
-            return false;
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-        JOptionPane.showMessageDialog(null, "Error al actualizar los datos: " + e.getMessage());
-        return false;
-    } finally {
-        try {
-            if (ps != null) ps.close();
-            if (connect != null) connect.close(); // Cierra la conexión aquí al finalizar la operación
+            System.out.println("Guardando datos con logo de tamaño: " + (getLogo() != null ? getLogo().length : 0) + " bytes");
+
+            int rowsInserted = ps.executeUpdate();
+            if (rowsInserted > 0) {
+                JOptionPane.showConfirmDialog(null, "Datos guardados correctamente.");
+                return true;
+            } else {
+                JOptionPane.showMessageDialog(null, "No se pudo guardar los datos.");
+                return false;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error al guardar los datos: " + e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+                // No cierres la conexión aquí para mantenerla abierta
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
-}
+
+    public boolean ModificarDatos() {
+        String sql = "UPDATE configuracion SET nombre=?, direccion=?, ciudad=?, zipcode=?, estado=?, telefono=?, email=?, webpage=?, mensaje=?, logo=?, email_password=? WHERE id=?";
+        // Abre la conexión aquí
+        try {
+            connect = con.getConexion();
+            ps = connect.prepareStatement(sql);
+            ps.setString(1, getNombre());
+            ps.setString(2, getDireccion());
+            ps.setString(3, getCiudad());
+            ps.setInt(4, getZipcode());
+            ps.setString(5, getEstado());
+            ps.setString(6, getTelefono());
+            ps.setString(7, getEmail());
+            ps.setString(8, getWebpage());
+            ps.setString(9, getMensaje());
+            ps.setBytes(10, getLogo()); // Guardar el logo como byte[]
+            ps.setString(11, getEmailPassword()); // Guardar la contraseña del email
+            ps.setInt(12, getId());
+
+            System.out.println("Actualizando datos con logo de tamaño: " + (getLogo() != null ? getLogo().length : 0) + " bytes");
+
+            int rowsUpdated = ps.executeUpdate();
+            if (rowsUpdated > 0) {
+                JOptionPane.showMessageDialog(null, "Datos actualizados correctamente.");
+                return true;
+            } else {
+                JOptionPane.showMessageDialog(null, "No se pudo actualizar los datos.");
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error al actualizar los datos: " + e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+                if (connect != null) {
+                    connect.close(); // Cierra la conexión aquí al finalizar la operación
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     // Método para cargar una imagen desde el sistema de archivos
     public byte[] cargarImagen() {
@@ -265,26 +281,26 @@ public boolean ModificarDatos() {
     }
 
     public void ListarConfig() {
-    BuscarDatos();
-    txtId.setText("" + getId());
-    txtNombre.setText(getNombre());
-    txtDireccion.setText(getDireccion());
-    txtCiudad.setText(getCiudad());
-    txtZipCode.setText("" + getZipcode());
-    txtEstado.setText(getEstado());
-    txtTelefono.setText(getTelefono());
-    txtEmail.setText(getEmail());
-    txtWebPage.setText(getWebpage());
-    txtMensaje.setText(getMensaje());
-    
-    // Mostrar la imagen en el JLabel LabelLogo
-    if (getLogo() != null) {
-        ImageIcon imageIcon = new ImageIcon(getLogo());
-        LabelLogo.setIcon(imageIcon);
-    } else {
-        LabelLogo.setIcon(null); // Si no hay imagen, vaciar el JLabel
+        BuscarDatos();
+        txtId.setText("" + getId());
+        txtNombre.setText(getNombre());
+        txtDireccion.setText(getDireccion());
+        txtCiudad.setText(getCiudad());
+        txtZipCode.setText("" + getZipcode());
+        txtEstado.setText(getEstado());
+        txtTelefono.setText(getTelefono());
+        txtEmail.setText(getEmail());
+        txtWebPage.setText(getWebpage());
+        txtMensaje.setText(getMensaje());
+
+        // Mostrar la imagen en el JLabel LabelLogo
+        if (getLogo() != null) {
+            ImageIcon imageIcon = new ImageIcon(getLogo());
+            LabelLogo.setIcon(imageIcon);
+        } else {
+            LabelLogo.setIcon(null); // Si no hay imagen, vaciar el JLabel
+        }
     }
-}
 
     public Configuracion() {
         initComponents();
@@ -320,6 +336,8 @@ public boolean ModificarDatos() {
         btnSalir = new javax.swing.JButton();
         txtId = new javax.swing.JTextField();
         btnCargarLogo = new javax.swing.JButton();
+        jLabel10 = new javax.swing.JLabel();
+        txtContrasenia = new javax.swing.JPasswordField();
 
         setTitle("Configuración");
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -364,13 +382,15 @@ public boolean ModificarDatos() {
 
         jLabel8.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel8.setText("Webpage");
-        jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(277, 161, -1, -1));
-        jPanel1.add(txtWebPage, new org.netbeans.lib.awtextra.AbsoluteConstraints(277, 190, 154, -1));
+        jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 210, -1, -1));
+        jPanel1.add(txtWebPage, new org.netbeans.lib.awtextra.AbsoluteConstraints(234, 230, 200, -1));
 
         jLabel9.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
-        jLabel9.setText("Mensaje");
-        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(277, 238, -1, -1));
-        jPanel1.add(txtMensaje, new org.netbeans.lib.awtextra.AbsoluteConstraints(277, 267, 154, -1));
+        jLabel9.setText("Contraseña");
+        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 150, -1, -1));
+        jPanel1.add(txtMensaje, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 290, 210, -1));
+
+        LabelLogo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
         jPanel1.add(LabelLogo, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 50, 260, 210));
 
         btnGuardar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/guardar.png"))); // NOI18N
@@ -409,7 +429,14 @@ public boolean ModificarDatos() {
         });
         jPanel1.add(btnCargarLogo, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 340, -1, -1));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 6, 730, 386));
+        jLabel10.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        jLabel10.setText("Mensaje");
+        jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 260, -1, -1));
+
+        txtContrasenia.setText("jPasswordField1");
+        jPanel1.add(txtContrasenia, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 170, 160, -1));
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 730, 386));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -424,7 +451,7 @@ public boolean ModificarDatos() {
                 && !"".equals(txtCiudad.getText()) && !"".equals(txtZipCode.getText())
                 && !"".equals(txtEstado.getText()) && !"".equals(txtTelefono.getText())
                 && !"".equals(txtEmail.getText()) && !"".equals(txtWebPage.getText())
-                && !"".equals(txtMensaje.getText())) {
+                && !"".equals(txtMensaje.getText()) && !"".equals(new String(txtContrasenia.getPassword()))) {
 
             // Establecer los valores a la instancia actual de Configuracion
             setNombre(txtNombre.getText());
@@ -436,6 +463,7 @@ public boolean ModificarDatos() {
             setEmail(txtEmail.getText());
             setWebpage(txtWebPage.getText());
             setMensaje(txtMensaje.getText());
+            setEmailPassword(new String(txtContrasenia.getPassword()));
 
             // Guardar la configuración
             if (GuardarConfig()) {
@@ -459,6 +487,7 @@ public boolean ModificarDatos() {
             setEmail(txtEmail.getText());
             setWebpage(txtWebPage.getText());
             setMensaje(txtMensaje.getText());
+            setEmailPassword(new String(txtContrasenia.getPassword()));
             ModificarDatos();
             JOptionPane.showMessageDialog(null, "Datos de la empresa modificado");
             ListarConfig();
@@ -487,6 +516,7 @@ public boolean ModificarDatos() {
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnSalir;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -497,6 +527,7 @@ public boolean ModificarDatos() {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField txtCiudad;
+    private javax.swing.JPasswordField txtContrasenia;
     private javax.swing.JTextField txtDireccion;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtEstado;

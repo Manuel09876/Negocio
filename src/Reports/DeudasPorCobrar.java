@@ -47,7 +47,13 @@ import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-
+import javax.mail.*;
+import javax.mail.internet.*;
+import java.util.Properties;
+import java.io.File;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class DeudasPorCobrar extends javax.swing.JInternalFrame {
@@ -275,6 +281,41 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         return modelo;
     }
 
+    private void enviarFacturaPorEmail() {
+    int selectedRow = tbDeudasPorCobrar.getSelectedRow();
+    if (selectedRow == -1) {
+        JOptionPane.showMessageDialog(this, "Seleccione una factura para enviar por email.");
+        return;
+    }
+
+    String recipientEmail = JOptionPane.showInputDialog(this, "Ingrese el email del destinatario:");
+    if (recipientEmail != null && !recipientEmail.trim().isEmpty()) {
+        int invoiceNumber = Integer.parseInt(tbDeudasPorCobrar.getValueAt(selectedRow, 15).toString());
+        byte[] pdfData = getPDFByInvoiceNumber(invoiceNumber);
+
+        if (pdfData != null) {
+            try {
+                File tempFile = File.createTempFile("factura_" + invoiceNumber, ".pdf");
+                FileOutputStream fos = new FileOutputStream(tempFile);
+                fos.write(pdfData);
+                fos.close();
+
+                EmailSender emailSender = new EmailSender();
+                String subject = "Factura de Presupuesto";
+                String body = "Adjunto encontrará la factura del presupuesto.";
+                emailSender.sendEmail(recipientEmail, subject, body, tempFile);
+
+                JOptionPane.showMessageDialog(this, "Email enviado con éxito a " + recipientEmail);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error al preparar el archivo para enviar: " + e.getMessage());
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "No se encontró un PDF con el número de factura especificado.");
+        }
+    }
+}
+
+
     public class InvoiceGenerator {
 
         public void generateInvoicePDF(String filePath, JTable table, List<Integer> selectedRows, String company, String client, String address, double subtotal, double tax, double total, String paymentMethod, double tip, int invoiceNumber, Configuracion datosEmpresa) {
@@ -308,7 +349,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                 Paragraph title = new Paragraph("Invoice N°: " + invoiceNumber, fontTitle);
                 title.setAlignment(Element.ALIGN_CENTER);
                 document.add(title);
-                
+
                 document.add(new Paragraph("\n"));
                 document.add(new Paragraph("\n"));
 
@@ -620,6 +661,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         jLabel17 = new javax.swing.JLabel();
         btnAbrirPDF = new javax.swing.JButton();
         txtNumeroFactura = new javax.swing.JTextField();
+        btnEnviarEmail = new javax.swing.JButton();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -795,7 +837,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                 btnPagarActionPerformed(evt);
             }
         });
-        jPanel1.add(btnPagar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1057, 112, -1, -1));
+        jPanel1.add(btnPagar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1090, 70, -1, -1));
 
         jLabel16.setText("Pagar con:");
         jPanel1.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(933, 18, -1, -1));
@@ -821,6 +863,14 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         });
         jPanel1.add(btnAbrirPDF, new org.netbeans.lib.awtextra.AbsoluteConstraints(530, 140, -1, -1));
         jPanel1.add(txtNumeroFactura, new org.netbeans.lib.awtextra.AbsoluteConstraints(404, 140, 80, -1));
+
+        btnEnviarEmail.setText("EnviarEmail");
+        btnEnviarEmail.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEnviarEmailActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnEnviarEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(1100, 130, -1, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 394, 1270, 200));
 
@@ -1133,11 +1183,16 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField10ActionPerformed
 
+    private void btnEnviarEmailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnviarEmailActionPerformed
+        enviarFacturaPorEmail();
+    }//GEN-LAST:event_btnEnviarEmailActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAbrirPDF;
     public javax.swing.JButton btnBusquedaEmpresa;
     private javax.swing.JButton btnBusquedaFechaEmpresa;
+    private javax.swing.JButton btnEnviarEmail;
     private javax.swing.JButton btnMostrarCanceladas;
     private javax.swing.JButton btnMostrarDeudas;
     private javax.swing.JButton btnPagar;
@@ -1352,5 +1407,56 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
             return label;
         }
     }
+
+    public class EmailSender {
+
+        private String username;
+        private String password;
+
+        public void sendEmail(String toEmail, String subject, String body, File attachment) {
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(username, password);
+            }
+        });
+
+        try {
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(username));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+            message.setSubject(subject);
+
+            MimeBodyPart messageBodyPart = new MimeBodyPart();
+            messageBodyPart.setText(body);
+
+            Multipart multipart = new MimeMultipart();
+            multipart.addBodyPart(messageBodyPart);
+
+            if (attachment != null) {
+                MimeBodyPart attachPart = new MimeBodyPart();
+                DataSource source = new FileDataSource(attachment);
+                attachPart.setDataHandler(new DataHandler(source));
+                attachPart.setFileName(attachment.getName());
+                multipart.addBodyPart(attachPart);
+            }
+
+            message.setContent(multipart);
+            Transport.send(message);
+
+            System.out.println("Email enviado con éxito!");
+
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+    
+    
 
 }

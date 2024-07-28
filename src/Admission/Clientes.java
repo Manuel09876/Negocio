@@ -143,7 +143,7 @@ public class Clientes extends javax.swing.JInternalFrame {
 
     }
 
-    private void InsertarCliente() {
+    public void InsertarCliente() {
         int id_empresa;
         String name;
         String address;
@@ -206,7 +206,7 @@ public class Clientes extends javax.swing.JInternalFrame {
         }
     }
 
-    private void MostrarClientes(String Valores) {
+    public void MostrarClientes(String Valores) {
         try {
             String[] titulosTabla = {"Id", "Empresa", "Nombres", "Dirección", "ZipCode", "Ciudad", "Estado", "Telefono", "email", "area", "nota_cliente", "estatus"}; //Titulos de la Tabla
             String[] RegistroBD = new String[12];  //Registros de la Basede Datos
@@ -429,6 +429,8 @@ public class Clientes extends javax.swing.JInternalFrame {
         btnActualizar.setEnabled(true);
         btnCancelar.setEnabled(true);
     }
+    
+    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents

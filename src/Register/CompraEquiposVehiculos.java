@@ -1,7 +1,7 @@
 package Register;
 
 import Administration.Productos;
-import Administration.TipoDeUsuario;
+import Administration.Roles;
 import Bases.CreditoEqVe;
 import com.toedter.calendar.JDateChooser;
 import conectar.Conectar;

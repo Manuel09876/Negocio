@@ -27,24 +27,22 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 public class VentanaPrincipal extends javax.swing.JFrame {
+
     private int rolId;
     private Conectar conectar;
 
-     public VentanaPrincipal(int rolId) {
+    public VentanaPrincipal(int rolId) {
         this.rolId = rolId;
         this.conectar = new Conectar();
         initComponents();
-        
+
         this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
         cargarPermisos();
     }
 
     public VentanaPrincipal() {
-        
-    }
-    
-    
 
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -68,35 +66,37 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         menuBusquedaConvenios = new javax.swing.JMenuItem();
         menuAsignaciondeTrabajos = new javax.swing.JMenuItem();
         menuPuestoDeTrabajo = new javax.swing.JMenuItem();
-        FormasDePago = new javax.swing.JMenuItem();
+        menuFormaDePago = new javax.swing.JMenuItem();
+        menuMenusSubmenus = new javax.swing.JMenuItem();
         menuAdmission = new javax.swing.JMenu();
         menuClientes = new javax.swing.JMenuItem();
-        Marcas = new javax.swing.JMenuItem();
-        Unidades = new javax.swing.JMenuItem();
-        tipo_pagosgenerales = new javax.swing.JMenuItem();
-        TipoProMat = new javax.swing.JMenuItem();
-        TipoMaqVe = new javax.swing.JMenuItem();
-        Localizacion = new javax.swing.JMenuItem();
+        menuMarcas = new javax.swing.JMenuItem();
+        menuUnidades = new javax.swing.JMenuItem();
+        menutipo_pagosgenerales = new javax.swing.JMenuItem();
+        menuTipoProMat = new javax.swing.JMenuItem();
+        menuTipoMaqVe = new javax.swing.JMenuItem();
+        menuLocalizacion = new javax.swing.JMenuItem();
         menuConfiguracion = new javax.swing.JMenuItem();
         menuRegisters = new javax.swing.JMenu();
         menuOrdenes = new javax.swing.JMenuItem();
         menuVerOrdenes = new javax.swing.JMenuItem();
-        menuIngreso = new javax.swing.JMenuItem();
-        menuGastos = new javax.swing.JMenuItem();
-        equipos = new javax.swing.JMenuItem();
-        Gastos_Generales = new javax.swing.JMenuItem();
+        menuVentas = new javax.swing.JMenuItem();
+        menuCompraProMat = new javax.swing.JMenuItem();
+        menuCompraEquyVehi = new javax.swing.JMenuItem();
+        menuGastosGenerales = new javax.swing.JMenuItem();
         menuKardex = new javax.swing.JMenuItem();
-        menuCargosPendientes = new javax.swing.JMenuItem();
+        menuCotizaciones = new javax.swing.JMenuItem();
         menuCancelaciones = new javax.swing.JMenuItem();
         menuReports = new javax.swing.JMenu();
         menuTrabajosRealizados = new javax.swing.JMenuItem();
-        menuRCompras = new javax.swing.JMenuItem();
+        menuEstadisticas = new javax.swing.JMenuItem();
         menuDeudasPorPagar = new javax.swing.JMenuItem();
         menuDeudasPorCobrar = new javax.swing.JMenuItem();
         menuHorasTrabajadas = new javax.swing.JMenuItem();
-        menuPayroll = new javax.swing.JMenuItem();
+        menuSueldos = new javax.swing.JMenuItem();
         menuStock = new javax.swing.JMenuItem();
         menuTrabajos = new javax.swing.JMenuItem();
+        menuPresupuesto = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setExtendedState(6);
@@ -249,14 +249,22 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         });
         menuAdministration.add(menuPuestoDeTrabajo);
 
-        FormasDePago.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
-        FormasDePago.setText("Formas de Pago");
-        FormasDePago.addActionListener(new java.awt.event.ActionListener() {
+        menuFormaDePago.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
+        menuFormaDePago.setText("Formas de Pago");
+        menuFormaDePago.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                FormasDePagoActionPerformed(evt);
+                menuFormaDePagoActionPerformed(evt);
             }
         });
-        menuAdministration.add(FormasDePago);
+        menuAdministration.add(menuFormaDePago);
+
+        menuMenusSubmenus.setText("Menus - Submenus");
+        menuMenusSubmenus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuMenusSubmenusActionPerformed(evt);
+            }
+        });
+        menuAdministration.add(menuMenusSubmenus);
 
         jMenuBar1.add(menuAdministration);
 
@@ -274,57 +282,57 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         });
         menuAdmission.add(menuClientes);
 
-        Marcas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/box.png"))); // NOI18N
-        Marcas.setText("Marcas");
-        Marcas.addActionListener(new java.awt.event.ActionListener() {
+        menuMarcas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/box.png"))); // NOI18N
+        menuMarcas.setText("Marcas");
+        menuMarcas.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                MarcasActionPerformed(evt);
+                menuMarcasActionPerformed(evt);
             }
         });
-        menuAdmission.add(Marcas);
+        menuAdmission.add(menuMarcas);
 
-        Unidades.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/medida.png"))); // NOI18N
-        Unidades.setText("Unidades");
-        Unidades.addActionListener(new java.awt.event.ActionListener() {
+        menuUnidades.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/medida.png"))); // NOI18N
+        menuUnidades.setText("Unidades");
+        menuUnidades.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                UnidadesActionPerformed(evt);
+                menuUnidadesActionPerformed(evt);
             }
         });
-        menuAdmission.add(Unidades);
+        menuAdmission.add(menuUnidades);
 
-        tipo_pagosgenerales.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/generate bill & print.png"))); // NOI18N
-        tipo_pagosgenerales.setText("Tipo de Pago");
-        tipo_pagosgenerales.addActionListener(new java.awt.event.ActionListener() {
+        menutipo_pagosgenerales.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/generate bill & print.png"))); // NOI18N
+        menutipo_pagosgenerales.setText("Tipo de Pagos Generales");
+        menutipo_pagosgenerales.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                tipo_pagosgeneralesActionPerformed(evt);
+                menutipo_pagosgeneralesActionPerformed(evt);
             }
         });
-        menuAdmission.add(tipo_pagosgenerales);
+        menuAdmission.add(menutipo_pagosgenerales);
 
-        TipoProMat.setText("Tipo de Productos y Materiales");
-        TipoProMat.addActionListener(new java.awt.event.ActionListener() {
+        menuTipoProMat.setText("Tipo de Productos y Materiales");
+        menuTipoProMat.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                TipoProMatActionPerformed(evt);
+                menuTipoProMatActionPerformed(evt);
             }
         });
-        menuAdmission.add(TipoProMat);
+        menuAdmission.add(menuTipoProMat);
 
-        TipoMaqVe.setText("Tipo de Maquinarias y Vehiculos");
-        TipoMaqVe.addActionListener(new java.awt.event.ActionListener() {
+        menuTipoMaqVe.setText("Tipo de Maquinarias y Vehiculos");
+        menuTipoMaqVe.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                TipoMaqVeActionPerformed(evt);
+                menuTipoMaqVeActionPerformed(evt);
             }
         });
-        menuAdmission.add(TipoMaqVe);
+        menuAdmission.add(menuTipoMaqVe);
 
-        Localizacion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/edificio.png"))); // NOI18N
-        Localizacion.setText("Localizacion");
-        Localizacion.addActionListener(new java.awt.event.ActionListener() {
+        menuLocalizacion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/edificio.png"))); // NOI18N
+        menuLocalizacion.setText("Localizacion");
+        menuLocalizacion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                LocalizacionActionPerformed(evt);
+                menuLocalizacionActionPerformed(evt);
             }
         });
-        menuAdmission.add(Localizacion);
+        menuAdmission.add(menuLocalizacion);
 
         menuConfiguracion.setText("Configuracion");
         menuConfiguracion.addActionListener(new java.awt.event.ActionListener() {
@@ -358,41 +366,41 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         });
         menuRegisters.add(menuVerOrdenes);
 
-        menuIngreso.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
-        menuIngreso.setText("Ventas");
-        menuIngreso.addActionListener(new java.awt.event.ActionListener() {
+        menuVentas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
+        menuVentas.setText("Ventas");
+        menuVentas.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuIngresoActionPerformed(evt);
+                menuVentasActionPerformed(evt);
             }
         });
-        menuRegisters.add(menuIngreso);
+        menuRegisters.add(menuVentas);
 
-        menuGastos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/compras.png"))); // NOI18N
-        menuGastos.setText("Compras Productos y Materiales");
-        menuGastos.addActionListener(new java.awt.event.ActionListener() {
+        menuCompraProMat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/compras.png"))); // NOI18N
+        menuCompraProMat.setText("Compras Productos y Materiales");
+        menuCompraProMat.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuGastosActionPerformed(evt);
+                menuCompraProMatActionPerformed(evt);
             }
         });
-        menuRegisters.add(menuGastos);
+        menuRegisters.add(menuCompraProMat);
 
-        equipos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/config.png"))); // NOI18N
-        equipos.setText("Compra Equipos, Vehiculos");
-        equipos.addActionListener(new java.awt.event.ActionListener() {
+        menuCompraEquyVehi.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/config.png"))); // NOI18N
+        menuCompraEquyVehi.setText("Compra Equipos, Vehiculos");
+        menuCompraEquyVehi.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                equiposActionPerformed(evt);
+                menuCompraEquyVehiActionPerformed(evt);
             }
         });
-        menuRegisters.add(equipos);
+        menuRegisters.add(menuCompraEquyVehi);
 
-        Gastos_Generales.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/place order.png"))); // NOI18N
-        Gastos_Generales.setText("Gastos Generales");
-        Gastos_Generales.addActionListener(new java.awt.event.ActionListener() {
+        menuGastosGenerales.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/place order.png"))); // NOI18N
+        menuGastosGenerales.setText("Gastos Generales");
+        menuGastosGenerales.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                Gastos_GeneralesActionPerformed(evt);
+                menuGastosGeneralesActionPerformed(evt);
             }
         });
-        menuRegisters.add(Gastos_Generales);
+        menuRegisters.add(menuGastosGenerales);
 
         menuKardex.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/historial1.png"))); // NOI18N
         menuKardex.setText("Kardex");
@@ -403,14 +411,14 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         });
         menuRegisters.add(menuKardex);
 
-        menuCargosPendientes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/anadir.png"))); // NOI18N
-        menuCargosPendientes.setText("Cotizaciones");
-        menuCargosPendientes.addActionListener(new java.awt.event.ActionListener() {
+        menuCotizaciones.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/anadir.png"))); // NOI18N
+        menuCotizaciones.setText("Cotizaciones");
+        menuCotizaciones.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuCargosPendientesActionPerformed(evt);
+                menuCotizacionesActionPerformed(evt);
             }
         });
-        menuRegisters.add(menuCargosPendientes);
+        menuRegisters.add(menuCotizaciones);
 
         menuCancelaciones.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/eliminar.png"))); // NOI18N
         menuCancelaciones.setLabel("Cancelaciones");
@@ -436,14 +444,14 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         });
         menuReports.add(menuTrabajosRealizados);
 
-        menuRCompras.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/historial1.png"))); // NOI18N
-        menuRCompras.setText("Estadisticas");
-        menuRCompras.addActionListener(new java.awt.event.ActionListener() {
+        menuEstadisticas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/historial1.png"))); // NOI18N
+        menuEstadisticas.setText("Estadisticas");
+        menuEstadisticas.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuRComprasActionPerformed(evt);
+                menuEstadisticasActionPerformed(evt);
             }
         });
-        menuReports.add(menuRCompras);
+        menuReports.add(menuEstadisticas);
 
         menuDeudasPorPagar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/View Bills & Order Placed Details.png"))); // NOI18N
         menuDeudasPorPagar.setLabel("Deudas por Pagar");
@@ -472,14 +480,14 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         });
         menuReports.add(menuHorasTrabajadas);
 
-        menuPayroll.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
-        menuPayroll.setLabel("Sueldos");
-        menuPayroll.addActionListener(new java.awt.event.ActionListener() {
+        menuSueldos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
+        menuSueldos.setLabel("Sueldos");
+        menuSueldos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuPayrollActionPerformed(evt);
+                menuSueldosActionPerformed(evt);
             }
         });
-        menuReports.add(menuPayroll);
+        menuReports.add(menuSueldos);
 
         menuStock.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/categorias.png"))); // NOI18N
         menuStock.setText("Stock");
@@ -498,6 +506,14 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
         });
         menuReports.add(menuTrabajos);
+
+        menuPresupuesto.setText("Presupuesto");
+        menuPresupuesto.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuPresupuestoActionPerformed(evt);
+            }
+        });
+        menuReports.add(menuPresupuesto);
 
         jMenuBar1.add(menuReports);
 
@@ -541,13 +557,13 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void menuPayrollActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuPayrollActionPerformed
+    private void menuSueldosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuSueldosActionPerformed
 
         Sueldos objPagosPersonal = new Sueldos();
         jpEscritorio.add(objPagosPersonal);
         objPagosPersonal.show();
 
-    }//GEN-LAST:event_menuPayrollActionPerformed
+    }//GEN-LAST:event_menuSueldosActionPerformed
 
     private void menuUsuariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUsuariosActionPerformed
         Usuarios objUsuarios = new Usuarios();
@@ -635,26 +651,26 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
     }//GEN-LAST:event_menuOrdenesActionPerformed
 
-    private void menuCargosPendientesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCargosPendientesActionPerformed
+    private void menuCotizacionesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCotizacionesActionPerformed
         Cotizaciones objCargosPendientes = new Cotizaciones();
         jpEscritorio.add(objCargosPendientes);
         objCargosPendientes.show();
 
-    }//GEN-LAST:event_menuCargosPendientesActionPerformed
+    }//GEN-LAST:event_menuCotizacionesActionPerformed
 
-    private void menuIngresoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuIngresoActionPerformed
+    private void menuVentasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuVentasActionPerformed
         Ventas objVentas = new Ventas();
         jpEscritorio.add(objVentas);
         objVentas.show();
 
-    }//GEN-LAST:event_menuIngresoActionPerformed
+    }//GEN-LAST:event_menuVentasActionPerformed
 
-    private void menuGastosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGastosActionPerformed
+    private void menuCompraProMatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCompraProMatActionPerformed
         ComprasProductosMateriales objGastos = new ComprasProductosMateriales();
         jpEscritorio.add(objGastos);
         objGastos.show();
 
-    }//GEN-LAST:event_menuGastosActionPerformed
+    }//GEN-LAST:event_menuCompraProMatActionPerformed
 
     private void menuKardexActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuKardexActionPerformed
         Kardex objKardex = new Kardex();
@@ -684,12 +700,12 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
     }//GEN-LAST:event_menuTrabajosRealizadosActionPerformed
 
-    private void menuRComprasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuRComprasActionPerformed
+    private void menuEstadisticasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEstadisticasActionPerformed
         Estadisticas objCompras = new Estadisticas();
         jpEscritorio.add(objCompras);
         objCompras.show();
 
-    }//GEN-LAST:event_menuRComprasActionPerformed
+    }//GEN-LAST:event_menuEstadisticasActionPerformed
 
     private void menuDeudasPorPagarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDeudasPorPagarActionPerformed
         DeudasPorPagar objDeudasPorPagar = null;
@@ -732,7 +748,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSalirActionPerformed
 
     private void menuTipoUsuariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTipoUsuariosActionPerformed
-        TipoDeUsuario objTipoDeUsuario = new TipoDeUsuario();
+        Roles objTipoDeUsuario = new Roles();
         jpEscritorio.add(objTipoDeUsuario);
         objTipoDeUsuario.show();
     }//GEN-LAST:event_menuTipoUsuariosActionPerformed
@@ -744,7 +760,12 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuBusquedaConveniosActionPerformed
 
     private void menuAsignacionPermisosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAsignacionPermisosActionPerformed
-        AsignacionPermisos objAsignacionPermisos = new AsignacionPermisos();
+        AsignacionPermisos objAsignacionPermisos = null;
+        try {
+            objAsignacionPermisos = new AsignacionPermisos(this);
+        } catch (SQLException ex) {
+            Logger.getLogger(VentanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        }
         jpEscritorio.add(objAsignacionPermisos);
         objAsignacionPermisos.show();
     }//GEN-LAST:event_menuAsignacionPermisosActionPerformed
@@ -755,59 +776,59 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         objTrabajos.show();
     }//GEN-LAST:event_menuTrabajosActionPerformed
 
-    private void equiposActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_equiposActionPerformed
+    private void menuCompraEquyVehiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCompraEquyVehiActionPerformed
         CompraEquiposVehiculos objEquipos = new CompraEquiposVehiculos();
         jpEscritorio.add(objEquipos);
         objEquipos.show();
-    }//GEN-LAST:event_equiposActionPerformed
+    }//GEN-LAST:event_menuCompraEquyVehiActionPerformed
 
-    private void MarcasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MarcasActionPerformed
+    private void menuMarcasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMarcasActionPerformed
         Marcas objMarcas = new Marcas();
         jpEscritorio.add(objMarcas);
         objMarcas.show();
-    }//GEN-LAST:event_MarcasActionPerformed
+    }//GEN-LAST:event_menuMarcasActionPerformed
 
-    private void Gastos_GeneralesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Gastos_GeneralesActionPerformed
+    private void menuGastosGeneralesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGastosGeneralesActionPerformed
         Gastos_Generales objPagosRecibos = new Gastos_Generales();
         jpEscritorio.add(objPagosRecibos);
         objPagosRecibos.show();
-    }//GEN-LAST:event_Gastos_GeneralesActionPerformed
+    }//GEN-LAST:event_menuGastosGeneralesActionPerformed
 
-    private void tipo_pagosgeneralesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tipo_pagosgeneralesActionPerformed
+    private void menutipo_pagosgeneralesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menutipo_pagosgeneralesActionPerformed
         tipos_pagosgenerales objConceptoPagos = new tipos_pagosgenerales();
         jpEscritorio.add(objConceptoPagos);
         objConceptoPagos.show();
-    }//GEN-LAST:event_tipo_pagosgeneralesActionPerformed
+    }//GEN-LAST:event_menutipo_pagosgeneralesActionPerformed
 
-    private void UnidadesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UnidadesActionPerformed
+    private void menuUnidadesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUnidadesActionPerformed
         Unidades objUnidades = new Unidades();
         jpEscritorio.add(objUnidades);
         objUnidades.show();
-    }//GEN-LAST:event_UnidadesActionPerformed
+    }//GEN-LAST:event_menuUnidadesActionPerformed
 
-    private void LocalizacionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LocalizacionActionPerformed
+    private void menuLocalizacionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuLocalizacionActionPerformed
         Localizacion objLocalizacion = new Localizacion();
         jpEscritorio.add(objLocalizacion);
         objLocalizacion.show();
-    }//GEN-LAST:event_LocalizacionActionPerformed
+    }//GEN-LAST:event_menuLocalizacionActionPerformed
 
-    private void FormasDePagoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FormasDePagoActionPerformed
+    private void menuFormaDePagoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFormaDePagoActionPerformed
         FormaDePago objFormasDePago = new FormaDePago();
         jpEscritorio.add(objFormasDePago);
         objFormasDePago.show();
-    }//GEN-LAST:event_FormasDePagoActionPerformed
+    }//GEN-LAST:event_menuFormaDePagoActionPerformed
 
-    private void TipoMaqVeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TipoMaqVeActionPerformed
+    private void menuTipoMaqVeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTipoMaqVeActionPerformed
         TipoMaquinariasYVehiculos objTipoMaqVe = new TipoMaquinariasYVehiculos();
         jpEscritorio.add(objTipoMaqVe);
         objTipoMaqVe.show();
-    }//GEN-LAST:event_TipoMaqVeActionPerformed
+    }//GEN-LAST:event_menuTipoMaqVeActionPerformed
 
-    private void TipoProMatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TipoProMatActionPerformed
+    private void menuTipoProMatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTipoProMatActionPerformed
         TipoProductosMateriales objTipoProMat = new TipoProductosMateriales();
         jpEscritorio.add(objTipoProMat);
         objTipoProMat.show();
-    }//GEN-LAST:event_TipoProMatActionPerformed
+    }//GEN-LAST:event_menuTipoProMatActionPerformed
 
     private void menuConfiguracionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuConfiguracionActionPerformed
         Configuracion objConfig = new Configuracion();
@@ -815,9 +836,18 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         objConfig.show();
     }//GEN-LAST:event_menuConfiguracionActionPerformed
 
-    
-    
-    
+    private void menuPresupuestoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuPresupuestoActionPerformed
+        BudgetManager objBudget = new BudgetManager();
+        jpEscritorio.add(objBudget);
+        objBudget.show();
+    }//GEN-LAST:event_menuPresupuestoActionPerformed
+
+    private void menuMenusSubmenusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMenusSubmenusActionPerformed
+        Menus objMenus = new Menus();
+        jpEscritorio.add(objMenus);
+        objMenus.show();
+    }//GEN-LAST:event_menuMenusSubmenusActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -855,15 +885,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenuItem FormasDePago;
-    private javax.swing.JMenuItem Gastos_Generales;
-    private javax.swing.JMenuItem Localizacion;
-    private javax.swing.JMenuItem Marcas;
-    private javax.swing.JMenuItem TipoMaqVe;
-    private javax.swing.JMenuItem TipoProMat;
-    private javax.swing.JMenuItem Unidades;
     private javax.swing.JButton btnSalir;
-    private javax.swing.JMenuItem equipos;
     private javax.swing.JLabel jLabel1;
     public javax.swing.JMenuBar jMenuBar1;
     public javax.swing.JPanel jpEscritorio;
@@ -874,72 +896,208 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     public javax.swing.JMenuItem menuAsignaciondeTrabajos;
     public javax.swing.JMenuItem menuBusquedaConvenios;
     public javax.swing.JMenuItem menuCancelaciones;
-    public javax.swing.JMenuItem menuCargosPendientes;
     public javax.swing.JMenuItem menuClientes;
+    private javax.swing.JMenuItem menuCompraEquyVehi;
+    public javax.swing.JMenuItem menuCompraProMat;
     private javax.swing.JMenuItem menuConfiguracion;
     public javax.swing.JMenuItem menuConvenios;
+    public javax.swing.JMenuItem menuCotizaciones;
     public javax.swing.JMenuItem menuDeudasPorCobrar;
     public javax.swing.JMenuItem menuDeudasPorPagar;
     public javax.swing.JMenuItem menuEmpresas;
+    public javax.swing.JMenuItem menuEstadisticas;
+    private javax.swing.JMenuItem menuFormaDePago;
     public javax.swing.JMenuItem menuFormularios;
-    public javax.swing.JMenuItem menuGastos;
+    private javax.swing.JMenuItem menuGastosGenerales;
     public javax.swing.JMenuItem menuHorasTrabajadas;
-    public javax.swing.JMenuItem menuIngreso;
     public javax.swing.JMenuItem menuKardex;
+    private javax.swing.JMenuItem menuLocalizacion;
+    private javax.swing.JMenuItem menuMarcas;
+    private javax.swing.JMenuItem menuMenusSubmenus;
     public javax.swing.JMenuItem menuOrdenes;
-    public javax.swing.JMenuItem menuPayroll;
+    private javax.swing.JMenuItem menuPresupuesto;
     public javax.swing.JMenuItem menuProductos;
     public javax.swing.JMenuItem menuProveedor;
     public javax.swing.JMenuItem menuPuestoDeTrabajo;
-    public javax.swing.JMenuItem menuRCompras;
     public javax.swing.JMenu menuRegisters;
     public javax.swing.JMenu menuReports;
     public javax.swing.JMenuItem menuStock;
+    public javax.swing.JMenuItem menuSueldos;
     public javax.swing.JMenuItem menuTarifario;
+    private javax.swing.JMenuItem menuTipoMaqVe;
+    private javax.swing.JMenuItem menuTipoProMat;
     public javax.swing.JMenuItem menuTipoUsuarios;
     public javax.swing.JMenuItem menuTrabajadores;
     private javax.swing.JMenuItem menuTrabajos;
     public javax.swing.JMenuItem menuTrabajosRealizados;
+    private javax.swing.JMenuItem menuUnidades;
     public javax.swing.JMenuItem menuUsuarios;
+    public javax.swing.JMenuItem menuVentas;
     public javax.swing.JMenuItem menuVerOrdenes;
-    private javax.swing.JMenuItem tipo_pagosgenerales;
+    private javax.swing.JMenuItem menutipo_pagosgenerales;
     // End of variables declaration//GEN-END:variables
 
     private void cargarPermisos() {
-        String sql = "SELECT m.nombre_menu, s.nombre_submenu, p.nombre_permiso " +
-                     "FROM permisos_menus_submenus pms " +
-                     "JOIN permisos p ON pms.permiso_id = p.id " +
-                     "LEFT JOIN menus m ON pms.menu_id = m.id " +
-                     "LEFT JOIN submenus s ON pms.submenu_id = s.id " +
-                     "JOIN roles_permisos rp ON rp.permiso_id = p.id " +
-                     "WHERE rp.rol_id = ?";
-
-        try {
-            PreparedStatement pst = conectar.getConexion().prepareStatement(sql);
+        String sql = "SELECT nombre_menu AS menu_name, nombre_submenu AS submenu_name "
+                + "FROM roles_permisos rp "
+                + "JOIN menus m ON rp.menu_id = m.id "
+                + "LEFT JOIN submenus s ON rp.submenu_id = s.id "
+                + "WHERE rp.rol_id = ?";
+        try (PreparedStatement pst = conectar.getConexion().prepareStatement(sql)) {
             pst.setInt(1, rolId);
             ResultSet rs = pst.executeQuery();
-
-            Map<String, JMenu> menuMap = new HashMap<>();
             while (rs.next()) {
-                String menuName = rs.getString("nombre_menu");
-                String submenuName = rs.getString("nombre_submenu");
-                String permisoName = rs.getString("nombre_permiso");
-
-                JMenu menu = menuMap.computeIfAbsent(menuName, k -> {
-                    JMenu newMenu = new JMenu(menuName);
-                    jMenuBar1.add(newMenu); // Asegúrate de que jMenuBar1 esté correctamente inicializado
-                    return newMenu;
-                });
-
+                String menuName = rs.getString("menu_name");
+                String submenuName = rs.getString("submenu_name");
+                setMenuVisibility(menuName, true);
                 if (submenuName != null) {
-                    JMenuItem submenu = new JMenuItem(submenuName);
-                    menu.add(submenu);
+                    setMenuVisibility(submenuName, true);
                 }
-
-                // Aquí puedes habilitar o deshabilitar los permisos específicos si es necesario
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al cargar permisos: " + e.getMessage());
         }
     }
+
+    public void setMenuVisibility(String menuName, boolean visibility) {
+        switch (menuName) {
+            case "menuAdministration":
+                menuAdministration.setVisible(visibility);
+                break;
+            case "menuAdmission":
+                menuAdmission.setVisible(visibility);
+                break;
+            case "menuRegisters":
+                menuRegisters.setVisible(visibility);
+                break;
+            case "menuReports":
+                menuReports.setVisible(visibility);
+                break;
+            case "menuSubAdministration1":
+                menuUsuarios.setVisible(visibility);
+                break;
+            case "menuSubAdministration2":
+                menuTipoUsuarios.setVisible(visibility);
+                break;                
+            case "menuSubAdministration3":
+                menuAsignacionPermisos.setVisible(visibility);
+                break;
+            case "menuSubAdministration4":
+                menuEmpresas.setVisible(visibility);
+                break;
+            case "menuSubAdministration5":
+                menuTrabajadores.setVisible(visibility);
+                break;
+            case "menuSubAdministration6":
+                menuTarifario.setVisible(visibility);
+                break;
+            case "menuSubAdministration7":
+                menuProductos.setVisible(visibility);
+                break;
+            case "menuSubAdministration8":
+                menuFormularios.setVisible(visibility);
+                break;
+            case "menuSubAdministration9":
+                menuProveedor.setVisible(visibility);
+                break;
+            case "menuSubAdministration10":
+                menuConvenios.setVisible(visibility);
+                break;
+            case "menuSubAdministration11":
+                menuBusquedaConvenios.setVisible(visibility);
+                break;
+            case "menuSubAdministration12":
+                menuAsignaciondeTrabajos.setVisible(visibility);
+                break;
+            case "menuSubAdministration13":
+                menuPuestoDeTrabajo.setVisible(visibility);
+                break;
+            case "menuSubAdministration14":
+                menuFormaDePago.setVisible(visibility);
+                break;
+                
+            case "menuSubAdmission1":
+                menuClientes.setVisible(visibility);
+                break;
+            case "menuSubAdmission2":
+                menuMarcas.setVisible(visibility);
+                break;
+            case "menuSubAdmission3":
+                menuUnidades.setVisible(visibility);
+                break;
+            case "menuSubAdmission4":
+                menutipo_pagosgenerales.setVisible(visibility);
+                break;
+            case "menuSubAdmission5":
+                menuTipoProMat.setVisible(visibility);
+                break;
+            case "menuSubAdmission6":
+                menuTipoMaqVe.setVisible(visibility);
+                break;
+            case "menuSubAdmission7":
+                menuLocalizacion.setVisible(visibility);
+                break;
+            case "menuSubAdmission8":
+                menuConfiguracion.setVisible(visibility);
+                break;
+                
+            case "menuSubRegister1":
+                menuOrdenes.setVisible(visibility);
+                break;
+            case "menuSubRegister2":
+                menuVerOrdenes.setVisible(visibility);
+                break;
+            case "menuSubRegister3":
+                menuVentas.setVisible(visibility);
+                break;
+            case "menuSubRegister4":
+                menuCompraProMat.setVisible(visibility);
+                break;
+            case "menuSubRegister5":
+                menuCompraEquyVehi.setVisible(visibility);
+                break;
+            case "menuSubRegister6":
+                menuGastosGenerales.setVisible(visibility);
+                break;
+            case "menuSubRegister7":
+                menuKardex.setVisible(visibility);
+                break;
+            case "menuSubRegister8":
+                menuCotizaciones.setVisible(visibility);
+                break;
+            case "menuSubRegister9":
+                menuCancelaciones.setVisible(visibility);
+                break;
+                
+            case "menuSubReports1":
+                menuTrabajosRealizados.setVisible(visibility);
+                break;
+            case "menuSubReports2":
+                menuEstadisticas.setVisible(visibility);
+                break;
+            case "menuSubReports3":
+                menuDeudasPorPagar.setVisible(visibility);
+                break;
+            case "menuSubReports4":
+                menuDeudasPorCobrar.setVisible(visibility);
+                break;
+            case "menuSubReports5":
+                menuHorasTrabajadas.setVisible(visibility);
+                break;
+            case "menuSubReports6":
+                menuSueldos.setVisible(visibility);
+                break;
+            case "menuSubReports7":
+                menuStock.setVisible(visibility);
+                break;
+            case "menuSubReports8":
+                menuTrabajos.setVisible(visibility);
+                break;
+            case "menuSubReports9":
+                menuPresupuesto.setVisible(visibility);
+                break;
+                
+        }
+    }
+
 }

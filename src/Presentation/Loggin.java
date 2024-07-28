@@ -25,17 +25,17 @@ public class Loggin extends javax.swing.JFrame {
             PreparedStatement pst = conect.prepareStatement(sql);
             pst.setString(1, Usuario);
             pst.setString(2, Contrasena);
-            ResultSet result = pst.executeQuery();
-
-            if (result.next()) {
-                int rolId = result.getInt("rol_id");
-                this.setVisible(false);
-                VentanaPrincipal objVP = new VentanaPrincipal(rolId);
-                objVP.setVisible(true);
-                objVP.pack();
-                VentanaPrincipal.lbUsuario.setText(Usuario);
-            } else {
-                JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
+            try (ResultSet result = pst.executeQuery()) {
+                if (result.next()) {
+                    int rolId = result.getInt("rol_id");
+                    this.setVisible(false);
+                    VentanaPrincipal objVP = new VentanaPrincipal(rolId);
+                    objVP.setVisible(true);
+                    objVP.pack();
+                    VentanaPrincipal.lbUsuario.setText(Usuario);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
+                }
             }
         } catch (SQLException ex) {
             Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
