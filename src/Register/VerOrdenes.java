@@ -391,7 +391,8 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnBuscarFechaEmpresaActionPerformed
 
     private void txtBuscarKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscarKeyTyped
-       
+
+        
     }//GEN-LAST:event_txtBuscarKeyTyped
 
     private void txtBuscarKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscarKeyReleased

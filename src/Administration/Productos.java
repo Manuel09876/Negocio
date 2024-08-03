@@ -1,6 +1,8 @@
 package Administration;
 
+import Bases.*;
 import conectar.Conectar;
+import java.awt.Component;
 import java.awt.HeadlessException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -15,6 +17,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class Productos extends javax.swing.JInternalFrame {
@@ -103,11 +106,10 @@ public class Productos extends javax.swing.JInternalFrame {
         txtIdProducto.setEnabled(false);
         AutoCompleteDecorator.decorate(cbxUnidades);
         MostrarUnidades(cbxUnidades);
-    
+
         CargarDatosTable("");
         txtIdProducto.setEnabled(false);
         txtName.requestFocus();
-
     }
 
     //Constructores de Metodos que vamos a necesitar
@@ -130,9 +132,9 @@ public class Productos extends javax.swing.JInternalFrame {
 
         txtName.setText("");
         txtPresentation.setText("");
-
         txtStock.setText("");
         txtOr.setText("");
+        txtStockMinimo.setText("");
 
     }
 
@@ -151,17 +153,17 @@ public class Productos extends javax.swing.JInternalFrame {
 
     //Es lo mismo que mostrar Tabla Clientes
     void CargarDatosTable(String Valores) {
-
         try {
+            String[] titulosTabla = {"Id", "Nombre", "Presentacion", "Unidades", "Stock", "Stock2", "Estado", "Stock Minimo"}; // Titulos de la Tabla
+            String[] RegistroBD = new String[8]; // Registros de la Base de Datos
 
-            String[] titulosTabla = {"Id", "Nombre", "Presentacion", "Unidades", "Stock", "Stock2","estado"}; //Titulos de la Tabla
-            String[] RegistroBD = new String[7];                                   //Registros de la Basede Datos
+            model = new DefaultTableModel(null, titulosTabla); // Le pasamos los titulos a la tabla
 
-            model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
-
-            String ConsultaSQL = "SELECT product.idProduct, product.nameProduct, product.presentation, unidades.nombre AS Unidades, product.stock, product.stock2, product.estado \n"
-                    + "FROM product \n"
-                    + "INNER JOIN unidades ON product.id_units=unidades.id_unidades";
+            String ConsultaSQL = """
+                SELECT product.idProduct, product.nameProduct, product.presentation, unidades.nombre AS Unidades, product.stock, product.stock2, product.estado, product.stock_minimo
+                FROM product
+                INNER JOIN unidades ON product.id_units=unidades.id_unidades
+                """;
 
             Statement st = connect.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
@@ -174,7 +176,8 @@ public class Productos extends javax.swing.JInternalFrame {
                 RegistroBD[4] = result.getString(5);
                 RegistroBD[5] = result.getString(6);
                 RegistroBD[6] = result.getString(7);
-                               
+                RegistroBD[7] = result.getString(8);
+
                 model.addRow(RegistroBD);
             }
 
@@ -185,64 +188,89 @@ public class Productos extends javax.swing.JInternalFrame {
             tbProducts.getColumnModel().getColumn(3).setPreferredWidth(150);
             tbProducts.getColumnModel().getColumn(4).setPreferredWidth(50);
             tbProducts.getColumnModel().getColumn(5).setPreferredWidth(100);
-            tbProducts.getColumnModel().getColumn(6).setPreferredWidth(150);
-                        
-        } catch (SQLException e) {
+            tbProducts.getColumnModel().getColumn(6).setPreferredWidth(50);
+            tbProducts.getColumnModel().getColumn(7).setPreferredWidth(100);
 
+            // Aplicar el renderer personalizado
+            CustomTableCellRenderer cellRenderer = new CustomTableCellRenderer();
+            tbProducts.setDefaultRenderer(Object.class, cellRenderer);
+
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
     void Guardar() {
-
         // Variables
         String nameProduct;
         String presentation;
         int id_units;
         double stock, stock2;
+        int stockMinimo; // Nuevo campo
         String sql = "";
 
-        //Obtenemos la informacion de las cajas de texto
+        // Obtenemos la informacion de las cajas de texto
         nameProduct = txtName.getText();
         presentation = txtPresentation.getText();
         id_units = Integer.parseInt(txtIdUnidades.getText());
         stock = Double.parseDouble(txtStock.getText());
         stock2 = Double.parseDouble(txtOr.getText());
+        stockMinimo = Integer.parseInt(txtStockMinimo.getText()); // Obtener el valor del nuevo campo
 
-        //Consulta para evitar duplicados
-        String consulta = "SELECT * FROM product WHERE nameProduct = ?";
+        // Consulta sql para insertar los datos (nombres como en la base de datos)
+        sql = "INSERT INTO product (nameProduct, presentation, id_units, stock, stock2, stock_minimo) VALUES (?, ?, ?, ?, ?, ?)";
 
-        //Consulta sql para insertar los datos (nombres como en la base de datos)
-        sql = "INSERT INTO product (nameProduct,presentation,id_units,stock,stock2)values(?,?,?,?,?)";
-
-        //Para almacenar los datos empleo un try cash
+        // Para almacenar los datos empleo un try catch
         try {
-
-            //prepara la coneccion para enviar al sql (Evita ataques al sql)
             PreparedStatement pst = connect.prepareStatement(sql);
-
             pst.setString(1, nameProduct);
             pst.setString(2, presentation);
             pst.setInt(3, id_units);
-            pst.setDouble(4,stock);
+            pst.setDouble(4, stock);
             pst.setDouble(5, stock2);
-            
+            pst.setInt(6, stockMinimo); // Añadir el nuevo campo
 
-            //Declara otra variable para validar los registros
             int n = pst.executeUpdate();
-
-            //si existe un registro en la BD el registro se guardo con exito
             if (n > 0) {
-                JOptionPane.showMessageDialog(null, "El registro se guardo exitosamente");
-
+                JOptionPane.showMessageDialog(null, "El registro se guardó exitosamente");
             }
             CargarDatosTable("");
 
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al guardar " + ex.toString());
-
         }
+    }
 
+    public void ModificarProducto(JTextField IdProducto, JTextField Name, JTextField Presentation, JTextField IdUnits, JTextField Stock, JTextField Or, JTextField StockMinimo) {
+        try {
+            setIdProduct(Integer.parseInt(IdProducto.getText()));
+            setNameProduct(Name.getText());
+            setPresentation(Presentation.getText());
+            setUnits(Integer.parseInt(IdUnits.getText()));
+            setStock(Integer.parseInt(txtStock.getText()));
+            setStock2(Double.parseDouble(Or.getText()));
+            int stockMinimo = Integer.parseInt(StockMinimo.getText()); // Obtener el valor del nuevo campo
+
+            String consulta = "UPDATE product SET nameProduct=?, presentation=?, id_units=?, stock=?, stock2=?, stock_minimo=? WHERE idProduct=?";
+            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            cs.setString(1, getNameProduct());
+            cs.setString(2, getPresentation());
+            cs.setInt(3, getUnits());
+            cs.setDouble(4, getStock());
+            cs.setDouble(5, getStock2());
+            cs.setInt(6, stockMinimo); // Añadir el nuevo campo
+            cs.setInt(7, getIdProduct());
+
+            cs.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Modificación Exitosa");
+
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null, "Error al convertir un valor a número. Asegúrate de ingresar números válidos en los campos numéricos.", "Error de conversión", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error al ejecutar la actualización en la base de datos: " + ex.getMessage(), "Error de base de datos", JOptionPane.ERROR_MESSAGE);
+        } catch (HeadlessException ex) {
+            JOptionPane.showMessageDialog(null, "Ocurrió un error durante la modificación: " + ex.getMessage(), "Error inesperado", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public void Eliminar(JTextField codigo) {
@@ -267,68 +295,35 @@ public class Productos extends javax.swing.JInternalFrame {
 
     }
 
-    public void SeleccionarProducto(JTable TablaProducto, JTextField IdProducto, JTextField Name, JTextField Presentacion, JComboBox Unidades, JTextField Stock, JTextField Or) {
-
+    public void SeleccionarProducto(JTable TablaProducto, JTextField IdProducto, JTextField Name, JTextField Presentation, JComboBox<CustomItem> Unidades, JTextField Stock, JTextField Or, JTextField StockMinimo) {
         try {
-
             int fila = TablaProducto.getSelectedRow();
-
             if (fila >= 0) {
-
                 IdProducto.setText(TablaProducto.getValueAt(fila, 0).toString());
                 Name.setText(TablaProducto.getValueAt(fila, 1).toString());
-                Presentacion.setText(TablaProducto.getValueAt(fila, 2).toString());
-                Unidades.setSelectedItem(TablaProducto.getValueAt(fila, 3).toString());
+                Presentation.setText(TablaProducto.getValueAt(fila, 2).toString());
+
+                String unidadNombre = TablaProducto.getValueAt(fila, 3).toString();
+                for (int i = 0; i < Unidades.getItemCount(); i++) {
+                    if (Unidades.getItemAt(i).toString().equals(unidadNombre)) {
+                        Unidades.setSelectedIndex(i);
+                        MostrarCodigoUnidades(Unidades, txtIdUnidades);
+                        break;
+                    }
+                }
+
                 Stock.setText(TablaProducto.getValueAt(fila, 4).toString());
                 Or.setText(TablaProducto.getValueAt(fila, 5).toString());
-
+                StockMinimo.setText(TablaProducto.getValueAt(fila, 7).toString());
             } else {
-                JOptionPane.showMessageDialog(null, "Fila seleccionada");
+                JOptionPane.showMessageDialog(null, "Fila no seleccionada");
             }
-
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error de Seleccion, Error: " + e.toString());
-        }
-
-    }
-
-    public void ModificarProducto(JTextField IdProducto, JTextField Name, JTextField Presentation, JTextField IdUnits, 
-            JTextField Stock, JTextField Or) {
-
-        try {
-            
-            setIdProduct(Integer.parseInt(IdProducto.getText()));
-            setNameProduct(Name.getText());
-            setPresentation(Presentation.getText());
-            setUnits(Integer.parseInt(IdUnits.getText())); // ¿Debería ser IdUnits?
-            setStock(Integer.parseInt(txtStock.getText()));
-            setStock2(Double.parseDouble(Or.getText()));
-
-            // Consulta de actualización
-            String consulta = "UPDATE product SET nameProduct=?, presentation=?, id_units=?, stock=?, stock2=? WHERE idProduct=?";
-
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
-
-            cs.setString(1, getNameProduct());
-            cs.setString(2, getPresentation());
-            cs.setInt(3, getUnits());
-            cs.setDouble(4, getStock());
-            cs.setDouble(5, getStock2());
-            cs.setInt(6, getIdProduct());
-
-            cs.executeUpdate();
-
-            JOptionPane.showMessageDialog(null, "Modificación Exitosa");
-
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null, "Error al convertir un valor a número. Asegúrate de ingresar números válidos en los campos numéricos.", "Error de conversión", JOptionPane.ERROR_MESSAGE);
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Error al ejecutar la actualización en la base de datos: " + ex.getMessage(), "Error de base de datos", JOptionPane.ERROR_MESSAGE);
-        } catch (HeadlessException ex) {
-            JOptionPane.showMessageDialog(null, "Ocurrió un error durante la modificación: " + ex.getMessage(), "Error inesperado", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Error de Selección: " + e.toString());
         }
     }
-    
+
+
     public Productos BuscarProductos(java.awt.event.KeyEvent evt) {
         String[] titulosTabla = {"Id", "Nombre", "Presentacion", "Unidades", "Stock", "Stock2"}; //Titulos de la Tabla
         String[] RegistroBD = new String[8];                                   //Registros de la Basede Datos
@@ -359,14 +354,13 @@ public class Productos extends javax.swing.JInternalFrame {
             tbProducts.getColumnModel().getColumn(3).setPreferredWidth(150);
             tbProducts.getColumnModel().getColumn(4).setPreferredWidth(50);
             tbProducts.getColumnModel().getColumn(5).setPreferredWidth(100);
-            
-            
+
         } catch (SQLException e) {
             System.out.println(e.toString());
         }
         return productos;
     }
-    
+
     public boolean accion(String estado, int idTipoDeUsuario) {
         String sql = "UPDATE product SET estado = ? WHERE idProduct = ?";
         try {
@@ -407,6 +401,8 @@ public class Productos extends javax.swing.JInternalFrame {
         btnCancel = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
         btnExit = new javax.swing.JButton();
+        txtStockMinimo = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jLabel11 = new javax.swing.JLabel();
@@ -509,6 +505,8 @@ public class Productos extends javax.swing.JInternalFrame {
             }
         });
 
+        jLabel2.setText("Stock Mínimo");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -534,29 +532,34 @@ public class Productos extends javax.swing.JInternalFrame {
                             .addComponent(cbxUnidades, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(txtIdUnidades, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel8)
-                            .addComponent(jLabel10))
-                        .addGap(100, 100, 100)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(txtStock)
-                            .addComponent(txtOr, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnNew)
-                            .addComponent(btnCancel))
-                        .addGap(39, 39, 39)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(btnDelete)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnExit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(btnAdd)
-                                .addGap(18, 18, 18)
-                                .addComponent(btnUpdate)))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel8)
+                                .addComponent(jLabel10))
+                            .addGap(100, 100, 100)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(txtStock)
+                                .addComponent(txtOr, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(txtStockMinimo, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel2)))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(btnNew)
+                                .addComponent(btnCancel))
+                            .addGap(39, 39, 39)
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(btnDelete)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(btnExit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(btnAdd)
+                                    .addGap(18, 18, 18)
+                                    .addComponent(btnUpdate))))))
+                .addContainerGap(12, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -581,11 +584,13 @@ public class Productos extends javax.swing.JInternalFrame {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8))
+                    .addComponent(jLabel8)
+                    .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel10)
-                    .addComponent(txtOr, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtOr, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtStockMinimo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(35, 35, 35)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnNew, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -679,7 +684,7 @@ public class Productos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnNewActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
-        ModificarProducto(txtIdProducto, txtName, txtPresentation, txtIdUnidades, txtStock, txtOr);
+        ModificarProducto(txtIdProducto, txtName, txtPresentation, txtIdUnidades, txtStock, txtOr, txtStockMinimo);
         CargarDatosTable("");
 
         txtIdProducto.setText("");
@@ -687,8 +692,7 @@ public class Productos extends javax.swing.JInternalFrame {
         txtPresentation.setText("");
         txtStock.setText("");
         txtOr.setText("");
-
-
+        txtStockMinimo.setText("");
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
@@ -709,10 +713,10 @@ public class Productos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnExitActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
-        SeleccionarProducto(tbProducts, txtIdProducto, txtName, txtPresentation, cbxUnidades, txtStock, txtOr);
+        SeleccionarProducto(tbProducts, txtIdProducto, txtName, txtPresentation, cbxUnidades, txtStock, txtOr, txtStockMinimo);
         Eliminar(txtIdProducto);
         CargarDatosTable("");
-        
+
         txtIdProducto.setText("");
         txtName.setText("");
         txtPresentation.setText("");
@@ -720,7 +724,6 @@ public class Productos extends javax.swing.JInternalFrame {
         txtOr.setText("");
 
         BloquearCampos();
-
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnSerchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSerchActionPerformed
@@ -730,12 +733,10 @@ public class Productos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnSerchActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-
         Guardar();
         CargarDatosTable("");
         LimpiarCajasTexto();
         DesbloquearCampos();
-
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void jScrollPane1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jScrollPane1MouseClicked
@@ -743,9 +744,7 @@ public class Productos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_jScrollPane1MouseClicked
 
     private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
-
-        SeleccionarProducto(tbProducts, txtIdProducto, txtName, txtPresentation, cbxUnidades, txtStock, txtOr);
-
+        SeleccionarProducto(tbProducts, txtIdProducto, txtName, txtPresentation, cbxUnidades, txtStock, txtOr, txtStockMinimo);
     }//GEN-LAST:event_formMouseClicked
 
     private void txtBuscarProductosKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscarProductosKeyTyped
@@ -753,7 +752,7 @@ public class Productos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_txtBuscarProductosKeyTyped
 
     private void tbProductsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbProductsMouseClicked
-        SeleccionarProducto(tbProducts, txtIdProducto, txtName, txtPresentation, cbxUnidades, txtStock, txtOr);
+        SeleccionarProducto(tbProducts, txtIdProducto, txtName, txtPresentation, cbxUnidades, txtStock, txtOr, txtStockMinimo);
     }//GEN-LAST:event_tbProductsMouseClicked
 
     private void txtBuscarProductosKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscarProductosKeyPressed
@@ -770,7 +769,7 @@ public class Productos extends javax.swing.JInternalFrame {
         if (accion("Inactivo", id)) {
             JOptionPane.showMessageDialog(null, "Inactivado");
             CargarDatosTable("");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Error al Inactivar");
         }
     }//GEN-LAST:event_btnInactivarActionPerformed
@@ -786,11 +785,12 @@ public class Productos extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnNew;
     private javax.swing.JButton btnSerch;
     private javax.swing.JButton btnUpdate;
-    private javax.swing.JComboBox<String> cbxUnidades;
+    private javax.swing.JComboBox<CustomItem> cbxUnidades;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel8;
@@ -805,65 +805,36 @@ public class Productos extends javax.swing.JInternalFrame {
     private javax.swing.JTextField txtOr;
     private javax.swing.JTextField txtPresentation;
     private javax.swing.JTextField txtStock;
+    private javax.swing.JTextField txtStockMinimo;
     // End of variables declaration//GEN-END:variables
 
     Conectar con = new Conectar();
     Connection connect = con.getConexion();
 
+    public void MostrarUnidades(JComboBox<CustomItem> cbxUnidades) {
+    String sql = "SELECT * FROM unidades";
+    Statement st;
 
-    public void MostrarUnidades(JComboBox cbxUnidades) {
-
-        String sql = "";
-        sql = "select * from unidades";
-        Statement st;
-
-        try {
-
-            st = con.getConexion().createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            cbxUnidades.removeAllItems();
-
-            while (rs.next()) {
-
-                cbxUnidades.addItem(rs.getString("nombre"));
-            }
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+    try {
+        st = con.getConexion().createStatement();
+        ResultSet rs = st.executeQuery(sql);
+        cbxUnidades.removeAllItems();
+        while (rs.next()) {
+            CustomItem item = new CustomItem(rs.getInt("id_unidades"), rs.getString("nombre"));
+            cbxUnidades.addItem(item);
         }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla: " + e.toString());
     }
-
-    public void MostrarCodigoUnidades(JComboBox cbxUnidades, JTextField idUnidades) {
-
-        String consuta = "select unidades.id_unidades from unidades where unidades.nombre=?";
-
-        try {
-            // Validar si hay un item seleccionado en el JComboBox
-            if (cbxUnidades.getSelectedIndex() == -1) {
-//            JOptionPane.showMessageDialog(null, "Error: No se ha seleccionado ningún proveedor.");
-                return;
-            }
-
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
-
-            Object selectedValue = cbxUnidades.getSelectedItem();
-            if (selectedValue != null) {
-                String valorSeleccionado = selectedValue.toString();
-                cs.setString(1, valorSeleccionado);
-
-                cs.execute();
-
-                ResultSet rs = cs.executeQuery();
-
-                if (rs.next()) {
-                    idUnidades.setText(rs.getString("id_unidades"));
-                }
-            }
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
-        }
-    }
-
-    
 }
+
+    public void MostrarCodigoUnidades(JComboBox<CustomItem> cbxUnidades, JTextField idUnidades) {
+    CustomItem selectedItem = (CustomItem) cbxUnidades.getSelectedItem();
+    if (selectedItem != null) {
+        idUnidades.setText(String.valueOf(selectedItem.getId()));
+    }
+}
+}
+
+
+

@@ -1172,27 +1172,20 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoProducto(JComboBox cbxProducto, JTextField idProducto) {
-
         String consuta = "select product.idProduct from product where product.nameProduct=?";
-
         try {
             // Validar si hay un item seleccionado en el JComboBox
             if (cbxProducto.getSelectedIndex() == -1) {
-//            JOptionPane.showMessageDialog(null, "Error: No se ha seleccionado ningún proveedor.");
+
                 return;
             }
-
             CallableStatement cs = con.getConexion().prepareCall(consuta);
-
             Object selectedValue = cbxProducto.getSelectedItem();
             if (selectedValue != null) {
                 String valorSeleccionado = selectedValue.toString();
                 cs.setString(1, valorSeleccionado);
-
                 cs.execute();
-
                 ResultSet rs = cs.executeQuery();
-
                 if (rs.next()) {
                     idProducto.setText(rs.getString("idProduct"));
                 }

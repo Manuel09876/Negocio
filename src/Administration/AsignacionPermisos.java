@@ -86,26 +86,33 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     private JTextField txtBuscar;
     private JTextField txtId;
     private JTextField txtBusinessName;
-    private JTextField txtAddress; 
+    private JTextField txtAddress;
     private JTextField txtZipCode;
     private JTextField txtCity;
     private JTextField txtState;
     private JTextField txtNameOwner;
-    private JTextField txtCellphoneOwner; 
+    private JTextField txtCellphoneOwner;
     private JTextField txtEmailOwner;
     private JTextField txtNameContact;
     private JTextField txtCellphoneContact;
-    private JTextField txtEmailContact; 
+    private JTextField txtEmailContact;
     private JTextField txtWebsiteBusiness;
     private JDateChooser calendar;
-    private JTextField txtCodigo; 
+    private JTextField txtCodigo;
     private JTextField txtIdBusiness;
-    private JTextField txtNameCustomer; 
+    private JTextField txtNameCustomer;
     private JTextField txtNameAddress;
-    private JTextField txtPhoneNumber; 
+    private JTextField txtPhoneNumber;
     private JTextField txtEmail;
     private JTextField txtArea;
     private JTextArea txtNotaCliente;
+    private JTextField txtTipoDocumento, txtNumeroDocumento, txtNombres, txtEdad, txtDireccion, txtCiudad, txtTelefono;
+    private JComboBox cbxSexo;
+    private JDateChooser JDateFechaNac;
+    private JTextField txtServicio, txtPrecio;
+    private JTextField txtIdProducto, txtName, txtPresentation, txtIdUnidades, txtStock, txtOr;
+    private JTextField txtWebsite;
+    private JTable tbPuestosDeTrabajo;
 
     private List<Permiso> permisos;
 
@@ -117,6 +124,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         this.tb = new Trabajadores();
         this.tf = new Tarifario();
         this.p = new Productos();
+        this.pr = new Proveedor();
         this.cv = new Convenios();
         this.bc = new BusquedaDeConvenios();
         this.at = new AsignacionTrabajos();
@@ -263,333 +271,1212 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
     // Método actualizado para configurar los oyentes del modelo de tabla
     private void setupTableModelListener(JTable table, String tableName) {
-    table.getModel().addTableModelListener(new TableModelListener() {
-        @Override
-        public void tableChanged(TableModelEvent e) {
-            if (e.getType() == TableModelEvent.UPDATE) {
-                int row = e.getFirstRow();
-                int column = e.getColumn();
+        table.getModel().addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                if (e.getType() == TableModelEvent.UPDATE) {
+                    int row = e.getFirstRow();
+                    int column = e.getColumn();
 
-                // Verificar que la columna sea una de las de permisos
-                if (column >= 2 && column <= 5) {
-                    Boolean selected = (Boolean) table.getValueAt(row, column);
+                    // Verificar que la columna sea una de las de permisos
+                    if (column >= 2 && column <= 5) {
+                        Boolean selected = (Boolean) table.getValueAt(row, column);
 
-                    // Obtener nombres de menú y submenú
-                    String menuName = getMenuNameByRow(tableName, row);
-                    String submenuName = getSubmenuNameByRow(tableName, row);
+                        // Obtener nombres de menú y submenú
+                        String menuName = getMenuNameByRow(tableName, row);
+                        String submenuName = getSubmenuNameByRow(tableName, row);
 
-                    // Validar que los nombres no estén vacíos
-                    if (!menuName.isEmpty() && !submenuName.isEmpty()) {
-                        // Guardar permisos en la base de datos
-                        guardarPermisoEnBaseDeDatos(menuName, submenuName, column, selected);
+                        // Validar que los nombres no estén vacíos
+                        if (!menuName.isEmpty() && !submenuName.isEmpty()) {
+                            // Guardar permisos en la base de datos
+                            guardarPermisoEnBaseDeDatos(menuName, submenuName, column, selected);
 
-                        // Llamar a los métodos específicos basados en el nombre del submenú y la acción
-                        if (menuName.equals("menuAdministration")) {
-                            switch (submenuName) {
-                                case "Usuarios":
-                                    handleUsuarios(column, selected);
-                                    break;
-                                case "Roles":
-                                    handleRoles(column, selected);
-                                    break;
-                                case "Asignación de Permisos":
-                                    handleAsignacionPermisos(column, selected);
-                                    break;
-                                case "Empresas":
-                                    handleEmpresas(column, selected);
-                                    break;
-                                // Añadir más casos según sea necesario...
+                            // Llamar a los métodos específicos basados en el nombre del submenú y la acción
+                            if (menuName.equals("menuAdministration")) {
+                                switch (submenuName) {
+                                    case "Usuarios":
+                                        handleUsuarios(column, selected);
+                                        break;
+                                    case "Roles":
+                                        handleRoles(column, selected);
+                                        break;
+                                    case "Asignación de Permisos":
+                                        handleAsignacionPermisos(column, selected);
+                                        break;
+                                    case "Empresas":
+                                        handleEmpresas(column, selected);
+                                        break;
+                                    case "Trabajadores":
+                                        handleUsuarios(column, selected);
+                                        break;
+                                    case "Tarifario":
+                                        handleRoles(column, selected);
+                                        break;
+                                    case "Productos":
+                                        handleAsignacionPermisos(column, selected);
+                                        break;
+                                    case "Formularios":
+                                        handleEmpresas(column, selected);
+                                        break;
+                                    case "Proveedor":
+                                        handleUsuarios(column, selected);
+                                        break;
+                                    case "Convenios":
+                                        handleRoles(column, selected);
+                                        break;
+                                    case "Busqueda de Convenios":
+                                        handleAsignacionPermisos(column, selected);
+                                        break;
+                                    case "Asignacion de Trabajos":
+                                        handleEmpresas(column, selected);
+                                        break;
+                                    case "Puesto de Trabajo":
+                                        handleUsuarios(column, selected);
+                                        break;
+                                    case "Formas de Pago":
+                                        handleRoles(column, selected);
+                                        break;
+                                    case "Menus - Submenus":
+                                        handleAsignacionPermisos(column, selected);
+                                        break;
+
+                                    // Añadir más casos según sea necesario...
+                                }
+                            } else if (menuName.equals("menuAdmission")) {
+                                switch (submenuName) {
+                                    case "Clientes":
+                                        handleClientes(column, selected);
+                                        break;
+                                    case "Marcas":
+                                        handleMarcas(column, selected);
+                                        break;
+                                    case "Unidades":
+                                        handleClientes(column, selected);
+                                        break;
+                                    case "Tipo de Pagos Generales":
+                                        handleMarcas(column, selected);
+                                        break;
+                                    case "Tipo de Productos y Materiales":
+                                        handleClientes(column, selected);
+                                        break;
+                                    case "Tipo de Maquinarias y Vehiculos":
+                                        handleMarcas(column, selected);
+                                        break;
+                                    case "Localizacion":
+                                        handleClientes(column, selected);
+                                        break;
+                                    case "Configuracion":
+                                        handleMarcas(column, selected);
+                                        break;
+                                    // Añadir más casos según sea necesario...
+                                }
+                            } else if (menuName.equals("menuRegisters")) {
+                                switch (submenuName) {
+                                    case "Orden de Servicio":
+                                        handleOrdenDeServicio(column, selected);
+                                        break;
+                                    case "Ver Ordenes":
+                                        handleVerOrdenes(column, selected);
+                                        break;
+                                    case "Ventas":
+                                        handleOrdenDeServicio(column, selected);
+                                        break;
+                                    case "Compra Productos y Materiales":
+                                        handleVerOrdenes(column, selected);
+                                        break;
+                                    case "Compra Equipos y Vehiculos":
+                                        handleVerOrdenes(column, selected);
+                                        break;
+                                    case "Gastos Generales":
+                                        handleOrdenDeServicio(column, selected);
+                                        break;
+                                    case "Kardex":
+                                        handleVerOrdenes(column, selected);
+                                        break;
+                                    case "Cotizaciones":
+                                        handleOrdenDeServicio(column, selected);
+                                        break;
+                                    case "Cancelasciones":
+                                        handleVerOrdenes(column, selected);
+                                        break;
+
+                                    // Añadir más casos según sea necesario...
+                                }
+                            } else if (menuName.equals("menuReports")) {
+                                switch (submenuName) {
+                                    case "Trabajos Realizados":
+                                        handleTrabajosRealizados(column, selected);
+                                        break;
+                                    case "Estadísticas":
+                                        handleEstadisticas(column, selected);
+                                        break;
+                                    case "Deudas Por Pagar":
+                                        handleTrabajosRealizados(column, selected);
+                                        break;
+                                    case "Deudas Por Cobrar":
+                                        handleEstadisticas(column, selected);
+                                        break;
+                                    case "Horas Trabajadas":
+                                        handleTrabajosRealizados(column, selected);
+                                        break;
+                                    case "Sueldos":
+                                        handleEstadisticas(column, selected);
+                                        break;
+                                    case "Stock":
+                                        handleTrabajosRealizados(column, selected);
+                                        break;
+                                    case "Trabajos":
+                                        handleEstadisticas(column, selected);
+                                        break;
+                                    case "Presupuesto":
+                                        handleTrabajosRealizados(column, selected);
+                                        break;
+
+                                    // Añadir más casos según sea necesario...
+                                }
                             }
-                        } else if (menuName.equals("menuAdmission")) {
-                            switch (submenuName) {
-                                case "Clientes":
-                                    handleClientes(column, selected);
-                                    break;
-                                case "Marcas":
-                                    handleMarcas(column, selected);
-                                    break;
-                                // Añadir más casos según sea necesario...
-                            }
-                        } else if (menuName.equals("menuRegisters")) {
-                            switch (submenuName) {
-                                case "Orden de Servicio":
-                                    handleOrdenDeServicio(column, selected);
-                                    break;
-                                case "Ver Ordenes":
-                                    handleVerOrdenes(column, selected);
-                                    break;
-                                // Añadir más casos según sea necesario...
-                            }
-                        } else if (menuName.equals("menuReports")) {
-                            switch (submenuName) {
-                                case "Trabajos Realizados":
-                                    handleTrabajosRealizados(column, selected);
-                                    break;
-                                case "Estadísticas":
-                                    handleEstadisticas(column, selected);
-                                    break;
-                                // Añadir más casos según sea necesario...
-                            }
+                        } else {
+                            System.out.println("Error: Nombres de menú o submenú no válidos.");
                         }
-                    } else {
-                        System.out.println("Error: Nombres de menú o submenú no válidos.");
                     }
                 }
             }
+        });
+    }
+
+    
+    private void handleUsuarios(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    u.CargarDatosTable("");
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    u.Guardar();
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    u.ModificarUsuario(txtNombre, txtNombre, txtUsuario, txtBuscar);
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    u.Eliminar(txtIdTPU);
+                }
+                break;
         }
-    });
-}
-
-private void handleUsuarios(int column, Boolean selected) {
-    switch (column) {
-        case 2: // Visualizar
-            if (selected) {
-                u.CargarDatosTable("");
-            }
-            break;
-        case 3: // Agregar
-            if (selected) {
-                u.Guardar();
-            }
-            break;
-        case 4: // Editar
-            if (selected) {
-                u.ModificarUsuario(txtNombre, txtNombre, txtUsuario, txtBuscar);
-            }
-            break;
-        case 5: // Eliminar
-            if (selected) {
-                u.Eliminar(txtIdTPU);
-            }
-            break;
     }
-}
 
-private void handleRoles(int column, Boolean selected) {
-    switch (column) {
-        case 2: // Visualizar
-            if (selected) {
-                r.CargarDatosTabla("");
-            }
-            break;
-        case 3: // Agregar
-            if (selected) {
-                r.Guardar();
-            }
-            break;
-        case 4: // Editar
-            if (selected) {
-                r.modificar(txtId, txtNombre);
-            }
-            break;
-        case 5: // Eliminar
-            if (selected) {
-                r.Eliminar(txtId);
-            }
-            break;
+    private void handleRoles(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    r.CargarDatosTabla("");
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    r.Guardar();
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    r.modificar(txtId, txtNombre);
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    r.Eliminar(txtId);
+                }
+                break;
+        }
     }
-}
 
-private void handleAsignacionPermisos(int column, Boolean selected) {
-    switch (column) {
-        case 2: // Visualizar
-            if (selected) {
-                // Implementar lógica de visualizar
-            }
-            break;
-        case 3: // Agregar
-            if (selected) {
-                // Implementar lógica de agregar
-            }
-            break;
-        case 4: // Editar
-            if (selected) {
-                // Implementar lógica de editar
-            }
-            break;
-        case 5: // Eliminar
-            if (selected) {
-                // Implementar lógica de eliminar
-            }
-            break;
+    private void handleAsignacionPermisos(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    // Implementar lógica de visualizar
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    // Implementar lógica de agregar
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    // Implementar lógica de editar
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    // Implementar lógica de eliminar
+                }
+                break;
+        }
     }
-}
 
-private void handleEmpresas(int column, Boolean selected) {
-    switch (column) {
-        case 2: // Visualizar
-            if (selected) {
-                em.CargarDatosTable("");
-            }
-            break;
-        case 3: // Agregar
-            if (selected) {
-                em.Guardar();
-            }
-            break;
-        case 4: // Editar
-            if (selected) {
-                em.ModificarEmpresa(txtId, txtBusinessName, txtAddress, txtZipCode, txtCity, txtState, txtNameOwner, txtCellphoneOwner, txtEmailOwner, txtNameContact, txtCellphoneContact, txtEmailContact, txtWebsiteBusiness, calendar);
-            }
-            break;
-        case 5: // Eliminar
-            if (selected) {
-                em.Eliminar(txtId);
-            }
-            break;
+    private void handleEmpresas(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    em.CargarDatosTable("");
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    em.Guardar();
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    em.ModificarEmpresa(txtId, txtBusinessName, txtAddress, txtZipCode, txtCity, txtState, txtNameOwner, txtCellphoneOwner, txtEmailOwner, txtNameContact, txtCellphoneContact, txtEmailContact, txtWebsiteBusiness, calendar);
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    em.Eliminar(txtId);
+                }
+                break;
+        }
     }
-}
-
-private void handleClientes(int column, Boolean selected) {
-    switch (column) {
-        case 2: // Visualizar
-            if (selected) {
-                c.MostrarClientes("");
-            }
-            break;
-        case 3: // Agregar
-            if (selected) {
-                c.InsertarCliente();
-            }
-            break;
-        case 4: // Editar
-            if (selected) {
-                c.ModificarCliente(txtCodigo, txtIdBusiness, txtNameCustomer, txtNameAddress, txtZipCode, txtCity, txtState, txtPhoneNumber, txtEmail, txtArea, txtNotaCliente);
-            }
-            break;
-        case 5: // Eliminar
-            if (selected) {
-                c.EliminarClientes(txtCodigo);
-            }
-            break;
+    
+    private void handleTrabajadores(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                   tb.CargarDatosTable(""); 
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                   tb.Guardar();
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    tb.ModificarTrabajador(txtId, txtTipoDocumento, txtNumeroDocumento, txtNombres, cbxSexo, JDateFechaNac, txtEdad, txtDireccion, txtZipCode, txtCiudad, txtState, txtTelefono, txtEmail);
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    tb.Eliminar(txtCodigo);
+                }
+                break;
+        }
     }
-}
 
-private void handleMarcas(int column, Boolean selected) {
-    switch (column) {
-        case 2: // Visualizar
-            if (selected) {
-                mc.CargarDatosTabla("");
-            }
-            break;
-        case 3: // Agregar
-            if (selected) {
-                mc.Guardar();
-            }
-            break;
-        case 4: // Editar
-            if (selected) {
-                mc.Modificar(txtId, txtNombre);
-            }
-            break;
-        case 5: // Eliminar
-            if (selected) {
-                mc.Eliminar(txtId);
-            }
-            break;
+    private void handleTarifario(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    tf.MostrarServicios("");
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    tf.Insertar();
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    tf.Modificar(txtId, txtServicio, txtPrecio);
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    tf.Eliminar(txtCodigo);
+                }
+                break;
+        }
     }
-}
 
-private void handleOrdenDeServicio(int column, Boolean selected) {
-    switch (column) {
-        case 2: // Visualizar
-            if (selected) {
-                ;
-            }
-            break;
-        case 3: // Agregar
-            if (selected) {
-                ;
-            }
-            break;
-        case 4: // Editar
-            if (selected) {
-                ;
-            }
-            break;
-        case 5: // Eliminar
-            if (selected) {
-                ;
-            }
-            break;
+    private void handleProductos(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    p.CargarDatosTable("");
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    p.Guardar();
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    p.Eliminar(txtCodigo);
+                }
+                break;
+        }
     }
-}
 
-private void handleVerOrdenes(int column, Boolean selected) {
-    switch (column) {
-        case 2: // Visualizar
-            if (selected) {
-                vo.MostrarTabla();
-            }
-            break;
-        case 3: // Agregar
-            if (selected) {
-                ;
-            }
-            break;
-        case 4: // Editar
-            if (selected) {
-                ;
-            }
-            break;
-        case 5: // Eliminar
-            if (selected) {
-                ;
-            }
-            break;
+    private void handleFormularios(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
     }
-}
-
-private void handleTrabajosRealizados(int column, Boolean selected) {
-    switch (column) {
-        case 2: // Visualizar
-            if (selected) {
-                tr.MostrarTabla();
-            }
-            break;
-        case 3: // Agregar
-            if (selected) {
-                ;
-            }
-            break;
-        case 4: // Editar
-            if (selected) {
-                ;
-            }
-            break;
-        case 5: // Eliminar
-            if (selected) {
-                ;
-            }
-            break;
+    
+    private void handleProveedor(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    pr.MostrarProveedor("");
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    pr.Insertar();
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    pr.Modificar(txtUsuario, txtUsuario, txtAddress, txtZipCode, txtCity, txtState, txtPhoneNumber, txtWebsite, txtEmail);
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    pr.Eliminar(txtCodigo);
+                }
+                break;
+        }
     }
-}
 
-private void handleEstadisticas(int column, Boolean selected) {
-    switch (column) {
-        case 2: // Visualizar
-            if (selected) {
-                ;
-            }
-            break;
-        case 3: // Agregar
-            if (selected) {
-                ;
-            }
-            break;
-        case 4: // Editar
-            if (selected) {
-                ;
-            }
-            break;
-        case 5: // Eliminar
-            if (selected) {
-                ;
-            }
-            break;
+    private void handleConvenios(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
     }
-}
 
+    private void handleBusquedaConvenios(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    // Implementar lógica de visualizar
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    // Implementar lógica de agregar
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    // Implementar lógica de editar
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    // Implementar lógica de eliminar
+                }
+                break;
+        }
+    }
+
+    private void handleAsignacionTrabajos(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+    
+    private void handlePuestosDeTrabajo(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                  pt.Mostrar(tbPuestosDeTrabajo);
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    private void handleFormasDePago(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    private void handleMenus(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    // Implementar lógica de visualizar
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    // Implementar lógica de agregar
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    // Implementar lógica de editar
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    // Implementar lógica de eliminar
+                }
+                break;
+        }
+    }
+
+        
+    private void handleClientes(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    c.MostrarClientes("");
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    c.InsertarCliente();
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    c.ModificarCliente(txtCodigo, txtIdBusiness, txtNameCustomer, txtNameAddress, txtZipCode, txtCity, txtState, txtPhoneNumber, txtEmail, txtArea, txtNotaCliente);
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    c.EliminarClientes(txtCodigo);
+                }
+                break;
+        }
+    }
+
+    private void handleMarcas(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    mc.CargarDatosTabla("");
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    mc.Guardar();
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    mc.Modificar(txtId, txtNombre);
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    mc.Eliminar(txtId);
+                }
+                break;
+        }
+    }
+    
+    private void handleUnidades(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    private void handleTipoDePagosGenerales(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+    
+    private void handleTipoDeProductosMateriales(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    private void handleTipoDeMaquinariasVehiculos(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+    
+    private void handleLocalizacion(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    private void handleconfiguracion(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    
+    private void handleOrdenDeServicio(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    private void handleVerOrdenes(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    vo.MostrarTabla();
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+    
+    private void handleVentas(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    private void handleCompraProductosMateriales(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+    
+    private void handleCompraEquiposVehiculos(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    private void handleGastosGenerales(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+    
+    private void handleKardex(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    private void handleCotizaciones(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+    
+    private void handleCancelaciones(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }  
+
+    
+    private void handleTrabajosRealizados(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    tr.MostrarTabla();
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    private void handleEstadisticas(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+    
+    private void handleDeudaPorPagar(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    private void handleDeudasPorCobrar(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+    
+    private void handleHorasTrabajadas(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    private void handleSueldos(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+    
+    private void handleStock(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    private void handleTrabajos(int column, Boolean selected) {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+    
+    private void handlePresupuestos(int column, Boolean selected) 
+    {
+        switch (column) {
+            case 2: // Visualizar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 3: // Agregar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 4: // Editar
+                if (selected) {
+                    ;
+                }
+                break;
+            case 5: // Eliminar
+                if (selected) {
+                    ;
+                }
+                break;
+        }
+    }
+
+    
+    
+    
 
 // Métodos auxiliares para obtener nombres de menú y submenú basado en la tabla y la fila
     private String getMenuNameByRow(String tableName, int row) {
