@@ -24,66 +24,85 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     Conectar conexion = new Conectar();
     Connection conect = conexion.getConexion();
 
+    
+
     public HorasTrabajadas() {
         initComponents();
         txtIdHoras.setEnabled(false);
         AutoCompleteDecorator.decorate(cbxTrabajador);
         MostrarTrabajador(cbxTrabajador);
     }
-     // Método para registrar el inicio de sesión
-    public void registrarInicioSesion(int trabajadorId) {
-        String sql = "INSERT INTO horas_trabajadas (trabajador_id, inicio, fecha) VALUES (?, ?, ?)";
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            pst.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-            pst.setDate(3, java.sql.Date.valueOf(java.time.LocalDate.now()));
-            pst.executeUpdate();
-        } catch (SQLException ex) {
-            Logger.getLogger(HorasTrabajadas.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
+     private static final Logger LOGGER = Logger.getLogger(HorasTrabajadas.class.getName());
+
+    
+    // Método para registrar el inicio de sesión
+     public void registrarInicioSesion(int trabajadorId) {
+    String sql = "INSERT INTO horas_trabajadas (trabajador_id, inicio, fecha) VALUES (?, ?, ?)";
+    try (PreparedStatement pst = conect.prepareStatement(sql)) {
+        pst.setInt(1, trabajadorId);
+        pst.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+        pst.setDate(3, java.sql.Date.valueOf(java.time.LocalDate.now()));
+        pst.executeUpdate();
+        System.out.println("Inicio de sesión registrado para trabajador ID: " + trabajadorId);
+    } catch (SQLException ex) {
+        Logger.getLogger(HorasTrabajadas.class.getName()).log(Level.SEVERE, null, ex);
     }
+}
 
-   // Método para registrar el fin de sesión y calcular las horas de trabajo
-    public void registrarFinSesion(int trabajadorId) {
-        String sql = "UPDATE horas_trabajadas SET fin = ?, horas = ?, horas_extras = ? WHERE trabajador_id = ? AND fecha = ?";
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            LocalDateTime fin = LocalDateTime.now();
-            pst.setTimestamp(1, Timestamp.valueOf(fin));
 
-            // Recuperar la hora de inicio
-            String sqlSelect = "SELECT inicio FROM horas_trabajadas WHERE trabajador_id = ? AND fecha = ?";
-            try (PreparedStatement pstSelect = conect.prepareStatement(sqlSelect)) {
-                pstSelect.setInt(1, trabajadorId);
-                pstSelect.setDate(2, java.sql.Date.valueOf(java.time.LocalDate.now()));
-                ResultSet rs = pstSelect.executeQuery();
-                if (rs.next()) {
-                    LocalDateTime inicio = rs.getTimestamp("inicio").toLocalDateTime();
-                    long minutosTrabajados = ChronoUnit.MINUTES.between(inicio, fin);
-                    double horasTrabajadas = minutosTrabajados / 60.0 - 0.5; // Restar 30 minutos de descanso
-                    double horasExtras = Math.max(0, horasTrabajadas - 8); // Suponiendo una jornada laboral de 8 horas
+    // Método para registrar el fin de sesión y calcular las horas de trabajo
+     public void registrarFinSesion(int trabajadorId) {
+    System.out.println("Intentando registrar fin de sesión para trabajador ID: " + trabajadorId); // Mensaje de depuración
 
-                    pst.setDouble(2, horasTrabajadas);
-                    pst.setDouble(3, horasExtras);
-                    pst.setInt(4, trabajadorId);
-                    pst.setDate(5, java.sql.Date.valueOf(java.time.LocalDate.now()));
-                    pst.executeUpdate();
+    String sql = "UPDATE horas_trabajadas SET fin = ?, horas = ?, horas_extras = ? WHERE trabajador_id = ? AND fecha = ?";
+    try (PreparedStatement pst = conect.prepareStatement(sql)) {
+        LocalDateTime fin = LocalDateTime.now();
+        System.out.println("Hora de fin: " + fin); // Mensaje de depuración
+        pst.setTimestamp(1, Timestamp.valueOf(fin));
+
+        String sqlSelect = "SELECT inicio FROM horas_trabajadas WHERE trabajador_id = ? AND fecha = ?";
+        try (PreparedStatement pstSelect = conect.prepareStatement(sqlSelect)) {
+            pstSelect.setInt(1, trabajadorId);
+            pstSelect.setDate(2, java.sql.Date.valueOf(java.time.LocalDate.now()));
+            ResultSet rs = pstSelect.executeQuery();
+            if (rs.next()) {
+                LocalDateTime inicio = rs.getTimestamp("inicio").toLocalDateTime();
+                System.out.println("Hora de inicio: " + inicio); // Mensaje de depuración
+
+                long minutosTrabajados = ChronoUnit.MINUTES.between(inicio, fin);
+                double horasTrabajadas = minutosTrabajados / 60.0 - 0.5; // Restar 30 minutos de descanso
+                double horasExtras = Math.max(0, horasTrabajadas - 8); // Suponiendo una jornada laboral de 8 horas
+
+                pst.setDouble(2, horasTrabajadas);
+                pst.setDouble(3, horasExtras);
+                pst.setInt(4, trabajadorId);
+                pst.setDate(5, java.sql.Date.valueOf(java.time.LocalDate.now()));
+
+                int rowsUpdated = pst.executeUpdate();
+                System.out.println("Rows updated: " + rowsUpdated); // Mensaje de depuración
+
+                if (rowsUpdated > 0) {
+                    System.out.println("Fin de sesión registrado para trabajador ID: " + trabajadorId); // Mensaje de depuración
+                } else {
+                    System.out.println("No se encontró el registro de inicio de sesión para el trabajador con ID: " + trabajadorId); // Mensaje de depuración
                 }
-                rs.close(); // Cerrar el ResultSet
+            } else {
+                System.out.println("No se encontró el registro de inicio de sesión para el trabajador con ID: " + trabajadorId); // Mensaje de depuración
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(HorasTrabajadas.class.getName()).log(Level.SEVERE, null, ex);
+            rs.close();
         }
+    } catch (SQLException ex) {
+        Logger.getLogger(HorasTrabajadas.class.getName()).log(Level.SEVERE, null, ex);
     }
+}
 
-    
 
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -248,8 +267,7 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
         }
     }
-    
-    
+
     //CALCULOS PARA PAYROLL IMPOSIBLE DE HACER POR AHORA
     public void calcularDeducciones(int trabajadorId) {
         String sql = "SELECT horas, horas_extras FROM horas_trabajadas WHERE trabajador_id = ? AND fecha = ?";
@@ -285,7 +303,7 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             Logger.getLogger(HorasTrabajadas.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private double obtenerTasaImpuestoFederal(int trabajadorId) {
         // Implementar lógica para obtener la tasa de impuesto federal basada en el formulario W-4 del trabajador
         return 0.1; // Ejemplo, reemplazar con lógica real
@@ -356,5 +374,5 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Error al generar el reporte: " + ex.getMessage());
         }
     }
-    
+
 }

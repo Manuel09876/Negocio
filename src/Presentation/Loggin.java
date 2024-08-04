@@ -1,5 +1,6 @@
 package Presentation;
 
+import Reports.HorasTrabajadas;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,16 +12,21 @@ import conectar.Conectar;
 
 public class Loggin extends javax.swing.JFrame {
 
+    private static final Logger LOGGER = Logger.getLogger(HorasTrabajadas.class.getName());
+    private int trabajadorId; // Variable de instancia para almacenar el ID del trabajador
+
+    HorasTrabajadas ht;
+
     public Loggin() {
         initComponents();
-
+        ht = new HorasTrabajadas();
         txtUser.requestFocus();
         btnTest.setVisible(false);
 
     }
 
     public void IngresaSistema(String Usuario, String Contrasena) {
-        String sql = "SELECT * FROM usuarios WHERE usuario = ? AND password = ?";
+        String sql = "SELECT idUsuarios, rol_id FROM usuarios WHERE usuario = ? AND password = ?";
         try {
             PreparedStatement pst = conect.prepareStatement(sql);
             pst.setString(1, Usuario);
@@ -28,11 +34,14 @@ public class Loggin extends javax.swing.JFrame {
             try (ResultSet result = pst.executeQuery()) {
                 if (result.next()) {
                     int rolId = result.getInt("rol_id");
+                    int trabajadorId = result.getInt("idUsuarios");
+                    System.out.println("ID del trabajador al ingresar: " + trabajadorId); // Mensaje de depuración
                     this.setVisible(false);
                     VentanaPrincipal objVP = new VentanaPrincipal(rolId);
                     objVP.setVisible(true);
                     objVP.pack();
                     VentanaPrincipal.lbUsuario.setText(Usuario);
+                    ht.registrarInicioSesion(trabajadorId); // Registrar inicio de sesión
                 } else {
                     JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
                 }
@@ -210,17 +219,23 @@ public class Loggin extends javax.swing.JFrame {
     }//GEN-LAST:event_btnTestActionPerformed
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
-
         if (JOptionPane.showConfirmDialog(null, "¡Desea salir del Sistema?", "Acceso", JOptionPane.YES_NO_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
-            System.exit(0);
-    }//GEN-LAST:event_btnExitActionPerformed
+        int trabajadorId = obtenerTrabajadorId(txtUser.getText());
+        if (trabajadorId != 0) {
+            System.out.println("ID del trabajador al salir: " + trabajadorId); // Mensaje de depuración
+            ht.registrarFinSesion(trabajadorId);
+        } else {
+            System.out.println("No se encontró el ID del trabajador."); // Mensaje de depuración
+        }
+        System.exit(0);
     }
+    }//GEN-LAST:event_btnExitActionPerformed
+
 
     private void btnCleanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCleanActionPerformed
 
         txtUser.setText("");
         txtPassword.setText("");
-
 
     }//GEN-LAST:event_btnCleanActionPerformed
 
@@ -274,5 +289,26 @@ public class Loggin extends javax.swing.JFrame {
 
     Conectar conexion = new Conectar();
     Connection conect = conexion.getConexion();
+
+    private int obtenerTrabajadorId(String usuario) {
+    String sql = "SELECT idUsuarios FROM usuarios WHERE usuario = ?";
+    try {
+        PreparedStatement pst = conect.prepareStatement(sql);
+        pst.setString(1, usuario);
+        ResultSet rs = pst.executeQuery();
+        if (rs.next()) {
+            int trabajadorId = rs.getInt("idUsuarios");
+            System.out.println("ID del trabajador obtenido: " + trabajadorId); // Mensaje de depuración
+            return trabajadorId;
+        } else {
+            System.out.println("No se encontró el trabajador con usuario: " + usuario); // Mensaje de depuración
+        }
+    } catch (SQLException ex) {
+        Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return 0;
+}
+
+
 
 }

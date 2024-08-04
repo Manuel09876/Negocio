@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
@@ -18,14 +19,9 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
     //Variables
-    int idPDT;
-    int idTrabajador;
-    int idTDT;
+    int idPDT, idTrabajador, idTDT;
     Double precioPorHora;
-    String overtime;
-    String estado;
-    String Trabajador;
-    String tipoDeTrabajo;
+    String overtime, estado, Trabajador, tipoDeTrabajo;
 
     public PuestoDeTrabajo(int idPDT, int idTrabajador, int idTDT, Double precioPorHora, String overtime, String estado, String Trabajador, String tipoDeTrabajo) {
         this.idPDT = idPDT;
@@ -215,36 +211,108 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
     }
 
-    public void Modificar(JTextField idTrabajador, JTextField TipoDeTrabajo, JTextField pagoPorHora, JComboBox OverTime) {
-
-        //Obtengo el valor en Cadena(String) de las cajas de Texto
-        setIdTrabajador(Integer.parseInt(idTrabajador.getText()));
-        setIdTDT(Integer.parseInt(TipoDeTrabajo.getText()));
-        setPrecioPorHora(Double.valueOf(pagoPorHora.getText()));
-        setOvertime(OverTime.getSelectedItem().toString());
-
-        Conectar con = new Conectar();
-
-        String consulta = "UPDATE puestodetrabajo SET idTrabajador = ?, idTDT = ?, precioPorHora = ?, overTime =? WHERE idPDT=?";
-
+    public void Modificar(JTextField idPDTField, JTextField idTrabajadorField, JTextField TipoDeTrabajoField, JTextField pagoPorHoraField, JComboBox<String> OverTime) {
+        Connection conn = null;
+        PreparedStatement ps = null;
         try {
+            // Verificar si los campos no están vacíos y convertir los valores apropiadamente
+            if (idPDTField.getText().isEmpty() || idTrabajadorField.getText().isEmpty() || TipoDeTrabajoField.getText().isEmpty() || pagoPorHoraField.getText().isEmpty() || OverTime.getSelectedItem() == null) {
+                JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            // Obtener los valores
+            int idPDT = Integer.parseInt(idPDTField.getText());
+            int idTrabajador = Integer.parseInt(idTrabajadorField.getText());
+            int idTDT = Integer.parseInt(TipoDeTrabajoField.getText());
+            double precioPorHora = Double.parseDouble(pagoPorHoraField.getText());
 
-            //
-            cs.setInt(1, getIdTrabajador());
-            cs.setInt(2, getIdTDT());
-            cs.setDouble(3, getPrecioPorHora());
-            cs.setString(4, getOvertime());
+            // Obtener el ID correspondiente a la descripción seleccionada en el ComboBox
+            String idOverTime = obtenerIdOverTime(OverTime.getSelectedItem().toString());
 
-            cs.execute();
+            // Verificar si el registro con idPDT existe
+            if (!verificarRegistroExiste(idPDT)) {
+                JOptionPane.showMessageDialog(null, "No se encontró el registro con idPDT = " + idPDT);
+                return;
+            }
 
-            JOptionPane.showMessageDialog(null, "Modificacion Exitosa");
+            // Establecer los valores
+            setIdTrabajador(idTrabajador);
+            setIdTDT(idTDT);
+            setPrecioPorHora(precioPorHora);
+            setOvertime(idOverTime);
 
+            Conectar con = new Conectar();
+            conn = con.getConexion();
+            conn.setAutoCommit(false); // Deshabilitar el auto-commit
+
+            String consulta = "UPDATE puestodetrabajo SET idTrabajador = ?, idTDT = ?, precioPorHora = ?, idOverTime = ? WHERE idPDT = ?";
+
+            ps = conn.prepareStatement(consulta);
+            // Establecer los parámetros
+            ps.setInt(1, getIdTrabajador());
+            ps.setInt(2, getIdTDT());
+            ps.setDouble(3, getPrecioPorHora());
+            ps.setString(4, getOvertime());
+            ps.setInt(5, idPDT);
+
+            // Ejecutar la consulta
+            System.out.println("Ejecutando consulta: " + consulta);
+            System.out.println("Parámetros:");
+            System.out.println("idTrabajador: " + getIdTrabajador());
+            System.out.println("idTDT: " + getIdTDT());
+            System.out.println("precioPorHora: " + getPrecioPorHora());
+            System.out.println("idOverTime: " + getOvertime());
+            System.out.println("idPDT: " + idPDT);
+
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected > 0) {
+                conn.commit(); // Confirmar la transacción
+                JOptionPane.showMessageDialog(null, "Modificación Exitosa");
+            } else {
+                conn.rollback(); // Revertir la transacción
+                JOptionPane.showMessageDialog(null, "No se encontró el registro para modificar.");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Error en la conversión de datos: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "No se Modifico, error " + e.toString());
+            try {
+                if (conn != null) {
+                    conn.rollback(); // Revertir la transacción en caso de error
+                }
+            } catch (SQLException rollbackEx) {
+                JOptionPane.showMessageDialog(null, "Error al revertir la transacción: " + rollbackEx.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+            JOptionPane.showMessageDialog(null, "No se Modificó, error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+                if (conn != null) {
+                    conn.setAutoCommit(true); // Restaurar el auto-commit
+                    conn.close();
+                }
+            } catch (SQLException closeEx) {
+                JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + closeEx.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
+    }
 
+    private String obtenerIdOverTime(String descripcion) {
+        String idOverTime = "";
+        String consulta = "SELECT id FROM overtime WHERE descripcion = ?";
+        try (PreparedStatement ps = objConect.getConexion().prepareStatement(consulta)) {
+            ps.setString(1, descripcion);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    idOverTime = rs.getString("id");
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al obtener ID de OverTime: " + e.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return idOverTime;
     }
 
     public void Eliminar(JTextField IdPDT) {
@@ -277,9 +345,28 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         AutoCompleteDecorator.decorate(cbxTrabajador);
         MostrarTrabajador(cbxTrabajador);
         MostrarTipoDeTrabajo(cbxTDT);
-        MostrarOverTime(cbxOverTime);
+        MostrarOverTime(cbxOverTime); // Llena el ComboBox con las descripciones de OverTime   
         Mostrar(tbPuestosDeTrabajo);
-        txtIdPDT.setDragEnabled(false);
+        txtIdPDT.setEnabled(false);
+        txtIdOverTime.setEnabled(false);
+        txtIdPDT.setEnabled(false);
+        txtIdTipoDeTrabajo.setEnabled(false);
+        txtIdtrabajador.setEnabled(false);
+    }
+
+    private boolean verificarRegistroExiste(int idPDT) {
+        String consulta = "SELECT COUNT(*) FROM puestodetrabajo WHERE idPDT = ?";
+        try (PreparedStatement ps = objConect.getConexion().prepareStatement(consulta)) {
+            ps.setInt(1, idPDT);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al verificar el registro: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return false;
     }
 
     /**
@@ -310,7 +397,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         txtIdtrabajador = new javax.swing.JTextField();
         txtIdTipoDeTrabajo = new javax.swing.JTextField();
         cbxOverTime = new javax.swing.JComboBox<>();
-        txtIOverTime = new javax.swing.JTextField();
+        txtIdOverTime = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbPuestosDeTrabajo = new javax.swing.JTable();
@@ -383,14 +470,14 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 cbxTDTItemStateChanged(evt);
             }
         });
-        jPanel1.add(cbxTDT, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 120, 210, -1));
+        jPanel1.add(cbxTDT, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 120, 210, -1));
 
         cbxTrabajador.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 cbxTrabajadorItemStateChanged(evt);
             }
         });
-        jPanel1.add(cbxTrabajador, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 80, 210, -1));
+        jPanel1.add(cbxTrabajador, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 80, 210, -1));
 
         jLabel4.setText("Trabajador");
         jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 80, -1, -1));
@@ -403,8 +490,8 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
             }
         });
         jPanel1.add(btnNuevoTipoDeTrabajo, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 10, -1, -1));
-        jPanel1.add(txtIdtrabajador, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 80, 80, -1));
-        jPanel1.add(txtIdTipoDeTrabajo, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 120, 80, -1));
+        jPanel1.add(txtIdtrabajador, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 80, 80, -1));
+        jPanel1.add(txtIdTipoDeTrabajo, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 120, 80, -1));
 
         cbxOverTime.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -413,12 +500,12 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         });
         jPanel1.add(cbxOverTime, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 200, 100, -1));
 
-        txtIOverTime.addActionListener(new java.awt.event.ActionListener() {
+        txtIdOverTime.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtIOverTimeActionPerformed(evt);
+                txtIdOverTimeActionPerformed(evt);
             }
         });
-        jPanel1.add(txtIOverTime, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 200, 90, -1));
+        jPanel1.add(txtIdOverTime, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 200, 90, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 450, 340));
 
@@ -430,6 +517,11 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
             }
         ));
+        tbPuestosDeTrabajo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tbPuestosDeTrabajoMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tbPuestosDeTrabajo);
 
         jPanel2.add(jScrollPane1);
@@ -449,21 +541,27 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnNuevoTipoDeTrabajoActionPerformed
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
-        Insertar(txtIdtrabajador, txtIdTipoDeTrabajo, txtPPH, txtIOverTime);
-        Mostrar(tbPuestosDeTrabajo);
-        txtIdPDT.setText("");
-        txtIdtrabajador.setText("");
-        txtIdTipoDeTrabajo.setText("");
-        txtPPH.setText("");
-        cbxTrabajador.setSelectedItem("");
-        cbxTDT.setSelectedItem("");
-        cbxOverTime.setSelectedItem("");
-
+        if (cbxTDT.getSelectedItem() != null) {
+//        MostrarCodigoTipodeTrabajo(cbxTDT, txtIdTipoDeTrabajo);
+            MostrarCodigoTrabajador(cbxTrabajador, txtIdtrabajador);
+            Insertar(txtIdtrabajador, txtIdTipoDeTrabajo, txtPPH, txtIdOverTime);
+            Mostrar(tbPuestosDeTrabajo);
+            txtIdPDT.setText("");
+            txtIdtrabajador.setText("");
+            txtIdTipoDeTrabajo.setText("");
+            txtPPH.setText("");
+            cbxTrabajador.setSelectedItem("");
+            cbxTDT.setSelectedItem("");
+            cbxOverTime.setSelectedItem("");
+        } else {
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione un tipo de trabajo antes de guardar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        }
     }//GEN-LAST:event_btnGuardarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
         Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtPPH, cbxOverTime);
-        Modificar(txtIdtrabajador, txtIdTipoDeTrabajo, txtPPH, cbxOverTime);
+        Modificar(txtIdPDT, txtIdtrabajador,
+                txtIdTipoDeTrabajo, txtPPH, cbxOverTime);
         Mostrar(tbPuestosDeTrabajo);
         txtIdPDT.setText("");
         txtIdtrabajador.setText("");
@@ -491,20 +589,30 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void cbxTrabajadorItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxTrabajadorItemStateChanged
-        MostrarCodigoTrabajador(cbxTrabajador, txtIdtrabajador);
+        if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+            MostrarCodigoTrabajador(cbxTrabajador, txtIdtrabajador);
+        }
     }//GEN-LAST:event_cbxTrabajadorItemStateChanged
 
     private void cbxTDTItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxTDTItemStateChanged
-        MostrarCodigoTipodeTrabajo(cbxTDT, txtIdTipoDeTrabajo);
+        if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+            MostrarCodigoTipodeTrabajo(cbxTDT, txtIdTipoDeTrabajo);
+        }
     }//GEN-LAST:event_cbxTDTItemStateChanged
 
-    private void txtIOverTimeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtIOverTimeActionPerformed
+    private void txtIdOverTimeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtIdOverTimeActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtIOverTimeActionPerformed
+    }//GEN-LAST:event_txtIdOverTimeActionPerformed
 
     private void cbxOverTimeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxOverTimeItemStateChanged
-        MostrarCodigoPorOverTime(cbxOverTime, txtIOverTime);
+        if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+            MostrarCodigoPorOverTime(cbxOverTime, txtIdOverTime);
+        }
     }//GEN-LAST:event_cbxOverTimeItemStateChanged
+
+    private void tbPuestosDeTrabajoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbPuestosDeTrabajoMouseClicked
+        Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtPPH, cbxOverTime);
+    }//GEN-LAST:event_tbPuestosDeTrabajoMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -526,7 +634,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tbPuestosDeTrabajo;
-    private javax.swing.JTextField txtIOverTime;
+    private javax.swing.JTextField txtIdOverTime;
     private javax.swing.JTextField txtIdPDT;
     private javax.swing.JTextField txtIdTipoDeTrabajo;
     private javax.swing.JTextField txtIdtrabajador;
@@ -556,22 +664,28 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoTrabajador(JComboBox trabajador, JTextField IdTrabajador) {
+        if (trabajador.getSelectedItem() != null) {
+            String consulta = "SELECT idWorker FROM worker WHERE nombre=?";
+            try {
+                CallableStatement cs = objConect.getConexion().prepareCall(consulta);
+                cs.setString(1, trabajador.getSelectedItem().toString());
+                cs.execute();
 
-        String consuta = "select worker.idWorker from worker where worker.nombre=?";
+                ResultSet rs = cs.executeQuery();
 
-        try {
-            CallableStatement cs = objConect.getConexion().prepareCall(consuta);
-            cs.setString(1, cbxTrabajador.getSelectedItem().toString());
-            cs.execute();
+                if (rs.next()) {
+                    IdTrabajador.setText(rs.getString("idWorker"));
+                } else {
+                    IdTrabajador.setText("");
+                }
+                rs.close(); // Asegurarse de cerrar el ResultSet
 
-            ResultSet rs = cs.executeQuery();
-
-            if (rs.next()) {
-                IdTrabajador.setText(rs.getString("idWorker"));
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
             }
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        } else {
+            IdTrabajador.setText("");
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione un trabajador válido.", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
     }
 
@@ -597,65 +711,61 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         }
     }
 
-    public void MostrarCodigoTipodeTrabajo(JComboBox comboTipoDeTrabajo, JTextField idTipoDeTrabajo) {
+    public void MostrarCodigoTipodeTrabajo(JComboBox tipoDeTrabajo, JTextField IdTipoDeTrabajo) {
+        String consulta = "select tiposdetrabajos.id from tiposdetrabajos where tiposdetrabajos.nombre=?";
 
-        String consuta = "select tiposdetrabajos.id from tiposdetrabajos where tiposdetrabajos.nombre=?";
+        if (tipoDeTrabajo.getSelectedItem() != null) {
+            try {
+                CallableStatement cs = objConect.getConexion().prepareCall(consulta);
+                cs.setString(1, tipoDeTrabajo.getSelectedItem().toString());
+                cs.execute();
 
-        try {
-            CallableStatement cs = objConect.getConexion().prepareCall(consuta);
-            cs.setString(1, comboTipoDeTrabajo.getSelectedItem().toString());
-            cs.execute();
+                ResultSet rs = cs.executeQuery();
 
-            ResultSet rs = cs.executeQuery();
+                if (rs.next()) {
+                    IdTipoDeTrabajo.setText(rs.getString("id"));
+                } else {
+                    IdTipoDeTrabajo.setText("");
+                }
+                rs.close(); // Asegurarse de cerrar el ResultSet
 
-            if (rs.next()) {
-                idTipoDeTrabajo.setText(rs.getString("id"));
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
             }
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        } else {
+            IdTipoDeTrabajo.setText("");
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione un tipo de trabajo válido.", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
     }
 
-    public void MostrarOverTime(JComboBox comboOverTime) {
-
-        String sql = "";
-        sql = "select * from overtime";
-        Statement st;
-
-        try {
-
-            st = objConect.getConexion().createStatement();
-            ResultSet rs = st.executeQuery(sql);
+    public void MostrarOverTime(JComboBox<String> comboOverTime) {
+        String sql = "SELECT * FROM overtime";
+        try (Statement st = objConect.getConexion().createStatement(); ResultSet rs = st.executeQuery(sql)) {
             comboOverTime.removeAllItems();
-
             while (rs.next()) {
-
                 comboOverTime.addItem(rs.getString("descripcion"));
             }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla: " + e.toString());
         }
     }
 
-    public void MostrarCodigoPorOverTime(JComboBox overtimeCombo, JTextField idOvertime) {
-
-        String consuta = "select overtime.id from overtime where overtime.descripcion=?";
-
-        try {
-            CallableStatement cs = objConect.getConexion().prepareCall(consuta);
-            cs.setString(1, overtimeCombo.getSelectedItem().toString());
-            cs.execute();
-
-            ResultSet rs = cs.executeQuery();
-
-            if (rs.next()) {
-                idOvertime.setText(rs.getString("id"));
+    public void MostrarCodigoPorOverTime(JComboBox<String> overtimeCombo, JTextField idOvertime) {
+        if (overtimeCombo.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(null, "Por favor seleccione un valor de OverTime.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        String consulta = "SELECT id FROM overtime WHERE descripcion = ?";
+        try (PreparedStatement ps = objConect.getConexion().prepareStatement(consulta)) {
+            ps.setString(1, overtimeCombo.getSelectedItem().toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    idOvertime.setText(rs.getString("id"));
+                }
             }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al mostrar: " + e.toString());
         }
     }
+
 }

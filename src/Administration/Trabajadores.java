@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+
 import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,12 +26,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.GregorianCalendar;
+import javax.swing.JDesktopPane;
 
 public class Trabajadores extends javax.swing.JInternalFrame {
 //Variables
 
+     private JDesktopPane desktopPane;
     DefaultTableModel model;
 
     int id;
@@ -276,92 +280,104 @@ public class Trabajadores extends javax.swing.JInternalFrame {
     }
 
     public void Guardar() {
-        //Variables
-        String tipoDocumento;
-        String numDocumento;
-        String Nombres, sexo;
-        int edad;
-        String direccion;
-        int zipCode;
-        String ciudad, state, telefono, email, estado;
+    // Variables
+    String tipoDocumento;
+    String numDocumento;
+    String nombres, sexo;
+    int edad;
+    String direccion;
+    int zipCode;
+    String ciudad, state, telefono, email;
 
-        //Obtenemos la Información de la Caja de Texto
-        tipoDocumento = txtTipoDocumento.getText();
-        numDocumento = txtNumeroDocumento.getText();
-        Nombres = txtNombres.getText();
-        sexo = cbxSexo.getSelectedItem().toString();
+    // Obtenemos la Información de la Caja de Texto
+    tipoDocumento = txtTipoDocumento.getText();
+    numDocumento = txtNumeroDocumento.getText();
+    nombres = txtNombres.getText();
+    sexo = cbxSexo.getSelectedItem().toString();
 
-        // Obtener la fecha de nacimiento del JDateChooser como java.util.Date con casting
-        java.util.Date fechaNuevaUtil = JDateFechaNac.getDate();
+    // Obtener la fecha de nacimiento del JDateChooser como java.util.Date
+    java.util.Date fechaNuevaUtil = JDateFechaNac.getDate();
 
-// Convertir la fecha de nacimiento a LocalDate
-        LocalDate fechaNueva = fechaNuevaUtil.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate fechaActual = null;
-
-        // Calcular la edad a partir de la fecha de nacimiento
-        edad = Period.between(fechaNueva, fechaActual).getYears();
-
-        //Asignamos la edad al campo de texto correspondiente
-        txtEdad.setText(Integer.toString(edad));
-
-        direccion = txtDireccion.getText();
-        zipCode = Integer.parseInt(txtZipCode.getText());
-        ciudad = txtCiudad.getText();
-        state = txtState.getText();
-        telefono = txtTelefono.getText();
-        email = txtEmail.getText();
-
-        //Consulta sql para insertar los datos (nombres como en la base de datos)
-        String sql = "INSERT INTO worker (documentType, documentNumber, nombre, sex, "
-                + "bornDate, age, address, zipCode, city, state, cellphone, "
-                + "email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        //Para almacenar los datos empleo un try cash
-        try {
-            //prepara la coneccion para enviar al sql (Evita ataques al sql)
-            PreparedStatement ps = connect.prepareStatement(sql);
-
-            ps.setString(1, tipoDocumento);
-            ps.setString(2, numDocumento);
-            ps.setString(3, Nombres);
-            ps.setString(4, sexo);
-            ps.setObject(5, fechaNueva);
-            ps.setInt(6, edad);
-            ps.setString(7, direccion);
-            ps.setInt(8, zipCode);
-            ps.setString(9, ciudad);
-            ps.setString(10, state);
-            ps.setString(11, telefono);
-            ps.setString(12, email);
-
-            //Declara otra variable para validar los registros
-            int n = ps.executeUpdate();
-
-            //si existe un registro en la BD el registro se guardo con exito
-            if (n > 0) {
-                JOptionPane.showMessageDialog(null, "El registro se guardo exitosamente");
-
-                // Limpiar campos
-                txtTipoDocumento.setText("");
-                txtNumeroDocumento.setText("");
-                txtNombres.setText("");
-                cbxSexo.setSelectedItem("");
-                // JDateFechaNac.setDate();
-                txtDireccion.setText("");
-                txtZipCode.setText("");
-                txtCiudad.setText("");
-                txtState.setText("");
-                txtTelefono.setText("");
-                txtEmail.setText("");
-            }
-            CargarDatosTable("");
-
-        } catch (SQLException e) {
-            Logger.getLogger(Tarifario.class.getName()).log(Level.SEVERE, null, e);
-            JOptionPane.showMessageDialog(null, "El registro NO se guardo exitosamente, Error " + e.toString());
-        }
+    // Verificar que la fecha no sea nula
+    if (fechaNuevaUtil == null) {
+        JOptionPane.showMessageDialog(null, "Por favor, ingrese una fecha de nacimiento válida.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
     }
 
+    // Convertir la fecha de nacimiento a LocalDate
+    LocalDate fechaNueva = fechaNuevaUtil.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    LocalDate fechaActual = LocalDate.now();
+
+    // Calcular la edad a partir de la fecha de nacimiento
+    edad = Period.between(fechaNueva, fechaActual).getYears();
+
+    // Asignamos la edad al campo de texto correspondiente
+    txtEdad.setText(Integer.toString(edad));
+
+    direccion = txtDireccion.getText();
+    try {
+        zipCode = Integer.parseInt(txtZipCode.getText());
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(null, "Por favor, ingrese un código postal válido.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+    ciudad = txtCiudad.getText();
+    state = txtState.getText();
+    telefono = txtTelefono.getText();
+    email = txtEmail.getText();
+
+    // Consulta sql para insertar los datos (nombres como en la base de datos)
+    String sql = "INSERT INTO worker (documentType, documentNumber, nombre, sex, "
+            + "bornDate, age, address, zipCode, city, state, cellphone, "
+            + "email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    // Para almacenar los datos empleo un try-catch
+    try {
+        // Prepara la conexión para enviar al SQL (Evita ataques al SQL)
+        PreparedStatement ps = connect.prepareStatement(sql);
+
+        ps.setString(1, tipoDocumento);
+        ps.setString(2, numDocumento);
+        ps.setString(3, nombres);
+        ps.setString(4, sexo);
+        ps.setObject(5, fechaNueva);
+        ps.setInt(6, edad);
+        ps.setString(7, direccion);
+        ps.setInt(8, zipCode);
+        ps.setString(9, ciudad);
+        ps.setString(10, state);
+        ps.setString(11, telefono);
+        ps.setString(12, email);
+
+        // Declara otra variable para validar los registros
+        int n = ps.executeUpdate();
+
+        // Si existe un registro en la BD el registro se guardó con éxito
+        if (n > 0) {
+            JOptionPane.showMessageDialog(null, "El registro se guardó exitosamente");
+
+            // Limpiar campos
+            txtTipoDocumento.setText("");
+            txtNumeroDocumento.setText("");
+            txtNombres.setText("");
+            cbxSexo.setSelectedIndex(0); // Seleccionar el primer elemento
+            JDateFechaNac.setDate(null);
+            txtDireccion.setText("");
+            txtZipCode.setText("");
+            txtCiudad.setText("");
+            txtState.setText("");
+            txtTelefono.setText("");
+            txtEmail.setText("");
+        }
+        CargarDatosTable("");
+
+    } catch (SQLException e) {
+        Logger.getLogger(Tarifario.class.getName()).log(Level.SEVERE, null, e);
+        JOptionPane.showMessageDialog(null, "El registro NO se guardó exitosamente, Error " + e.toString());
+    }
+}
+    
+    
     public void Eliminar(JTextField codigo) {
 
         setId(Integer.parseInt(codigo.getText()));
