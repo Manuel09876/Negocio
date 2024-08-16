@@ -133,7 +133,7 @@ public class Proveedor extends javax.swing.JInternalFrame {
 
     Conectar objconexion = new Conectar();
     Connection connect = objconexion.getConexion();
-    PreparedStatement ps;
+    private static final Logger LOGGER = Logger.getLogger(Proveedor.class.getName());
     ResultSet rs;
 
     DefaultTableModel modelo = new DefaultTableModel();
@@ -210,14 +210,14 @@ public class Proveedor extends javax.swing.JInternalFrame {
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
             PreparedStatement pst = connect.prepareStatement(sql);
 
-            ps.setString(1, nameSuplier);
-            ps.setString(2, address);
-            ps.setInt(3, zipCode);
-            ps.setString(4, city);
-            ps.setString(5, state);
-            ps.setString(6, phoneNumber);
-            ps.setString(7, website);
-            ps.setString(8, email);
+            pst.setString(1, nameSuplier);
+            pst.setString(2, address);
+            pst.setInt(3, zipCode);
+            pst.setString(4, city);
+            pst.setString(5, state);
+            pst.setString(6, phoneNumber);
+            pst.setString(7, website);
+            pst.setString(8, email);
 
             //Declara otra variable para validar los registros
             int n = pst.executeUpdate();
@@ -337,10 +337,11 @@ public class Proveedor extends javax.swing.JInternalFrame {
         String sql = "UPDATE suplier SET estado = ? WHERE idSuplier = ?";
         try {
             connect = objconexion.getConexion();
-            ps = connect.prepareStatement(sql);
-            ps.setString(1, estado);
-            ps.setInt(2, idSuplier);
-            ps.execute();
+            PreparedStatement pst = connect.prepareStatement(sql);
+            pst = connect.prepareStatement(sql);
+            pst.setString(1, estado);
+            pst.setInt(2, idSuplier);
+            pst.execute();
             return true;
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
@@ -353,9 +354,10 @@ public class Proveedor extends javax.swing.JInternalFrame {
         Proveedor prov = new Proveedor();
         try {
             connect = objconexion.getConexion();
-            ps = connect.prepareStatement(sql);
-            ps.setInt(1, id);
-            rs = ps.executeQuery();
+            PreparedStatement pst = connect.prepareStatement(sql);
+            pst = connect.prepareStatement(sql);
+            pst.setInt(1, id);
+            rs = pst.executeQuery();
             if (rs.next()) {
                 prov.setNameSuplier(rs.getString("nameSuplier"));
                 prov.setAddress(rs.getString("address"));
@@ -378,9 +380,9 @@ public class Proveedor extends javax.swing.JInternalFrame {
         Proveedor prov = new Proveedor();
         try {
             connect = objconexion.getConexion();
-            ps = connect.prepareStatement(sql);
-            ps.setString(1, codigo);
-            rs = ps.executeQuery();
+            PreparedStatement pst = connect.prepareStatement(sql);
+            pst.setString(1, codigo);
+            rs = pst.executeQuery();
             if (rs.next()) {
                 prov.setIdSuplier(rs.getInt("idSuplier"));//Segun id recuperamos los valores de la BD
                 prov.setNameSuplier(rs.getString("nameSuplier"));
@@ -443,16 +445,16 @@ public class Proveedor extends javax.swing.JInternalFrame {
         btnNew = new javax.swing.JButton();
         btnGrabar = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        btnExit = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         txtIdSuplier = new javax.swing.JTextField();
+        btnModificar = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbSuplier = new javax.swing.JTable();
-        btnModificar = new javax.swing.JButton();
         btnEliminar = new javax.swing.JButton();
         btnReingresar = new javax.swing.JButton();
         btnInactivar = new javax.swing.JButton();
+        btnExit = new javax.swing.JButton();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -556,19 +558,10 @@ public class Proveedor extends javax.swing.JInternalFrame {
                 btnGrabarActionPerformed(evt);
             }
         });
-        jPanel2.add(btnGrabar, new org.netbeans.lib.awtextra.AbsoluteConstraints(192, 339, -1, -1));
+        jPanel2.add(btnGrabar, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 340, -1, -1));
 
         jLabel1.setText("Proveedor");
         jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(23, 36, -1, -1));
-
-        btnExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
-        btnExit.setText("Exit");
-        btnExit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnExitActionPerformed(evt);
-            }
-        });
-        jPanel2.add(btnExit, new org.netbeans.lib.awtextra.AbsoluteConstraints(265, 397, -1, -1));
 
         btnCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/close.png"))); // NOI18N
         btnCancel.setText("Cancel");
@@ -577,10 +570,19 @@ public class Proveedor extends javax.swing.JInternalFrame {
                 btnCancelActionPerformed(evt);
             }
         });
-        jPanel2.add(btnCancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(144, 399, -1, -1));
+        jPanel2.add(btnCancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 400, -1, -1));
         jPanel2.add(txtIdSuplier, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 80, -1));
 
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, -1, -1));
+        btnModificar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/actualizar.png"))); // NOI18N
+        btnModificar.setText("Modificar");
+        btnModificar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnModificarActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnModificar, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 400, -1, -1));
+
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, 370, 460));
 
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -603,15 +605,6 @@ public class Proveedor extends javax.swing.JInternalFrame {
 
         getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(378, 113, 740, -1));
 
-        btnModificar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/actualizar.png"))); // NOI18N
-        btnModificar.setText("Modificar");
-        btnModificar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnModificarActionPerformed(evt);
-            }
-        });
-        getContentPane().add(btnModificar, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 10, -1, -1));
-
         btnEliminar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/eliminar.png"))); // NOI18N
         btnEliminar.setText("Eliminar");
         btnEliminar.addActionListener(new java.awt.event.ActionListener() {
@@ -622,7 +615,7 @@ public class Proveedor extends javax.swing.JInternalFrame {
         getContentPane().add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 10, -1, -1));
 
         btnReingresar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/login.png"))); // NOI18N
-        btnReingresar.setText("Reingresar");
+        btnReingresar.setText("Activar");
         btnReingresar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnReingresarActionPerformed(evt);
@@ -636,7 +629,16 @@ public class Proveedor extends javax.swing.JInternalFrame {
                 btnInactivarActionPerformed(evt);
             }
         });
-        getContentPane().add(btnInactivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(970, 10, -1, -1));
+        getContentPane().add(btnInactivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 10, -1, -1));
+
+        btnExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
+        btnExit.setText("Exit");
+        btnExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExitActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnExit, new org.netbeans.lib.awtextra.AbsoluteConstraints(1040, 10, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents

@@ -28,10 +28,8 @@ public class Productos extends javax.swing.JInternalFrame {
     DefaultTableModel model;
     int idProduct;
     String nameProduct;
-    int categoria;
     String presentation;
     int units;
-    int location;
     int stock;
     double stock2;
     String estado;
@@ -52,15 +50,7 @@ public class Productos extends javax.swing.JInternalFrame {
         this.nameProduct = nameProduct;
     }
 
-    public int getCategoria() {
-        return categoria;
-    }
-
-    public void setCategoria(int categoria) {
-        this.categoria = categoria;
-    }
-
-    public String getPresentation() {
+   public String getPresentation() {
         return presentation;
     }
 
@@ -103,10 +93,10 @@ public class Productos extends javax.swing.JInternalFrame {
     public Productos() {
         initComponents();
 
-        txtIdProducto.setEnabled(false);
+        txtIdUnidades.setVisible(false);
         AutoCompleteDecorator.decorate(cbxUnidades);
         MostrarUnidades(cbxUnidades);
-
+        
         CargarDatosTable("");
         txtIdProducto.setEnabled(false);
         txtName.requestFocus();
@@ -129,13 +119,12 @@ public class Productos extends javax.swing.JInternalFrame {
     }
 
     void LimpiarCajasTexto() {
-
         txtName.setText("");
         txtPresentation.setText("");
         txtStock.setText("");
         txtOr.setText("");
         txtStockMinimo.setText("");
-
+        txtStockMinimo.setText("");
     }
 
     void DesbloquearCampos() {
@@ -325,7 +314,7 @@ public class Productos extends javax.swing.JInternalFrame {
 
 
     public Productos BuscarProductos(java.awt.event.KeyEvent evt) {
-        String[] titulosTabla = {"Id", "Nombre", "Presentacion", "Unidades", "Stock", "Stock2"}; //Titulos de la Tabla
+        String[] titulosTabla = {"Id", "Nombre", "Presentacion", "Unidades", "Stock", "Stock2", "Estado", "Stock Minimo"}; //Titulos de la Tabla
         String[] RegistroBD = new String[8];                                   //Registros de la Basede Datos
 
         Productos productos = new Productos();
@@ -686,23 +675,15 @@ public class Productos extends javax.swing.JInternalFrame {
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         ModificarProducto(txtIdProducto, txtName, txtPresentation, txtIdUnidades, txtStock, txtOr, txtStockMinimo);
         CargarDatosTable("");
-
-        txtIdProducto.setText("");
-        txtName.setText("");
-        txtPresentation.setText("");
-        txtStock.setText("");
-        txtOr.setText("");
-        txtStockMinimo.setText("");
+        LimpiarCajasTexto();   
+        
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
 
         txtIdProducto.setText("");
-        txtName.setText("");
-        txtPresentation.setText("");
-        txtStock.setText("");
-        txtOr.setText("");
-
+        LimpiarCajasTexto();
+        
 
     }//GEN-LAST:event_btnCancelActionPerformed
 
@@ -718,11 +699,7 @@ public class Productos extends javax.swing.JInternalFrame {
         CargarDatosTable("");
 
         txtIdProducto.setText("");
-        txtName.setText("");
-        txtPresentation.setText("");
-        txtStock.setText("");
-        txtOr.setText("");
-
+        LimpiarCajasTexto();
         BloquearCampos();
     }//GEN-LAST:event_btnDeleteActionPerformed
 

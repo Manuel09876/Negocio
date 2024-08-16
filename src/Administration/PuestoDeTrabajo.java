@@ -1,18 +1,27 @@
 package Administration;
 
+import com.toedter.calendar.JDateChooser;
 import conectar.Conectar;
+import java.awt.HeadlessException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
@@ -20,19 +29,10 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
     //Variables
     int idPDT, idTrabajador, idTDT;
-    Double precioPorHora;
-    String overtime, estado, Trabajador, tipoDeTrabajo;
-
-    public PuestoDeTrabajo(int idPDT, int idTrabajador, int idTDT, Double precioPorHora, String overtime, String estado, String Trabajador, String tipoDeTrabajo) {
-        this.idPDT = idPDT;
-        this.idTrabajador = idTrabajador;
-        this.idTDT = idTDT;
-        this.precioPorHora = precioPorHora;
-        this.overtime = overtime;
-        this.estado = estado;
-        this.Trabajador = Trabajador;
-        this.tipoDeTrabajo = tipoDeTrabajo;
-    }
+    Double pagoPorHora, sueldo;
+    String estado, Trabajador, tipoDeTrabajo;
+    int overtime, horario, periodo, vacaciones, tiempoVacaciones;
+    Date fechaDePuesto;
 
     public int getIdPDT() {
         return idPDT;
@@ -58,20 +58,12 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         this.idTDT = idTDT;
     }
 
-    public Double getPrecioPorHora() {
-        return precioPorHora;
+    public Double getPagoPorHora() {
+        return pagoPorHora;
     }
 
-    public void setPrecioPorHora(Double precioPorHora) {
-        this.precioPorHora = precioPorHora;
-    }
-
-    public String getOvertime() {
-        return overtime;
-    }
-
-    public void setOvertime(String overtime) {
-        this.overtime = overtime;
+    public void setPagoPorHora(Double pagoPorHora) {
+        this.pagoPorHora = pagoPorHora;
     }
 
     public String getEstado() {
@@ -98,7 +90,108 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         this.tipoDeTrabajo = tipoDeTrabajo;
     }
 
+    public int getOvertime() {
+        return overtime;
+    }
+
+    public void setOvertime(int overtime) {
+        this.overtime = overtime;
+    }
+
+    public int getHorario() {
+        return horario;
+    }
+
+    public void setHorario(int horario) {
+        this.horario = horario;
+    }
+
+    public int getPeriodo() {
+        return periodo;
+    }
+
+    public void setPeriodo(int periodo) {
+        this.periodo = periodo;
+    }
+
+    public Double getSueldo() {
+        return sueldo;
+    }
+
+    public void setSueldo(Double sueldo) {
+        this.sueldo = sueldo;
+    }
+
+    public Date getFechaDePuesto() {
+        return fechaDePuesto;
+    }
+
+    public void setFechaDePuesto(Date fechaDePuesto) {
+        this.fechaDePuesto = fechaDePuesto;
+    }
+
+    public int getVacaciones() {
+        return vacaciones;
+    }
+
+    public void setVacaciones(int vacaciones) {
+        this.vacaciones = vacaciones;
+    }
+
+    public int getTiempoVacaciones() {
+        return tiempoVacaciones;
+    }
+
+    public void setTiempoVacaciones(int tiempoVacaciones) {
+        this.tiempoVacaciones = tiempoVacaciones;
+    }
+
     Conectar objConect = new Conectar();
+
+    public PuestoDeTrabajo() {
+        initComponents();
+        // Establecer el valor por default en los campos de texto
+//        txtPagoPorHora.setText("0.00");
+//        txtSueldo.setText("0.00");
+//        txtVacaciones.setText("0");
+
+        AutoCompleteDecorator.decorate(cbxTDT);
+        AutoCompleteDecorator.decorate(cbxTrabajador);
+        AutoCompleteDecorator.decorate(cbxOverTime);
+        AutoCompleteDecorator.decorate(cbxHorario);
+        AutoCompleteDecorator.decorate(cbxPeriodo);
+        AutoCompleteDecorator.decorate(cbxVacaciones);
+
+        MostrarTrabajador(cbxTrabajador);
+        MostrarTipoDeTrabajo(cbxTDT);
+        MostrarOverTime(cbxOverTime);
+        MostrarHorario(cbxHorario);
+        MostrarPeriodo(cbxPeriodo);
+        MostrarVacaciones(cbxVacaciones);
+
+        Mostrar(tbPuestosDeTrabajo);
+        txtIdPDT.setEnabled(false);
+        txtIdOverTime.setEnabled(false);
+        txtIdPDT.setEnabled(false);
+        txtIdTipoDeTrabajo.setEnabled(false);
+        txtIdtrabajador.setEnabled(false);
+        txtIdOverTime.setEnabled(false);
+        txtIdHorario.setEnabled(false);
+        txtIdPeriodo.setEnabled(false);
+        txtIdVacaciones.setEnabled(false);
+
+        DocumentListener documentListener = new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                
+            }
+        };
+    }
 
     public void Mostrar(JTable Tabla) {
 
@@ -108,31 +201,40 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         String sql = "";
 
         //Darle titulos a la Tabla
-        modelo.addColumn("idPDT");
+        modelo.addColumn("idPDT"); //id Puestos de Trabajo
         modelo.addColumn("Trabajador");
-        modelo.addColumn("Tipo De Trabajo");
-        modelo.addColumn("Precio por Hora");
+        modelo.addColumn("Tipo De Trabajo"); //Tipo de Trabajo
+        modelo.addColumn("Pago por Hora");
+        modelo.addColumn("Sueldo");
         modelo.addColumn("OverTime");
+        modelo.addColumn("Horario");//Si es horario Completo o Parcial
+        modelo.addColumn("Periodo de Pagos"); // Estable si el pago es mensual, quincenal o semanal
+        modelo.addColumn("Vacaciones"); // Si se le consideran vacaciones o no
+        modelo.addColumn("Tiempo de Vacaciones");
+        modelo.addColumn("Fecha de Puesto"); // Nueva columna para la fecha de inicio del puesto
+        modelo.addColumn("Estado");
 
         Tabla.setModel(modelo);
 
         //Consulto la BD
-        sql = "select idPDT, w.nombre as trabajador, tdt.nombre as TipoTrabajo, precioPorHora, o.descripcion as OverTime\n"
-                + "from puestodetrabajo pdt\n"
-                + "inner join worker w on pdt.idTrabajador=w.idWorker\n"
-                + "inner join tiposdetrabajos tdt on pdt.idTDT=tdt.id\n"
-                + "inner join overtime o on o.id=pdt.idOverTime";
+        sql = "SELECT pdt.idPDT, w.nombre AS Trabajador, tdt.nombre AS 'Tipo de Trabajo', pdt.pagoPorHora AS 'Pago por Hora', \n"
+                + "pdt.sueldo AS Sueldo, o.descripcion AS Overtime, h.descripcion AS Horario, p.descripcion AS 'Periodo de Pagos', v.descripcion AS Vacaciones, pdt.tiempoVacaciones AS 'Periodo de Vacaciones', pdt.fechaDePuesto AS 'Fecha de Puesto', pdt.estado AS Estado \n"
+                + "FROM puestodetrabajo pdt \n"
+                + "INNER JOIN worker w ON pdt.idTrabajador=w.idWorker \n"
+                + "INNER JOIN tiposdetrabajos tdt ON pdt.idTDT=tdt.id \n"
+                + "INNER JOIN overtime o ON pdt.id_overtime=o.id \n"
+                + "INNER JOIN horario h ON pdt.id_horario=h.id \n"
+                + "INNER JOIN periodo p ON pdt.id_periodo=p.id\n"
+                + "INNER JOIN vacaciones v ON pdt.id_vacaciones=v.id";
 
         /*select usuarios.id, usuarios.nombres, usuarios.apellidos, sexo.sexoDescripcion as sexo\n"
                 + "from usuarios\n"
                 + "inner join sexo on usuarios.fksexo=sexo.id*/
-        String[] datos = new String[5];
+        String[] datos = new String[12];
         Statement st;
 
         try {
-
             st = objConect.getConexion().createStatement();
-
             ResultSet rs = st.executeQuery(sql);
 
             //Recorre la Tabla con un while
@@ -143,6 +245,13 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 datos[2] = rs.getString(3);
                 datos[3] = rs.getString(4);
                 datos[4] = rs.getString(5);
+                datos[5] = rs.getString(6);
+                datos[6] = rs.getString(7);
+                datos[7] = rs.getString(8);
+                datos[8] = rs.getString(9);
+                datos[9] = rs.getString(10);
+                datos[10] = rs.getString(11);
+                datos[11] = rs.getString(12);
 
                 //Lo agregue a las filas 
                 modelo.addRow(datos);
@@ -158,119 +267,249 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
     }
 
-    public void Insertar(JTextField IdTrabajador, JTextField IdTipoDeTrabajo, JTextField pagoPorHora, JTextField IdOverTime) {
-
+    public void Insertar(JTextField IdTrabajador, JTextField IdTipoDeTrabajo, JTextField pagoPorHora, JTextField sueldo, JComboBox OverTime, JComboBox Horario, JComboBox Periodo, JComboBox Vacaciones, JTextField tiempoVacaciones, JDateChooser FechaField) {
         Conectar con = new Conectar();
         Connection connect = con.getConexion();
 
-        //Hago la Consulta
-        String consulta = "Insert into puestodetrabajo (idTrabajador, idTDT, precioPorHora, idOverTime)values (?, ?, ?, ?);";
-
         try {
+            int idTrabajador = Integer.parseInt(IdTrabajador.getText());
+            int idTipoDeTrabajo = Integer.parseInt(IdTipoDeTrabajo.getText());
+            double pagoPorHoraValue = 0.0;
+            double sueldoValue = 0.0;
 
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            // Validar y convertir los valores de pago por hora y sueldo
+            if (!pagoPorHora.getText().isEmpty()) {
+                pagoPorHoraValue = Double.parseDouble(pagoPorHora.getText());
+            }
+            if (!sueldo.getText().isEmpty()) {
+                sueldoValue = Double.parseDouble(sueldo.getText());
+            }
 
-            //Los datos a enviar a la BD
-            cs.setString(1, IdTrabajador.getText());
-            cs.setString(2, IdTipoDeTrabajo.getText());
-            cs.setString(3, pagoPorHora.getText());
-            cs.setString(4, IdOverTime.getText());
-            cs.execute();
+            // Asegurarse de que uno de los valores sea cero
+            if (pagoPorHoraValue > 0) {
+                sueldoValue = 0.0;
+            } else if (sueldoValue > 0) {
+                pagoPorHoraValue = 0.0;
+            }
 
-            JOptionPane.showMessageDialog(null, "Se Inserto");
+            int idOverTime = Integer.parseInt(txtIdOverTime.getText());
+            int idHorario = Integer.parseInt(txtIdHorario.getText());
+            int idPeriodo = Integer.parseInt(txtIdPeriodo.getText());
+            int idVacaciones = Integer.parseInt(txtIdVacaciones.getText());
+            int tiempoVacacionesValue = Integer.parseInt(tiempoVacaciones.getText());
 
-        } catch (SQLException e) {
+            // Obtener la fecha de ingreso del JDateChooser como java.util.Date
+            java.util.Date fecha = FechaField.getDate();
 
-            JOptionPane.showMessageDialog(null, "No se Inserto. Error: " + e.toString());
+            if (fecha == null) {
+                JOptionPane.showMessageDialog(null, "Por favor, ingrese una fecha de ingreso válida.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            java.sql.Date fechaSQL = new java.sql.Date(fecha.getTime());
+
+            String consulta = "INSERT INTO puestodetrabajo (idTrabajador, idTDT, pagoPorHora, sueldo, id_overtime, id_horario, id_periodo, id_vacaciones, tiempoVacaciones, fechaDePuesto, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Activo')";
+
+            try (CallableStatement cs = connect.prepareCall(consulta)) {
+                cs.setInt(1, idTrabajador);
+                cs.setInt(2, idTipoDeTrabajo);
+                cs.setDouble(3, pagoPorHoraValue);
+                cs.setDouble(4, sueldoValue);
+                cs.setInt(5, idOverTime);
+                cs.setInt(6, idHorario);
+                cs.setInt(7, idPeriodo);
+                cs.setInt(8, idVacaciones);
+                cs.setInt(9, tiempoVacacionesValue);
+                cs.setDate(10, fechaSQL);
+
+                cs.execute();
+
+                JOptionPane.showMessageDialog(null, "Se Insertó");
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "No se Insertó. Error: " + e.toString());
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Error en la conversión de datos: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     //Metodo para seleccionar y que se muestre
-    public void Seleccionar(JTable Tabla, JTextField Id, JComboBox Trabajador, JComboBox TDT, JTextField PPH, JComboBox OverTime) {
+    public void Eliminar(JTextField IdPDT) {
+        setIdPDT(Integer.parseInt(IdPDT.getText()));
+
+        Conectar con = new Conectar();
+        String consulta = "DELETE FROM puestodetrabajo WHERE idPDT=?";
 
         try {
-            //Creamos un contador de filas que va a recorer la fila
+            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            cs.setInt(1, getIdPDT());
+            cs.execute();
+            JOptionPane.showMessageDialog(null, "Se eliminó correctamente.");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "No se pudo eliminar, error " + e.toString());
+        }
+    }
+
+    public void Seleccionar(JTable Tabla, JTextField Id, JComboBox Trabajador, JComboBox TDT, JTextField PagoPorHora, JTextField sueldo, JComboBox OverTime, JComboBox Horario, JComboBox Periodo, JComboBox Vacaciones, JTextField tiempoVacaciones, JDateChooser dateInicioPuesto) throws ParseException {
+        try {
             int fila = Tabla.getSelectedRow();
-            //Comparo la fila con la posición que tiene un valor, me sercioro que se ha seleccionado la fila
             if (fila >= 0) {
-                //
-                Id.setText(Tabla.getValueAt(fila, 0).toString());
-                Trabajador.setSelectedItem(Tabla.getValueAt(fila, 1).toString());
-                TDT.setSelectedItem(Tabla.getValueAt(fila, 2).toString());
-                PPH.setText(Tabla.getValueAt(fila, 3).toString());
-                OverTime.setSelectedItem(Tabla.getValueAt(fila, 4).toString());
+                DocumentListener documentListener = null;
+                // Desactivar listeners (si es necesario)
+                Id.getDocument().removeDocumentListener(documentListener);
+                PagoPorHora.getDocument().removeDocumentListener(documentListener);
+                sueldo.getDocument().removeDocumentListener(documentListener);
+                tiempoVacaciones.getDocument().removeDocumentListener(documentListener);
+
+                // (Haz lo mismo para los otros campos si tienen listeners)
+                // Limpiar los campos antes de asignarles nuevos valores
+                Id.setText("");
+                Trabajador.setSelectedItem(null);
+                TDT.setSelectedItem(null);
+//                PagoPorHora.setText("");
+                sueldo.setText("");
+                OverTime.setSelectedItem(null);
+                Horario.setSelectedItem(null);
+                Periodo.setSelectedItem(null);
+                Vacaciones.setSelectedItem(null);
+                tiempoVacaciones.setText("");
+                dateInicioPuesto.setDate(null);
+
+                // Asignar los valores de las columnas de la tabla a los campos correspondientes
+                String idPDTValue = Tabla.getValueAt(fila, 0).toString();
+                String trabajadorValue = Tabla.getValueAt(fila, 1).toString();
+                String tdtValue = Tabla.getValueAt(fila, 2).toString();
+                String pagoPorHoraValue = Tabla.getValueAt(fila, 3).toString();
+                String sueldoValue = Tabla.getValueAt(fila, 4).toString();
+                String overTimeValue = Tabla.getValueAt(fila, 5).toString();
+                String horarioValue = Tabla.getValueAt(fila, 6).toString();
+                String periodoValue = Tabla.getValueAt(fila, 7).toString();
+                String vacacionesValue = Tabla.getValueAt(fila, 8).toString();
+                String tiempoVacacionesValue = Tabla.getValueAt(fila, 9).toString();
+                String fechaTexto = Tabla.getValueAt(fila, 10).toString();
+
+                // Asignar valores a JTextFields y JComboBox
+                System.out.println("Asignando valores...");
+                Id.setText(idPDTValue);
+                System.out.println("IdPDT set to: " + Id.getText());
+                Trabajador.setSelectedItem(trabajadorValue);
+                TDT.setSelectedItem(tdtValue);
+                PagoPorHora.setText(pagoPorHoraValue);
+                sueldo.setText(sueldoValue);
+                OverTime.setSelectedItem(overTimeValue);
+                Horario.setSelectedItem(horarioValue);
+                Periodo.setSelectedItem(periodoValue);
+                Vacaciones.setSelectedItem(vacacionesValue);
+                tiempoVacaciones.setText(tiempoVacacionesValue);
+
+                // Asignar valor a JDateChooser
+                if (fechaTexto != null && !fechaTexto.equalsIgnoreCase("null")) {
+                    java.util.Date fecha = new SimpleDateFormat("yyyy-MM-dd").parse(fechaTexto);
+                    dateInicioPuesto.setDate(fecha);
+                } else {
+                    dateInicioPuesto.setDate(null);
+                }
+
+                // Imprimir valores después de asignarlos para verificación
+                System.out.println("IdPDT JTextField value: " + Id.getText());
+                System.out.println("Trabajador JComboBox value: " + Trabajador.getSelectedItem());
+                System.out.println("TDT JComboBox value: " + TDT.getSelectedItem());
+                System.out.println("PagoPorHora JTextField value: " + PagoPorHora.getText());
+                System.out.println("Sueldo JTextField value: " + sueldo.getText());
+                System.out.println("OverTime JComboBox value: " + OverTime.getSelectedItem());
+                System.out.println("Horario JComboBox value: " + Horario.getSelectedItem());
+                System.out.println("Periodo JComboBox value: " + Periodo.getSelectedItem());
+                System.out.println("Vacaciones JComboBox value: " + Vacaciones.getSelectedItem());
+                System.out.println("TiempoVacaciones JTextField value: " + tiempoVacaciones.getText());
+                System.out.println("FechaInicioPuesto JDateChooser value: " + dateInicioPuesto.getDate());
+
+                // Reactivar listeners (si es necesario)
+                Id.getDocument().addDocumentListener(documentListener);
+                // (Haz lo mismo para los otros campos si tienen listeners)
 
             } else {
                 JOptionPane.showMessageDialog(null, "Fila no seleccionada");
             }
-
-        } catch (Exception e) {
-
-            JOptionPane.showMessageDialog(null, "Error de seleccion, error: " + e.toString());
+        } catch (HeadlessException | ParseException e) {
+            JOptionPane.showMessageDialog(null, "Error de selección, error: " + e.toString());
         }
-
     }
 
-    public void Modificar(JTextField idPDTField, JTextField idTrabajadorField, JTextField TipoDeTrabajoField, JTextField pagoPorHoraField, JComboBox<String> OverTime) {
+    public void Modificar(JTextField idPDTField, JTextField idTrabajadorField, JTextField TipoDeTrabajoField, JTextField pagoPorHoraField, JTextField sueldoField, JComboBox OverTime, JComboBox Horario, JComboBox Periodo, JComboBox Vacaciones, JTextField tiempoVacacionesField, JDateChooser dateInicioPuesto) {
         Connection conn = null;
         PreparedStatement ps = null;
         try {
-            // Verificar si los campos no están vacíos y convertir los valores apropiadamente
-            if (idPDTField.getText().isEmpty() || idTrabajadorField.getText().isEmpty() || TipoDeTrabajoField.getText().isEmpty() || pagoPorHoraField.getText().isEmpty() || OverTime.getSelectedItem() == null) {
+            if (idPDTField.getText().isEmpty() || idTrabajadorField.getText().isEmpty() || TipoDeTrabajoField.getText().isEmpty() || OverTime.getSelectedItem() == null || Horario.getSelectedItem() == null || Periodo.getSelectedItem() == null || Vacaciones.getSelectedItem() == null) {
                 JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Obtener los valores
             int idPDT = Integer.parseInt(idPDTField.getText());
             int idTrabajador = Integer.parseInt(idTrabajadorField.getText());
             int idTDT = Integer.parseInt(TipoDeTrabajoField.getText());
-            double precioPorHora = Double.parseDouble(pagoPorHoraField.getText());
+            double precioPorHora = 0.0;
+            double sueldo = 0.0;
 
-            // Obtener el ID correspondiente a la descripción seleccionada en el ComboBox
-            String idOverTime = obtenerIdOverTime(OverTime.getSelectedItem().toString());
+            // Validar y convertir los valores de pago por hora y sueldo
+            if (!pagoPorHoraField.getText().isEmpty()) {
+                precioPorHora = Double.parseDouble(pagoPorHoraField.getText());
+            }
+            if (!sueldoField.getText().isEmpty()) {
+                sueldo = Double.parseDouble(sueldoField.getText());
+            }
 
-            // Verificar si el registro con idPDT existe
+            // Asegurarse de que uno de los valores sea cero
+            if (precioPorHora > 0) {
+                sueldo = 0.0;
+            } else if (sueldo > 0) {
+                precioPorHora = 0.0;
+            }
+
+            int idOvertime = Integer.parseInt(txtIdOverTime.getText());
+            int idHorario = Integer.parseInt(txtIdHorario.getText());
+            int idPeriodo = Integer.parseInt(txtIdPeriodo.getText());
+            int idVacaciones = Integer.parseInt(txtIdVacaciones.getText());
+            int tiempoVacaciones = Integer.parseInt(tiempoVacacionesField.getText());
+
+            java.util.Date ingreso = dateInicioPuesto.getDate();
+
+            if (ingreso == null) {
+                JOptionPane.showMessageDialog(null, "Por favor, ingrese una fecha de ingreso válida.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            java.sql.Date fechaSQL = new java.sql.Date(ingreso.getTime());
+
             if (!verificarRegistroExiste(idPDT)) {
                 JOptionPane.showMessageDialog(null, "No se encontró el registro con idPDT = " + idPDT);
                 return;
             }
 
-            // Establecer los valores
-            setIdTrabajador(idTrabajador);
-            setIdTDT(idTDT);
-            setPrecioPorHora(precioPorHora);
-            setOvertime(idOverTime);
-
             Conectar con = new Conectar();
             conn = con.getConexion();
-            conn.setAutoCommit(false); // Deshabilitar el auto-commit
+            conn.setAutoCommit(false);
 
-            String consulta = "UPDATE puestodetrabajo SET idTrabajador = ?, idTDT = ?, precioPorHora = ?, idOverTime = ? WHERE idPDT = ?";
+            String consulta = "UPDATE puestodetrabajo SET idTrabajador = ?, idTDT = ?, pagoPorHora = ?, sueldo = ?, id_overtime = ?, id_horario = ?, id_periodo = ?, id_vacaciones = ?, tiempoVacaciones = ?, fechaDePuesto = ?, estado = 'Activo' WHERE idPDT = ?";
 
             ps = conn.prepareStatement(consulta);
-            // Establecer los parámetros
-            ps.setInt(1, getIdTrabajador());
-            ps.setInt(2, getIdTDT());
-            ps.setDouble(3, getPrecioPorHora());
-            ps.setString(4, getOvertime());
-            ps.setInt(5, idPDT);
-
-            // Ejecutar la consulta
-            System.out.println("Ejecutando consulta: " + consulta);
-            System.out.println("Parámetros:");
-            System.out.println("idTrabajador: " + getIdTrabajador());
-            System.out.println("idTDT: " + getIdTDT());
-            System.out.println("precioPorHora: " + getPrecioPorHora());
-            System.out.println("idOverTime: " + getOvertime());
-            System.out.println("idPDT: " + idPDT);
+            ps.setInt(1, idTrabajador);
+            ps.setInt(2, idTDT);
+            ps.setDouble(3, precioPorHora);
+            ps.setDouble(4, sueldo);
+            ps.setInt(5, idOvertime);
+            ps.setInt(6, idHorario);
+            ps.setInt(7, idPeriodo);
+            ps.setInt(8, idVacaciones);
+            ps.setInt(9, tiempoVacaciones);
+            ps.setDate(10, fechaSQL);
+            ps.setInt(11, idPDT);
 
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {
-                conn.commit(); // Confirmar la transacción
+                conn.commit();
                 JOptionPane.showMessageDialog(null, "Modificación Exitosa");
             } else {
-                conn.rollback(); // Revertir la transacción
+                conn.rollback();
                 JOptionPane.showMessageDialog(null, "No se encontró el registro para modificar.");
             }
         } catch (NumberFormatException e) {
@@ -278,7 +517,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             try {
                 if (conn != null) {
-                    conn.rollback(); // Revertir la transacción en caso de error
+                    conn.rollback();
                 }
             } catch (SQLException rollbackEx) {
                 JOptionPane.showMessageDialog(null, "Error al revertir la transacción: " + rollbackEx.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -290,7 +529,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                     ps.close();
                 }
                 if (conn != null) {
-                    conn.setAutoCommit(true); // Restaurar el auto-commit
+                    conn.setAutoCommit(true);
                     conn.close();
                 }
             } catch (SQLException closeEx) {
@@ -315,45 +554,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         return idOverTime;
     }
 
-    public void Eliminar(JTextField IdPDT) {
-
-        setIdPDT(Integer.parseInt(IdPDT.getText()));
-
-        Conectar con = new Conectar();
-
-        String consulta = "DELETE FROM puestodetrabajo WHERE idPDT=?";
-
-        try {
-
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
-
-            cs.setInt(1, getIdPDT());
-
-            cs.execute();
-
-            JOptionPane.showMessageDialog(null, "Se Elimino correctamente ");
-
-        } catch (SQLException e) {
-
-            JOptionPane.showMessageDialog(null, "No se pudo eliminar, error " + e.toString());
-        }
-    }
-
-    public PuestoDeTrabajo() {
-        initComponents();
-        AutoCompleteDecorator.decorate(cbxTDT);
-        AutoCompleteDecorator.decorate(cbxTrabajador);
-        MostrarTrabajador(cbxTrabajador);
-        MostrarTipoDeTrabajo(cbxTDT);
-        MostrarOverTime(cbxOverTime); // Llena el ComboBox con las descripciones de OverTime   
-        Mostrar(tbPuestosDeTrabajo);
-        txtIdPDT.setEnabled(false);
-        txtIdOverTime.setEnabled(false);
-        txtIdPDT.setEnabled(false);
-        txtIdTipoDeTrabajo.setEnabled(false);
-        txtIdtrabajador.setEnabled(false);
-    }
-
     private boolean verificarRegistroExiste(int idPDT) {
         String consulta = "SELECT COUNT(*) FROM puestodetrabajo WHERE idPDT = ?";
         try (PreparedStatement ps = objConect.getConexion().prepareStatement(consulta)) {
@@ -369,11 +569,107 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         return false;
     }
 
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
+    //Para Calculo de Pagos
+    public double calcularPagoTrabajador(int idTrabajador) {
+        double salarioBruto = 0.0;
+        int idPDT = obtenerIdPuestoActivo(idTrabajador);
+
+        if (idPDT == -1) {
+            JOptionPane.showMessageDialog(null, "No se encontró un puesto de trabajo activo para el trabajador con ID: " + idTrabajador);
+            return salarioBruto;
+        }
+
+        double horasTrabajadas = obtenerHorasTrabajadas(idTrabajador);
+        double pagoPorHora = obtenerPagoPorHora(idPDT);
+        double sueldo = obtenerSueldo(idPDT);
+        boolean tieneOvertime = verificarOvertime(idPDT);
+        double horasExtras = 0.0;
+
+        if (tieneOvertime && horasTrabajadas > 40) {
+            horasExtras = horasTrabajadas - 40;
+            horasTrabajadas = 40;
+        }
+
+        salarioBruto = (horasTrabajadas * pagoPorHora) + (horasExtras * pagoPorHora * 1.5);
+
+        return salarioBruto;
+    }
+
+    private int obtenerIdPuestoActivo(int idTrabajador) {
+        int idPDT = -1;
+        String sql = "SELECT idPDT FROM puestodetrabajo WHERE idTrabajador = ? AND estado = 'Activo'";
+        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
+            pst.setInt(1, idTrabajador);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                idPDT = rs.getInt("idPDT");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return idPDT;
+    }
+
+    private double obtenerHorasTrabajadas(int idTrabajador) {
+        double totalHoras = 0.0;
+        String sql = "SELECT SUM(TIMESTAMPDIFF(HOUR, fInicio, fSalida)) as horas FROM horas_trabajo WHERE trabajador_id = ?";
+        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
+            pst.setInt(1, idTrabajador);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                totalHoras = rs.getDouble("horas");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return totalHoras;
+    }
+
+    private double obtenerPagoPorHora(int idPDT) {
+        double pagoPorHora = 0.0;
+        String sql = "SELECT pagoPorHora FROM puestodetrabajo WHERE idPDT = ?";
+        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
+            pst.setInt(1, idPDT);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                pagoPorHora = rs.getDouble("pagoPorHora");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return pagoPorHora;
+    }
+
+    private double obtenerSueldo(int idPDT) {
+        double sueldo = 0.0;
+        String sql = "SELECT sueldo FROM puestodetrabajo WHERE idPDT = ?";
+        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
+            pst.setInt(1, idPDT);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                sueldo = rs.getDouble("sueldo");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return sueldo;
+    }
+
+    private boolean verificarOvertime(int idPDT) {
+        boolean tieneOvertime = false;
+        String sql = "SELECT id_overtime FROM puestodetrabajo WHERE idPDT = ?";
+        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
+            pst.setInt(1, idPDT);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                tieneOvertime = rs.getInt("id_overtime") > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return tieneOvertime;
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -381,12 +677,11 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        txtPPH = new javax.swing.JTextField();
+        txtPagoPorHora = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         btnGuardar = new javax.swing.JButton();
         btnModificar = new javax.swing.JButton();
-        btnSalir = new javax.swing.JButton();
         btnCancelar = new javax.swing.JButton();
         txtIdPDT = new javax.swing.JTextField();
         btnEliminar = new javax.swing.JButton();
@@ -398,6 +693,23 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         txtIdTipoDeTrabajo = new javax.swing.JTextField();
         cbxOverTime = new javax.swing.JComboBox<>();
         txtIdOverTime = new javax.swing.JTextField();
+        txtIdHorario = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        cbxHorario = new javax.swing.JComboBox<>();
+        txtIdPeriodo = new javax.swing.JTextField();
+        cbxPeriodo = new javax.swing.JComboBox<>();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        dateInicioPuesto = new com.toedter.calendar.JDateChooser();
+        cbxVacaciones = new javax.swing.JComboBox<>();
+        txtIdVacaciones = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        txtVacaciones = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        txtSueldo = new javax.swing.JTextField();
+        dateVacaciones = new com.toedter.calendar.JDateChooser();
+        btnSalir = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbPuestosDeTrabajo = new javax.swing.JTable();
@@ -411,13 +723,13 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
         jLabel1.setText("Tipo de Trabajo");
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 120, -1, -1));
-        jPanel1.add(txtPPH, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 160, 100, -1));
+        jPanel1.add(txtPagoPorHora, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 160, 100, -1));
 
         jLabel2.setText("Pago por hora");
         jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 160, -1, -1));
 
         jLabel3.setText("Overtime");
-        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 200, -1, -1));
+        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 30, -1, -1));
 
         btnGuardar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/guardar.png"))); // NOI18N
         btnGuardar.setText("Guardar");
@@ -426,7 +738,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 btnGuardarActionPerformed(evt);
             }
         });
-        jPanel1.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 250, -1, -1));
+        jPanel1.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1030, 70, -1, -1));
 
         btnModificar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/actualizar.png"))); // NOI18N
         btnModificar.setText("Modificar");
@@ -435,16 +747,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 btnModificarActionPerformed(evt);
             }
         });
-        jPanel1.add(btnModificar, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 250, -1, -1));
-
-        btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
-        btnSalir.setText("Salir");
-        btnSalir.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSalirActionPerformed(evt);
-            }
-        });
-        jPanel1.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 290, -1, -1));
+        jPanel1.add(btnModificar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1020, 160, -1, -1));
 
         btnCancelar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/close.png"))); // NOI18N
         btnCancelar.setText("Cancelar");
@@ -453,7 +756,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 btnCancelarActionPerformed(evt);
             }
         });
-        jPanel1.add(btnCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 250, -1, -1));
+        jPanel1.add(btnCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1030, 120, -1, -1));
         jPanel1.add(txtIdPDT, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 80, -1));
 
         btnEliminar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/eliminar.png"))); // NOI18N
@@ -463,7 +766,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 btnEliminarActionPerformed(evt);
             }
         });
-        jPanel1.add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 300, -1, -1));
+        jPanel1.add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1030, 210, -1, -1));
 
         cbxTDT.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -498,16 +801,74 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 cbxOverTimeItemStateChanged(evt);
             }
         });
-        jPanel1.add(cbxOverTime, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 200, 100, -1));
+        jPanel1.add(cbxOverTime, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 30, 100, -1));
 
         txtIdOverTime.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtIdOverTimeActionPerformed(evt);
             }
         });
-        jPanel1.add(txtIdOverTime, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 200, 90, -1));
+        jPanel1.add(txtIdOverTime, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 30, 90, -1));
+        jPanel1.add(txtIdHorario, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 60, 90, -1));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 450, 340));
+        jLabel5.setText("Horario");
+        jPanel1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 60, -1, -1));
+
+        cbxHorario.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { " " }));
+        cbxHorario.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbxHorarioItemStateChanged(evt);
+            }
+        });
+        jPanel1.add(cbxHorario, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 60, 100, -1));
+        jPanel1.add(txtIdPeriodo, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 100, 90, -1));
+
+        cbxPeriodo.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbxPeriodoItemStateChanged(evt);
+            }
+        });
+        jPanel1.add(cbxPeriodo, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 100, 100, -1));
+
+        jLabel6.setText("Periodo");
+        jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 100, -1, -1));
+
+        jLabel7.setText("Fecha Inicio Puesto");
+        jPanel1.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 170, -1, -1));
+        jPanel1.add(dateInicioPuesto, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 170, 150, -1));
+
+        cbxVacaciones.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbxVacacionesItemStateChanged(evt);
+            }
+        });
+        jPanel1.add(cbxVacaciones, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 130, 100, -1));
+        jPanel1.add(txtIdVacaciones, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 130, 90, -1));
+
+        jLabel8.setText("Vacaciones");
+        jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 140, -1, -1));
+        jPanel1.add(txtVacaciones, new org.netbeans.lib.awtextra.AbsoluteConstraints(830, 60, 90, -1));
+
+        jLabel9.setText("Tiempo de Vacaciones");
+        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 30, -1, -1));
+
+        jLabel10.setText("Sueldo");
+        jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 160, -1, -1));
+        jPanel1.add(txtSueldo, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 160, 80, -1));
+        jPanel1.add(dateVacaciones, new org.netbeans.lib.awtextra.AbsoluteConstraints(830, 90, 90, -1));
+
+        btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
+        btnSalir.setText("Salir");
+        btnSalir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSalirActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(1050, 20, -1, -1));
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 1160, 250));
+
+        jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         tbPuestosDeTrabajo.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -524,9 +885,9 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         });
         jScrollPane1.setViewportView(tbPuestosDeTrabajo);
 
-        jPanel2.add(jScrollPane1);
+        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(9, 5, 1120, 270));
 
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 30, 570, 300));
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 290, 1140, 290));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -544,12 +905,12 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         if (cbxTDT.getSelectedItem() != null) {
 //        MostrarCodigoTipodeTrabajo(cbxTDT, txtIdTipoDeTrabajo);
             MostrarCodigoTrabajador(cbxTrabajador, txtIdtrabajador);
-            Insertar(txtIdtrabajador, txtIdTipoDeTrabajo, txtPPH, txtIdOverTime);
+            Insertar(txtIdtrabajador, txtIdTipoDeTrabajo, txtPagoPorHora, txtSueldo, cbxOverTime, cbxHorario, cbxPeriodo, cbxVacaciones, txtIdVacaciones, dateVacaciones);
             Mostrar(tbPuestosDeTrabajo);
             txtIdPDT.setText("");
             txtIdtrabajador.setText("");
             txtIdTipoDeTrabajo.setText("");
-            txtPPH.setText("");
+            txtPagoPorHora.setText("");
             cbxTrabajador.setSelectedItem("");
             cbxTDT.setSelectedItem("");
             cbxOverTime.setSelectedItem("");
@@ -559,14 +920,17 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnGuardarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-        Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtPPH, cbxOverTime);
-        Modificar(txtIdPDT, txtIdtrabajador,
-                txtIdTipoDeTrabajo, txtPPH, cbxOverTime);
+        try {
+            Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtIdPDT, txtSueldo, cbxOverTime, cbxHorario, cbxPeriodo, cbxVacaciones, txtIdVacaciones, dateInicioPuesto);
+        } catch (ParseException ex) {
+            Logger.getLogger(PuestoDeTrabajo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Modificar(txtSueldo, txtIdtrabajador, txtIdTipoDeTrabajo, txtPagoPorHora, txtSueldo, cbxOverTime, cbxHorario, cbxPeriodo, cbxVacaciones, txtIdVacaciones, dateInicioPuesto);
         Mostrar(tbPuestosDeTrabajo);
         txtIdPDT.setText("");
         txtIdtrabajador.setText("");
         txtIdTipoDeTrabajo.setText("");
-        txtPPH.setText("");
+        txtPagoPorHora.setText("");
         cbxTrabajador.setSelectedItem("");
         cbxTDT.setSelectedItem("");
         cbxOverTime.setSelectedItem("");
@@ -576,14 +940,18 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         txtIdPDT.setText("");
         txtIdtrabajador.setText("");
         txtIdTipoDeTrabajo.setText("");
-        txtPPH.setText("");
+        txtPagoPorHora.setText("");
         cbxTrabajador.setSelectedItem("");
         cbxTDT.setSelectedItem("");
         cbxOverTime.setSelectedItem("");
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtPPH, cbxOverTime);
+        try {
+            Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtIdPDT, txtSueldo, cbxOverTime, cbxHorario, cbxPeriodo, cbxVacaciones, txtIdVacaciones, dateInicioPuesto);
+        } catch (ParseException ex) {
+            Logger.getLogger(PuestoDeTrabajo.class.getName()).log(Level.SEVERE, null, ex);
+        }
         Eliminar(txtIdPDT);
         Mostrar(tbPuestosDeTrabajo);
     }//GEN-LAST:event_btnEliminarActionPerformed
@@ -611,8 +979,30 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbxOverTimeItemStateChanged
 
     private void tbPuestosDeTrabajoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbPuestosDeTrabajoMouseClicked
-        Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtPPH, cbxOverTime);
+        try {
+            Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtIdPDT, txtSueldo, cbxOverTime, cbxHorario, cbxPeriodo, cbxVacaciones, txtIdVacaciones, dateInicioPuesto);
+        } catch (ParseException ex) {
+            Logger.getLogger(PuestoDeTrabajo.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_tbPuestosDeTrabajoMouseClicked
+
+    private void cbxHorarioItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxHorarioItemStateChanged
+        if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED && cbxHorario.getSelectedItem() != null) {
+            MostrarCodigoHorario(cbxHorario, txtIdHorario);
+        }
+    }//GEN-LAST:event_cbxHorarioItemStateChanged
+
+    private void cbxPeriodoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxPeriodoItemStateChanged
+        if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED && cbxPeriodo.getSelectedItem() != null) {
+            MostrarCodigoPeriodo(cbxPeriodo, txtIdPeriodo);
+        }
+    }//GEN-LAST:event_cbxPeriodoItemStateChanged
+
+    private void cbxVacacionesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxVacacionesItemStateChanged
+        if (evt.getStateChange() == java.awt.event.ItemEvent.SELECTED && cbxVacaciones.getSelectedItem() != null) {
+            MostrarCodigoVacaciones(cbxVacaciones, txtIdVacaciones);
+        }
+    }//GEN-LAST:event_cbxVacacionesItemStateChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -623,43 +1013,49 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnNuevoTipoDeTrabajo;
     private javax.swing.JButton btnSalir;
     private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JComboBox<String> cbxHorario;
     private javax.swing.JComboBox<String> cbxOverTime;
+    private javax.swing.JComboBox<String> cbxPeriodo;
     private javax.swing.JComboBox<String> cbxTDT;
     private javax.swing.JComboBox<String> cbxTrabajador;
+    private javax.swing.JComboBox<String> cbxVacaciones;
+    private com.toedter.calendar.JDateChooser dateInicioPuesto;
+    private com.toedter.calendar.JDateChooser dateVacaciones;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tbPuestosDeTrabajo;
+    private javax.swing.JTextField txtIdHorario;
     private javax.swing.JTextField txtIdOverTime;
     private javax.swing.JTextField txtIdPDT;
+    private javax.swing.JTextField txtIdPeriodo;
     private javax.swing.JTextField txtIdTipoDeTrabajo;
+    private javax.swing.JTextField txtIdVacaciones;
     private javax.swing.JTextField txtIdtrabajador;
-    private javax.swing.JTextField txtPPH;
+    private javax.swing.JTextField txtPagoPorHora;
+    private javax.swing.JTextField txtSueldo;
+    private javax.swing.JTextField txtVacaciones;
     // End of variables declaration//GEN-END:variables
 
     public void MostrarTrabajador(JComboBox comboTrabajador) {
-
-        String sql = "";
-        sql = "select * from worker";
-        Statement st;
-
-        try {
-
-            st = objConect.getConexion().createStatement();
-            ResultSet rs = st.executeQuery(sql);
+        String sql = "select * from worker";
+        try (Statement st = objConect.getConexion().createStatement(); ResultSet rs = st.executeQuery(sql)) {
             comboTrabajador.removeAllItems();
-
             while (rs.next()) {
-
                 comboTrabajador.addItem(rs.getString("nombre"));
             }
-
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+            JOptionPane.showMessageDialog(null, "Error al Mostrar Trabajadores: " + e.toString());
         }
     }
 
@@ -690,24 +1086,14 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarTipoDeTrabajo(JComboBox comboTipoDeTrabajo) {
-
-        String sql = "";
-        sql = "select * from tiposdetrabajos";
-        Statement st;
-
-        try {
-
-            st = objConect.getConexion().createStatement();
-            ResultSet rs = st.executeQuery(sql);
+        String sql = "select * from tiposdetrabajos";
+        try (Statement st = objConect.getConexion().createStatement(); ResultSet rs = st.executeQuery(sql)) {
             comboTipoDeTrabajo.removeAllItems();
-
             while (rs.next()) {
-
                 comboTipoDeTrabajo.addItem(rs.getString("nombre"));
             }
-
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+            JOptionPane.showMessageDialog(null, "Error al Mostrar Tipos de Trabajo: " + e.toString());
         }
     }
 
@@ -746,7 +1132,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 comboOverTime.addItem(rs.getString("descripcion"));
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla: " + e.toString());
+            JOptionPane.showMessageDialog(null, "Error al Mostrar Overtime: " + e.toString());
         }
     }
 
@@ -768,4 +1154,120 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         }
     }
 
+    public void MostrarHorario(JComboBox comboHorario) {
+        String sql = "select * from horario";
+        try (Statement st = objConect.getConexion().createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            comboHorario.removeAllItems();
+            while (rs.next()) {
+                comboHorario.addItem(rs.getString("descripcion"));
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al Mostrar Horario: " + e.toString());
+        }
+    }
+
+    public void MostrarCodigoHorario(JComboBox Horario, JTextField IdHorario) {
+        String consulta = "select id from horario where descripcion=?";
+
+        if (Horario.getSelectedItem() != null) {
+            try {
+                CallableStatement cs = objConect.getConexion().prepareCall(consulta);
+                cs.setString(1, Horario.getSelectedItem().toString());
+                cs.execute();
+
+                ResultSet rs = cs.executeQuery();
+
+                if (rs.next()) {
+                    IdHorario.setText(rs.getString("id"));
+                } else {
+                    IdHorario.setText("");
+                }
+                rs.close(); // Asegurarse de cerrar el ResultSet
+
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+            }
+        } else {
+            IdHorario.setText("");
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione un tipo de horario válido.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    public void MostrarPeriodo(JComboBox comboPeriodo) {
+        String sql = "select * from periodo";
+        try (Statement st = objConect.getConexion().createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            comboPeriodo.removeAllItems();
+            while (rs.next()) {
+                comboPeriodo.addItem(rs.getString("descripcion"));
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al Mostrar Periodo: " + e.toString());
+        }
+    }
+
+    public void MostrarCodigoPeriodo(JComboBox Periodo, JTextField IdPeriodo) {
+        String consulta = "select id from periodo where descripcion=?";
+
+        if (Periodo.getSelectedItem() != null) {
+            try {
+                CallableStatement cs = objConect.getConexion().prepareCall(consulta);
+                cs.setString(1, Periodo.getSelectedItem().toString());
+                cs.execute();
+
+                ResultSet rs = cs.executeQuery();
+
+                if (rs.next()) {
+                    IdPeriodo.setText(rs.getString("id"));
+                } else {
+                    IdPeriodo.setText("");
+                }
+                rs.close(); // Asegurarse de cerrar el ResultSet
+
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+            }
+        } else {
+            IdPeriodo.setText("");
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione un tipo de horario periodo.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    public void MostrarVacaciones(JComboBox comboVacaciones) {
+        String sql = "select * from vacaciones";
+        try (Statement st = objConect.getConexion().createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            comboVacaciones.removeAllItems();
+            while (rs.next()) {
+                comboVacaciones.addItem(rs.getString("descripcion"));
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al Mostrar Periodo: " + e.toString());
+        }
+    }
+
+    public void MostrarCodigoVacaciones(JComboBox Vacaciones, JTextField IdVacaciones) {
+        String consulta = "select id from vacaciones where descripcion=?";
+
+        if (Vacaciones.getSelectedItem() != null) {
+            try {
+                CallableStatement cs = objConect.getConexion().prepareCall(consulta);
+                cs.setString(1, Vacaciones.getSelectedItem().toString());
+                cs.execute();
+
+                ResultSet rs = cs.executeQuery();
+
+                if (rs.next()) {
+                    IdVacaciones.setText(rs.getString("id"));
+                } else {
+                    IdVacaciones.setText("");
+                }
+                rs.close(); // Asegurarse de cerrar el ResultSet
+
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+            }
+        } else {
+            IdVacaciones.setText("");
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione un tipo de horario periodo.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        }
+    }
 }

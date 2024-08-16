@@ -31,6 +31,9 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
         MostrarEmpresa(cbxEmpresa);
         MostrarTabla();
         addCheckBox(0, tbAsignacionTrabajos);
+
+        txtIdBusiness.setVisible(false);
+        txtIdTrabajador.setVisible(false);
     }
 
     //Metodo que agrega el checkBox
@@ -239,52 +242,40 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
             System.out.println("Error al mostrar la Tabla " + e.toString());
         }
     }
-    
 
 //Guardar selección y asignar trabajo a trabajador, eliminando fila
-    public void guardarSeleccion() {
+    public void guardarSeleccion(int rowIndex) {
         try {
-// Conexión a la base de datos
+            // Conexión a la base de datos
             Conectar con = new Conectar();
             Connection connect = con.getConexion();
 
-// Obtener el modelo de la tabla
+            // Obtener el modelo de la tabla
             DefaultTableModel modelo = (DefaultTableModel) tbAsignacionTrabajos.getModel();
 
-// Crear un ArrayList para almacenar las filas seleccionadas
-            ArrayList<Integer> filasSeleccionadas = new ArrayList<>();
+            // Obtener los valores de la fila seleccionada
+            int id = Integer.parseInt(modelo.getValueAt(rowIndex, 1).toString()); // Obtener el ID de la tabla
+            int id_Trabajador = Integer.parseInt(txtIdTrabajador.getText()); // Obtener el nombre del trabajador seleccionado en el ComboBox
 
-// Recorrer las filas de la tabla para guardar los registros
-            for (int i = 0; i < modelo.getRowCount(); i++) {
-                Boolean seleccionado = (Boolean) modelo.getValueAt(i, 0); // Suponiendo que la columna 0 es donde se encuentra el CheckBox
-                if (seleccionado != null && seleccionado) {
-                    filasSeleccionadas.add(i);
-                    int id = Integer.parseInt(modelo.getValueAt(i, 1).toString()); // Obtener el ID de la tabla
-                    int id_Trabajador = Integer.parseInt(txtIdTrabajador.getText()); // Obtener el nombre del trabajador seleccionado en el ComboBox
+            // Insertar el registro en la base de datos
+            String sql = "INSERT INTO servicio_trabajador (id_OS, id_Trabajador, comentario) VALUES (?, ?, 'sin comentario')";
+            PreparedStatement pstmt = connect.prepareStatement(sql);
+            pstmt.setInt(1, id);
+            pstmt.setInt(2, id_Trabajador);
+            pstmt.executeUpdate();
 
-// Insertar el registro en la base de datos
-                    String sql = "INSERT INTO servicio_trabajador (id_OS, id_Trabajador, comentario) VALUES (?, ?, 'sin comentario')";
-                    PreparedStatement pstmt = connect.prepareStatement(sql);
-                    pstmt.setInt(1, id);
-                    pstmt.setInt(2, id_Trabajador);
-                    pstmt.executeUpdate();
+            // Actualizar el estado del registro a "Programado"
+            String sqlUpdate = "UPDATE orderservice SET estado = 'Programado' WHERE id = ?";
+            PreparedStatement pstmtUpdate = connect.prepareStatement(sqlUpdate);
+            pstmtUpdate.setInt(1, id);
+            pstmtUpdate.executeUpdate();
 
-// Actualizar el estado del registro a "asignado"
-                    String sqlUpdate = "UPDATE orderservice SET estado = 'Programado' WHERE id = ?";
-                    PreparedStatement pstmtUpdate = connect.prepareStatement(sqlUpdate);
-                    pstmtUpdate.setInt(1, id);
-                    pstmtUpdate.executeUpdate();
+            // Eliminar la fila del modelo de la tabla
+            modelo.removeRow(rowIndex);
 
-                    //Eliminar la fila del modelo de la tabla
-                    modelo.removeRow(i);
-                    i--; //Decrmentar el indice ya que se eliminó una fila
-                }
-
-            }
             // Cerrar la conexión
             connect.close();
-            // Mensaje de éxito
-            JOptionPane.showMessageDialog(null, "Registros guardados correctamente");
+
         } catch (SQLException e) {
             System.out.println("Error al guardar en la base de datos: " + e.getMessage());
         }
@@ -582,7 +573,23 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnMostrarTodoActionPerformed
 
     private void btnProgramarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProgramarActionPerformed
-        guardarSeleccion();
+        DefaultTableModel modelo = (DefaultTableModel) tbAsignacionTrabajos.getModel();
+        boolean filaSeleccionada = false;
+
+        for (int i = 0; i < modelo.getRowCount(); i++) {
+            Boolean seleccionado = (Boolean) modelo.getValueAt(i, 0);
+            if (seleccionado != null && seleccionado) {
+                guardarSeleccion(i);  // Pasamos el índice de la fila al método guardarSeleccion
+                filaSeleccionada = true;
+            }
+        }
+
+        if (!filaSeleccionada) {
+            JOptionPane.showMessageDialog(null, "Seleccione al menos una fila");
+        } else {
+            // Mensaje de éxito si al menos una fila fue seleccionada y procesada
+            JOptionPane.showMessageDialog(null, "Registros guardados correctamente");
+        }
     }//GEN-LAST:event_btnProgramarActionPerformed
 
 

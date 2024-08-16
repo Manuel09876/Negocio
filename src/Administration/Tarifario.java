@@ -79,7 +79,7 @@ public class Tarifario extends javax.swing.JInternalFrame {
         initComponents();
 
         txtId.setEnabled(false);
-        txtIdEmpresa.setEditable(false);
+        txtIdEmpresa.setVisible(false);
         txtServicio.requestFocus();
         MostrarServicios("");
         AutoCompleteDecorator.decorate(cbxEmpresas);

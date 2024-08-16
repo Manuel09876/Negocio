@@ -22,6 +22,7 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
@@ -79,6 +80,8 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     private Stock st;
     private Trabajos tbs;
     private BudgetManager b;
+    
+    private List<Permiso> permisos;
 
     // Definir JTextFields como variables de instancia
     private JTextField txtNombre;
@@ -104,6 +107,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     private JTextField txtNameAddress;
     private JTextField txtPhoneNumber;
     private JTextField txtEmail;
+    private JDateChooser dateIngreso;
     private JTextField txtArea;
     private JTextArea txtNotaCliente;
     private JTextField txtTipoDocumento, txtNumeroDocumento, txtNombres, txtEdad, txtDireccion, txtCiudad, txtTelefono;
@@ -113,8 +117,8 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     private JTextField txtIdProducto, txtName, txtPresentation, txtIdUnidades, txtStock, txtOr;
     private JTextField txtWebsite;
     private JTable tbPuestosDeTrabajo;
+    private JRadioButton rdRelacionar;
 
-    private List<Permiso> permisos;
 
     public AsignacionPermisos(VentanaPrincipal vp) throws SQLException {
         this.vp = vp;
@@ -185,18 +189,18 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         setupTableModelListener(tbReportes, "Reportes");
     }
 
-    private void setupPermisos() {
-        permisos = new ArrayList<>();
-        // Definir los JTextField
-        JTextField txtCodigo = new JTextField(20);
-        JTextField txtNombre = new JTextField(20);
-        JTextField txtUsuario = new JTextField(20);
-        JTextField txtPassword = new JTextField(20);
-
-        // Asociar permisos y JTextField
-        permisos.add(new Permiso(chAdministracion, txtCodigo, txtNombre, txtUsuario, txtPassword));
-        // Agregar más permisos según sea necesario...
-    }
+//    private void setupPermisos() {
+//        permisos = new ArrayList<>();
+//        // Definir los JTextField
+//        JTextField txtCodigo = new JTextField(20);
+//        JTextField txtNombre = new JTextField(20);
+//        JTextField txtUsuario = new JTextField(20);
+//        JTextField txtPassword = new JTextField(20);
+//
+//        // Asociar permisos y JTextField
+//        permisos.add(new Permiso(chAdministracion, txtCodigo, txtNombre, txtUsuario, txtPassword));
+//        // Agregar más permisos según sea necesario...
+//    }
 
     private void setupTableCheckBoxes(JTable table) {
         for (int i = 2; i <= 6; i++) {
@@ -266,10 +270,10 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 updateLayout();
             }
         });
-
     }
 
     // Método actualizado para configurar los oyentes del modelo de tabla
+     // Método actualizado para configurar los oyentes del modelo de tabla
     private void setupTableModelListener(JTable table, String tableName) {
         table.getModel().addTableModelListener(new TableModelListener() {
             @Override
@@ -307,39 +311,38 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                                         handleEmpresas(column, selected);
                                         break;
                                     case "Trabajadores":
-                                        handleUsuarios(column, selected);
+                                        handleTrabajadores(column, selected);
                                         break;
                                     case "Tarifario":
-                                        handleRoles(column, selected);
+                                        handleTarifario(column, selected);
                                         break;
                                     case "Productos":
-                                        handleAsignacionPermisos(column, selected);
+                                        handleProductos(column, selected);
                                         break;
                                     case "Formularios":
-                                        handleEmpresas(column, selected);
+                                        handleFormularios(column, selected);
                                         break;
                                     case "Proveedor":
-                                        handleUsuarios(column, selected);
+                                        handleProveedor(column, selected);
                                         break;
                                     case "Convenios":
-                                        handleRoles(column, selected);
+                                        handleConvenios(column, selected);
                                         break;
-                                    case "Busqueda de Convenios":
-                                        handleAsignacionPermisos(column, selected);
+                                    case "Búsqueda de Convenios":
+                                        handleBusquedaConvenios(column, selected);
                                         break;
-                                    case "Asignacion de Trabajos":
-                                        handleEmpresas(column, selected);
+                                    case "Asignación de Trabajos":
+                                        handleAsignacionTrabajos(column, selected);
                                         break;
-                                    case "Puesto de Trabajo":
-                                        handleUsuarios(column, selected);
+                                    case "Puesto de Trabajos":
+                                        handlePuestosDeTrabajo(column, selected);
                                         break;
                                     case "Formas de Pago":
-                                        handleRoles(column, selected);
+                                        handleFormasDePago(column, selected);
                                         break;
                                     case "Menus - Submenus":
-                                        handleAsignacionPermisos(column, selected);
+                                        handleMenus(column, selected);
                                         break;
-
                                     // Añadir más casos según sea necesario...
                                 }
                             } else if (menuName.equals("menuAdmission")) {
@@ -351,22 +354,22 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                                         handleMarcas(column, selected);
                                         break;
                                     case "Unidades":
-                                        handleClientes(column, selected);
+                                        handleUnidades(column, selected);
                                         break;
                                     case "Tipo de Pagos Generales":
-                                        handleMarcas(column, selected);
+                                        handleTipoDePagosGenerales(column, selected);
                                         break;
                                     case "Tipo de Productos y Materiales":
-                                        handleClientes(column, selected);
+                                        handleTipoDeProductosMateriales(column, selected);
                                         break;
                                     case "Tipo de Maquinarias y Vehiculos":
-                                        handleMarcas(column, selected);
+                                        handleTipoDeMaquinariasVehiculos(column, selected);
                                         break;
-                                    case "Localizacion":
-                                        handleClientes(column, selected);
+                                    case "Localización":
+                                        handleLocalizacion(column, selected);
                                         break;
-                                    case "Configuracion":
-                                        handleMarcas(column, selected);
+                                    case "Configuración":
+                                        handleconfiguracion(column, selected);
                                         break;
                                     // Añadir más casos según sea necesario...
                                 }
@@ -379,27 +382,26 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                                         handleVerOrdenes(column, selected);
                                         break;
                                     case "Ventas":
-                                        handleOrdenDeServicio(column, selected);
+                                        handleVentas(column, selected);
                                         break;
-                                    case "Compra Productos y Materiales":
-                                        handleVerOrdenes(column, selected);
+                                    case "Compras de Productos y Materiales":
+                                        handleCompraProductosMateriales(column, selected);
                                         break;
                                     case "Compra Equipos y Vehiculos":
-                                        handleVerOrdenes(column, selected);
+                                        handleCompraEquiposVehiculos(column, selected);
                                         break;
                                     case "Gastos Generales":
-                                        handleOrdenDeServicio(column, selected);
+                                        handleGastosGenerales(column, selected);
                                         break;
                                     case "Kardex":
-                                        handleVerOrdenes(column, selected);
+                                        handleKardex(column, selected);
                                         break;
                                     case "Cotizaciones":
-                                        handleOrdenDeServicio(column, selected);
+                                        handleCotizaciones(column, selected);
                                         break;
-                                    case "Cancelasciones":
-                                        handleVerOrdenes(column, selected);
+                                    case "Cancelaciones":
+                                        handleCancelaciones(column, selected);
                                         break;
-
                                     // Añadir más casos según sea necesario...
                                 }
                             } else if (menuName.equals("menuReports")) {
@@ -411,27 +413,26 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                                         handleEstadisticas(column, selected);
                                         break;
                                     case "Deudas Por Pagar":
-                                        handleTrabajosRealizados(column, selected);
+                                        handleDeudaPorPagar(column, selected);
                                         break;
                                     case "Deudas Por Cobrar":
-                                        handleEstadisticas(column, selected);
+                                        handleDeudasPorCobrar(column, selected);
                                         break;
                                     case "Horas Trabajadas":
-                                        handleTrabajosRealizados(column, selected);
+                                        handleHorasTrabajadas(column, selected);
                                         break;
                                     case "Sueldos":
-                                        handleEstadisticas(column, selected);
+                                        handleSueldos(column, selected);
                                         break;
                                     case "Stock":
-                                        handleTrabajosRealizados(column, selected);
+                                        handleStock(column, selected);
                                         break;
                                     case "Trabajos":
-                                        handleEstadisticas(column, selected);
+                                        handleTrabajos(column, selected);
                                         break;
                                     case "Presupuesto":
-                                        handleTrabajosRealizados(column, selected);
+                                        handlePresupuestos(column, selected);
                                         break;
-
                                     // Añadir más casos según sea necesario...
                                 }
                             }
@@ -459,7 +460,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 break;
             case 4: // Editar
                 if (selected) {
-                    u.ModificarUsuario(txtNombre, txtNombre, txtUsuario, txtBuscar);
+                    u.ModificarUsuario(txtIdTPU, txtNombre, txtUsuario, txtBuscar);
                 }
                 break;
             case 5: // Eliminar
@@ -544,22 +545,22 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 break;
         }
     }
-    
+
     private void handleTrabajadores(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                   tb.CargarDatosTable(""); 
+                    tb.CargarDatosTable("");
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                   tb.Guardar();
+                    tb.Guardar();
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    tb.ModificarTrabajador(txtId, txtTipoDocumento, txtNumeroDocumento, txtNombres, cbxSexo, JDateFechaNac, txtEdad, txtDireccion, txtZipCode, txtCiudad, txtState, txtTelefono, txtEmail);
+                    tb.ModificarTrabajador(txtId, txtTipoDocumento, txtNumeroDocumento, txtNombres, cbxSexo, JDateFechaNac, txtEdad, txtDireccion, txtZipCode, txtCiudad, txtState, txtTelefono, txtEmail, dateIngreso);
                 }
                 break;
             case 5: // Eliminar
@@ -609,7 +610,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 break;
             case 4: // Editar
                 if (selected) {
-                    
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
@@ -624,27 +625,27 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
-    
+
     private void handleProveedor(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
@@ -674,22 +675,22 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -724,47 +725,47 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
-    
+
     private void handlePuestosDeTrabajo(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                  pt.Mostrar(tbPuestosDeTrabajo);
+                    pt.Mostrar(tbPuestosDeTrabajo);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -774,22 +775,22 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -820,7 +821,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         }
     }
 
-        
     private void handleClientes(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
@@ -870,27 +870,27 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 break;
         }
     }
-    
+
     private void handleUnidades(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -900,47 +900,47 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
-    
+
     private void handleTipoDeProductosMateriales(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -950,47 +950,47 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
-    
+
     private void handleLocalizacion(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -1000,48 +1000,47 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
 
-    
     private void handleOrdenDeServicio(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -1056,42 +1055,42 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
-    
+
     private void handleVentas(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -1101,47 +1100,47 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
-    
+
     private void handleCompraEquiposVehiculos(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -1151,47 +1150,47 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
-    
+
     private void handleKardex(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -1201,53 +1200,52 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
-    
+
     private void handleCancelaciones(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
-    }  
+    }
 
-    
     private void handleTrabajosRealizados(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
@@ -1257,17 +1255,17 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -1277,47 +1275,47 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
-    
+
     private void handleDeudaPorPagar(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -1327,47 +1325,47 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
-    
+
     private void handleHorasTrabajadas(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -1377,47 +1375,47 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
-    
+
     private void handleStock(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
@@ -1427,58 +1425,53 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
-    
-    private void handlePresupuestos(int column, Boolean selected) 
-    {
+
+    private void handlePresupuestos(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    ;
+                    // Implementar lógica de visualizar
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    ;
+                    // Implementar lógica de agregar
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    ;
+                    // Implementar lógica de editar
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    ;
+                    // Implementar lógica de eliminar
                 }
                 break;
         }
     }
 
-    
-    
-    
-
-// Métodos auxiliares para obtener nombres de menú y submenú basado en la tabla y la fila
+    // Métodos auxiliares para obtener nombres de menú y submenú basado en la tabla y la fila
     private String getMenuNameByRow(String tableName, int row) {
         switch (tableName) {
             case "Administracion":
@@ -1515,7 +1508,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         return submenuNames.length > row ? submenuNames[row] : "";
     }
 
-// Método para obtener el ID del menú
+    // Método para obtener el ID del menú
     private int obtenerMenuId(String menuName) {
         String sql = "SELECT id FROM menus WHERE nombre_menu = ?";
         try (PreparedStatement ps = conect.prepareStatement(sql)) {
@@ -1530,7 +1523,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         return -1;
     }
 
-// Método para obtener el ID del submenú
+    // Método para obtener el ID del submenú
     private int obtenerSubmenuId(String submenuName) {
         String sql = "SELECT id FROM submenus WHERE nombre_submenu = ?";
         try (PreparedStatement ps = conect.prepareStatement(sql)) {
@@ -1545,7 +1538,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         return -1;
     }
 
-// Método para obtener el ID del permiso basado en la columna
+    // Método para obtener el ID del permiso basado en la columna
     private int obtenerPermisoIdPorColumna(int column) {
         switch (column) {
             case 2:
@@ -1561,7 +1554,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         }
     }
 
-// Método para guardar el permiso en la base de datos
+    // Método para guardar el permiso en la base de datos
     private void guardarPermisoEnBaseDeDatos(String menuName, String submenuName, int column, Boolean selected) {
         int menuId = obtenerMenuId(menuName);
         int submenuId = obtenerSubmenuId(submenuName);
@@ -1597,54 +1590,54 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         repaint();
     }
 
-    private void initTable(javax.swing.JTable table, javax.swing.JButton btn) {
-        addCheckBox(2, table);
-        addCheckBox(3, table);
-        addCheckBox(4, table);
-        addCheckBox(5, table);
-        addCheckBox(6, table);
-        btn.setVisible(false); // Botón oculto al inicio
-    }
-
-    private void addTableModelListener(javax.swing.JTable table, javax.swing.JButton btn) {
-        table.getModel().addTableModelListener(e -> {
-            if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
-                int column = e.getColumn();
-                int row = e.getFirstRow();
-
-                if (column < 2 || column > 5) {
-                    return; // No hacemos nada si se modifica una columna distinta a las primeras 4 columnas
-                }
-
-                boolean allSelected = true;
-
-                for (int i = 2; i <= 5; i++) {
-                    Object value = table.getValueAt(row, i);
-                    if (!(value instanceof Boolean) || !(Boolean) value) {
-                        allSelected = false;
-                        break;
-                    }
-                }
-
-                // Si todas las primeras 4 casillas están marcadas, marcamos la casilla 5, si no, la desmarcamos
-                table.setValueAt(allSelected, row, 6);
-
-                // Mostramos u ocultamos el botón dependiendo del estado de la casilla 5
-                btn.setVisible(allSelected);
-                updateLayout();
-            }
-        });
-    }
-
-    private void addCheckBox(int column, javax.swing.JTable table) {
-        TableColumn tc = table.getColumnModel().getColumn(column);
-        tc
-                .setCellEditor(table.getDefaultEditor(Boolean.class
-                ));
-        tc
-                .setCellRenderer(table.getDefaultRenderer(Boolean.class
-                ));
-    }
+//    private void initTable(javax.swing.JTable table, javax.swing.JButton btn) {
+//        addCheckBox(2, table);
+//        addCheckBox(3, table);
+//        addCheckBox(4, table);
+//        addCheckBox(5, table);
+//        addCheckBox(6, table);
+//        btn.setVisible(false); // Botón oculto al inicio
+//    }
+//
+//    private void addTableModelListener(javax.swing.JTable table, javax.swing.JButton btn) {
+//        table.getModel().addTableModelListener(e -> {
+//            if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
+//                int column = e.getColumn();
+//                int row = e.getFirstRow();
+//
+//                if (column < 2 || column > 5) {
+//                    return; // No hacemos nada si se modifica una columna distinta a las primeras 4 columnas
+//                }
+//
+//                boolean allSelected = true;
+//
+//                for (int i = 2; i <= 5; i++) {
+//                    Object value = table.getValueAt(row, i);
+//                    if (!(value instanceof Boolean) || !(Boolean) value) {
+//                        allSelected = false;
+//                        break;
+//                    }
+//                }
+//
+//                // Si todas las primeras 4 casillas están marcadas, marcamos la casilla 5, si no, la desmarcamos
+//                table.setValueAt(allSelected, row, 6);
+//
+//                // Mostramos u ocultamos el botón dependiendo del estado de la casilla 5
+//                btn.setVisible(allSelected);
+//                updateLayout();
+//            }
+//        });
+//    }
+//
+//    private void addCheckBox(int column, javax.swing.JTable table) {
+//        TableColumn tc = table.getColumnModel().getColumn(column);
+//        tc
+//                .setCellEditor(table.getDefaultEditor(Boolean.class
+//                ));
+//        tc
+//                .setCellRenderer(table.getDefaultRenderer(Boolean.class
+//                ));
+//    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents

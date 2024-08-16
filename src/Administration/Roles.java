@@ -2,6 +2,7 @@ package Administration;
 
 import Bases.Tables;
 import conectar.Conectar;
+import java.awt.HeadlessException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,29 +21,29 @@ import javax.swing.table.DefaultTableModel;
 public class Roles extends javax.swing.JInternalFrame {
 
     DefaultTableModel model;
-    private int idTipoDeUsuaio;
-    private String tipoDeUsuario, estado;
+    private int id_rol;
+    private String rol, estado;
 
     public Roles(int idTipoDeUsuaio, String tipoDeUsuario, String estado) {
-        this.idTipoDeUsuaio = idTipoDeUsuaio;
-        this.tipoDeUsuario = tipoDeUsuario;
+        this.id_rol = idTipoDeUsuaio;
+        this.rol = tipoDeUsuario;
         this.estado = estado;
     }
 
-    public int getIdTipoDeUsuaio() {
-        return idTipoDeUsuaio;
+    public int getId_rol() {
+        return id_rol;
     }
 
-    public void setIdTipoDeUsuaio(int idTipoDeUsuaio) {
-        this.idTipoDeUsuaio = idTipoDeUsuaio;
+    public void setId_rol(int id_rol) {
+        this.id_rol = id_rol;
     }
 
-    public String getTipoDeUsuario() {
-        return tipoDeUsuario;
+    public String getRol() {
+        return rol;
     }
 
-    public void setTipoDeUsuario(String tipoDeUsuario) {
-        this.tipoDeUsuario = tipoDeUsuario;
+    public void setRol(String rol) {
+        this.rol = rol;
     }
 
     public String getEstado() {
@@ -56,7 +57,7 @@ public class Roles extends javax.swing.JInternalFrame {
     public Roles() {
         initComponents();
         
-        txtId.setEnabled(false);
+        txtId.setVisible(false);
         CargarDatosTabla("");
     }
 
@@ -145,14 +146,14 @@ public class Roles extends javax.swing.JInternalFrame {
     
     public void Eliminar(JTextField codigo) {
 
-        setIdTipoDeUsuaio(Integer.parseInt(codigo.getText()));
+        setId_rol(Integer.parseInt(codigo.getText()));
 
         String consulta = "DELETE from roles where id=?";
 
         try {
 
             CallableStatement cs = con.getConexion().prepareCall(consulta);
-            cs.setInt(1, getIdTipoDeUsuaio());
+            cs.setInt(1, getId_rol());
             cs.executeUpdate();
 
             JOptionPane.showMessageDialog(null, "Se Elimino");
@@ -181,7 +182,7 @@ public class Roles extends javax.swing.JInternalFrame {
                 JOptionPane.showMessageDialog(null, "Fila No seleccionada");
             }
 
-        } catch (Exception e) {
+        } catch (HeadlessException e) {
             JOptionPane.showMessageDialog(null, "Error de Seleccion, Error: ");
         }
 
@@ -192,15 +193,15 @@ public class Roles extends javax.swing.JInternalFrame {
         
         try {
         
-            setIdTipoDeUsuaio(Integer.parseInt(id.getText()));
+            setId_rol(Integer.parseInt(id.getText()));
             setName(nombre.getText());
             
         String sql = "UPDATE roles SET nombre = ?  WHERE id = ?";
         
             connect = con.getConexion();
             ps = connect.prepareStatement(sql);
-            ps.setString(1, getTipoDeUsuario());
-            ps.setInt(2, getIdTipoDeUsuaio());
+            ps.setString(1, getRol());
+            ps.setInt(2, getId_rol());
             ps.execute();
             
             JOptionPane.showMessageDialog(null, "Modificacion exitosa");
