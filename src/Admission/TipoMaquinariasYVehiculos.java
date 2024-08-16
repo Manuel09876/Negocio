@@ -167,7 +167,7 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
 
     }
 
-    public void SeleccionarCategoria(JTable Tabla, JTextField IdMaqVe, JTextField tipo) {
+    public void SeleccionarTipo(JTable Tabla, JTextField IdMaqVe, JTextField tipo) {
 
         try {
 
@@ -188,7 +188,7 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
 
     }
 
-    public void ModificarCategoria(JTextField paraId, JTextField paraNombre){
+    public void ModificarTipo(JTextField paraId, JTextField paraNombre){
         
         //Obtengo el valor en Cadena(String) de las cajas de Texto
         setIdMaqVe(Integer.parseInt(paraId.getText()));
@@ -477,13 +477,13 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnActivarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-        SeleccionarCategoria(tbMaqVe, txtIdMaqVe, txtMaqVe);
-        ModificarCategoria(txtIdMaqVe, txtMaqVe);
+        SeleccionarTipo(tbMaqVe, txtIdMaqVe, txtMaqVe);
+        ModificarTipo(txtIdMaqVe, txtMaqVe);
         CargarDatosTabla("");
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void tbMaqVeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbMaqVeMouseClicked
-        SeleccionarCategoria(tbMaqVe, txtIdMaqVe, txtMaqVe);
+        SeleccionarTipo(tbMaqVe, txtIdMaqVe, txtMaqVe);
     }//GEN-LAST:event_tbMaqVeMouseClicked
 
 

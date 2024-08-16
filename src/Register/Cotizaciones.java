@@ -483,6 +483,8 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
         modelo.setRowCount(0); // Esto borra todas las filas de la tabla
     }
     
+    
+    //Obtener los datos de la Empresa para los PDF
     private Configuracion obtenerConfiguracion() {
     Configuracion config = new Configuracion();
     String sql = "SELECT nombre, direccion, ciudad, estado, zipcode, telefono, email, webpage, logo FROM configuracion WHERE id = 1";

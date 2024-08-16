@@ -75,7 +75,7 @@
                     <Column editable="true" title="Pago por Hora" type="java.lang.Object"/>
                     <Column editable="true" title="Hora extra" type="java.lang.Object"/>
                     <Column editable="true" title="Fecha Inicio" type="java.lang.Object"/>
-                    <Column editable="true" title="Fecha Fin" type="java.lang.Object"/>
+                    <Column editable="true" title="Periodo de Pago" type="java.lang.Object"/>
                     <Column editable="true" title="Pago Hora" type="java.lang.Object"/>
                     <Column editable="true" title="Horas Trabajadas" type="java.lang.Object"/>
                     <Column editable="true" title="Horas Extras" type="java.lang.Object"/>
@@ -166,6 +166,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Generar Reporte"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnHistorialCompraActionPerformed"/>
+          </Events>
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
           </AuxValues>
@@ -214,11 +217,11 @@
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel1">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Inicio"/>
+            <Property name="text" type="java.lang.String" value="Fecha de Inicio de Pagos"/>
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="800" y="30" width="-1" height="-1"/>
+              <AbsoluteConstraints x="750" y="30" width="-1" height="-1"/>
             </Constraint>
           </Constraints>
         </Component>

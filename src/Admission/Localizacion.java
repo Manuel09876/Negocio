@@ -166,7 +166,7 @@ public class Localizacion extends javax.swing.JInternalFrame {
 
     }
 
-    public void SeleccionarCategoria(JTable Tabla, JTextField IdLocalizacion, JTextField Localizacion) {
+    public void SeleccionarLocalizacion(JTable Tabla, JTextField IdLocalizacion, JTextField Localizacion) {
 
         try {
 
@@ -188,7 +188,7 @@ public class Localizacion extends javax.swing.JInternalFrame {
     }
 
     public boolean modificar(Localizacion lo) {
-        String sql = "UPDATE categoria SET nombre = ?  WHERE id_categoria = ?";
+        String sql = "UPDATE localizacion SET nombre = ?  WHERE id_localizacion = ?";
         try {
             connect = con.getConexion();
             ps = connect.prepareStatement(sql);
@@ -438,7 +438,7 @@ public class Localizacion extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnActivarActionPerformed
 
     private void tbLocalizacionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbLocalizacionMouseClicked
-        SeleccionarCategoria(tbLocalizacion, txtIdLocalizacion, txtLocalizacion);
+        SeleccionarLocalizacion(tbLocalizacion, txtIdLocalizacion, txtLocalizacion);
     }//GEN-LAST:event_tbLocalizacionMouseClicked
 
 

@@ -166,7 +166,7 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
 
     }
 
-    public void SeleccionarCategoria(JTable Tabla, JTextField IdProMat, JTextField tipo) {
+    public void SeleccionarTipo(JTable Tabla, JTextField IdProMat, JTextField tipo) {
 
         try {
 
@@ -187,7 +187,7 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
 
     }
 
-    public void ModificarCategoria(JTextField paraId, JTextField paraNombre){
+    public void ModificarTipo(JTextField paraId, JTextField paraNombre){
         
         //Obtengo el valor en Cadena(String) de las cajas de Texto
         setIdProMat(Integer.parseInt(paraId.getText()));
@@ -473,13 +473,13 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnActivarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
-        SeleccionarCategoria(tbProMat, txtIdProMat, txtProMat);
-        ModificarCategoria(txtIdProMat, txtProMat);
+        SeleccionarTipo(tbProMat, txtIdProMat, txtProMat);
+        ModificarTipo(txtIdProMat, txtProMat);
         CargarDatosTabla("");
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void tbProMatMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbProMatMouseClicked
-        SeleccionarCategoria(tbProMat, txtIdProMat, txtProMat);
+        SeleccionarTipo(tbProMat, txtIdProMat, txtProMat);
     }//GEN-LAST:event_tbProMatMouseClicked
 
 

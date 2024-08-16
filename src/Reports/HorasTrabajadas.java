@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import conectar.Conectar;
+import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Statement;
 import javax.swing.JComboBox;
@@ -21,87 +22,150 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
+    private static final Logger LOGGER = Logger.getLogger(HorasTrabajadas.class.getName());
     Conectar conexion = new Conectar();
     Connection conect = conexion.getConexion();
-
-    
 
     public HorasTrabajadas() {
         initComponents();
         txtIdHoras.setEnabled(false);
         AutoCompleteDecorator.decorate(cbxTrabajador);
         MostrarTrabajador(cbxTrabajador);
+
+        this.conect = conexion.getConexion();  // Asegurando la inicialización de la conexión
     }
 
-     private static final Logger LOGGER = Logger.getLogger(HorasTrabajadas.class.getName());
+    // Constructor que inicializa la conexión a la base de datos
+    public HorasTrabajadas(Connection connection) {
+        this.conect = connection;
+    }
 
-    
     // Método para registrar el inicio de sesión
-     public void registrarInicioSesion(int trabajadorId) {
-    String sql = "INSERT INTO horas_trabajadas (trabajador_id, inicio, fecha) VALUES (?, ?, ?)";
-    try (PreparedStatement pst = conect.prepareStatement(sql)) {
-        pst.setInt(1, trabajadorId);
-        pst.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-        pst.setDate(3, java.sql.Date.valueOf(java.time.LocalDate.now()));
-        pst.executeUpdate();
-        System.out.println("Inicio de sesión registrado para trabajador ID: " + trabajadorId);
-    } catch (SQLException ex) {
-        Logger.getLogger(HorasTrabajadas.class.getName()).log(Level.SEVERE, null, ex);
+    public void registrarInicioSesion(int trabajadorId) {
+        String sql = "INSERT INTO horas_ingreso (trabajador_id, fInicio) VALUES (?, ?)";
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            pst.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            pst.executeUpdate();
+            System.out.println("Inicio de sesión registrado para trabajador ID: " + trabajadorId);
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error al registrar inicio de sesión: ", ex);
+            ex.printStackTrace();
+        }
     }
-}
-
 
     // Método para registrar el fin de sesión y calcular las horas de trabajo
-     public void registrarFinSesion(int trabajadorId) {
-    System.out.println("Intentando registrar fin de sesión para trabajador ID: " + trabajadorId); // Mensaje de depuración
-
-    String sql = "UPDATE horas_trabajadas SET fin = ?, horas = ?, horas_extras = ? WHERE trabajador_id = ? AND fecha = ?";
-    try (PreparedStatement pst = conect.prepareStatement(sql)) {
-        LocalDateTime fin = LocalDateTime.now();
-        System.out.println("Hora de fin: " + fin); // Mensaje de depuración
-        pst.setTimestamp(1, Timestamp.valueOf(fin));
-
-        String sqlSelect = "SELECT inicio FROM horas_trabajadas WHERE trabajador_id = ? AND fecha = ?";
-        try (PreparedStatement pstSelect = conect.prepareStatement(sqlSelect)) {
-            pstSelect.setInt(1, trabajadorId);
-            pstSelect.setDate(2, java.sql.Date.valueOf(java.time.LocalDate.now()));
-            ResultSet rs = pstSelect.executeQuery();
-            if (rs.next()) {
-                LocalDateTime inicio = rs.getTimestamp("inicio").toLocalDateTime();
-                System.out.println("Hora de inicio: " + inicio); // Mensaje de depuración
-
-                long minutosTrabajados = ChronoUnit.MINUTES.between(inicio, fin);
-                double horasTrabajadas = minutosTrabajados / 60.0 - 0.5; // Restar 30 minutos de descanso
-                double horasExtras = Math.max(0, horasTrabajadas - 8); // Suponiendo una jornada laboral de 8 horas
-
-                pst.setDouble(2, horasTrabajadas);
-                pst.setDouble(3, horasExtras);
-                pst.setInt(4, trabajadorId);
-                pst.setDate(5, java.sql.Date.valueOf(java.time.LocalDate.now()));
-
-                int rowsUpdated = pst.executeUpdate();
-                System.out.println("Rows updated: " + rowsUpdated); // Mensaje de depuración
-
-                if (rowsUpdated > 0) {
-                    System.out.println("Fin de sesión registrado para trabajador ID: " + trabajadorId); // Mensaje de depuración
-                } else {
-                    System.out.println("No se encontró el registro de inicio de sesión para el trabajador con ID: " + trabajadorId); // Mensaje de depuración
-                }
+    public void registrarFinSesion(int trabajadorId) {
+        System.out.println("Registrando fin de sesión para trabajador ID: " + trabajadorId); // Mensaje de depuración
+        String sql = "INSERT INTO horas_salida (trabajador_id, fSalida) VALUES (?, ?)";
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            pst.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            int rowsAffected = pst.executeUpdate();
+            System.out.println("Filas afectadas: " + rowsAffected); // Mensaje de depuración
+            if (rowsAffected > 0) {
+                System.out.println("Fin de sesión registrado para trabajador ID: " + trabajadorId);
             } else {
-                System.out.println("No se encontró el registro de inicio de sesión para el trabajador con ID: " + trabajadorId); // Mensaje de depuración
+                System.out.println("No se pudo registrar el fin de sesión para trabajador ID: " + trabajadorId);
             }
-            rs.close();
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error al registrar fin de sesión: ", ex);
+            ex.printStackTrace();
         }
-    } catch (SQLException ex) {
-        Logger.getLogger(HorasTrabajadas.class.getName()).log(Level.SEVERE, null, ex);
     }
-}
 
+    public void calcularPagos(int trabajadorId) {
+        String sqlHoras = "SELECT fInicio, fSalida FROM horas_ingreso i "
+                + "JOIN horas_salida s ON i.trabajador_id = s.trabajador_id "
+                + "WHERE i.trabajador_id = ? AND i.fecha = s.fecha";
+        try (PreparedStatement pst = conect.prepareStatement(sqlHoras)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
+            double totalHorasTrabajadas = 0;
+            double totalHorasExtras = 0;
+            while (rs.next()) {
+                LocalDateTime inicio = rs.getTimestamp("fInicio").toLocalDateTime();
+                LocalDateTime fin = rs.getTimestamp("fSalida").toLocalDateTime();
+                long minutosTrabajados = ChronoUnit.MINUTES.between(inicio, fin);
+                double horasTrabajadas = minutosTrabajados / 60.0;
+                totalHorasTrabajadas += horasTrabajadas;
+                if (horasTrabajadas > 8) {
+                    totalHorasExtras += horasTrabajadas - 8;
+                }
+            }
+            double pagoPorHora = obtenerPagoPorHora(trabajadorId);
+            double salarioBruto = totalHorasTrabajadas * pagoPorHora;
+            double salarioNeto = salarioBruto; // Aquí puedes añadir deducciones y otros cálculos
+            guardarPagos(trabajadorId, salarioBruto, salarioNeto);
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error al calcular pagos: ", ex);
+        }
+    }
 
+    private double obtenerPagoPorHora(int trabajadorId) {
+        String sql = "SELECT precioPorHora FROM puestodetrabajo WHERE idTrabajador = ?";
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("precioPorHora");
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error al obtener pago por hora: ", ex);
+        }
+        return 0.0;
+    }
 
+    private void guardarPagos(int trabajadorId, double salarioBruto, double salarioNeto) {
+        String sql = "INSERT INTO pagos (trabajador_id, salario_bruto, salario_neto) VALUES (?, ?, ?)";
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            pst.setDouble(2, salarioBruto);
+            pst.setDouble(3, salarioNeto);
+            pst.executeUpdate();
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error al guardar pagos: ", ex);
+        }
+    }
 
+    public void generarReporte(int trabajadorId, java.util.Date fechaInicio, java.util.Date fechaFin) {
+        String sql = "SELECT * FROM pagos WHERE trabajador_id = ? AND fecha BETWEEN ? AND ?";
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            pst.setDate(2, new java.sql.Date(fechaInicio.getTime()));
+            pst.setDate(3, new java.sql.Date(fechaFin.getTime()));
+            ResultSet rs = pst.executeQuery();
 
+            DefaultTableModel model = (DefaultTableModel) TableCompras.getModel();
+            model.setRowCount(0); // Clear existing data
 
+            while (rs.next()) {
+                Object[] row = {
+                    rs.getInt("id"),
+                    obtenerNombreTrabajador(rs.getInt("trabajador_id")),
+                    rs.getDouble("salario_bruto"),
+                    rs.getDouble("salario_neto")
+                };
+                model.addRow(row);
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error al generar el reporte: " + ex.getMessage());
+        }
+    }
+
+    private String obtenerNombreTrabajador(int trabajadorId) {
+        String sql = "SELECT nombre FROM worker WHERE idWorker = ?";
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                return rs.getString("nombre");
+            }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error al obtener nombre del trabajador: ", ex);
+        }
+        return "";
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -133,7 +197,7 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "Id", "Trabajador", "Puesto de Trabajo", "Pago por Hora", "Hora extra", "Fecha Inicio", "Fecha Fin", "Pago Hora", "Horas Trabajadas", "Horas Extras", "Monto a Pagar"
+                "Id", "Trabajador", "Puesto de Trabajo", "Pago por Hora", "Hora extra", "Fecha Inicio", "Periodo de Pago", "Pago Hora", "Horas Trabajadas", "Horas Extras", "Monto a Pagar"
             }
         ));
         TableCompras.setRowHeight(23);
@@ -143,6 +207,11 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         jPanel12.add(txtIdHoras, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 60, 30));
 
         btnHistorialCompra.setText("Generar Reporte");
+        btnHistorialCompra.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHistorialCompraActionPerformed(evt);
+            }
+        });
         jPanel12.add(btnHistorialCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 90, 120, 40));
         jPanel12.add(txtIdTrabajador, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 50, 70, 30));
 
@@ -156,8 +225,8 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         jPanel12.add(jDateChooser1, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 50, 140, -1));
         jPanel12.add(jDateChooser2, new org.netbeans.lib.awtextra.AbsoluteConstraints(920, 50, 120, -1));
 
-        jLabel1.setText("Inicio");
-        jPanel12.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(800, 30, -1, -1));
+        jLabel1.setText("Fecha de Inicio de Pagos");
+        jPanel12.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 30, -1, -1));
 
         jLabel2.setText("Final");
         jPanel12.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(950, 30, -1, -1));
@@ -209,6 +278,13 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         MostrarCodigoTrabajador(cbxTrabajador, txtIdTrabajador);
     }//GEN-LAST:event_cbxTrabajadorItemStateChanged
 
+    private void btnHistorialCompraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHistorialCompraActionPerformed
+        int trabajadorId = Integer.parseInt(txtIdTrabajador.getText());
+        java.util.Date fechaInicio = jDateChooser1.getDate();
+        java.util.Date fechaFin = jDateChooser2.getDate();
+        generarReporte(trabajadorId, fechaInicio, fechaFin);
+    }//GEN-LAST:event_btnHistorialCompraActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JTable TableCompras;
@@ -227,24 +303,14 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarTrabajador(JComboBox comboTrabajador) {
-
-        String sql = "";
-        sql = "select * from worker";
-        Statement st;
-
-        try {
-
-            st = conect.createStatement();
-            ResultSet rs = st.executeQuery(sql);
+        String sql = "SELECT * FROM worker";
+        try (Statement st = conect.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             comboTrabajador.removeAllItems();
-
             while (rs.next()) {
-
                 comboTrabajador.addItem(rs.getString("nombre"));
             }
-
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+            JOptionPane.showMessageDialog(null, "Error al Mostrar Trabajadores: " + e.toString());
         }
     }
 
@@ -279,12 +345,12 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                 double horasTrabajadas = rs.getDouble("horas");
                 double horasExtras = rs.getDouble("horas_extras");
 
-                String sqlTrabajador = "SELECT pago_hora FROM trabajadores WHERE id = ?";
+                String sqlTrabajador = "SELECT pagoPorHora FROM puestodetrabajo WHERE idTrabajador = ?";
                 try (PreparedStatement pstTrabajador = conect.prepareStatement(sqlTrabajador)) {
                     pstTrabajador.setInt(1, trabajadorId);
                     ResultSet rsTrabajador = pstTrabajador.executeQuery();
                     if (rsTrabajador.next()) {
-                        double pagoHora = rsTrabajador.getDouble("pago_hora");
+                        double pagoHora = rsTrabajador.getDouble("pagoPorHora");
                         double salarioBruto = horasTrabajadas * pagoHora + horasExtras * pagoHora * 1.5;
 
                         double impuestoFederal = salarioBruto * obtenerTasaImpuestoFederal(trabajadorId);

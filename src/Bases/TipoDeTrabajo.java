@@ -57,7 +57,7 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
         Connection connect = con.getConexion();
 
         //Hago la Consulta
-        String consulta = "Insert into tiposDeTrabajos (nombre) values (?);";
+        String consulta = "Insert into tiposdetrabajos (nombre) values (?);";
 
         try {
 

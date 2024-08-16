@@ -165,7 +165,7 @@ public class Unidades extends javax.swing.JInternalFrame {
 
     }
 
-    public void SeleccionarCategoria(JTable Tabla, JTextField IdUnidades, JTextField Unidades) {
+    public void SeleccionarUnidades(JTable Tabla, JTextField IdUnidades, JTextField Unidades) {
 
         try {
 
@@ -465,7 +465,7 @@ public class Unidades extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnActivarActionPerformed
 
     private void tbUnidadesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbUnidadesMouseClicked
-        SeleccionarCategoria(tbUnidades, txtIdUnidades, txtUnidades);
+        SeleccionarUnidades(tbUnidades, txtIdUnidades, txtUnidades);
     }//GEN-LAST:event_tbUnidadesMouseClicked
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed

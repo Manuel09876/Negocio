@@ -1135,6 +1135,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             int id = IdCompra();
             int frecuencia = Integer.parseInt(txtFrecuencia.getText());
             double interes = Double.parseDouble(txtInteres.getText());
+            double Inicial = Double.parseDouble(txt_Inicial.getText());
             int numeroCuotas = Integer.parseInt(txtNumeroCuotas.getText());
             double valorCuota = Double.parseDouble(txtValorCuota.getText());
             double total = Double.parseDouble(txtTotal.getText());
@@ -1148,8 +1149,8 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             }
 
             // Preparar la inserción de pagos en la base de datos
-            String sql = "INSERT INTO creditopg (id_compra, frecuencia, fechaPago, interes, NumeroCuotas, cuota, Diferencia, estado) "
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
+            String sql = "INSERT INTO creditopg (id_compra, frecuencia, fechaPago, interes, Inicial, NumeroCuotas, cuota, Diferencia, estado) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
             stmt = connect.prepareStatement(sql);
 
             Calendar calendar = Calendar.getInstance();
@@ -1173,9 +1174,10 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                 stmt.setInt(2, frecuencia);
                 stmt.setString(3, dateFormat.format(fechaPago));
                 stmt.setDouble(4, interes);
-                stmt.setInt(5, i); // Número de la cuota actual
-                stmt.setDouble(6, cuotaActual);
-                stmt.setDouble(7, diferencia); // Diferencia actualizada
+                stmt.setDouble(5, Inicial);
+                stmt.setInt(6, i); // Número de la cuota actual
+                stmt.setDouble(7, cuotaActual);
+                stmt.setDouble(8, diferencia); // Diferencia actualizada
 
                 stmt.executeUpdate();
 

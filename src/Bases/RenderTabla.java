@@ -14,7 +14,7 @@ public class RenderTabla extends DefaultTableCellRenderer{
             JButton boton = (JButton)o;
             return boton;
         }
-        return super.getTableCellRendererComponent(table, o, isSelected, hasFocus, row, column); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+        return super.getTableCellRendererComponent(table, o, isSelected, hasFocus, row, column); // Generated from
     }
 
     

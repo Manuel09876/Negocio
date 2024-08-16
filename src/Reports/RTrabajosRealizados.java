@@ -684,7 +684,7 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_tbVentasMouseClicked
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        double subtotal = 0.0;
+    double subtotal = 0.0;
     double impuesto = 0.06; // Impuesto del 6%
     double total = 0.0;
     double tip = 0.0; // Propina inicialmente en 0

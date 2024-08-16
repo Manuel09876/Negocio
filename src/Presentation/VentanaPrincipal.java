@@ -28,20 +28,33 @@ import javax.swing.JOptionPane;
 
 public class VentanaPrincipal extends javax.swing.JFrame {
 
-    private int rolId;
+    private int tipUsu;
     private Conectar conectar;
+    private String usuario; // Variable para almacenar el usuario
+    private HorasTrabajadas ht; // Asegúrate de que esta instancia esté correctamente inicializada
 
-    public VentanaPrincipal(int rolId) {
-        this.rolId = rolId;
-        this.conectar = new Conectar();
+    Loggin lg = new Loggin();
+
+    public VentanaPrincipal(int tipUsu, String usuario) {
         initComponents();
+        this.conectar = new Conectar();
+        this.ht = new HorasTrabajadas();
+        this.tipUsu = tipUsu;
+        this.usuario = usuario; // Almacena el usuario
 
         this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
         cargarPermisos();
+
+        System.out.println("Usuario en VentanaPrincipal: " + this.usuario); // Mensaje de depuración
+        lbUsuario.setText(usuario); // Mostrar el nombre de usuario en la interfaz
+
+        ht = new HorasTrabajadas();
+
     }
 
+    // Constructor vacío para evitar errores en la inicialización por defecto
     public VentanaPrincipal() {
-
+        initComponents();
     }
 
     @SuppressWarnings("unchecked")
@@ -741,8 +754,25 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuStockActionPerformed
 
     private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirActionPerformed
+        System.out.println("Botón de salida presionado"); // Mensaje de depuración
+        if (JOptionPane.showConfirmDialog(null, "¿Desea salir del Sistema?", "Acceso", JOptionPane.YES_NO_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
+            System.out.println("Usuario al salir: " + this.usuario); // Mensaje de depuración
+            int trabajadorId = obtenerTrabajadorId(this.usuario);
+            if (trabajadorId != 0) {
+                System.out.println("ID del trabajador al salir: " + trabajadorId); // Mensaje de depuración
+                ht.registrarFinSesion(trabajadorId); // Llama al método para registrar la hora de salida
+//                System.out.println("Fin de sesión registrado para trabajador ID: " + trabajadorId); // Mensaje de depuración
+            } else {
+                System.out.println("No se encontró el ID del trabajador."); // Mensaje de depuración
+            }
 
-        if (JOptionPane.showConfirmDialog(null, "¡Desea salir del Sistema?", "Acceso", JOptionPane.YES_NO_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
+            // Ejecuta otros métodos que desees antes de salir del programa
+            // Por ejemplo:
+            // ht.calcularPagos(trabajadorId);
+            // ht.generarReporte(trabajadorId, fechaInicio, fechaFin);
+//        // Cierra la conexión a la base de datos
+//        Conectar conexion = new Conectar();
+//        conexion.cerrarConexion(conect);
             System.exit(0);
         }
     }//GEN-LAST:event_btnSalirActionPerformed
@@ -879,7 +909,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new VentanaPrincipal(1).setVisible(true);
+                new VentanaPrincipal().setVisible(true);
             }
         });
     }
@@ -944,7 +974,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 + "LEFT JOIN submenus s ON rp.submenu_id = s.id "
                 + "WHERE rp.rol_id = ?";
         try (PreparedStatement pst = conectar.getConexion().prepareStatement(sql)) {
-            pst.setInt(1, rolId);
+            pst.setInt(1, tipUsu);
             ResultSet rs = pst.executeQuery();
             while (rs.next()) {
                 String menuName = rs.getString("menu_name");
@@ -978,7 +1008,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 break;
             case "menuSubAdministration2":
                 menuTipoUsuarios.setVisible(visibility);
-                break;                
+                break;
             case "menuSubAdministration3":
                 menuAsignacionPermisos.setVisible(visibility);
                 break;
@@ -1015,7 +1045,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             case "menuSubAdministration14":
                 menuFormaDePago.setVisible(visibility);
                 break;
-                
+
             case "menuSubAdmission1":
                 menuClientes.setVisible(visibility);
                 break;
@@ -1040,7 +1070,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             case "menuSubAdmission8":
                 menuConfiguracion.setVisible(visibility);
                 break;
-                
+
             case "menuSubRegister1":
                 menuOrdenes.setVisible(visibility);
                 break;
@@ -1068,7 +1098,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             case "menuSubRegister9":
                 menuCancelaciones.setVisible(visibility);
                 break;
-                
+
             case "menuSubReports1":
                 menuTrabajosRealizados.setVisible(visibility);
                 break;
@@ -1096,8 +1126,26 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             case "menuSubReports9":
                 menuPresupuesto.setVisible(visibility);
                 break;
-                
+
         }
     }
 
+    private int obtenerTrabajadorId(String usuario) {
+        String sql = "SELECT ut.id_trabajador FROM usuario_trabajador ut INNER JOIN usuarios u ON ut.id_usuario = u.idUsuarios WHERE u.usuario = ?";
+        try {
+            PreparedStatement pst = conectar.getConexion().prepareStatement(sql);
+            pst.setString(1, usuario);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                int idTrabajador = rs.getInt("id_trabajador");
+                System.out.println("ID del trabajador obtenido: " + idTrabajador); // Mensaje de depuración
+                return idTrabajador;
+            } else {
+                System.out.println("No se encontró el trabajador para el usuario: " + usuario); // Mensaje de depuración
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(VentanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+    }
 }

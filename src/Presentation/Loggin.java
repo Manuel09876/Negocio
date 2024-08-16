@@ -14,34 +14,45 @@ public class Loggin extends javax.swing.JFrame {
 
     private static final Logger LOGGER = Logger.getLogger(HorasTrabajadas.class.getName());
     private int trabajadorId; // Variable de instancia para almacenar el ID del trabajador
-
-    HorasTrabajadas ht;
+    private HorasTrabajadas ht; // Asegúrate de que esta instancia esté correctamente inicializada
+    
 
     public Loggin() {
         initComponents();
         ht = new HorasTrabajadas();
         txtUser.requestFocus();
         btnTest.setVisible(false);
+        
+        
 
     }
 
     public void IngresaSistema(String Usuario, String Contrasena) {
-        String sql = "SELECT idUsuarios, rol_id FROM usuarios WHERE usuario = ? AND password = ?";
+        String sql = "SELECT idUsuarios, rol, password FROM usuarios WHERE usuario = ?";
         try {
             PreparedStatement pst = conect.prepareStatement(sql);
             pst.setString(1, Usuario);
-            pst.setString(2, Contrasena);
+            System.out.println("Ejecutando consulta: " + sql);
             try (ResultSet result = pst.executeQuery()) {
                 if (result.next()) {
-                    int rolId = result.getInt("rol_id");
-                    int trabajadorId = result.getInt("idUsuarios");
-                    System.out.println("ID del trabajador al ingresar: " + trabajadorId); // Mensaje de depuración
-                    this.setVisible(false);
-                    VentanaPrincipal objVP = new VentanaPrincipal(rolId);
-                    objVP.setVisible(true);
-                    objVP.pack();
-                    VentanaPrincipal.lbUsuario.setText(Usuario);
-                    ht.registrarInicioSesion(trabajadorId); // Registrar inicio de sesión
+                    String passwordBD = result.getString("password");
+                    System.out.println("Password en BD: " + passwordBD);
+                    System.out.println("Password ingresado: " + Contrasena);
+                    if (passwordBD.equals(Contrasena)) {
+                        int tipUsu = result.getInt("rol");
+                        int idUsuarios = result.getInt("idUsuarios");
+                        System.out.println("ID del usuario al ingresar: " + idUsuarios);
+
+                        // Obtener el idTrabajador relacionado con el idUsuarios
+                        int idTrabajador = obtenerTrabajadorId(Usuario);
+                        if (idTrabajador != 0) {
+                            System.out.println("ID del trabajador al ingresar: " + idTrabajador);
+                            ht.registrarInicioSesion(idTrabajador); // Registrar inicio de sesión del trabajador
+                        }
+
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
+                    }
                 } else {
                     JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
                 }
@@ -49,6 +60,25 @@ public class Loggin extends javax.swing.JFrame {
         } catch (SQLException ex) {
             Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private int obtenerTrabajadorId(int idUsuario) {
+        String sql = "SELECT id_trabajador FROM usuario_trabajador WHERE id_usuario = ?";
+        try {
+            PreparedStatement pst = conect.prepareStatement(sql);
+            pst.setInt(1, idUsuario);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                int idTrabajador = rs.getInt("id_trabajador");
+                System.out.println("ID del trabajador obtenido: " + idTrabajador); // Mensaje de depuración
+                return idTrabajador;
+            } else {
+                System.out.println("No se encontró el trabajador para el usuario con ID: " + idUsuario); // Mensaje de depuración
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
     }
 
     @SuppressWarnings("unchecked")
@@ -202,12 +232,18 @@ public class Loggin extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnEnterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEnterActionPerformed
-
         String usu = txtUser.getText();
         String pas = new String(txtPassword.getPassword());
-
+        System.out.println("Usuario: " + usu + ", Contraseña: " + pas); // Depuración
         IngresaSistema(usu, pas);
-
+        
+         // Código para obtener tipUsu y usuario
+        String usuario = txtUser.getText();
+        int tipUsu = obtenerRolDeUsuario(usuario); // Implementa este método para obtener el rol del usuario
+        
+        VentanaPrincipal objVP = new VentanaPrincipal(tipUsu, usuario); // Pasar los valores correctos
+        objVP.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_btnEnterActionPerformed
 
     private void btnTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTestActionPerformed
@@ -215,20 +251,12 @@ public class Loggin extends javax.swing.JFrame {
         Connection con = conecta.getConexion();
         JOptionPane.showMessageDialog(null, "Conexion establecida");
 
-        // TODO add your handling code here:
     }//GEN-LAST:event_btnTestActionPerformed
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
         if (JOptionPane.showConfirmDialog(null, "¡Desea salir del Sistema?", "Acceso", JOptionPane.YES_NO_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
-        int trabajadorId = obtenerTrabajadorId(txtUser.getText());
-        if (trabajadorId != 0) {
-            System.out.println("ID del trabajador al salir: " + trabajadorId); // Mensaje de depuración
-            ht.registrarFinSesion(trabajadorId);
-        } else {
-            System.out.println("No se encontró el ID del trabajador."); // Mensaje de depuración
+            System.exit(0);
         }
-        System.exit(0);
-    }
     }//GEN-LAST:event_btnExitActionPerformed
 
 
@@ -291,24 +319,29 @@ public class Loggin extends javax.swing.JFrame {
     Connection conect = conexion.getConexion();
 
     private int obtenerTrabajadorId(String usuario) {
-    String sql = "SELECT idUsuarios FROM usuarios WHERE usuario = ?";
-    try {
-        PreparedStatement pst = conect.prepareStatement(sql);
-        pst.setString(1, usuario);
-        ResultSet rs = pst.executeQuery();
-        if (rs.next()) {
-            int trabajadorId = rs.getInt("idUsuarios");
-            System.out.println("ID del trabajador obtenido: " + trabajadorId); // Mensaje de depuración
-            return trabajadorId;
-        } else {
-            System.out.println("No se encontró el trabajador con usuario: " + usuario); // Mensaje de depuración
+        String sql = "SELECT ut.id_trabajador FROM usuario_trabajador ut INNER JOIN usuarios u ON ut.id_usuario = u.idUsuarios WHERE u.usuario = ?";
+        try {
+            PreparedStatement pst = conect.prepareStatement(sql);
+            pst.setString(1, usuario);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                int idTrabajador = rs.getInt("id_trabajador");
+                System.out.println("ID del trabajador obtenido: " + idTrabajador); // Mensaje de depuración
+                return idTrabajador;
+            } else {
+                System.out.println("No se encontró el trabajador para el usuario: " + usuario); // Mensaje de depuración
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
         }
-    } catch (SQLException ex) {
-        Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
+        return 0;
     }
-    return 0;
-}
-
-
+    
+    private int obtenerRolDeUsuario(String usuario) {
+        // Implementa este método para obtener el rol del usuario desde la base de datos
+        int rolId = 0;
+        // Código para obtener rolId desde la base de datos basado en el usuario
+        return rolId;
+    }
 
 }
