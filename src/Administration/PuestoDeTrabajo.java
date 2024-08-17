@@ -388,17 +388,17 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                     dateInicioPuesto.setDate(fecha);
 
                     // Imprimir valores después de asignarlos para verificación
-                    System.out.println("IdPDT JTextField value: " + IdPDT.getText());
-                    System.out.println("Trabajador JComboBox value: " + Trabajador.getSelectedItem());
-                    System.out.println("TDT JComboBox value: " + TDT.getSelectedItem());
-                    System.out.println("PagoPorHora JTextField value: " + PPH.getText());
-                    System.out.println("Sueldo JTextField value: " + sueldo.getText());
-                    System.out.println("OverTime JComboBox value: " + OverTime.getSelectedItem());
-                    System.out.println("Horario JComboBox value: " + Horario.getSelectedItem());
-                    System.out.println("Periodo JComboBox value: " + Periodo.getSelectedItem());
-                    System.out.println("Vacaciones JComboBox value: " + Vacaciones.getSelectedItem());
-                    System.out.println("TiempoVacaciones JTextField value: " + tiempoVacaciones.getText());
-                    System.out.println("FechaInicioPuesto JDateChooser value: " + dateInicioPuesto.getDate());
+//                    System.out.println("IdPDT JTextField value: " + IdPDT.getText());
+//                    System.out.println("Trabajador JComboBox value: " + Trabajador.getSelectedItem());
+//                    System.out.println("TDT JComboBox value: " + TDT.getSelectedItem());
+//                    System.out.println("PagoPorHora JTextField value: " + PPH.getText());
+//                    System.out.println("Sueldo JTextField value: " + sueldo.getText());
+//                    System.out.println("OverTime JComboBox value: " + OverTime.getSelectedItem());
+//                    System.out.println("Horario JComboBox value: " + Horario.getSelectedItem());
+//                    System.out.println("Periodo JComboBox value: " + Periodo.getSelectedItem());
+//                    System.out.println("Vacaciones JComboBox value: " + Vacaciones.getSelectedItem());
+//                    System.out.println("TiempoVacaciones JTextField value: " + tiempoVacaciones.getText());
+//                    System.out.println("FechaInicioPuesto JDateChooser value: " + dateInicioPuesto.getDate());
 
                 } else {
                     dateInicioPuesto.setDate(null);
