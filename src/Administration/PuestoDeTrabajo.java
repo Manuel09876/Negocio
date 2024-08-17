@@ -1,5 +1,6 @@
 package Administration;
 
+import Bases.CustomItem;
 import com.toedter.calendar.JDateChooser;
 import conectar.Conectar;
 import java.awt.HeadlessException;
@@ -150,10 +151,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
     public PuestoDeTrabajo() {
         initComponents();
-        // Establecer el valor por default en los campos de texto
-//        txtPagoPorHora.setText("0.00");
-//        txtSueldo.setText("0.00");
-//        txtVacaciones.setText("0");
 
         AutoCompleteDecorator.decorate(cbxTDT);
         AutoCompleteDecorator.decorate(cbxTrabajador);
@@ -170,6 +167,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         MostrarVacaciones(cbxVacaciones);
 
         Mostrar(tbPuestosDeTrabajo);
+
         txtIdPDT.setEnabled(false);
         txtIdOverTime.setEnabled(false);
         txtIdPDT.setEnabled(false);
@@ -180,17 +178,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         txtIdPeriodo.setEnabled(false);
         txtIdVacaciones.setEnabled(false);
 
-        DocumentListener documentListener = new DocumentListener() {
-            public void changedUpdate(DocumentEvent e) {
-            }
-
-            public void removeUpdate(DocumentEvent e) {
-            }
-
-            public void insertUpdate(DocumentEvent e) {
-                
-            }
-        };
     }
 
     public void Mostrar(JTable Tabla) {
@@ -218,7 +205,9 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
         //Consulto la BD
         sql = "SELECT pdt.idPDT, w.nombre AS Trabajador, tdt.nombre AS 'Tipo de Trabajo', pdt.pagoPorHora AS 'Pago por Hora', \n"
-                + "pdt.sueldo AS Sueldo, o.descripcion AS Overtime, h.descripcion AS Horario, p.descripcion AS 'Periodo de Pagos', v.descripcion AS Vacaciones, pdt.tiempoVacaciones AS 'Periodo de Vacaciones', pdt.fechaDePuesto AS 'Fecha de Puesto', pdt.estado AS Estado \n"
+                + "pdt.sueldo AS Sueldo, o.descripcion AS Overtime, h.descripcion AS Horario, p.descripcion AS 'Periodo de Pagos', "
+                + "v.descripcion AS Vacaciones, pdt.tiempoVacaciones AS 'Periodo de Vacaciones', pdt.fechaDePuesto AS 'Fecha de Puesto', "
+                + "pdt.estado AS Estado \n"
                 + "FROM puestodetrabajo pdt \n"
                 + "INNER JOIN worker w ON pdt.idTrabajador=w.idWorker \n"
                 + "INNER JOIN tiposdetrabajos tdt ON pdt.idTDT=tdt.id \n"
@@ -227,9 +216,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 + "INNER JOIN periodo p ON pdt.id_periodo=p.id\n"
                 + "INNER JOIN vacaciones v ON pdt.id_vacaciones=v.id";
 
-        /*select usuarios.id, usuarios.nombres, usuarios.apellidos, sexo.sexoDescripcion as sexo\n"
-                + "from usuarios\n"
-                + "inner join sexo on usuarios.fksexo=sexo.id*/
         String[] datos = new String[12];
         Statement st;
 
@@ -240,18 +226,18 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
             //Recorre la Tabla con un while
             while (rs.next()) {
                 //LLenamos la Tabla
-                datos[0] = rs.getString(1);
-                datos[1] = rs.getString(2);
-                datos[2] = rs.getString(3);
-                datos[3] = rs.getString(4);
-                datos[4] = rs.getString(5);
-                datos[5] = rs.getString(6);
-                datos[6] = rs.getString(7);
-                datos[7] = rs.getString(8);
-                datos[8] = rs.getString(9);
-                datos[9] = rs.getString(10);
-                datos[10] = rs.getString(11);
-                datos[11] = rs.getString(12);
+                datos[0] = rs.getString("idPDT");
+                datos[1] = rs.getString("Trabajador");
+                datos[2] = rs.getString("Tipo de Trabajo");
+                datos[3] = rs.getString("Pago por Hora");
+                datos[4] = rs.getString("Sueldo");
+                datos[5] = rs.getString("Overtime");
+                datos[6] = rs.getString("Horario");
+                datos[7] = rs.getString("Periodo de Pagos");
+                datos[8] = rs.getString("Vacaciones");
+                datos[9] = rs.getString("Periodo de Vacaciones");
+                datos[10] = rs.getString("Fecha de Puesto");
+                datos[11] = rs.getString("Estado");
 
                 //Lo agregue a las filas 
                 modelo.addRow(datos);
@@ -267,69 +253,88 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
     }
 
-    public void Insertar(JTextField IdTrabajador, JTextField IdTipoDeTrabajo, JTextField pagoPorHora, JTextField sueldo, JComboBox OverTime, JComboBox Horario, JComboBox Periodo, JComboBox Vacaciones, JTextField tiempoVacaciones, JDateChooser FechaField) {
+    public void Insertar() {
         Conectar con = new Conectar();
-        Connection connect = con.getConexion();
+        Connection connect = null;
+        CallableStatement cs = null;
 
         try {
-            int idTrabajador = Integer.parseInt(IdTrabajador.getText());
-            int idTipoDeTrabajo = Integer.parseInt(IdTipoDeTrabajo.getText());
-            double pagoPorHoraValue = 0.0;
-            double sueldoValue = 0.0;
+            connect = con.getConexion();
+
+            // Validar y convertir los valores de IdTrabajador e IdTipoDeTrabajo
+            int idTrabajador = Integer.parseInt(txtIdtrabajador.getText());
+            int idTipoDeTrabajo = Integer.parseInt(txtIdTipoDeTrabajo.getText());
+
+            // Inicializar variables para pago por hora y sueldo
+            double pagoPorHora = 0.0;
+            double sueldo = 0.0;
 
             // Validar y convertir los valores de pago por hora y sueldo
-            if (!pagoPorHora.getText().isEmpty()) {
-                pagoPorHoraValue = Double.parseDouble(pagoPorHora.getText());
+            if (!txtPagoPorHora.getText().isEmpty()) {
+                pagoPorHora = Double.parseDouble(txtPagoPorHora.getText());
             }
-            if (!sueldo.getText().isEmpty()) {
-                sueldoValue = Double.parseDouble(sueldo.getText());
+            if (!txtSueldo.getText().isEmpty()) {
+                sueldo = Double.parseDouble(txtSueldo.getText());
             }
 
             // Asegurarse de que uno de los valores sea cero
-            if (pagoPorHoraValue > 0) {
-                sueldoValue = 0.0;
-            } else if (sueldoValue > 0) {
-                pagoPorHoraValue = 0.0;
+            if (pagoPorHora > 0) {
+                sueldo = 0.0;
+            } else if (sueldo > 0) {
+                pagoPorHora = 0.0;
             }
 
+            // Validar y convertir los valores de OverTime, Horario, Periodo, y Vacaciones
             int idOverTime = Integer.parseInt(txtIdOverTime.getText());
             int idHorario = Integer.parseInt(txtIdHorario.getText());
             int idPeriodo = Integer.parseInt(txtIdPeriodo.getText());
             int idVacaciones = Integer.parseInt(txtIdVacaciones.getText());
-            int tiempoVacacionesValue = Integer.parseInt(tiempoVacaciones.getText());
+            int tiempoVacacionesValue = Integer.parseInt(txtVacaciones.getText());
 
             // Obtener la fecha de ingreso del JDateChooser como java.util.Date
-            java.util.Date fecha = FechaField.getDate();
-
+            java.util.Date fecha = dateInicioPuesto.getDate();
             if (fecha == null) {
                 JOptionPane.showMessageDialog(null, "Por favor, ingrese una fecha de ingreso válida.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
+            // Convertir la fecha a java.sql.Date
             java.sql.Date fechaSQL = new java.sql.Date(fecha.getTime());
 
+            // Preparar la consulta SQL para insertar el registro
             String consulta = "INSERT INTO puestodetrabajo (idTrabajador, idTDT, pagoPorHora, sueldo, id_overtime, id_horario, id_periodo, id_vacaciones, tiempoVacaciones, fechaDePuesto, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Activo')";
 
-            try (CallableStatement cs = connect.prepareCall(consulta)) {
-                cs.setInt(1, idTrabajador);
-                cs.setInt(2, idTipoDeTrabajo);
-                cs.setDouble(3, pagoPorHoraValue);
-                cs.setDouble(4, sueldoValue);
-                cs.setInt(5, idOverTime);
-                cs.setInt(6, idHorario);
-                cs.setInt(7, idPeriodo);
-                cs.setInt(8, idVacaciones);
-                cs.setInt(9, tiempoVacacionesValue);
-                cs.setDate(10, fechaSQL);
+            cs = connect.prepareCall(consulta);
+            cs.setInt(1, idTrabajador);
+            cs.setInt(2, idTipoDeTrabajo);
+            cs.setDouble(3, pagoPorHora);
+            cs.setDouble(4, sueldo);
+            cs.setInt(5, idOverTime);
+            cs.setInt(6, idHorario);
+            cs.setInt(7, idPeriodo);
+            cs.setInt(8, idVacaciones);
+            cs.setInt(9, tiempoVacacionesValue);
+            cs.setDate(10, fechaSQL);
 
-                cs.execute();
+            // Ejecutar la consulta
+            cs.execute();
 
-                JOptionPane.showMessageDialog(null, "Se Insertó");
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "No se Insertó. Error: " + e.toString());
-            }
+            JOptionPane.showMessageDialog(null, "Registro insertado exitosamente.");
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "Error en la conversión de datos: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "No se pudo insertar el registro. Error: " + e.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            try {
+                if (cs != null) {
+                    cs.close();
+                }
+                if (connect != null) {
+                    connect.close();
+                }
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -350,87 +355,58 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         }
     }
 
-    public void Seleccionar(JTable Tabla, JTextField Id, JComboBox Trabajador, JComboBox TDT, JTextField PagoPorHora, JTextField sueldo, JComboBox OverTime, JComboBox Horario, JComboBox Periodo, JComboBox Vacaciones, JTextField tiempoVacaciones, JDateChooser dateInicioPuesto) throws ParseException {
+    public void Seleccionar(JTable Tabla, JTextField IdPDT, JComboBox Trabajador, JComboBox TDT, JTextField PPH, JTextField sueldo, JComboBox OverTime, JComboBox Horario, JComboBox Periodo, JComboBox Vacaciones, JTextField tiempoVacaciones, JDateChooser dateInicioPuesto) {
         try {
             int fila = Tabla.getSelectedRow();
+
             if (fila >= 0) {
-                DocumentListener documentListener = null;
-                // Desactivar listeners (si es necesario)
-                Id.getDocument().removeDocumentListener(documentListener);
-                PagoPorHora.getDocument().removeDocumentListener(documentListener);
-                sueldo.getDocument().removeDocumentListener(documentListener);
-                tiempoVacaciones.getDocument().removeDocumentListener(documentListener);
+                IdPDT.setText(Tabla.getValueAt(fila, 0).toString());  // ID del Puesto de Trabajo
+                Trabajador.setSelectedItem(Tabla.getValueAt(fila, 1).toString());  // Trabajador
+                TDT.setSelectedItem(Tabla.getValueAt(fila, 2).toString());  // Tipo de Trabajo
 
-                // (Haz lo mismo para los otros campos si tienen listeners)
-                // Limpiar los campos antes de asignarles nuevos valores
-                Id.setText("");
-                Trabajador.setSelectedItem(null);
-                TDT.setSelectedItem(null);
-//                PagoPorHora.setText("");
-                sueldo.setText("");
-                OverTime.setSelectedItem(null);
-                Horario.setSelectedItem(null);
-                Periodo.setSelectedItem(null);
-                Vacaciones.setSelectedItem(null);
-                tiempoVacaciones.setText("");
-                dateInicioPuesto.setDate(null);
+                // Pago por Hora
+                PPH.setText(Tabla.getValueAt(fila, 3).toString());
 
-                // Asignar los valores de las columnas de la tabla a los campos correspondientes
-                String idPDTValue = Tabla.getValueAt(fila, 0).toString();
-                String trabajadorValue = Tabla.getValueAt(fila, 1).toString();
-                String tdtValue = Tabla.getValueAt(fila, 2).toString();
-                String pagoPorHoraValue = Tabla.getValueAt(fila, 3).toString();
-                String sueldoValue = Tabla.getValueAt(fila, 4).toString();
-                String overTimeValue = Tabla.getValueAt(fila, 5).toString();
-                String horarioValue = Tabla.getValueAt(fila, 6).toString();
-                String periodoValue = Tabla.getValueAt(fila, 7).toString();
-                String vacacionesValue = Tabla.getValueAt(fila, 8).toString();
-                String tiempoVacacionesValue = Tabla.getValueAt(fila, 9).toString();
+                
+                // Sueldo
+                sueldo.setText(Tabla.getValueAt(fila, 4).toString());
+
+                OverTime.setSelectedItem(Tabla.getValueAt(fila, 5).toString());  // OverTime
+                Horario.setSelectedItem(Tabla.getValueAt(fila, 6).toString());  // Horario
+                Periodo.setSelectedItem(Tabla.getValueAt(fila, 7).toString());  // Periodo de Pagos
+
+                // Vacaciones
+                Vacaciones.setSelectedItem(Tabla.getValueAt(fila, 8).toString());
+
+                // Tiempo de Vacaciones
+                tiempoVacaciones.setText(Tabla.getValueAt(fila, 9).toString());
+
+                // Manejar la conversión de la fecha
                 String fechaTexto = Tabla.getValueAt(fila, 10).toString();
-
-                // Asignar valores a JTextFields y JComboBox
-                System.out.println("Asignando valores...");
-                Id.setText(idPDTValue);
-                System.out.println("IdPDT set to: " + Id.getText());
-                Trabajador.setSelectedItem(trabajadorValue);
-                TDT.setSelectedItem(tdtValue);
-                PagoPorHora.setText(pagoPorHoraValue);
-                sueldo.setText(sueldoValue);
-                OverTime.setSelectedItem(overTimeValue);
-                Horario.setSelectedItem(horarioValue);
-                Periodo.setSelectedItem(periodoValue);
-                Vacaciones.setSelectedItem(vacacionesValue);
-                tiempoVacaciones.setText(tiempoVacacionesValue);
-
-                // Asignar valor a JDateChooser
-                if (fechaTexto != null && !fechaTexto.equalsIgnoreCase("null")) {
+                if (fechaTexto != null && !fechaTexto.isEmpty()) {
                     java.util.Date fecha = new SimpleDateFormat("yyyy-MM-dd").parse(fechaTexto);
                     dateInicioPuesto.setDate(fecha);
+
+                    // Imprimir valores después de asignarlos para verificación
+                    System.out.println("IdPDT JTextField value: " + IdPDT.getText());
+                    System.out.println("Trabajador JComboBox value: " + Trabajador.getSelectedItem());
+                    System.out.println("TDT JComboBox value: " + TDT.getSelectedItem());
+                    System.out.println("PagoPorHora JTextField value: " + PPH.getText());
+                    System.out.println("Sueldo JTextField value: " + sueldo.getText());
+                    System.out.println("OverTime JComboBox value: " + OverTime.getSelectedItem());
+                    System.out.println("Horario JComboBox value: " + Horario.getSelectedItem());
+                    System.out.println("Periodo JComboBox value: " + Periodo.getSelectedItem());
+                    System.out.println("Vacaciones JComboBox value: " + Vacaciones.getSelectedItem());
+                    System.out.println("TiempoVacaciones JTextField value: " + tiempoVacaciones.getText());
+                    System.out.println("FechaInicioPuesto JDateChooser value: " + dateInicioPuesto.getDate());
+
                 } else {
                     dateInicioPuesto.setDate(null);
                 }
-
-                // Imprimir valores después de asignarlos para verificación
-                System.out.println("IdPDT JTextField value: " + Id.getText());
-                System.out.println("Trabajador JComboBox value: " + Trabajador.getSelectedItem());
-                System.out.println("TDT JComboBox value: " + TDT.getSelectedItem());
-                System.out.println("PagoPorHora JTextField value: " + PagoPorHora.getText());
-                System.out.println("Sueldo JTextField value: " + sueldo.getText());
-                System.out.println("OverTime JComboBox value: " + OverTime.getSelectedItem());
-                System.out.println("Horario JComboBox value: " + Horario.getSelectedItem());
-                System.out.println("Periodo JComboBox value: " + Periodo.getSelectedItem());
-                System.out.println("Vacaciones JComboBox value: " + Vacaciones.getSelectedItem());
-                System.out.println("TiempoVacaciones JTextField value: " + tiempoVacaciones.getText());
-                System.out.println("FechaInicioPuesto JDateChooser value: " + dateInicioPuesto.getDate());
-
-                // Reactivar listeners (si es necesario)
-                Id.getDocument().addDocumentListener(documentListener);
-                // (Haz lo mismo para los otros campos si tienen listeners)
-
             } else {
                 JOptionPane.showMessageDialog(null, "Fila no seleccionada");
             }
-        } catch (HeadlessException | ParseException e) {
+        } catch (HeadlessException | ParseException | NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "Error de selección, error: " + e.toString());
         }
     }
@@ -439,6 +415,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         Connection conn = null;
         PreparedStatement ps = null;
         try {
+            // Verificar que todos los campos necesarios estén completos
             if (idPDTField.getText().isEmpty() || idTrabajadorField.getText().isEmpty() || TipoDeTrabajoField.getText().isEmpty() || OverTime.getSelectedItem() == null || Horario.getSelectedItem() == null || Periodo.getSelectedItem() == null || Vacaciones.getSelectedItem() == null) {
                 JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -447,15 +424,17 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
             int idPDT = Integer.parseInt(idPDTField.getText());
             int idTrabajador = Integer.parseInt(idTrabajadorField.getText());
             int idTDT = Integer.parseInt(TipoDeTrabajoField.getText());
+
+            // Asegurarse de que estos campos se conviertan correctamente a double
             double precioPorHora = 0.0;
             double sueldo = 0.0;
 
             // Validar y convertir los valores de pago por hora y sueldo
             if (!pagoPorHoraField.getText().isEmpty()) {
-                precioPorHora = Double.parseDouble(pagoPorHoraField.getText());
+                precioPorHora = Double.parseDouble(pagoPorHoraField.getText());  // Este puede tener decimales
             }
             if (!sueldoField.getText().isEmpty()) {
-                sueldo = Double.parseDouble(sueldoField.getText());
+                sueldo = Double.parseDouble(sueldoField.getText());  // Este puede tener decimales
             }
 
             // Asegurarse de que uno de los valores sea cero
@@ -677,13 +656,11 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        txtPagoPorHora = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         btnGuardar = new javax.swing.JButton();
         btnModificar = new javax.swing.JButton();
         btnCancelar = new javax.swing.JButton();
-        txtIdPDT = new javax.swing.JTextField();
         btnEliminar = new javax.swing.JButton();
         cbxTDT = new javax.swing.JComboBox<>();
         cbxTrabajador = new javax.swing.JComboBox<>();
@@ -704,12 +681,13 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         cbxVacaciones = new javax.swing.JComboBox<>();
         txtIdVacaciones = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
-        txtVacaciones = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         txtSueldo = new javax.swing.JTextField();
-        dateVacaciones = new com.toedter.calendar.JDateChooser();
         btnSalir = new javax.swing.JButton();
+        txtIdPDT = new javax.swing.JTextField();
+        txtPagoPorHora = new javax.swing.JTextField();
+        txtVacaciones = new javax.swing.JTextField();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbPuestosDeTrabajo = new javax.swing.JTable();
@@ -723,7 +701,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
         jLabel1.setText("Tipo de Trabajo");
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 120, -1, -1));
-        jPanel1.add(txtPagoPorHora, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 160, 100, -1));
 
         jLabel2.setText("Pago por hora");
         jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 160, -1, -1));
@@ -757,7 +734,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
             }
         });
         jPanel1.add(btnCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1030, 120, -1, -1));
-        jPanel1.add(txtIdPDT, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 80, -1));
 
         btnEliminar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/eliminar.png"))); // NOI18N
         btnEliminar.setText("Eliminar");
@@ -847,7 +823,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
         jLabel8.setText("Vacaciones");
         jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 140, -1, -1));
-        jPanel1.add(txtVacaciones, new org.netbeans.lib.awtextra.AbsoluteConstraints(830, 60, 90, -1));
 
         jLabel9.setText("Tiempo de Vacaciones");
         jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 30, -1, -1));
@@ -855,7 +830,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         jLabel10.setText("Sueldo");
         jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 160, -1, -1));
         jPanel1.add(txtSueldo, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 160, 80, -1));
-        jPanel1.add(dateVacaciones, new org.netbeans.lib.awtextra.AbsoluteConstraints(830, 90, 90, -1));
 
         btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
         btnSalir.setText("Salir");
@@ -865,6 +839,9 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
             }
         });
         jPanel1.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(1050, 20, -1, -1));
+        jPanel1.add(txtIdPDT, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 80, 30));
+        jPanel1.add(txtPagoPorHora, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 160, 110, -1));
+        jPanel1.add(txtVacaciones, new org.netbeans.lib.awtextra.AbsoluteConstraints(840, 60, 100, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 1160, 250));
 
@@ -903,9 +880,8 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
         if (cbxTDT.getSelectedItem() != null) {
-//        MostrarCodigoTipodeTrabajo(cbxTDT, txtIdTipoDeTrabajo);
             MostrarCodigoTrabajador(cbxTrabajador, txtIdtrabajador);
-            Insertar(txtIdtrabajador, txtIdTipoDeTrabajo, txtPagoPorHora, txtSueldo, cbxOverTime, cbxHorario, cbxPeriodo, cbxVacaciones, txtIdVacaciones, dateVacaciones);
+            Insertar();
             Mostrar(tbPuestosDeTrabajo);
             txtIdPDT.setText("");
             txtIdtrabajador.setText("");
@@ -914,6 +890,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
             cbxTrabajador.setSelectedItem("");
             cbxTDT.setSelectedItem("");
             cbxOverTime.setSelectedItem("");
+            txtVacaciones.setText("");
         } else {
             JOptionPane.showMessageDialog(null, "Por favor, seleccione un tipo de trabajo antes de guardar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
@@ -921,8 +898,8 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
         try {
-            Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtIdPDT, txtSueldo, cbxOverTime, cbxHorario, cbxPeriodo, cbxVacaciones, txtIdVacaciones, dateInicioPuesto);
-        } catch (ParseException ex) {
+            Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtPagoPorHora, txtSueldo, cbxOverTime, cbxHorario, cbxPeriodo, cbxVacaciones, txtVacaciones, dateInicioPuesto);
+        } catch (Exception ex) {
             Logger.getLogger(PuestoDeTrabajo.class.getName()).log(Level.SEVERE, null, ex);
         }
         Modificar(txtSueldo, txtIdtrabajador, txtIdTipoDeTrabajo, txtPagoPorHora, txtSueldo, cbxOverTime, cbxHorario, cbxPeriodo, cbxVacaciones, txtIdVacaciones, dateInicioPuesto);
@@ -934,6 +911,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         cbxTrabajador.setSelectedItem("");
         cbxTDT.setSelectedItem("");
         cbxOverTime.setSelectedItem("");
+        txtVacaciones.setText("");
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
@@ -944,12 +922,13 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         cbxTrabajador.setSelectedItem("");
         cbxTDT.setSelectedItem("");
         cbxOverTime.setSelectedItem("");
+        txtVacaciones.setText("");
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
         try {
-            Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtIdPDT, txtSueldo, cbxOverTime, cbxHorario, cbxPeriodo, cbxVacaciones, txtIdVacaciones, dateInicioPuesto);
-        } catch (ParseException ex) {
+            Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtPagoPorHora, txtSueldo, cbxOverTime, cbxHorario, cbxPeriodo, cbxVacaciones, txtVacaciones, dateInicioPuesto);
+        } catch (Exception ex) {
             Logger.getLogger(PuestoDeTrabajo.class.getName()).log(Level.SEVERE, null, ex);
         }
         Eliminar(txtIdPDT);
@@ -980,8 +959,8 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
     private void tbPuestosDeTrabajoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbPuestosDeTrabajoMouseClicked
         try {
-            Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtIdPDT, txtSueldo, cbxOverTime, cbxHorario, cbxPeriodo, cbxVacaciones, txtIdVacaciones, dateInicioPuesto);
-        } catch (ParseException ex) {
+            Seleccionar(tbPuestosDeTrabajo, txtIdPDT, cbxTrabajador, cbxTDT, txtPagoPorHora, txtSueldo, cbxOverTime, cbxHorario, cbxPeriodo, cbxVacaciones, txtVacaciones, dateInicioPuesto);
+        } catch (Exception ex) {
             Logger.getLogger(PuestoDeTrabajo.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_tbPuestosDeTrabajoMouseClicked
@@ -1020,7 +999,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     private javax.swing.JComboBox<String> cbxTrabajador;
     private javax.swing.JComboBox<String> cbxVacaciones;
     private com.toedter.calendar.JDateChooser dateInicioPuesto;
-    private com.toedter.calendar.JDateChooser dateVacaciones;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;

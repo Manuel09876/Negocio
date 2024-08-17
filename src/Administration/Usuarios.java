@@ -97,9 +97,29 @@ public class Usuarios extends javax.swing.JInternalFrame {
         MostrarCTipoDeUsuario(cbxTipoDeUsuario);
         MostrarTrabajador(cbxTrabajador);
         txtIdTPU.setVisible(false);
+
+        // Inicializar y configurar rdRelacionar
         rdRelacionar = new javax.swing.JRadioButton();
         rdRelacionar.setText("Trabajador");
+        rdRelacionar.setSelected(true);  // Aseguramos que esté seleccionado inicialmente
+
+        // Añadir el JRadioButton al panel jPanel2
+        jPanel2.add(rdRelacionar);
+
         CargarDatosTable("");
+        CargarDatosTablaUsuariosTrabajadores(tbUsuTrab);
+
+        // Listener para detectar cambios en la selección
+        rdRelacionar.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                if (rdRelacionar.isSelected()) {
+                    System.out.println("El radio botón rdRelacionar está seleccionado.");
+                } else {
+                    System.out.println("El radio botón rdRelacionar NO está seleccionado.");
+                }
+            }
+        });
+
     }
 
     // Conexión
@@ -229,6 +249,9 @@ public class Usuarios extends javax.swing.JInternalFrame {
                 return;
             }
 
+            // Debug: Verificar si se llega hasta este punto
+            System.out.println("Guardando usuario...");
+
             // Insertar usuario
             PreparedStatement pstInsertUsuario = connect.prepareStatement(sqlInsertUsuario, Statement.RETURN_GENERATED_KEYS);
             pstInsertUsuario.setString(1, nombre);
@@ -244,10 +267,22 @@ public class Usuarios extends javax.swing.JInternalFrame {
                 idUsuario = generatedKeys.getInt(1);
             }
 
+            // Debug: Verificar el ID del usuario recién insertado
+            System.out.println("ID del nuevo usuario: " + idUsuario);
+
             // Si se selecciona el radio botón `rdRelacionar`, insertar la relación con el trabajador
+            // Debug: Verificar si rdRelacionar está seleccionado
             if (rdRelacionar.isSelected()) {
+                System.out.println("El radio botón rdRelacionar está seleccionado.");
+
+                // Aquí puedes agregar más mensajes de depuración para seguir la ejecución del código
                 int idTrabajador = Integer.parseInt(txtIdTrabajador.getText());
+                System.out.println("ID del trabajador obtenido: " + idTrabajador);
+
+                // Luego, realizar la inserción de la relación usuario-trabajador
                 insertarUsuarioTrabajador(idUsuario, idTrabajador);
+            } else {
+                System.out.println("El radio botón rdRelacionar NO está seleccionado.");
             }
 
             // Si el registro se guardó con éxito
@@ -301,37 +336,65 @@ public class Usuarios extends javax.swing.JInternalFrame {
     }
 
     public void ModificarUsuario(JTextField codigo, JTextField nombre, JTextField usuario, JTextField password) {
+        // Obtener el ID del usuario desde el JTextField
         setIdUsuarios(Integer.parseInt(codigo.getText()));
+
+        // Depuración: Verifica si el ID se obtiene correctamente
+        System.out.println("ID del usuario a modificar: " + getIdUsuarios());
+
         setNombre(nombre.getText());
         setUsuario(usuario.getText());
         setPassword(password.getText());
 
         String consulta = "UPDATE usuarios SET nombre=?, usuario=?, password=?, rol=? WHERE idUsuarios=?";
+        String consultaDuplicado = "SELECT * FROM usuarios WHERE nombre = ?";
         try {
-            PreparedStatement ps = con.getConexion().prepareStatement(consulta);
-            ps.setString(1, getNombre());
-            ps.setString(2, getUsuario());
-            ps.setString(3, getPassword());
-            ps.setInt(4, Integer.parseInt(txtIdTPU.getText()));
-            ps.setInt(5, getIdUsuarios());
-            ps.executeUpdate();
+            // Verificar duplicado
+            PreparedStatement pstDuplicado = connect.prepareStatement(consultaDuplicado);
+            pstDuplicado.setString(1, getNombre());
+            ResultSet rsDuplicado = pstDuplicado.executeQuery();
 
-            if (rdRelacionar.isSelected()) {
-                int idTrabajador = Integer.parseInt(txtIdTrabajador.getText());
-                insertarOActualizarUsuarioTrabajador(getIdUsuarios(), idTrabajador);
+            if (rsDuplicado.next() && rsDuplicado.getInt("idUsuarios") != getIdUsuarios()) {
+                // Si ya existe un registro duplicado, modificar en lugar de insertar
+                JOptionPane.showMessageDialog(null, "El nombre de usuario ya existe. Realizando modificación...");
+                int idUsuarioExistente = rsDuplicado.getInt("idUsuarios");
+                // Realizar la actualización del registro existente con los nuevos valores
+                actualizarUsuarioTrabajador(idUsuarioExistente, Integer.parseInt(txtIdTrabajador.getText()));
+            } else {
+                // Si no hay duplicados, proceder con la modificación del registro
+                PreparedStatement ps = con.getConexion().prepareStatement(consulta);
+                ps.setString(1, getNombre());
+                ps.setString(2, getUsuario());
+                ps.setString(3, getPassword());
+                ps.setInt(4, Integer.parseInt(txtIdTPU.getText()));
+                ps.setInt(5, getIdUsuarios());
+                ps.executeUpdate();
+
+                // Verificar si rdRelacionar está seleccionado
+                if (rdRelacionar.isSelected()) {
+                    System.out.println("El radio botón rdRelacionar está seleccionado.");
+
+                    // Obtener el ID del trabajador desde el JTextField
+                    int idTrabajador = Integer.parseInt(txtIdTrabajador.getText());
+                    System.out.println("ID del trabajador obtenido: " + idTrabajador);
+
+                    // Luego, realizar la inserción de la relación usuario-trabajador
+                    insertarUsuarioTrabajador(getIdUsuarios(), idTrabajador);
+                }                 
+                JOptionPane.showMessageDialog(null, "Modificación Exitosa");
             }
-
-            JOptionPane.showMessageDialog(null, "Modificación Exitosa");
-        } catch (HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "No se Modificó, error: " + e.toString());
-        }
+            }catch (HeadlessException | SQLException e) {
+        JOptionPane.showMessageDialog(null, "No se Modificó, error: " + e.toString());
     }
+        }
+
+
+    
 
     public void insertarOActualizarUsuarioTrabajador(int idUsuario, int idTrabajador) {
         // Comprobar si ya existe una relación
         String consultaSelect = "SELECT COUNT(*) FROM usuario_trabajador WHERE id_usuario = ?";
-        try (Connection connect = con.getConexion(); 
-             PreparedStatement psSelect = connect.prepareStatement(consultaSelect)) {
+        try (Connection connect = con.getConexion(); PreparedStatement psSelect = connect.prepareStatement(consultaSelect)) {
             psSelect.setInt(1, idUsuario);
             ResultSet rs = psSelect.executeQuery();
             if (rs.next() && rs.getInt(1) > 0) {
@@ -383,8 +446,7 @@ public class Usuarios extends javax.swing.JInternalFrame {
 
     public void insertarUsuarioTrabajador(int idUsuario, int idTrabajador) {
         String sql = "INSERT INTO usuario_trabajador (id_usuario, id_trabajador) VALUES (?, ?)";
-        try (Connection connect = con.getConexion();
-             PreparedStatement ps = connect.prepareStatement(sql)) {
+        try (Connection connect = con.getConexion(); PreparedStatement ps = connect.prepareStatement(sql)) {
             ps.setInt(1, idUsuario);
             ps.setInt(2, idTrabajador);
             ps.executeUpdate();
@@ -394,8 +456,6 @@ public class Usuarios extends javax.swing.JInternalFrame {
         }
     }
 
-    
-    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -491,6 +551,7 @@ public class Usuarios extends javax.swing.JInternalFrame {
             }
         });
 
+        rdRelacionar.setSelected(true);
         rdRelacionar.setText("Trabajador");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -720,9 +781,9 @@ public class Usuarios extends javax.swing.JInternalFrame {
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 393, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 393, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 439, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 335, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
@@ -823,6 +884,7 @@ public class Usuarios extends javax.swing.JInternalFrame {
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
         ModificarUsuario(txtIdUsuario, txtNombre, txtUsuario, txtPassword);
         CargarDatosTable("");
+        CargarDatosTablaUsuariosTrabajadores(tbUsuTrab);
         txtIdUsuario.setText("");
         txtNombre.setText("");
         cbxTipoDeUsuario.setSelectedIndex(0);
