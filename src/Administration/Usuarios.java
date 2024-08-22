@@ -97,6 +97,7 @@ public class Usuarios extends javax.swing.JInternalFrame {
         MostrarCTipoDeUsuario(cbxTipoDeUsuario);
         MostrarTrabajador(cbxTrabajador);
         txtIdTPU.setVisible(false);
+        txtIdTrabajador.setEnabled(false);
 
         // Inicializar y configurar rdRelacionar
         rdRelacionar = new javax.swing.JRadioButton();
@@ -298,25 +299,16 @@ public class Usuarios extends javax.swing.JInternalFrame {
     }
 
     public void Eliminar(JTextField codigo) {
-
         setIdUsuarios(Integer.parseInt(codigo.getText()));
-
         String consulta = "DELETE from usuarios where idUsuarios=?";
-
         try {
-
             CallableStatement cs = con.getConexion().prepareCall(consulta);
             cs.setInt(1, getIdUsuarios());
             cs.executeUpdate();
-
             JOptionPane.showMessageDialog(null, "Se Elimino");
-
-        } catch (Exception e) {
-
+        } catch (HeadlessException | SQLException e) {
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
-
         }
-
     }
 
     public void SeleccionarUsuario(JTable TablaUsuario, JTextField codigo, JTextField nombre, JTextField usuario, JTextField password) {

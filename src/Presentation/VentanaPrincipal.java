@@ -768,8 +768,8 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
             // Ejecuta otros métodos que desees antes de salir del programa
             // Por ejemplo:
-            // ht.calcularPagos(trabajadorId);
-            // ht.generarReporte(trabajadorId, fechaInicio, fechaFin);
+             ht.calcularPagos(trabajadorId);
+             ht.generarReporte();
 //        // Cierra la conexión a la base de datos
 //        Conectar conexion = new Conectar();
 //        conexion.cerrarConexion(conect);

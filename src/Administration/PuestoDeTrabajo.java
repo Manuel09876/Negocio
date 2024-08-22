@@ -367,7 +367,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 // Pago por Hora
                 PPH.setText(Tabla.getValueAt(fila, 3).toString());
 
-                
                 // Sueldo
                 sueldo.setText(Tabla.getValueAt(fila, 4).toString());
 
@@ -399,7 +398,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 //                    System.out.println("Vacaciones JComboBox value: " + Vacaciones.getSelectedItem());
 //                    System.out.println("TiempoVacaciones JTextField value: " + tiempoVacaciones.getText());
 //                    System.out.println("FechaInicioPuesto JDateChooser value: " + dateInicioPuesto.getDate());
-
                 } else {
                     dateInicioPuesto.setDate(null);
                 }
@@ -517,7 +515,9 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         }
     }
 
-    private String obtenerIdOverTime(String descripcion) {
+    
+     //Para Calculo de Pagos
+    public String obtenerIdOverTime(String descripcion) {
         String idOverTime = "";
         String consulta = "SELECT id FROM overtime WHERE descripcion = ?";
         try (PreparedStatement ps = objConect.getConexion().prepareStatement(consulta)) {
@@ -533,7 +533,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         return idOverTime;
     }
 
-    private boolean verificarRegistroExiste(int idPDT) {
+    public boolean verificarRegistroExiste(int idPDT) {
         String consulta = "SELECT COUNT(*) FROM puestodetrabajo WHERE idPDT = ?";
         try (PreparedStatement ps = objConect.getConexion().prepareStatement(consulta)) {
             ps.setInt(1, idPDT);
@@ -548,33 +548,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         return false;
     }
 
-    //Para Calculo de Pagos
-    public double calcularPagoTrabajador(int idTrabajador) {
-        double salarioBruto = 0.0;
-        int idPDT = obtenerIdPuestoActivo(idTrabajador);
-
-        if (idPDT == -1) {
-            JOptionPane.showMessageDialog(null, "No se encontró un puesto de trabajo activo para el trabajador con ID: " + idTrabajador);
-            return salarioBruto;
-        }
-
-        double horasTrabajadas = obtenerHorasTrabajadas(idTrabajador);
-        double pagoPorHora = obtenerPagoPorHora(idPDT);
-        double sueldo = obtenerSueldo(idPDT);
-        boolean tieneOvertime = verificarOvertime(idPDT);
-        double horasExtras = 0.0;
-
-        if (tieneOvertime && horasTrabajadas > 40) {
-            horasExtras = horasTrabajadas - 40;
-            horasTrabajadas = 40;
-        }
-
-        salarioBruto = (horasTrabajadas * pagoPorHora) + (horasExtras * pagoPorHora * 1.5);
-
-        return salarioBruto;
-    }
-
-    private int obtenerIdPuestoActivo(int idTrabajador) {
+    public int obtenerIdPuestoActivo(int idTrabajador) {
         int idPDT = -1;
         String sql = "SELECT idPDT FROM puestodetrabajo WHERE idTrabajador = ? AND estado = 'Activo'";
         try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
@@ -588,53 +562,22 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         }
         return idPDT;
     }
-
-    private double obtenerHorasTrabajadas(int idTrabajador) {
-        double totalHoras = 0.0;
-        String sql = "SELECT SUM(TIMESTAMPDIFF(HOUR, fInicio, fSalida)) as horas FROM horas_trabajo WHERE trabajador_id = ?";
-        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
-            pst.setInt(1, idTrabajador);
-            ResultSet rs = pst.executeQuery();
-            if (rs.next()) {
-                totalHoras = rs.getDouble("horas");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return totalHoras;
-    }
-
-    private double obtenerPagoPorHora(int idPDT) {
-        double pagoPorHora = 0.0;
-        String sql = "SELECT pagoPorHora FROM puestodetrabajo WHERE idPDT = ?";
+    
+    public String obtenerPeriodoPago(int idPDT) {
+        String sql = "SELECT p.descripcion FROM periodo p JOIN puestodetrabajo pt ON p.id = pt.id_periodo WHERE pt.idPDT = ?";
         try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
             pst.setInt(1, idPDT);
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                pagoPorHora = rs.getDouble("pagoPorHora");
+                return rs.getString("descripcion");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            System.out.println("Error al obtener el periodo de pago: " + ex.getMessage());
         }
-        return pagoPorHora;
+        return "Semanal"; // Valor predeterminado
     }
-
-    private double obtenerSueldo(int idPDT) {
-        double sueldo = 0.0;
-        String sql = "SELECT sueldo FROM puestodetrabajo WHERE idPDT = ?";
-        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
-            pst.setInt(1, idPDT);
-            ResultSet rs = pst.executeQuery();
-            if (rs.next()) {
-                sueldo = rs.getDouble("sueldo");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return sueldo;
-    }
-
-    private boolean verificarOvertime(int idPDT) {
+    
+    public boolean verificarOvertime(int idPDT) {
         boolean tieneOvertime = false;
         String sql = "SELECT id_overtime FROM puestodetrabajo WHERE idPDT = ?";
         try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
@@ -648,6 +591,108 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         }
         return tieneOvertime;
     }
+    
+    public double obtenerPagoPorHora(int idPDT) {
+        double pagoPorHora = 0.0;
+        String sql = "SELECT pagoPorHora FROM puestodetrabajo WHERE idPDT = ?";
+        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
+            pst.setInt(1, idPDT);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                pagoPorHora = rs.getDouble("pagoPorHora");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return pagoPorHora;
+    }
+    
+    public double obtenerSueldo(int idPDT) {
+        double sueldo = 0.0;
+        String sql = "SELECT sueldo FROM puestodetrabajo WHERE idPDT = ?";
+        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
+            pst.setInt(1, idPDT);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                sueldo = rs.getDouble("sueldo");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return sueldo;
+    }
+    
+    public int calcularDiasDeVacaciones(int idPDT) {
+        String sql = "SELECT tiempoVacaciones FROM puestodetrabajo WHERE idPDT = ?";
+        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
+            pst.setInt(1, idPDT);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("tiempoVacaciones");
+            }
+        } catch (SQLException ex) {
+            System.out.println("Error al obtener tiempo vacaciones: " + ex.getMessage());
+        }
+        return 0;
+    }
+    
+    
+    
+    
+    
+    
+//    public double calcularPagoTrabajador(int idTrabajador) {
+//        double salarioBruto = 0.0;
+//        int idPDT = obtenerIdPuestoActivo(idTrabajador);
+//
+//        if (idPDT == -1) {
+//            JOptionPane.showMessageDialog(null, "No se encontró un puesto de trabajo activo para el trabajador con ID: " + idTrabajador);
+//            return salarioBruto;
+//        }
+//
+//        double horasTrabajadas = obtenerHorasTrabajadas(idTrabajador);
+//        double pagoPorHora = obtenerPagoPorHora(idPDT);
+//        double sueldo = obtenerSueldo(idPDT);
+//        boolean tieneOvertime = verificarOvertime(idPDT);
+//        double horasExtras = 0.0;
+//
+//        if (tieneOvertime && horasTrabajadas > 40) {
+//            horasExtras = horasTrabajadas - 40;
+//            horasTrabajadas = 40;
+//        }
+//
+//        salarioBruto = (horasTrabajadas * pagoPorHora) + (horasExtras * pagoPorHora * 1.5);
+//
+//        return salarioBruto;
+//    }
+//
+   
+//
+//    private double obtenerHorasTrabajadas(int idTrabajador) {
+//        double totalHoras = 0.0;
+//        String sql = "SELECT SUM(TIMESTAMPDIFF(HOUR, hi.fInicio, hs.fSalida)) as horas_trabajadas\n"
+//                + "FROM horas_ingreso hi\n"
+//                + "JOIN horas_salida hs ON hi.trabajador_id = hs.trabajador_id\n"
+//                + "WHERE hi.trabajador_id = ?";
+//        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
+//            pst.setInt(1, idTrabajador);
+//            ResultSet rs = pst.executeQuery();
+//            if (rs.next()) {
+//                totalHoras = rs.getDouble("horas");
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return totalHoras;
+//    }
+
+    
+
+    
+
+    
+    
+    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
