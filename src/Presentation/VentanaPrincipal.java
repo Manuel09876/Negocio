@@ -32,13 +32,15 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     private Conectar conectar;
     private String usuario; // Variable para almacenar el usuario
     private HorasTrabajadas ht; // Asegúrate de que esta instancia esté correctamente inicializada
+    private PuestoDeTrabajo puestoDeTrabajo;
 
     Loggin lg = new Loggin();
 
     public VentanaPrincipal(int tipUsu, String usuario) {
         initComponents();
         this.conectar = new Conectar();
-        this.ht = new HorasTrabajadas();
+        this.puestoDeTrabajo = new PuestoDeTrabajo(); // Inicializamos puestoDeTrabajo
+        this.ht = new HorasTrabajadas(this.puestoDeTrabajo); // Pasamos puestoDeTrabajo a HorasTrabajadas
         this.tipUsu = tipUsu;
         this.usuario = usuario; // Almacena el usuario
 
@@ -47,14 +49,14 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
         System.out.println("Usuario en VentanaPrincipal: " + this.usuario); // Mensaje de depuración
         lbUsuario.setText(usuario); // Mostrar el nombre de usuario en la interfaz
-
-        ht = new HorasTrabajadas();
-
     }
 
     // Constructor vacío para evitar errores en la inicialización por defecto
     public VentanaPrincipal() {
         initComponents();
+        this.conectar = new Conectar();
+        this.puestoDeTrabajo = new PuestoDeTrabajo(); // Inicializamos puestoDeTrabajo
+        this.ht = new HorasTrabajadas(this.puestoDeTrabajo); // Pasamos puestoDeTrabajo a HorasTrabajadas
     }
 
     @SuppressWarnings("unchecked")
@@ -754,25 +756,28 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuStockActionPerformed
 
     private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirActionPerformed
-        System.out.println("Botón de salida presionado"); // Mensaje de depuración
-        if (JOptionPane.showConfirmDialog(null, "¿Desea salir del Sistema?", "Acceso", JOptionPane.YES_NO_CANCEL_OPTION) == JOptionPane.YES_OPTION) {
-            System.out.println("Usuario al salir: " + this.usuario); // Mensaje de depuración
+        System.out.println("Botón de salida presionado");
+        if (JOptionPane.showConfirmDialog(null, "¿Desea salir del Sistema?", "Acceso", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             int trabajadorId = obtenerTrabajadorId(this.usuario);
             if (trabajadorId != 0) {
-                System.out.println("ID del trabajador al salir: " + trabajadorId); // Mensaje de depuración
-                ht.registrarFinSesion(trabajadorId); // Llama al método para registrar la hora de salida
-//                System.out.println("Fin de sesión registrado para trabajador ID: " + trabajadorId); // Mensaje de depuración
-            } else {
-                System.out.println("No se encontró el ID del trabajador."); // Mensaje de depuración
-            }
+                ht.registrarFinSesion(trabajadorId); // Registro de fin de sesión
 
-            // Ejecuta otros métodos que desees antes de salir del programa
-            // Por ejemplo:
-             ht.calcularPagos(trabajadorId);
-             ht.generarReporte();
-//        // Cierra la conexión a la base de datos
-//        Conectar conexion = new Conectar();
-//        conexion.cerrarConexion(conect);
+                // Verificar si puestoDeTrabajo está inicializado
+                if (ht.puestoDeTrabajo != null) {
+                    int idPDT = ht.puestoDeTrabajo.obtenerIdPuestoActivo(trabajadorId);
+
+                    if (idPDT != -1) {
+                        ht.calcularPagos(trabajadorId); // Calcular pagos
+                        
+                    } else {
+                        System.out.println("No hay puesto activo para el trabajador ID: " + trabajadorId);
+                    }
+                } else {
+                    System.out.println("Error: puestoDeTrabajo no está inicializado.");
+                }
+            } else {
+                System.out.println("No se encontró el ID del trabajador.");
+            }
             System.exit(0);
         }
     }//GEN-LAST:event_btnSalirActionPerformed

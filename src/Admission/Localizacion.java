@@ -1,4 +1,3 @@
-
 package Admission;
 
 import conectar.Conectar;
@@ -52,139 +51,101 @@ public class Localizacion extends javax.swing.JInternalFrame {
     public void setEstado(String estado) {
         this.estado = estado;
     }
-    
-    
-    
+
     public Localizacion() {
         initComponents();
+        CargarDatosTabla("");
+        txtIdLocalizacion.setEnabled(false);
     }
-    
+
     //Conexión
     Conectar con = new Conectar();
     Connection connect = con.getConexion();
     PreparedStatement ps;
     ResultSet rs;
-    
-    void CargarDatosTabla(String Valores) {
 
+    void CargarDatosTabla(String Valores) {
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];
-
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
-
             String ConsultaSQL = "SELECT * FROM localizacion";
-
             Statement st = connect.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
-
             while (result.next()) {
                 RegistroBD[0] = result.getString("id_localizacion");
                 RegistroBD[1] = result.getString("nombre");
                 RegistroBD[2] = result.getString("estado");
-
                 model.addRow(RegistroBD);
             }
-
             tbLocalizacion.setModel(model);
             tbLocalizacion.getColumnModel().getColumn(0).setPreferredWidth(150);
             tbLocalizacion.getColumnModel().getColumn(1).setPreferredWidth(350);
             tbLocalizacion.getColumnModel().getColumn(2).setPreferredWidth(100);
-
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
     void Guardar() {
-
         // Variables
         int id_localizacion;
         String nombre;
         String sql = "";
-
         //Obtenemos la informacion de las cajas de texto
         nombre = txtLocalizacion.getText();
-
         //Consulta para evitar duplicados
         String consulta = "SELECT * FROM localizacion WHERE nombre = ?";
-
         //Consulta sql para insertar los datos (nombres como en la base de datos)
         sql = "INSERT INTO localizacion (nombre)VALUES (?)";
-
         //Para almacenar los datos empleo un try cash
         try {
-
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
             PreparedStatement pst = connect.prepareStatement(sql);
-
             pst.setString(1, nombre);
-
             //Declara otra variable para validar los registros
             int n = pst.executeUpdate();
-
             //si existe un registro en la BD el registro se guardo con exito
             if (n > 0) {
                 JOptionPane.showMessageDialog(null, "El registro se guardo exitosamente");
-
                 //Luego Bloquera campos
             }
             CargarDatosTabla("");
             txtLocalizacion.setText("");
             txtLocalizacion.requestFocus();
-
         } catch (SQLException ex) {
-            
-
         }
-
     }
 
     public void Eliminar(JTextField id) {
-
         setId_localizacion(Integer.parseInt(id.getText()));
-
         String consulta = "DELETE from localizacion where id_localizacion=?";
-
         try {
-
             CallableStatement cs = con.getConexion().prepareCall(consulta);
             cs.setInt(1, getId_localizacion());
             cs.executeUpdate();
-
             JOptionPane.showMessageDialog(null, "Se Elimino");
             CargarDatosTabla("");
             txtLocalizacion.setText("");
             txtIdLocalizacion.setText("");
             txtLocalizacion.requestFocus();
-
         } catch (Exception e) {
-
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
-
         }
-
     }
 
     public void SeleccionarLocalizacion(JTable Tabla, JTextField IdLocalizacion, JTextField Localizacion) {
-
         try {
-
             int fila = tbLocalizacion.getSelectedRow();
-
             if (fila >= 0) {
-
                 IdLocalizacion.setText(tbLocalizacion.getValueAt(fila, 0).toString());
                 Localizacion.setText(tbLocalizacion.getValueAt(fila, 1).toString());
-
             } else {
                 JOptionPane.showMessageDialog(null, "Fila No seleccionada");
             }
-
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error de Seleccion, Error: ");
         }
-
     }
 
     public boolean modificar(Localizacion lo) {
@@ -201,9 +162,9 @@ public class Localizacion extends javax.swing.JInternalFrame {
             return false;
         }
     }
-    
+
     public boolean accion(String estado, int IdLocalizacion) {
-        String sql = "UPDATE localiacion SET estado = ? WHERE id_localizacion = ?";
+        String sql = "UPDATE localizacion SET estado = ? WHERE id_localizacion = ?";
         try {
             connect = con.getConexion();
             ps = connect.prepareStatement(sql);
@@ -231,9 +192,13 @@ public class Localizacion extends javax.swing.JInternalFrame {
         txtIdLocalizacion = new javax.swing.JTextField();
         btnInactivar = new javax.swing.JButton();
         btnActivar = new javax.swing.JButton();
+        btnGuia = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbLocalizacion = new javax.swing.JTable();
+
+        setTitle("Localización");
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setBackground(new java.awt.Color(153, 153, 255));
 
@@ -287,6 +252,13 @@ public class Localizacion extends javax.swing.JInternalFrame {
             }
         });
 
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -311,7 +283,9 @@ public class Localizacion extends javax.swing.JInternalFrame {
                 .addComponent(btnInactivar)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnActivar)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 59, Short.MAX_VALUE)
+                .addComponent(btnGuia)
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -337,9 +311,12 @@ public class Localizacion extends javax.swing.JInternalFrame {
                     .addComponent(btnCancelar)
                     .addComponent(btnEliminar)
                     .addComponent(btnInactivar)
-                    .addComponent(btnActivar))
+                    .addComponent(btnActivar)
+                    .addComponent(btnGuia))
                 .addGap(15, 15, 15))
         );
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 6, -1, -1));
 
         jPanel2.setBackground(new java.awt.Color(204, 255, 204));
 
@@ -367,7 +344,7 @@ public class Localizacion extends javax.swing.JInternalFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 517, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 656, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18))
         );
         jPanel2Layout.setVerticalGroup(
@@ -378,22 +355,7 @@ public class Localizacion extends javax.swing.JInternalFrame {
                 .addContainerGap(18, Short.MAX_VALUE))
         );
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 121, 690, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -417,23 +379,57 @@ public class Localizacion extends javax.swing.JInternalFrame {
 
     private void btnInactivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInactivarActionPerformed
         int fila = tbLocalizacion.getSelectedRow();
-        int id = Integer.parseInt(txtIdLocalizacion.getText());
-        if (accion("Inactivo", id)) {
-            CargarDatosTabla("");
-            JOptionPane.showMessageDialog(null, "Inactivado");
-        }else{
-            JOptionPane.showMessageDialog(null, "Error al Inactivar");
+        // Verificar si hay una fila seleccionada
+        if (fila >= 0) {
+            String idText = txtIdLocalizacion.getText().trim(); // Obtener el texto del campo
+            // Verificar si el campo de texto no está vacío
+            if (!idText.isEmpty()) {
+                try {
+                    int id = Integer.parseInt(idText); // Convertir el texto a entero
+                    if (accion("Inactivo", id)) {
+                        CargarDatosTabla("");
+                        JOptionPane.showMessageDialog(null, "Inactivado");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Error al Inactivar");
+                    }
+                } catch (NumberFormatException e) {
+                    // Mostrar mensaje de error si la conversión falla
+                    JOptionPane.showMessageDialog(null, "El ID no es válido.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                // Mostrar mensaje si el campo de texto está vacío
+                JOptionPane.showMessageDialog(null, "Por favor, seleccione una localización válida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione una fila de la tabla.", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_btnInactivarActionPerformed
 
     private void btnActivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActivarActionPerformed
         int fila = tbLocalizacion.getSelectedRow();
-        int id = Integer.parseInt(txtIdLocalizacion.getText());
-        if (accion("Activo", id)) {
-            CargarDatosTabla("");
-            JOptionPane.showMessageDialog(null, "Activar");
-        }else{
-            JOptionPane.showMessageDialog(null, "Error al Activar");
+        // Verificar si hay una fila seleccionada
+        if (fila >= 0) {
+            String idText = txtIdLocalizacion.getText().trim(); // Obtener el texto del campo
+            // Verificar si el campo de texto no está vacío
+            if (!idText.isEmpty()) {
+                try {
+                    int id = Integer.parseInt(idText); // Convertir el texto a entero
+                    if (accion("Activo", id)) {
+                        CargarDatosTabla("");
+                        JOptionPane.showMessageDialog(null, "Activado");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Error al Activar");
+                    }
+                } catch (NumberFormatException e) {
+                    // Mostrar mensaje de error si la conversión falla
+                    JOptionPane.showMessageDialog(null, "El ID no es válido.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                // Mostrar mensaje si el campo de texto está vacío
+                JOptionPane.showMessageDialog(null, "Por favor, seleccione una localización válida.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione una fila de la tabla.", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_btnActivarActionPerformed
 
@@ -441,12 +437,26 @@ public class Localizacion extends javax.swing.JInternalFrame {
         SeleccionarLocalizacion(tbLocalizacion, txtIdLocalizacion, txtLocalizacion);
     }//GEN-LAST:event_tbLocalizacionMouseClicked
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "LOCALIZACIÓN\n"
+                + "Llenar la casilla para el ingreso de tipo de Localización\n"
+                + "Botón GUARDAR para guardar los datos que se mostraran en una Tabla\n"
+                + "Botón CANCELAR para limpiar las casillas\n"
+                + "Botón MODIFICAR  seleccionamos una fila de la Tabla para modificar los datos y presionamos Modificar\n"
+                + "Botón ELIMINAR seleccionamos la fila de la Tabla que queremos eliminar y click en Eliminar\n"
+                + "Botón ACTIVAR para activar una Localización que habia sido desactivado\n"
+                + "Botón DESACTIVAR´para desactivar una Localización\n"
+                + "Botón NUEVO limpiara las casilla y se ubicará el puntero en Localización\n"
+                + "Esta Interfaz es para el Ingreso de nueva Localización");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnActivar;
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnInactivar;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;

@@ -191,7 +191,6 @@ public class Configuracion extends javax.swing.JInternalFrame {
                 return false;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error al guardar los datos: " + e.getMessage());
             return false;
         } finally {
@@ -201,7 +200,6 @@ public class Configuracion extends javax.swing.JInternalFrame {
                 }
                 // No cierres la conexión aquí para mantenerla abierta
             } catch (SQLException e) {
-                e.printStackTrace();
             }
         }
     }
@@ -236,7 +234,6 @@ public class Configuracion extends javax.swing.JInternalFrame {
                 return false;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error al actualizar los datos: " + e.getMessage());
             return false;
         } finally {
@@ -338,6 +335,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
         btnCargarLogo = new javax.swing.JButton();
         jLabel10 = new javax.swing.JLabel();
         txtContrasenia = new javax.swing.JPasswordField();
+        btnGuia = new javax.swing.JButton();
 
         setTitle("Configuración");
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -373,22 +371,22 @@ public class Configuracion extends javax.swing.JInternalFrame {
         jLabel6.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel6.setText("Teléfono");
         jPanel1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(277, 29, -1, -1));
-        jPanel1.add(txtTelefono, new org.netbeans.lib.awtextra.AbsoluteConstraints(277, 52, 154, -1));
+        jPanel1.add(txtTelefono, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 50, 154, 30));
 
         jLabel7.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel7.setText("Email");
         jPanel1.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(277, 92, -1, -1));
-        jPanel1.add(txtEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(277, 121, 154, -1));
+        jPanel1.add(txtEmail, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 120, 154, -1));
 
         jLabel8.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel8.setText("Webpage");
         jPanel1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 210, -1, -1));
-        jPanel1.add(txtWebPage, new org.netbeans.lib.awtextra.AbsoluteConstraints(234, 230, 200, -1));
+        jPanel1.add(txtWebPage, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 230, 200, -1));
 
         jLabel9.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel9.setText("Contraseña");
         jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 150, -1, -1));
-        jPanel1.add(txtMensaje, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 290, 210, -1));
+        jPanel1.add(txtMensaje, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 280, 210, -1));
 
         LabelLogo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)));
         jPanel1.add(LabelLogo, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 50, 260, 210));
@@ -434,7 +432,15 @@ public class Configuracion extends javax.swing.JInternalFrame {
         jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 260, -1, -1));
 
         txtContrasenia.setText("jPasswordField1");
-        jPanel1.add(txtContrasenia, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 170, 160, -1));
+        jPanel1.add(txtContrasenia, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 170, 160, -1));
+
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 340, -1, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 730, 386));
 
@@ -508,12 +514,23 @@ public class Configuracion extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_btnCargarLogoActionPerformed
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "CONFIGURACIÓN\n"
+                + "Llenar las casillas con los datos de tu Empresa\n"
+                + "Botón GUARDAR para guardar los datos que se mostraran en las casilla\n"
+                + "La Imagen del Logo deberá tener aprox 250 pixeles SI TIENE PROBLEMAS CONTACTARNOS"
+                + "Botón ACTUALIZAR  seleccionamos una fila de la Tabla para modificar los datos y presionamos Modificar\n"
+                + "Botón CARGAR IMAGEN para cargar tu logo deberas ubicar tu imagen y cumpla con el tamaño\n"
+                + "Esta Interfaz es para guardar los Datos de tu empresa lo cual aparecerá en las facturas y cotizaciones");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel LabelLogo;
     private javax.swing.JButton btnActualizar;
     private javax.swing.JButton btnCargarLogo;
     private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnSalir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

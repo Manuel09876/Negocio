@@ -199,6 +199,7 @@ public class Orden extends javax.swing.JInternalFrame {
         txtIdTrabajador = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtComisión = new javax.swing.JTextField();
+        btnGuia = new javax.swing.JButton();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -251,7 +252,7 @@ public class Orden extends javax.swing.JInternalFrame {
                 btnGenerarCompraActionPerformed(evt);
             }
         });
-        jPanel16.add(btnGenerarCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 410, 90, 30));
+        jPanel16.add(btnGenerarCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 390, 90, 30));
 
         jLabel46.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel46.setText("Cliente");
@@ -443,6 +444,14 @@ public class Orden extends javax.swing.JInternalFrame {
         jPanel16.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 330, -1, -1));
         jPanel16.add(txtComisión, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 330, 90, -1));
 
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+        jPanel16.add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 440, -1, -1));
+
         getContentPane().add(jPanel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 1090, 500));
 
         pack();
@@ -621,6 +630,22 @@ public class Orden extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_btnGenerarCompraActionPerformed
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "ORDENES DE SERVICIO\n"
+                + "Buscar la empresa para la que es el Trabajo si solamente trabajas para tu empresa dejarla como esta\n"
+                + "Buscar el nombre del cliente, puedes ir escribiendo el nombre del cliente en la casilla\n"
+                + "Buscar el periódo de servicios entre la F.Inicio y la F.Termino\n"
+                + "Presionar Mostrar Tamaño de Propiedad para ver el tamaño de la Propiedad y darle el precio que corresponde\n"
+                + "Presional LISTA para ver la lista de precios de la empresa y señalar la que corresponde y dar click\n"
+                + "En Tiempo entre servicios colocar cada cuanto tiempo va a realizarse los servicios dar click en servicios\n"
+                + "así sabra cuantos servicos se realizarán, el botón Total solo indicará cuanto costará ese servicio\n"
+                + "Presionar el botón con un signo + para agregarlo a la lista de trabajos para seguir agregando servicios\n"
+                + "Colocar nota si es necesario\n"
+                + "colocar el valor de la comisión y al vendedor o trabajador que vendió el servicio"
+                + "cuando termine Presionar GENERAR\n"
+                + "Si se equivoco o hay que anular algún servicio dar click en el servicio y presionar el botón de la X");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private com.toedter.calendar.JDateChooser DateFinal;
@@ -630,6 +655,7 @@ public class Orden extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnAdicionar;
     private javax.swing.JButton btnEliminar;
     public javax.swing.JButton btnGenerarCompra;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnLista;
     private javax.swing.JButton btnMTP;
     private javax.swing.JButton btnServicios;

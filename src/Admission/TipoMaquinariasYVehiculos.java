@@ -246,6 +246,7 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
         btnInactivar = new javax.swing.JButton();
         btnActivar = new javax.swing.JButton();
         btnModificar = new javax.swing.JButton();
+        btnGuia = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbMaqVe = new javax.swing.JTable();
@@ -315,6 +316,13 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
             }
         });
 
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -327,6 +335,8 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
                 .addGap(18, 18, 18)
                 .addComponent(txtIdMaqVe, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnGuia)
+                .addGap(31, 31, 31)
                 .addComponent(jButton1))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
@@ -360,7 +370,9 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
                                 .addComponent(txtIdMaqVe)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jButton1)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton1)
+                            .addComponent(btnGuia))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -486,12 +498,26 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
         SeleccionarTipo(tbMaqVe, txtIdMaqVe, txtMaqVe);
     }//GEN-LAST:event_tbMaqVeMouseClicked
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "TIPO DE MAQUINARIAS Y VEHICULOS\n"
+                + "Llenar la casilla para el ingreso de tipo de Maquinarias y Vehículos\n"
+                + "Botón GUARDAR para guardar los datos que se mostraran en una Tabla\n"
+                + "Botón CANCELAR para limpiar las casillas\n"
+                + "Botón MODIFICAR  seleccionamos una fila de la Tabla para modificar los datos y presionamos Modificar\n"
+                + "Botón ELIMINAR seleccionamos la fila de la Tabla que queremos eliminar y click en Eliminar\n"
+                + "Botón ACTIVAR para activar un Tipo de Maquinarias y Vehículos que habia sido desactivado\n"
+                + "Botón DESACTIVAR´para desactivar un Tipo de Maquinaria y Vehículo\n"
+                + "Botón NUEVO limpiara las casilla y se ubicará el puntero en Tipo\n"
+                + "Esta Interfaz es para el Ingreso de nuevos Tipo de Maquinarias y vehículos");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnActivar;
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnInactivar;
     private javax.swing.JButton btnModificar;
     private javax.swing.JButton jButton1;

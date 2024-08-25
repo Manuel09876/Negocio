@@ -62,6 +62,7 @@ public class FormaDePago extends javax.swing.JInternalFrame {
     public FormaDePago() {
         initComponents();
         CargarDatosTabla("");
+        txtIdFormasDePago.setEnabled(false);
     }
 
    
@@ -231,9 +232,12 @@ public class FormaDePago extends javax.swing.JInternalFrame {
         txtIdFormasDePago = new javax.swing.JTextField();
         btnInactivar = new javax.swing.JButton();
         btnActivar = new javax.swing.JButton();
+        btnGuia = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbFormasDePago = new javax.swing.JTable();
+
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setBackground(new java.awt.Color(153, 153, 255));
 
@@ -293,6 +297,13 @@ public class FormaDePago extends javax.swing.JInternalFrame {
             }
         });
 
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -312,6 +323,8 @@ public class FormaDePago extends javax.swing.JInternalFrame {
                         .addComponent(btnInactivar)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnActivar)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
+                        .addComponent(btnGuia)
                         .addContainerGap())
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(42, 42, 42)
@@ -345,9 +358,12 @@ public class FormaDePago extends javax.swing.JInternalFrame {
                     .addComponent(btnCancelar)
                     .addComponent(btnEliminar)
                     .addComponent(btnInactivar)
-                    .addComponent(btnActivar))
+                    .addComponent(btnActivar)
+                    .addComponent(btnGuia))
                 .addGap(15, 15, 15))
         );
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, 703, -1));
 
         jPanel2.setBackground(new java.awt.Color(204, 255, 204));
 
@@ -375,8 +391,8 @@ public class FormaDePago extends javax.swing.JInternalFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 517, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 680, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(17, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -386,26 +402,7 @@ public class FormaDePago extends javax.swing.JInternalFrame {
                 .addContainerGap(17, Short.MAX_VALUE))
         );
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 116, 703, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -457,12 +454,24 @@ public class FormaDePago extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtFormasDePagoActionPerformed
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "FORMAS DE PAGO\n"
+                + "En la casilla Forma de Pago ingresar la nueva Forma de Trabajo\n"
+                + "Botón GUARDAR para guardar el dato que se mostrará en la Tabla\n"
+                + "Botón CANCELAR para limpiar la casilla\n"
+                + "Botón ELIMINAR seleccionamos la fila de la Tabla que queremos eliminar y click en Eliminar\n"
+                + "Botón ACTIVAR para activar una Forma de Pago que habia sido desactivado\n"
+                + "Botón INACTIVAR´para desactivar a una Forma de Pago\n"
+                + "Esta Interfaz es para determinar las diferentes Formas de Pago");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnActivar;
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnInactivar;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;

@@ -1,4 +1,3 @@
-
 package Admission;
 
 import conectar.Conectar;
@@ -17,7 +16,7 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 public class Unidades extends javax.swing.JInternalFrame {
-    
+
     DefaultTableModel model;
     int id_unidades;
     String nombre;
@@ -52,7 +51,7 @@ public class Unidades extends javax.swing.JInternalFrame {
     public void setEstado(String estado) {
         this.estado = estado;
     }
-    
+
     //Conexión
     Conectar con = new Conectar();
     Connection connect = con.getConexion();
@@ -63,7 +62,7 @@ public class Unidades extends javax.swing.JInternalFrame {
         initComponents();
         CargarDatosTabla("");
     }
-    
+
     void CargarDatosTabla(String Valores) {
 
         try {
@@ -133,7 +132,6 @@ public class Unidades extends javax.swing.JInternalFrame {
             txtUnidades.requestFocus();
 
         } catch (SQLException ex) {
-            
 
         }
 
@@ -187,13 +185,13 @@ public class Unidades extends javax.swing.JInternalFrame {
     }
 
     public void Modificar(JTextField paraId, JTextField paraNombre) {
-        
+
         //Obtengo el valor en Cadena(String) de las cajas de Texto
         setId_unidades(Integer.parseInt(paraId.getText()));
         setNombre(paraNombre.getText());
-        
+
         Conectar con = new Conectar();
-        
+
         String sql = "UPDATE unidades SET nombre = ?  WHERE id_unidades = ?";
         try {
             connect = con.getConexion();
@@ -201,15 +199,15 @@ public class Unidades extends javax.swing.JInternalFrame {
             ps.setString(1, getNombre());
             ps.setInt(2, getId_unidades());
             ps.execute();
-            
+
             JOptionPane.showMessageDialog(null, "Modificacion Exitosa");
-            
+
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "No se Modifico, error "+e.toString());
-            
+            JOptionPane.showMessageDialog(null, "No se Modifico, error " + e.toString());
+
         }
     }
-    
+
     public boolean accion(String estado, int IdUnidades) {
         String sql = "UPDATE unidades SET estado = ? WHERE id_unidades = ?";
         try {
@@ -230,7 +228,7 @@ public class Unidades extends javax.swing.JInternalFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
+        btnSalir = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         txtUnidades = new javax.swing.JTextField();
         btnGuardar = new javax.swing.JButton();
@@ -239,7 +237,8 @@ public class Unidades extends javax.swing.JInternalFrame {
         txtIdUnidades = new javax.swing.JTextField();
         btnInactivar = new javax.swing.JButton();
         btnActivar = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        btnModificar = new javax.swing.JButton();
+        btnGuia = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbUnidades = new javax.swing.JTable();
@@ -247,14 +246,15 @@ public class Unidades extends javax.swing.JInternalFrame {
         setIconifiable(true);
         setMaximizable(true);
         setResizable(true);
+        setTitle("Unidades");
 
         jPanel1.setBackground(new java.awt.Color(153, 153, 255));
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
-        jButton1.setText("Salir");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
+        btnSalir.setText("Salir");
+        btnSalir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnSalirActionPerformed(evt);
             }
         });
 
@@ -300,11 +300,18 @@ public class Unidades extends javax.swing.JInternalFrame {
             }
         });
 
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/exchange.png"))); // NOI18N
-        jButton2.setText("Modificar");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnModificar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/exchange.png"))); // NOI18N
+        btnModificar.setText("Modificar");
+        btnModificar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnModificarActionPerformed(evt);
+            }
+        });
+
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
             }
         });
 
@@ -326,25 +333,29 @@ public class Unidades extends javax.swing.JInternalFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(btnGuardar)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton2)
+                        .addComponent(btnModificar)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnCancelar)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnEliminar)
                         .addGap(18, 18, 18)
-                        .addComponent(btnInactivar)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnActivar))
+                        .addComponent(btnInactivar))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jButton1)))
+                        .addComponent(btnGuia)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnActivar, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnSalir, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addGap(18, 18, 18))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton1)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnSalir)
+                    .addComponent(btnGuia))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -361,7 +372,7 @@ public class Unidades extends javax.swing.JInternalFrame {
                     .addComponent(btnEliminar)
                     .addComponent(btnInactivar)
                     .addComponent(btnActivar)
-                    .addComponent(jButton2))
+                    .addComponent(btnModificar))
                 .addGap(15, 15, 15))
         );
 
@@ -425,9 +436,9 @@ public class Unidades extends javax.swing.JInternalFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirActionPerformed
         dispose();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnSalirActionPerformed
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
         Guardar();
@@ -443,24 +454,48 @@ public class Unidades extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void btnInactivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInactivarActionPerformed
-        int fila = tbUnidades.getSelectedRow();
-        int id = Integer.parseInt(txtIdUnidades.getText());
-        if (accion("Inactivo", id)) {
-            CargarDatosTabla("");
-            JOptionPane.showMessageDialog(null, "Inactivado");
-        }else{
-            JOptionPane.showMessageDialog(null, "Error al Inactivar");
+        // Verifica si el campo de texto txtIdUnidades no está vacío
+        String idText = txtIdUnidades.getText().trim(); // Elimina espacios en blanco alrededor del texto
+
+        if (idText.isEmpty()) {
+            // Muestra un mensaje de error si el campo está vacío
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione una unidad para inactivar.", "Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            try {
+                int id = Integer.parseInt(idText); // Intenta convertir el texto a un entero
+                if (accion("Inactivo", id)) {
+                    CargarDatosTabla(""); // Actualiza la tabla con los datos más recientes
+                    JOptionPane.showMessageDialog(null, "Inactivado");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error al Inactivar");
+                }
+            } catch (NumberFormatException e) {
+                // Muestra un mensaje de error si el texto no es un número válido
+                JOptionPane.showMessageDialog(null, "El ID ingresado no es un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }//GEN-LAST:event_btnInactivarActionPerformed
 
     private void btnActivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActivarActionPerformed
-        int fila = tbUnidades.getSelectedRow();
-        int id = Integer.parseInt(txtIdUnidades.getText());
-        if (accion("Activo", id)) {
-            CargarDatosTabla("");
-            JOptionPane.showMessageDialog(null, "Activar");
-        }else{
-            JOptionPane.showMessageDialog(null, "Error al Activar");
+        // Verifica si el campo de texto txtIdUnidades no está vacío
+        String idText = txtIdUnidades.getText().trim(); // Elimina espacios en blanco alrededor del texto
+
+        if (idText.isEmpty()) {
+            // Muestra un mensaje de error si el campo está vacío
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione una unidad para activar.", "Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            try {
+                int id = Integer.parseInt(idText); // Intenta convertir el texto a un entero
+                if (accion("Activo", id)) {
+                    CargarDatosTabla(""); // Actualiza la tabla con los datos más recientes
+                    JOptionPane.showMessageDialog(null, "Activado");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error al Activar");
+                }
+            } catch (NumberFormatException e) {
+                // Muestra un mensaje de error si el texto no es un número válido
+                JOptionPane.showMessageDialog(null, "El ID ingresado no es un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }//GEN-LAST:event_btnActivarActionPerformed
 
@@ -468,10 +503,23 @@ public class Unidades extends javax.swing.JInternalFrame {
         SeleccionarUnidades(tbUnidades, txtIdUnidades, txtUnidades);
     }//GEN-LAST:event_tbUnidadesMouseClicked
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
         Modificar(txtIdUnidades, txtUnidades);
         CargarDatosTabla("");
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "UNIDADES\n"
+                + "Llenar todas la casilla para el ingreso de UNIDADES de medida\n"
+                + "Botón GUARDAR para guardar los datos que se mostraran en una Tabla\n"
+                + "Botón CANCELAR para limpiar las casillas\n"
+                + "Botón MODIFICAR  seleccionamos una fila de la Tabla para modificar los datos y presionamos Modificar\n"
+                + "Botón ELIMINAR seleccionamos la fila de la Tabla que queremos eliminar y click en Eliminar\n"
+                + "Botón ACTIVAR para activar una Unidad que habia sido desactivado\n"
+                + "Botón DESACTIVAR´para desactivar una Unidad\n"
+                + "Botón NUEVO limpiara las casilla y se ubicará el puntero en Unidades\n"
+                + "Esta Interfaz es para el Ingreso de Unidades");
+    }//GEN-LAST:event_btnGuiaActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -479,9 +527,10 @@ public class Unidades extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnInactivar;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton btnModificar;
+    private javax.swing.JButton btnSalir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;

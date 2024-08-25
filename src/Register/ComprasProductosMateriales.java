@@ -509,6 +509,7 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         btnMostrarStock = new javax.swing.JButton();
         txtSubTotal = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
+        btnGuia = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(0, 51, 153));
         setIconifiable(true);
@@ -757,6 +758,14 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         jLabel3.setText("SubTotal");
         jPanel16.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(930, 390, -1, -1));
 
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+        jPanel16.add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(890, 20, -1, -1));
+
         getContentPane().add(jPanel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 1080, 510));
 
         pack();
@@ -987,11 +996,19 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_txt_InicialKeyPressed
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "COMPRA DE PRODUCTOS Y MATERIALES\n"
+                + "El ingreso de compras de Productos y Materiales\n"
+                + "Colocar el Numero de Recibo si no lo tiene ponga S/R\n"
+                + "Buscar El Producto, El tipo de producto, Marca, Proveedor");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JLabel JLabelTotalCompra;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnMostrarStock;
     private javax.swing.JButton btnRegistrarCredito;
     private javax.swing.JButton btnSalir;

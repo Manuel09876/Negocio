@@ -34,7 +34,7 @@ import javax.swing.JDesktopPane;
 public class Trabajadores extends javax.swing.JInternalFrame {
 //Variables
 
-     private JDesktopPane desktopPane;
+    private JDesktopPane desktopPane;
     DefaultTableModel model;
 
     int id;
@@ -47,8 +47,6 @@ public class Trabajadores extends javax.swing.JInternalFrame {
     int zipCode;
     String ciudad, state, telefono, email, estado;
     Date Ingreso;
-
-    
 
     public int getId() {
         return id;
@@ -169,8 +167,6 @@ public class Trabajadores extends javax.swing.JInternalFrame {
     public void setIngreso(Date Ingreso) {
         this.Ingreso = Ingreso;
     }
-    
-    
 
     public void BloquearCampos() {
         txtTipoDocumento.setEnabled(false);
@@ -278,107 +274,106 @@ public class Trabajadores extends javax.swing.JInternalFrame {
     }
 
     public void Guardar() {
-    // Variables
-    String tipoDocumento;
-    String numDocumento;
-    String nombres, sexo;
-    int edad;
-    String direccion;
-    int zipCode;
-    String ciudad, state, telefono, email;
+        // Variables
+        String tipoDocumento;
+        String numDocumento;
+        String nombres, sexo;
+        int edad;
+        String direccion;
+        int zipCode;
+        String ciudad, state, telefono, email;
 
-    // Obtenemos la Información de la Caja de Texto
-    tipoDocumento = txtTipoDocumento.getText();
-    numDocumento = txtNumeroDocumento.getText();
-    nombres = txtNombres.getText();
-    sexo = cbxSexo.getSelectedItem().toString();
+        // Obtenemos la Información de la Caja de Texto
+        tipoDocumento = txtTipoDocumento.getText();
+        numDocumento = txtNumeroDocumento.getText();
+        nombres = txtNombres.getText();
+        sexo = cbxSexo.getSelectedItem().toString();
 
-    // Obtener la fecha de nacimiento del JDateChooser como java.util.Date
-    java.util.Date fechaNuevaUtil = JDateFechaNac.getDate();
+        // Obtener la fecha de nacimiento del JDateChooser como java.util.Date
+        java.util.Date fechaNuevaUtil = JDateFechaNac.getDate();
 
-    // Verificar que la fecha no sea nula
-    if (fechaNuevaUtil == null) {
-        JOptionPane.showMessageDialog(null, "Por favor, ingrese una fecha de nacimiento válida.", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
-
-    // Convertir la fecha de nacimiento a LocalDate
-    LocalDate fechaNueva = fechaNuevaUtil.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-    LocalDate fechaActual = LocalDate.now();
-
-    // Calcular la edad a partir de la fecha de nacimiento
-    edad = Period.between(fechaNueva, fechaActual).getYears();
-
-    // Asignamos la edad al campo de texto correspondiente
-    txtEdad.setText(Integer.toString(edad));
-
-    direccion = txtDireccion.getText();
-    try {
-        zipCode = Integer.parseInt(txtZipCode.getText());
-    } catch (NumberFormatException e) {
-        JOptionPane.showMessageDialog(null, "Por favor, ingrese un código postal válido.", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
-    ciudad = txtCiudad.getText();
-    state = txtState.getText();
-    telefono = txtTelefono.getText();
-    email = txtEmail.getText();
-    
-    // Obtener la fecha de ingreso del JDateChooser como java.util.Date
-    java.util.Date ingresoDateUtil = dateIngreso.getDate();
-
-    // Verificar que la fecha no sea nula
-    if (ingresoDateUtil == null) {
-        JOptionPane.showMessageDialog(null, "Por favor, ingrese una fecha de ingreso válida.", "Error", JOptionPane.ERROR_MESSAGE);
-        return;
-    }
-
-    // Convertir la fecha de ingreso a LocalDate
-    LocalDate ingresoDate = ingresoDateUtil.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
-    // Consulta sql para insertar los datos (nombres como en la base de datos)
-    String sql = "INSERT INTO worker (documentType, documentNumber, nombre, sex, "
-            + "bornDate, age, address, zipCode, city, state, cellphone, "
-            + "email, ingreso) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    // Para almacenar los datos empleo un try-catch
-    try {
-        // Prepara la conexión para enviar al SQL (Evita ataques al SQL)
-        PreparedStatement ps = connect.prepareStatement(sql);
-
-        ps.setString(1, tipoDocumento);
-        ps.setString(2, numDocumento);
-        ps.setString(3, nombres);
-        ps.setString(4, sexo);
-        ps.setObject(5, fechaNueva);
-        ps.setInt(6, edad);
-        ps.setString(7, direccion);
-        ps.setInt(8, zipCode);
-        ps.setString(9, ciudad);
-        ps.setString(10, state);
-        ps.setString(11, telefono);
-        ps.setString(12, email);
-        ps.setObject(13, ingresoDate);
-
-        // Declara otra variable para validar los registros
-        int n = ps.executeUpdate();
-
-        // Si existe un registro en la BD el registro se guardó con éxito
-        if (n > 0) {
-            JOptionPane.showMessageDialog(null, "El registro se guardó exitosamente");
-
-            // Limpiar campos
-            limpiarCajas();
+        // Verificar que la fecha no sea nula
+        if (fechaNuevaUtil == null) {
+            JOptionPane.showMessageDialog(null, "Por favor, ingrese una fecha de nacimiento válida.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
-        CargarDatosTable("");
 
-    } catch (SQLException e) {
-        Logger.getLogger(Tarifario.class.getName()).log(Level.SEVERE, null, e);
-        JOptionPane.showMessageDialog(null, "El registro NO se guardó exitosamente, Error " + e.toString());
+        // Convertir la fecha de nacimiento a LocalDate
+        LocalDate fechaNueva = fechaNuevaUtil.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate fechaActual = LocalDate.now();
+
+        // Calcular la edad a partir de la fecha de nacimiento
+        edad = Period.between(fechaNueva, fechaActual).getYears();
+
+        // Asignamos la edad al campo de texto correspondiente
+        txtEdad.setText(Integer.toString(edad));
+
+        direccion = txtDireccion.getText();
+        try {
+            zipCode = Integer.parseInt(txtZipCode.getText());
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Por favor, ingrese un código postal válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        ciudad = txtCiudad.getText();
+        state = txtState.getText();
+        telefono = txtTelefono.getText();
+        email = txtEmail.getText();
+
+        // Obtener la fecha de ingreso del JDateChooser como java.util.Date
+        java.util.Date ingresoDateUtil = dateIngreso.getDate();
+
+        // Verificar que la fecha no sea nula
+        if (ingresoDateUtil == null) {
+            JOptionPane.showMessageDialog(null, "Por favor, ingrese una fecha de ingreso válida.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Convertir la fecha de ingreso a LocalDate
+        LocalDate ingresoDate = ingresoDateUtil.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        // Consulta sql para insertar los datos (nombres como en la base de datos)
+        String sql = "INSERT INTO worker (documentType, documentNumber, nombre, sex, "
+                + "bornDate, age, address, zipCode, city, state, cellphone, "
+                + "email, ingreso) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        // Para almacenar los datos empleo un try-catch
+        try {
+            // Prepara la conexión para enviar al SQL (Evita ataques al SQL)
+            PreparedStatement ps = connect.prepareStatement(sql);
+
+            ps.setString(1, tipoDocumento);
+            ps.setString(2, numDocumento);
+            ps.setString(3, nombres);
+            ps.setString(4, sexo);
+            ps.setObject(5, fechaNueva);
+            ps.setInt(6, edad);
+            ps.setString(7, direccion);
+            ps.setInt(8, zipCode);
+            ps.setString(9, ciudad);
+            ps.setString(10, state);
+            ps.setString(11, telefono);
+            ps.setString(12, email);
+            ps.setObject(13, ingresoDate);
+
+            // Declara otra variable para validar los registros
+            int n = ps.executeUpdate();
+
+            // Si existe un registro en la BD el registro se guardó con éxito
+            if (n > 0) {
+                JOptionPane.showMessageDialog(null, "El registro se guardó exitosamente");
+
+                // Limpiar campos
+                limpiarCajas();
+            }
+            CargarDatosTable("");
+
+        } catch (SQLException e) {
+            Logger.getLogger(Tarifario.class.getName()).log(Level.SEVERE, null, e);
+            JOptionPane.showMessageDialog(null, "El registro NO se guardó exitosamente, Error " + e.toString());
+        }
     }
-}
-    
-    
+
     public void Eliminar(JTextField codigo) {
 
         setId(Integer.parseInt(codigo.getText()));
@@ -402,104 +397,102 @@ public class Trabajadores extends javax.swing.JInternalFrame {
     }
 
     public void SeleccionarTrabajador(JTable TablaTrabajador, JTextField Id, JTextField tipodeDocumento, JTextField numeroDocumento,
-        JTextField Nombres, JComboBox Sexo, JDateChooser FechaNacimiento, JTextField Edad, JTextField Direccion, JTextField ZipCode,
-        JTextField Ciudad, JTextField State, JTextField Telefono, JTextField Email, JDateChooser Ingreso) {
-    try {
-        int fila = TablaTrabajador.getSelectedRow();
-        if (fila >= 0) {
+            JTextField Nombres, JComboBox Sexo, JDateChooser FechaNacimiento, JTextField Edad, JTextField Direccion, JTextField ZipCode,
+            JTextField Ciudad, JTextField State, JTextField Telefono, JTextField Email, JDateChooser Ingreso) {
+        try {
+            int fila = TablaTrabajador.getSelectedRow();
+            if (fila >= 0) {
 
-            Id.setText(TablaTrabajador.getValueAt(fila, 0).toString());
-            tipodeDocumento.setText(TablaTrabajador.getValueAt(fila, 1).toString());
-            numeroDocumento.setText(TablaTrabajador.getValueAt(fila, 2).toString());
-            Nombres.setText(TablaTrabajador.getValueAt(fila, 3).toString());
-            Sexo.setSelectedItem(TablaTrabajador.getValueAt(fila, 4).toString());
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Formato de fecha de la tabla
-            String fechaNacimientoString = TablaTrabajador.getValueAt(fila, 5).toString(); // Obtener la fecha de nacimiento como String de la tabla
-            java.util.Date fechaNacimientoDate = sdf.parse(fechaNacimientoString); // Convertir el String a un objeto Date
-            FechaNacimiento.setDate(fechaNacimientoDate); // Establecer la fecha en el JDateChooser
-            Edad.setText(TablaTrabajador.getValueAt(fila, 6).toString());
-            Direccion.setText(TablaTrabajador.getValueAt(fila, 7).toString());
-            ZipCode.setText(TablaTrabajador.getValueAt(fila, 8).toString());
-            Ciudad.setText(TablaTrabajador.getValueAt(fila, 9).toString());
-            State.setText(TablaTrabajador.getValueAt(fila, 10).toString());
-            Telefono.setText(TablaTrabajador.getValueAt(fila, 11).toString());
-            Email.setText(TablaTrabajador.getValueAt(fila, 12).toString());
-            String fechaIngresoString = TablaTrabajador.getValueAt(fila, 13).toString(); // Obtener la fecha de ingreso como String de la tabla
-            java.util.Date fechaIngresoDate = sdf.parse(fechaIngresoString); // Convertir el String a un objeto Date
-            Ingreso.setDate(fechaIngresoDate); // Establecer la fecha en el JDateChooser
+                Id.setText(TablaTrabajador.getValueAt(fila, 0).toString());
+                tipodeDocumento.setText(TablaTrabajador.getValueAt(fila, 1).toString());
+                numeroDocumento.setText(TablaTrabajador.getValueAt(fila, 2).toString());
+                Nombres.setText(TablaTrabajador.getValueAt(fila, 3).toString());
+                Sexo.setSelectedItem(TablaTrabajador.getValueAt(fila, 4).toString());
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Formato de fecha de la tabla
+                String fechaNacimientoString = TablaTrabajador.getValueAt(fila, 5).toString(); // Obtener la fecha de nacimiento como String de la tabla
+                java.util.Date fechaNacimientoDate = sdf.parse(fechaNacimientoString); // Convertir el String a un objeto Date
+                FechaNacimiento.setDate(fechaNacimientoDate); // Establecer la fecha en el JDateChooser
+                Edad.setText(TablaTrabajador.getValueAt(fila, 6).toString());
+                Direccion.setText(TablaTrabajador.getValueAt(fila, 7).toString());
+                ZipCode.setText(TablaTrabajador.getValueAt(fila, 8).toString());
+                Ciudad.setText(TablaTrabajador.getValueAt(fila, 9).toString());
+                State.setText(TablaTrabajador.getValueAt(fila, 10).toString());
+                Telefono.setText(TablaTrabajador.getValueAt(fila, 11).toString());
+                Email.setText(TablaTrabajador.getValueAt(fila, 12).toString());
+                String fechaIngresoString = TablaTrabajador.getValueAt(fila, 13).toString(); // Obtener la fecha de ingreso como String de la tabla
+                java.util.Date fechaIngresoDate = sdf.parse(fechaIngresoString); // Convertir el String a un objeto Date
+                Ingreso.setDate(fechaIngresoDate); // Establecer la fecha en el JDateChooser
 
-        } else {
-            JOptionPane.showMessageDialog(null, "Fila No seleccionada");
+            } else {
+                JOptionPane.showMessageDialog(null, "Fila No seleccionada");
+            }
+        } catch (HeadlessException | ParseException e) {
+            JOptionPane.showMessageDialog(null, "Error de Selección, Error: " + e.toString());
         }
-    } catch (HeadlessException | ParseException e) {
-        JOptionPane.showMessageDialog(null, "Error de Selección, Error: " + e.toString());
     }
-}
-
 
     public void ModificarTrabajador(JTextField Id, JTextField tipodeDocumento, JTextField numeroDocumento, JTextField Nombres,
-        JComboBox Sexo, JDateChooser FechaNacimiento, JTextField Edad, JTextField Direccion, JTextField ZipCode, JTextField Ciudad,
-        JTextField State, JTextField Telefono, JTextField Email, JDateChooser Ingreso) {
+            JComboBox Sexo, JDateChooser FechaNacimiento, JTextField Edad, JTextField Direccion, JTextField ZipCode, JTextField Ciudad,
+            JTextField State, JTextField Telefono, JTextField Email, JDateChooser Ingreso) {
 
-    setId(Integer.parseInt(Id.getText()));
-    setTipoDocumento(tipodeDocumento.getText());
-    setNumDocumento(numeroDocumento.getText());
-    setNombres(Nombres.getText());
-    setSexo(Sexo.getSelectedItem().toString());
+        setId(Integer.parseInt(Id.getText()));
+        setTipoDocumento(tipodeDocumento.getText());
+        setNumDocumento(numeroDocumento.getText());
+        setNombres(Nombres.getText());
+        setSexo(Sexo.getSelectedItem().toString());
 
-    // Obtener la fecha de nacimiento como LocalDate
-    LocalDate fechaNueva = FechaNacimiento.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        // Obtener la fecha de nacimiento como LocalDate
+        LocalDate fechaNueva = FechaNacimiento.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-    // Calcular la edad a partir de la fecha de nacimiento
-    LocalDate fechaActual = LocalDate.now();
-    int nuevaEdad = Period.between(fechaNueva, fechaActual).getYears();
+        // Calcular la edad a partir de la fecha de nacimiento
+        LocalDate fechaActual = LocalDate.now();
+        int nuevaEdad = Period.between(fechaNueva, fechaActual).getYears();
 
-    // Convertir LocalDate a Date
-    Date fechaNacimientoSQL = Date.valueOf(fechaNueva);
+        // Convertir LocalDate a Date
+        Date fechaNacimientoSQL = Date.valueOf(fechaNueva);
 
-    // Obtener la fecha de ingreso como LocalDate
-    LocalDate ingresoDate = Ingreso.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        // Obtener la fecha de ingreso como LocalDate
+        LocalDate ingresoDate = Ingreso.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-    // Convertir LocalDate a Date
-    Date ingresoSQL = Date.valueOf(ingresoDate);
+        // Convertir LocalDate a Date
+        Date ingresoSQL = Date.valueOf(ingresoDate);
 
-    setFechaNacimiento(fechaNacimientoSQL); // Establecer la nueva fecha de nacimiento como un objeto Date
-    setEdad(nuevaEdad);
-    setDireccion(Direccion.getText());
-    setZipCode(Integer.parseInt(ZipCode.getText()));
-    setCiudad(Ciudad.getText());
-    setState(State.getText());
-    setTelefono(Telefono.getText());
-    setEmail(Email.getText());
-    setIngreso(ingresoSQL);
+        setFechaNacimiento(fechaNacimientoSQL); // Establecer la nueva fecha de nacimiento como un objeto Date
+        setEdad(nuevaEdad);
+        setDireccion(Direccion.getText());
+        setZipCode(Integer.parseInt(ZipCode.getText()));
+        setCiudad(Ciudad.getText());
+        setState(State.getText());
+        setTelefono(Telefono.getText());
+        setEmail(Email.getText());
+        setIngreso(ingresoSQL);
 
-    String consulta = "UPDATE worker set documentType=?, documentNumber=?, nombre=?, sex=?, "
-            + "bornDate=?, age=?, address=?, zipCode=?, city=?, state=?, cellphone=?, "
-            + "email=?, ingreso=? where idWorker=?";
-    try {
-        CallableStatement cs = con.getConexion().prepareCall(consulta);
-        cs.setString(1, getTipoDocumento());
-        cs.setString(2, getNumDocumento());
-        cs.setString(3, getNombres());
-        cs.setString(4, getSexo());
-        cs.setDate(5, fechaNacimientoSQL); // Utilizar la nueva fecha seleccionada
-        cs.setInt(6, getEdad());
-        cs.setString(7, getDireccion());
-        cs.setInt(8, getZipCode());
-        cs.setString(9, getCiudad());
-        cs.setString(10, getState());
-        cs.setString(11, getTelefono());
-        cs.setString(12, getEmail());
-        cs.setDate(13, ingresoSQL);
-        cs.setInt(14, getId());
-        cs.executeUpdate();
+        String consulta = "UPDATE worker set documentType=?, documentNumber=?, nombre=?, sex=?, "
+                + "bornDate=?, age=?, address=?, zipCode=?, city=?, state=?, cellphone=?, "
+                + "email=?, ingreso=? where idWorker=?";
+        try {
+            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            cs.setString(1, getTipoDocumento());
+            cs.setString(2, getNumDocumento());
+            cs.setString(3, getNombres());
+            cs.setString(4, getSexo());
+            cs.setDate(5, fechaNacimientoSQL); // Utilizar la nueva fecha seleccionada
+            cs.setInt(6, getEdad());
+            cs.setString(7, getDireccion());
+            cs.setInt(8, getZipCode());
+            cs.setString(9, getCiudad());
+            cs.setString(10, getState());
+            cs.setString(11, getTelefono());
+            cs.setString(12, getEmail());
+            cs.setDate(13, ingresoSQL);
+            cs.setInt(14, getId());
+            cs.executeUpdate();
 
-        JOptionPane.showMessageDialog(null, "Modificación Exitosa");
-    } catch (SQLException e) {
-        JOptionPane.showMessageDialog(null, "No se Modificó, error: " + e.toString());
+            JOptionPane.showMessageDialog(null, "Modificación Exitosa");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "No se Modificó, error: " + e.toString());
+        }
     }
-}
-
 
     public void BuscarTrabajadores(java.awt.event.KeyEvent evt) {
 
@@ -557,15 +550,15 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Error: " + e.toString());
         }
     }
-    
-    public boolean accion(String estado, int idTipoDeUsuario) {
+
+    public boolean accion(String estado, int idWorker) {
         String sql = "UPDATE worker SET estado = ? WHERE idWorker = ?";
         try {
             connect = con.getConexion();
             PreparedStatement ps;
             ps = connect.prepareStatement(sql);
             ps.setString(1, estado);
-            ps.setInt(2, idTipoDeUsuario);
+            ps.setInt(2, idWorker);
             ps.execute();
             return true;
         } catch (SQLException e) {
@@ -594,6 +587,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         jLabel18 = new javax.swing.JLabel();
         txtBuscarTrabajador = new javax.swing.JTextField();
         btnBuscar = new javax.swing.JButton();
+        btnSalir = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         txtNombres = new javax.swing.JTextField();
@@ -627,10 +621,10 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         btnGrabar = new javax.swing.JButton();
         btnModificar = new javax.swing.JButton();
         btnCancelar = new javax.swing.JButton();
-        btnSalir = new javax.swing.JButton();
         btnEliminar = new javax.swing.JButton();
         btnActivar = new javax.swing.JButton();
         btnInactivar = new javax.swing.JButton();
+        btnGuia = new javax.swing.JButton();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -685,6 +679,15 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             }
         });
         jPanel1.add(btnBuscar, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 30, -1, -1));
+
+        btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
+        btnSalir.setText("Salir");
+        btnSalir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSalirActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(900, 30, 100, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 10, 1020, 400));
 
@@ -763,7 +766,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         jLabel4.setText("Fecha de Ingreso");
         jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 430, -1, -1));
 
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 360, 460));
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 360, 480));
 
         btnNuevo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/new product.png"))); // NOI18N
         btnNuevo.setText("Nuevo");
@@ -801,15 +804,6 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         });
         getContentPane().add(btnCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 420, -1, -1));
 
-        btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
-        btnSalir.setText("Salir");
-        btnSalir.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSalirActionPerformed(evt);
-            }
-        });
-        getContentPane().add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(1230, 420, 100, -1));
-
         btnEliminar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/eliminar.png"))); // NOI18N
         btnEliminar.setText("Eliminar");
         btnEliminar.addActionListener(new java.awt.event.ActionListener() {
@@ -834,6 +828,15 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             }
         });
         getContentPane().add(btnInactivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1120, 420, -1, -1));
+
+        btnGuia.setText("Guia");
+        btnGuia.setToolTipText("");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(1270, 420, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -904,26 +907,57 @@ public class Trabajadores extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_txtBuscarTrabajadorKeyPressed
 
     private void btnActivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActivarActionPerformed
-        int fila = tbTrabajadores.getSelectedRow();
-        int id = Integer.parseInt(txtId.getText());
-        if (accion("Activo", id)) {
-            JOptionPane.showMessageDialog(null, "Activado");
-            CargarDatosTable("");
-        }else{
-            JOptionPane.showMessageDialog(null, "Error al Activar");
+        String idText = txtId.getText().trim(); // Asegúrate de que no haya espacios en blanco
+
+        if (idText.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione un trabajador para activar.", "Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            try {
+                int id = Integer.parseInt(idText); // Convertir a entero después de validar que no esté vacío
+                if (accion("Activo", id)) {
+                    JOptionPane.showMessageDialog(null, "Trabajador activado con éxito.");
+                    CargarDatosTable("");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error al activar el trabajador.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "El ID ingresado no es un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }//GEN-LAST:event_btnActivarActionPerformed
 
     private void btnInactivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInactivarActionPerformed
-        int fila = tbTrabajadores.getSelectedRow();
-        int id = Integer.parseInt(txtId.getText());
-        if (accion("Inactivo", id)) {
-            JOptionPane.showMessageDialog(null, "Inactivado");
-            CargarDatosTable("");
-        }else{
-            JOptionPane.showMessageDialog(null, "Error al Inactivar");
+        String idText = txtId.getText().trim(); // Asegúrate de que no haya espacios en blanco
+
+        if (idText.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione un trabajador para inactivar.", "Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            try {
+                int id = Integer.parseInt(idText); // Convertir a entero después de validar que no esté vacío
+                if (accion("Inactivo", id)) {
+                    JOptionPane.showMessageDialog(null, "Trabajador inactivado con éxito.");
+                    CargarDatosTable("");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error al inactivar el trabajador.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "El ID ingresado no es un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }//GEN-LAST:event_btnInactivarActionPerformed
+
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "TRABAJADORES\n"
+                + "Llenar todas las casillas para el ingreso de Nuevos Trabajadores\n"
+                + "Botón GUARDAR para guardar los datos que se mostraran en una Tabla\n"
+                + "Botón CANCELAR para limpiar las casillas\n"
+                + "Botón MODIFICAR  seleccionamos una fila de la Tabla para modificar los datos y presionamos Modificar\n"
+                + "Botón ELIMINAR seleccionamos la fila de la Tabla que queremos eliminar y click en Eliminar\n"
+                + "Botón ACTIVAR para activar un trabajador que habia sido desactivado\n"
+                + "Botón DESACTIVAR´para desactivar a un Trabajador\n"
+                + "Botón NUEVO limpiara las casilla y se ubicará el puntero en Tipo de documento\n"
+                + "Esta Interfaz es para el Ingreso de Nuevos Trabajadores");
+    }//GEN-LAST:event_btnGuiaActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -933,6 +967,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGrabar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnInactivar;
     private javax.swing.JButton btnModificar;
     private javax.swing.JButton btnNuevo;

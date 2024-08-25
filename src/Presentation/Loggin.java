@@ -15,50 +15,49 @@ public class Loggin extends javax.swing.JFrame {
     private static final Logger LOGGER = Logger.getLogger(HorasTrabajadas.class.getName());
     private int trabajadorId; // Variable de instancia para almacenar el ID del trabajador
     private HorasTrabajadas ht; // Asegúrate de que esta instancia esté correctamente inicializada
-    
 
     public Loggin() {
         initComponents();
         ht = new HorasTrabajadas();
         txtUser.requestFocus();
         btnTest.setVisible(false);
-        
-        
 
     }
 
-    public void IngresaSistema(String Usuario, String Contrasena) {
-        String sql = "SELECT idUsuarios, rol, password FROM usuarios WHERE usuario = ?";
-        try {
-            PreparedStatement pst = conect.prepareStatement(sql);
-            pst.setString(1, Usuario);
+    public void IngresaSistema(String usuario, String contrasena) {
+        String sql = "SELECT idUsuarios, rol, password FROM usuarios WHERE usuario = ? AND estado = 'Activo'";
+
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setString(1, usuario);
             System.out.println("Ejecutando consulta: " + sql);
+
             try (ResultSet result = pst.executeQuery()) {
                 if (result.next()) {
                     String passwordBD = result.getString("password");
                     System.out.println("Password en BD: " + passwordBD);
-                    System.out.println("Password ingresado: " + Contrasena);
-                    if (passwordBD.equals(Contrasena)) {
+                    System.out.println("Password ingresado: " + contrasena);
+
+                    if (passwordBD.equals(contrasena)) {  // Asegúrate de que la comparación sea segura si usas hash
                         int tipUsu = result.getInt("rol");
                         int idUsuarios = result.getInt("idUsuarios");
                         System.out.println("ID del usuario al ingresar: " + idUsuarios);
 
                         // Obtener el idTrabajador relacionado con el idUsuarios
-                        int idTrabajador = obtenerTrabajadorId(Usuario);
+                        int idTrabajador = obtenerTrabajadorId(usuario);
                         if (idTrabajador != 0) {
                             System.out.println("ID del trabajador al ingresar: " + idTrabajador);
                             ht.registrarInicioSesion(idTrabajador); // Registrar inicio de sesión del trabajador
                         }
-
                     } else {
                         JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
                     }
                 } else {
-                    JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
+                    JOptionPane.showMessageDialog(this, "Usuario no encontrado o inactivo");
                 }
             }
         } catch (SQLException ex) {
-            Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, "Error al ingresar al sistema", ex);
+            JOptionPane.showMessageDialog(this, "Error al ingresar al sistema. Por favor, intente de nuevo.");
         }
     }
 
@@ -236,11 +235,11 @@ public class Loggin extends javax.swing.JFrame {
         String pas = new String(txtPassword.getPassword());
         System.out.println("Usuario: " + usu + ", Contraseña: " + pas); // Depuración
         IngresaSistema(usu, pas);
-        
-         // Código para obtener tipUsu y usuario
+
+        // Código para obtener tipUsu y usuario
         String usuario = txtUser.getText();
         int tipUsu = obtenerRolDeUsuario(usuario); // Implementa este método para obtener el rol del usuario
-        
+
         VentanaPrincipal objVP = new VentanaPrincipal(tipUsu, usuario); // Pasar los valores correctos
         objVP.setVisible(true);
         this.dispose();
@@ -336,7 +335,7 @@ public class Loggin extends javax.swing.JFrame {
         }
         return 0;
     }
-    
+
     private int obtenerRolDeUsuario(String usuario) {
         // Implementa este método para obtener el rol del usuario desde la base de datos
         int rolId = 0;

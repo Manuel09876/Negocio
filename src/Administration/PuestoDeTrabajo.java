@@ -634,7 +634,22 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         return 0;
     }
     
-    
+    public boolean accion(String estado, int id) {
+        String sql = "UPDATE puestodetrabajo SET estado = ? WHERE idPDT = ?";
+        try {
+            Conectar con = new Conectar();
+            Connection connect = con.getConexion();
+            PreparedStatement ps;
+            ps = con.getConexion().prepareStatement(sql);
+            ps.setString(1, estado);
+            ps.setInt(2, id);
+            ps.execute();
+            return true;
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e.toString());
+            return false;
+        }
+    }
     
     
     
@@ -707,7 +722,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 btnGuardarActionPerformed(evt);
             }
         });
-        jPanel1.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1030, 70, -1, -1));
+        jPanel1.add(btnGuardar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1021, 70, 110, -1));
 
         btnModificar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/actualizar.png"))); // NOI18N
         btnModificar.setText("Modificar");
@@ -725,7 +740,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 btnCancelarActionPerformed(evt);
             }
         });
-        jPanel1.add(btnCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1030, 120, -1, -1));
+        jPanel1.add(btnCancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1020, 120, 110, -1));
 
         btnEliminar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/eliminar.png"))); // NOI18N
         btnEliminar.setText("Eliminar");
@@ -734,7 +749,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 btnEliminarActionPerformed(evt);
             }
         });
-        jPanel1.add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1030, 210, -1, -1));
+        jPanel1.add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(1021, 210, 110, -1));
 
         cbxTDT.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -830,7 +845,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 btnSalirActionPerformed(evt);
             }
         });
-        jPanel1.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(1050, 20, -1, -1));
+        jPanel1.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(1020, 20, 110, -1));
         jPanel1.add(txtIdPDT, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, 80, 30));
         jPanel1.add(txtPagoPorHora, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 160, 110, -1));
         jPanel1.add(txtVacaciones, new org.netbeans.lib.awtextra.AbsoluteConstraints(840, 60, 100, -1));
@@ -844,9 +859,19 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         jPanel1.add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(890, 210, -1, -1));
 
         btnActivar.setText("Activar");
+        btnActivar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnActivarActionPerformed(evt);
+            }
+        });
         jPanel1.add(btnActivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 210, -1, -1));
 
-        btnDesactivar.setText("Desactivar");
+        btnDesactivar.setText("Inactivar");
+        btnDesactivar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDesactivarActionPerformed(evt);
+            }
+        });
         jPanel1.add(btnDesactivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 210, -1, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 1160, 250));
@@ -999,8 +1024,31 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 + "Botón ELIMINAR seleccionamos la fila de la Tabla que queremos eliminar y click en Eliminar\n"
                 + "Botón ACTIVAR para activar un trabajador que habia sido desactivado\n"
                 + "Botón DESACTIVAR´para desactivar a un Trabajador\n"
-                + "Botón NUEVO TIPO DE TRABAJO  es para guardar los acuerdos de las condiciones de trabajo de los trabajadores");
+                + "Botón NUEVO TIPO DE TRABAJO cuando no tengamos el tipo buscado podemos crearlo, aparecera otra interfaz\n"
+                + "al presionar este botón");
     }//GEN-LAST:event_btnGuiaActionPerformed
+
+    private void btnActivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActivarActionPerformed
+        int fila = tbPuestosDeTrabajo.getSelectedRow();
+        int id = Integer.parseInt(txtIdPDT.getText());
+        if (accion("Activo", id)) {
+            JOptionPane.showMessageDialog(null, "Activado");
+            Mostrar(tbPuestosDeTrabajo);
+        }else{
+            JOptionPane.showMessageDialog(null, "Error al Activar");
+        }
+    }//GEN-LAST:event_btnActivarActionPerformed
+
+    private void btnDesactivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDesactivarActionPerformed
+        int fila = tbPuestosDeTrabajo.getSelectedRow();
+        int id = Integer.parseInt(txtIdPDT.getText());
+        if (accion("Inactivo", id)) {
+            JOptionPane.showMessageDialog(null, "Inactivado");
+            Mostrar(tbPuestosDeTrabajo);
+        }else{
+            JOptionPane.showMessageDialog(null, "Error al Inactivar");
+        }
+    }//GEN-LAST:event_btnDesactivarActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

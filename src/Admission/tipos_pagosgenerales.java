@@ -63,149 +63,106 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
     public tipos_pagosgenerales() {
         initComponents();
         CargarDatosTabla("");
+        txtId.setEnabled(false);
     }
 
     void CargarDatosTabla(String Valores) {
-
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];
-
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
-
             String ConsultaSQL = "SELECT * FROM tipos_pagosgenerales";
-
             Statement st = connect.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
-
             while (result.next()) {
                 RegistroBD[0] = result.getString("id_pagos");
                 RegistroBD[1] = result.getString("nombre");
                 RegistroBD[2] = result.getString("estado");
-
                 model.addRow(RegistroBD);
             }
-
             tbPagos.setModel(model);
             tbPagos.getColumnModel().getColumn(0).setPreferredWidth(150);
             tbPagos.getColumnModel().getColumn(1).setPreferredWidth(350);
             tbPagos.getColumnModel().getColumn(2).setPreferredWidth(100);
-
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
     void Guardar() {
-
         // Variables
         int id_pagos;
         String nombre;
         String sql = "";
-
         //Obtenemos la informacion de las cajas de texto
         nombre = txtDescripcion.getText();
-
         //Consulta para evitar duplicados
         String consulta = "SELECT * FROM tipos_pagosgenerales WHERE nombre = ?";
-
         //Consulta sql para insertar los datos (nombres como en la base de datos)
         sql = "INSERT INTO tipos_pagosgenerales (nombre)VALUES (?)";
-
         //Para almacenar los datos empleo un try cash
         try {
-
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
             PreparedStatement pst = connect.prepareStatement(sql);
-
             pst.setString(1, nombre);
-
             //Declara otra variable para validar los registros
             int n = pst.executeUpdate();
-
             //si existe un registro en la BD el registro se guardo con exito
             if (n > 0) {
                 JOptionPane.showMessageDialog(null, "El registro se guardo exitosamente");
-
                 //Luego Bloquera campos
             }
             CargarDatosTabla("");
             txtDescripcion.setText("");
             txtDescripcion.requestFocus();
-
         } catch (SQLException ex) {
-
         }
-
     }
 
     public void Eliminar(JTextField id) {
-
         setId_pagos(Integer.parseInt(id.getText()));
-
         String consulta = "DELETE from tipos_pagosgenerales where id_pagos=?";
-
         try {
-
             CallableStatement cs = con.getConexion().prepareCall(consulta);
             cs.setInt(1, getId_pagos());
             cs.executeUpdate();
-
             JOptionPane.showMessageDialog(null, "Se Elimino");
             CargarDatosTabla("");
             txtDescripcion.setText("");
             txtId.setText("");
             txtDescripcion.requestFocus();
-
         } catch (Exception e) {
-
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
-
         }
-
     }
 
     public void SeleccionarTipoPagosGenerales(JTable Tabla, JTextField IdPagos, JTextField Descripcion) {
-
         try {
-
             int fila = tbPagos.getSelectedRow();
-
             if (fila >= 0) {
-
                 IdPagos.setText(tbPagos.getValueAt(fila, 0).toString());
                 Descripcion.setText(tbPagos.getValueAt(fila, 1).toString());
-
             } else {
                 JOptionPane.showMessageDialog(null, "Fila No seleccionada");
             }
-
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error de Seleccion, Error: ");
         }
-
     }
 
-    public void modificar(JTextField id, JTextField nombre) {
-        
-        try {
-        
+    public void modificar(JTextField id, JTextField nombre) {        
+        try {        
             setId_pagos(Integer.parseInt(txtId.getText()));
-            setNombre(txtDescripcion.getText());
-            
-        String sql = "UPDATE tipos_pagosgenerales SET nombre = ?  WHERE id_pagos = ?";
-        
+            setNombre(txtDescripcion.getText());            
+        String sql = "UPDATE tipos_pagosgenerales SET nombre = ?  WHERE id_pagos = ?";        
             connect = con.getConexion();
             ps = connect.prepareStatement(sql);
             ps.setString(1, getNombre());
             ps.setInt(2, getId_pagos());
-            ps.execute();
-            
-            JOptionPane.showMessageDialog(null, "Modificacion exitosa");
-            
+            ps.execute();            
+            JOptionPane.showMessageDialog(null, "Modificacion exitosa");            
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al Modificar "+e.toString());
-            
+            JOptionPane.showMessageDialog(null, "Error al Modificar "+e.toString());            
         }
     }
     
@@ -245,6 +202,7 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
         btnActivar = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         btnModificar = new javax.swing.JButton();
+        btnGuia = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbPagos = new javax.swing.JTable();
@@ -252,7 +210,7 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
         setIconifiable(true);
         setMaximizable(true);
         setResizable(true);
-        setTitle("Nuevo Pago");
+        setTitle("Tipos de Pagos Generales");
 
         jPanel1.setBackground(new java.awt.Color(153, 153, 255));
 
@@ -320,6 +278,13 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
             }
         });
 
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -341,16 +306,20 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtId, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnModificar))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(btnModificar)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton2)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(btnInactivar)
                         .addGap(26, 26, 26)
                         .addComponent(btnActivar))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jButton2)
-                        .addGap(94, 94, 94)
+                        .addGap(45, 45, 45)
+                        .addComponent(btnGuia)
+                        .addGap(46, 46, 46)
                         .addComponent(btnsalir))))
         );
         jPanel1Layout.setVerticalGroup(
@@ -378,11 +347,12 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(btnsalir)
-                            .addComponent(jButton2))
+                            .addComponent(btnGuia))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnActivar)
-                            .addComponent(btnInactivar))
+                            .addComponent(btnInactivar)
+                            .addComponent(jButton2))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
@@ -412,8 +382,8 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 693, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addComponent(jScrollPane1)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -504,12 +474,26 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
         txtDescripcion.requestFocus();
     }//GEN-LAST:event_btnModificarActionPerformed
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "TIPO DE PAGOS GENERALES\n"
+                + "Llenar la casilla para el ingreso de tipo de Pagos Generales\n"
+                + "Botón GUARDAR para guardar los datos que se mostraran en una Tabla\n"
+                + "Botón CANCELAR para limpiar las casillas\n"
+                + "Botón MODIFICAR  seleccionamos una fila de la Tabla para modificar los datos y presionamos Modificar\n"
+                + "Botón ELIMINAR seleccionamos la fila de la Tabla que queremos eliminar y click en Eliminar\n"
+                + "Botón ACTIVAR para activar un Tipo de Pago General que habia sido desactivado\n"
+                + "Botón DESACTIVAR´para desactivar un Tipo de Pago General\n"
+                + "Botón NUEVO limpiara las casilla y se ubicará el puntero en Descripción\n"
+                + "Esta Interfaz es para el Ingreso de nuevos Tipo de Pagos Generales o los pagos Fijos");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnActivar;
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnInactivar;
     private javax.swing.JButton btnModificar;
     private javax.swing.JButton btnsalir;

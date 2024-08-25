@@ -1,4 +1,3 @@
-
 package Admission;
 
 import conectar.Conectar;
@@ -12,7 +11,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
-
 
 public class TipoProductosMateriales extends javax.swing.JInternalFrame {
 
@@ -50,9 +48,8 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
     public void setEstado(String estado) {
         this.estado = estado;
     }
-    
-    
-     //Conexión
+
+    //Conexión
     Conectar con = new Conectar();
     Connection connect = con.getConexion();
     PreparedStatement ps;
@@ -60,177 +57,128 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
 
     public TipoProductosMateriales() {
         initComponents();
-        
+
         CargarDatosTabla("");
+        txtIdProMat.setEnabled(false);
     }
 
-    
-   void CargarDatosTabla(String Valores) {
-
+    void CargarDatosTabla(String Valores) {
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];
-
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
-
             String ConsultaSQL = "SELECT * FROM tipodeproductomateriales";
-
             Statement st = connect.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
-
             while (result.next()) {
                 RegistroBD[0] = result.getString("idProMat");
                 RegistroBD[1] = result.getString("nombre");
                 RegistroBD[2] = result.getString("estado");
-
                 model.addRow(RegistroBD);
             }
-
             tbProMat.setModel(model);
             tbProMat.getColumnModel().getColumn(0).setPreferredWidth(150);
             tbProMat.getColumnModel().getColumn(1).setPreferredWidth(350);
             tbProMat.getColumnModel().getColumn(2).setPreferredWidth(100);
-
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
     void Guardar() {
-
         // Variables
         int idProMat;
         String nombre;
         String sql = "";
-
         //Obtenemos la informacion de las cajas de texto
         nombre = txtProMat.getText();
-
         //Consulta para evitar duplicados
         String consulta = "SELECT * FROM tipodeproductomateriales WHERE nombre = ?";
-
         //Consulta sql para insertar los datos (nombres como en la base de datos)
         sql = "INSERT INTO tipodeproductomateriales (nombre)VALUES (?)";
-
         //Para almacenar los datos empleo un try cash
         try {
-
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
             PreparedStatement pst = connect.prepareStatement(sql);
-
             pst.setString(1, nombre);
-
             //Declara otra variable para validar los registros
             int n = pst.executeUpdate();
-
             //si existe un registro en la BD el registro se guardo con exito
             if (n > 0) {
                 JOptionPane.showMessageDialog(null, "El registro se guardo exitosamente");
-
                 //Luego Bloquera campos
             }
             CargarDatosTabla("");
             txtProMat.setText("");
             txtProMat.requestFocus();
-
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(null, "Error al guardar " +ex.toString());
-
+            JOptionPane.showMessageDialog(null, "Error al guardar " + ex.toString());
         }
-
     }
 
     public void Eliminar(JTextField id) {
-
         setIdProMat(Integer.parseInt(id.getText()));
-
         String consulta = "DELETE from tipodeproductomateriales where idProMat=?";
-
         try {
-
             CallableStatement cs = con.getConexion().prepareCall(consulta);
             cs.setInt(1, getIdProMat());
             cs.executeUpdate();
-
             JOptionPane.showMessageDialog(null, "Se Elimino");
             CargarDatosTabla("");
             txtProMat.setText("");
             txtIdProMat.setText("");
             txtProMat.requestFocus();
-
         } catch (Exception e) {
-
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
-
         }
-
     }
 
     public void SeleccionarTipo(JTable Tabla, JTextField IdProMat, JTextField tipo) {
-
         try {
-
             int fila = tbProMat.getSelectedRow();
-
             if (fila >= 0) {
-
                 IdProMat.setText(tbProMat.getValueAt(fila, 0).toString());
                 tipo.setText(tbProMat.getValueAt(fila, 1).toString());
-
             } else {
                 JOptionPane.showMessageDialog(null, "Fila No seleccionada");
             }
-
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error de Seleccion, Error: ");
         }
-
     }
 
-    public void ModificarTipo(JTextField paraId, JTextField paraNombre){
-        
+    public void ModificarTipo(JTextField paraId, JTextField paraNombre) {
         //Obtengo el valor en Cadena(String) de las cajas de Texto
         setIdProMat(Integer.parseInt(paraId.getText()));
         setNombre(paraNombre.getText());
-        
         Conectar con = new Conectar();
-        
-        String consulta= "UPDATE tipodeproductomateriales SET tiopodeproductomateriales.nombre = ? WHERE tipodeproductomateriales.idProMat=?";
-        
+        String consulta = "UPDATE tipodeproductomateriales SET tiopodeproductomateriales.nombre = ? WHERE tipodeproductomateriales.idProMat=?";
         try {
-            
             CallableStatement cs = con.getConexion().prepareCall(consulta);
-            
-            //
             cs.setString(1, getNombre());
             cs.setInt(2, getIdProMat());
-            
             cs.execute();
-            
             JOptionPane.showMessageDialog(null, "Modificacion Exitosa");
-            
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "No se Modifico, error "+e.toString());
+            JOptionPane.showMessageDialog(null, "No se Modifico, error " + e.toString());
         }
-        
     }
-    
-    public boolean accion(String estado, int IdMaqVe) {
+
+    public boolean accion(String estado, int IdProMat) {
         String sql = "UPDATE tipodeproductomateriales SET estado = ? WHERE idProMat = ?";
         try {
-            connect = con.getConexion();
+            connect = con.getConexion(); // Reestablecer la conexión por si acaso
             ps = connect.prepareStatement(sql);
             ps.setString(1, estado);
-            ps.setInt(2, idProMat);
-            ps.execute();
+            ps.setInt(2, IdProMat); // Usar el parámetro pasado en lugar de la variable de clase
+            ps.executeUpdate(); // Cambia a executeUpdate para claridad
             return true;
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
         }
     }
-    
-    
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -246,6 +194,7 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
         btnInactivar = new javax.swing.JButton();
         btnActivar = new javax.swing.JButton();
         btnModificar = new javax.swing.JButton();
+        btnGuia = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbProMat = new javax.swing.JTable();
@@ -315,6 +264,13 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
             }
         });
 
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -327,6 +283,8 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
                 .addGap(18, 18, 18)
                 .addComponent(txtIdProMat, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnGuia)
+                .addGap(32, 32, 32)
                 .addComponent(jButton1))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
@@ -360,7 +318,9 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
                                 .addComponent(txtIdProMat)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jButton1)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton1)
+                            .addComponent(btnGuia))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -452,23 +412,49 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
 
     private void btnInactivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInactivarActionPerformed
         int fila = tbProMat.getSelectedRow();
-        int id = Integer.parseInt(txtIdProMat.getText());
-        if (accion("Inactivo", id)) {
-            CargarDatosTabla("");
-            JOptionPane.showMessageDialog(null, "Inactivado");
-        }else{
-            JOptionPane.showMessageDialog(null, "Error al Inactivar");
+        if (fila >= 0) {
+            String idText = txtIdProMat.getText().trim();
+            if (!idText.isEmpty()) {
+                try {
+                    int id = Integer.parseInt(idText);
+                    if (accion("Inactivo", id)) {
+                        CargarDatosTabla("");
+                        JOptionPane.showMessageDialog(null, "Inactivado");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Error al Inactivar");
+                    }
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(null, "El ID no es válido.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Por favor, seleccione un tipo de producto o material.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione una fila de la tabla.", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_btnInactivarActionPerformed
 
     private void btnActivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActivarActionPerformed
         int fila = tbProMat.getSelectedRow();
-        int id = Integer.parseInt(txtIdProMat.getText());
-        if (accion("Activo", id)) {
-            CargarDatosTabla("");
-            JOptionPane.showMessageDialog(null, "Activar");
-        }else{
-            JOptionPane.showMessageDialog(null, "Error al Activar");
+        if (fila >= 0) {
+            String idText = txtIdProMat.getText().trim();
+            if (!idText.isEmpty()) {
+                try {
+                    int id = Integer.parseInt(idText);
+                    if (accion("Activo", id)) {
+                        CargarDatosTabla("");
+                        JOptionPane.showMessageDialog(null, "Activado");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Error al Activar");
+                    }
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(null, "El ID no es válido.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Por favor, seleccione un tipo de producto o material.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione una fila de la tabla.", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_btnActivarActionPerformed
 
@@ -482,12 +468,26 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
         SeleccionarTipo(tbProMat, txtIdProMat, txtProMat);
     }//GEN-LAST:event_tbProMatMouseClicked
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "TIPO DE PRODUCTOS Y MATERIALES\n"
+                + "Llenar la casilla para el ingreso de tipo de Productos y Materiales\n"
+                + "Botón GUARDAR para guardar los datos que se mostraran en una Tabla\n"
+                + "Botón CANCELAR para limpiar las casillas\n"
+                + "Botón MODIFICAR  seleccionamos una fila de la Tabla para modificar los datos y presionamos Modificar\n"
+                + "Botón ELIMINAR seleccionamos la fila de la Tabla que queremos eliminar y click en Eliminar\n"
+                + "Botón ACTIVAR para activar un Tipo de Productos y Materiales que habia sido desactivado\n"
+                + "Botón DESACTIVAR´para desactivar un Tipo de Productos y Materiales\n"
+                + "Botón NUEVO limpiara las casilla y se ubicará el puntero en Tipo\n"
+                + "Esta Interfaz es para el Ingreso de nuevos Tipo de Productos y Materiales");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnActivar;
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnInactivar;
     private javax.swing.JButton btnModificar;
     private javax.swing.JButton jButton1;

@@ -156,7 +156,7 @@
         <Component class="javax.swing.JTextField" name="txtTelefono">
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="277" y="52" width="154" height="-1"/>
+              <AbsoluteConstraints x="240" y="50" width="154" height="30"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -176,7 +176,7 @@
         <Component class="javax.swing.JTextField" name="txtEmail">
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="277" y="121" width="154" height="-1"/>
+              <AbsoluteConstraints x="240" y="120" width="154" height="-1"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -196,7 +196,7 @@
         <Component class="javax.swing.JTextField" name="txtWebPage">
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="234" y="230" width="200" height="-1"/>
+              <AbsoluteConstraints x="220" y="230" width="200" height="-1"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -216,7 +216,7 @@
         <Component class="javax.swing.JTextField" name="txtMensaje">
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="230" y="290" width="210" height="-1"/>
+              <AbsoluteConstraints x="220" y="280" width="210" height="-1"/>
             </Constraint>
           </Constraints>
         </Component>
@@ -323,7 +323,20 @@
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-              <AbsoluteConstraints x="270" y="170" width="160" height="-1"/>
+              <AbsoluteConstraints x="240" y="170" width="160" height="-1"/>
+            </Constraint>
+          </Constraints>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnGuia">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Guia"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnGuiaActionPerformed"/>
+          </Events>
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
+              <AbsoluteConstraints x="340" y="340" width="-1" height="-1"/>
             </Constraint>
           </Constraints>
         </Component>

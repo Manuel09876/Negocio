@@ -31,6 +31,8 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
         AutoCompleteDecorator.decorate(cbxEmpresa);
         MostrarEmpresa(cbxEmpresa);
         MostrarTabla();
+        txtIdBusiness.setEnabled(false);
+        txtId.setEnabled(false);
     }
 
 //Mostrar datos en la Tabla
@@ -163,8 +165,8 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
     private void initComponents() {
 
         jPopupMenu1 = new javax.swing.JPopupMenu();
-        jmEliminar = new javax.swing.JMenuItem();
-        jmReingresar = new javax.swing.JMenuItem();
+        jmInactivar = new javax.swing.JMenuItem();
+        jmActivar = new javax.swing.JMenuItem();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -181,27 +183,28 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
         txtId = new javax.swing.JTextField();
         btnMostrarTodo = new javax.swing.JButton();
         btnSoloEmpresa = new javax.swing.JButton();
+        btnGuia = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         TablaRegistro = new javax.swing.JTable();
 
-        jmEliminar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/delete.png"))); // NOI18N
-        jmEliminar.setText("Eliminar");
-        jmEliminar.addActionListener(new java.awt.event.ActionListener() {
+        jmInactivar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/delete.png"))); // NOI18N
+        jmInactivar.setText("Inactivar");
+        jmInactivar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jmEliminarActionPerformed(evt);
+                jmInactivarActionPerformed(evt);
             }
         });
-        jPopupMenu1.add(jmEliminar);
+        jPopupMenu1.add(jmInactivar);
 
-        jmReingresar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/exchange.png"))); // NOI18N
-        jmReingresar.setText("Reingresar");
-        jmReingresar.addActionListener(new java.awt.event.ActionListener() {
+        jmActivar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/exchange.png"))); // NOI18N
+        jmActivar.setText("Activar");
+        jmActivar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jmReingresarActionPerformed(evt);
+                jmActivarActionPerformed(evt);
             }
         });
-        jPopupMenu1.add(jmReingresar);
+        jPopupMenu1.add(jmActivar);
 
         setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         setIconifiable(true);
@@ -262,7 +265,7 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
                 btnSalirActionPerformed(evt);
             }
         });
-        jPanel1.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(1162, 64, -1, -1));
+        jPanel1.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(1190, 20, -1, -1));
         jPanel1.add(txtIdBusiness, new org.netbeans.lib.awtextra.AbsoluteConstraints(441, 54, 83, -1));
 
         btnBuscarFechaEmpresa.setText("Buscar Por Fecha y Empresa");
@@ -272,7 +275,7 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
             }
         });
         jPanel1.add(btnBuscarFechaEmpresa, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 10, -1, -1));
-        jPanel1.add(txtId, new org.netbeans.lib.awtextra.AbsoluteConstraints(894, 80, 90, 30));
+        jPanel1.add(txtId, new org.netbeans.lib.awtextra.AbsoluteConstraints(820, 10, 90, 30));
 
         btnMostrarTodo.setText("Mostrar Todo");
         btnMostrarTodo.addActionListener(new java.awt.event.ActionListener() {
@@ -289,6 +292,14 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
             }
         });
         jPanel1.add(btnSoloEmpresa, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 50, -1, -1));
+
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(1190, 80, -1, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1310, -1));
 
@@ -399,16 +410,16 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
         buscarTabla(txtBuscar.getText());
     }//GEN-LAST:event_txtBuscarKeyReleased
 //Poner en Inactivo un trabajo sin borrarlo de la base de datos
-    private void jmEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmEliminarActionPerformed
+    private void jmInactivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmInactivarActionPerformed
         int fila = TablaRegistro.getSelectedRow();
         int id = Integer.parseInt(txtId.getText());
         if (accion("Inactivo", id)) {
             MostrarTabla();
-            JOptionPane.showMessageDialog(null, "Eliminado");
+            JOptionPane.showMessageDialog(null, "Inactivo");
         }else{
             JOptionPane.showMessageDialog(null, "Error al eliminar");
         }
-    }//GEN-LAST:event_jmEliminarActionPerformed
+    }//GEN-LAST:event_jmInactivarActionPerformed
 
 //Seleccion de la casilla seleccion o checkBox
     private void TablaRegistroMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TablaRegistroMouseClicked
@@ -416,16 +427,16 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
         txtId.setText(String.valueOf(TablaRegistro.getValueAt(seleccionar, 0)));
     }//GEN-LAST:event_TablaRegistroMouseClicked
 //Reingresar o poner en Activo un trabajo que este Inactivo en la Basede Datos
-    private void jmReingresarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmReingresarActionPerformed
+    private void jmActivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmActivarActionPerformed
         int fila = TablaRegistro.getSelectedRow();
         int id = Integer.parseInt(txtId.getText());
         if (accion("Activo", id)) {
             MostrarTabla();
-            JOptionPane.showMessageDialog(null, "Reingresado");
+            JOptionPane.showMessageDialog(null, "Activado");
         }else{
             JOptionPane.showMessageDialog(null, "Error al reingresar");
         }
-    }//GEN-LAST:event_jmReingresarActionPerformed
+    }//GEN-LAST:event_jmActivarActionPerformed
 //Boton para volver a Mostrar la Tabla Actualizada
     private void btnMostrarTodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarTodoActionPerformed
         MostrarTabla();
@@ -487,11 +498,23 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_btnSoloEmpresaActionPerformed
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "VER ORDENES\n"
+                + "Aca podrá ver todoas las Ordenes de Servicio\n"
+                + "Podrá Buscar las Ordenes de Servicio por el nombre escribiendo en la acsilla Apellido y Nombre o Dirección\n"
+                + "Buscar por Ordenes entre periódo de fechas Fecha de Inicio y Fecha Fina y nombre de la Empresa presionar BUSCAR POR FECHA Y EMPRESA\n"
+                + "Podrá Buscar solo por Empresa, buscar el nombre de la Empresa y dar click en BUSCAR SOLO POR EMPRESA\n"
+                + "Botón MOSTRAR TODO cuando queremos regresar a que se vean todas la Ordenes\n"
+                + "Seleccionar una fila dar click derecho en el mouse y podrá Inactivar (Esta orden ya no se ejecutará)\n"
+                + "o Activar (se volvera a ingresar para su trabajo) una orden de servicio según sea el caso\n");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable TablaRegistro;
     private javax.swing.JButton btnBuscarFechaEmpresa;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnMostrarTodo;
     private javax.swing.JButton btnSalir;
     private javax.swing.JButton btnSoloEmpresa;
@@ -507,8 +530,8 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JMenuItem jmEliminar;
-    private javax.swing.JMenuItem jmReingresar;
+    private javax.swing.JMenuItem jmActivar;
+    private javax.swing.JMenuItem jmInactivar;
     private javax.swing.JTextField txtBuscar;
     private javax.swing.JTextField txtId;
     private javax.swing.JTextField txtIdBusiness;
