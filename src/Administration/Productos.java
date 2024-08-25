@@ -50,7 +50,7 @@ public class Productos extends javax.swing.JInternalFrame {
         this.nameProduct = nameProduct;
     }
 
-   public String getPresentation() {
+    public String getPresentation() {
         return presentation;
     }
 
@@ -96,7 +96,7 @@ public class Productos extends javax.swing.JInternalFrame {
         txtIdUnidades.setVisible(false);
         AutoCompleteDecorator.decorate(cbxUnidades);
         MostrarUnidades(cbxUnidades);
-        
+
         CargarDatosTable("");
         txtIdProducto.setEnabled(false);
         txtName.requestFocus();
@@ -141,7 +141,7 @@ public class Productos extends javax.swing.JInternalFrame {
     }
 
     //Es lo mismo que mostrar Tabla Clientes
-    void CargarDatosTable(String Valores) {
+    public void CargarDatosTable(String Valores) {
         try {
             String[] titulosTabla = {"Id", "Nombre", "Presentacion", "Unidades", "Stock", "Stock2", "Estado", "Stock Minimo"}; // Titulos de la Tabla
             String[] RegistroBD = new String[8]; // Registros de la Base de Datos
@@ -189,7 +189,7 @@ public class Productos extends javax.swing.JInternalFrame {
         }
     }
 
-    void Guardar() {
+    public void Guardar() {
         // Variables
         String nameProduct;
         String presentation;
@@ -312,15 +312,15 @@ public class Productos extends javax.swing.JInternalFrame {
         }
     }
 
-
     public Productos BuscarProductos(java.awt.event.KeyEvent evt) {
         String[] titulosTabla = {"Id", "Nombre", "Presentacion", "Unidades", "Stock", "Stock2", "Estado", "Stock Minimo"}; //Titulos de la Tabla
         String[] RegistroBD = new String[8];                                   //Registros de la Basede Datos
 
         Productos productos = new Productos();
         String ConsultaSQL = """
-                             SELECT product.idProduct, product.nameProduct, product.presentation, product.units, product.stock, product.stock2, product.estado 
-                             FROM product 
+                             SELECT product.idProduct, product.nameProduct, product.presentation, unidades.nombre AS Unidades, product.stock, product.stock2, product.estado, product.stock_minimo
+                             FROM product
+                             INNER JOIN unidades ON product.id_units=unidades.id_unidades
                              WHERE nameProduct LIKE '%""" + txtBuscarProductos.getText() + "%'";
         model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
         try {
@@ -399,6 +399,7 @@ public class Productos extends javax.swing.JInternalFrame {
         btnSerch = new javax.swing.JButton();
         btnActivar = new javax.swing.JButton();
         btnInactivar = new javax.swing.JButton();
+        btnGuia = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(0, 255, 0));
         setIconifiable(true);
@@ -659,45 +660,43 @@ public class Productos extends javax.swing.JInternalFrame {
         });
         jPanel2.add(btnInactivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 360, -1, -1));
 
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 360, -1, -1));
+
         getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(417, 6, -1, 404));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewActionPerformed
-
         LimpiarCajasTexto();
         txtName.requestFocus();
-
-
     }//GEN-LAST:event_btnNewActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
         ModificarProducto(txtIdProducto, txtName, txtPresentation, txtIdUnidades, txtStock, txtOr, txtStockMinimo);
         CargarDatosTable("");
-        LimpiarCajasTexto();   
-        
+        LimpiarCajasTexto();
     }//GEN-LAST:event_btnUpdateActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
-
         txtIdProducto.setText("");
         LimpiarCajasTexto();
-        
-
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
-
         this.dispose();  //solo cierra la ventana actual
-
     }//GEN-LAST:event_btnExitActionPerformed
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
         SeleccionarProducto(tbProducts, txtIdProducto, txtName, txtPresentation, cbxUnidades, txtStock, txtOr, txtStockMinimo);
         Eliminar(txtIdProducto);
         CargarDatosTable("");
-
         txtIdProducto.setText("");
         LimpiarCajasTexto();
         BloquearCampos();
@@ -706,7 +705,6 @@ public class Productos extends javax.swing.JInternalFrame {
     private void btnSerchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSerchActionPerformed
         txtBuscarProductos.setText("");
         CargarDatosTable("");
-
     }//GEN-LAST:event_btnSerchActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
@@ -751,6 +749,24 @@ public class Productos extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_btnInactivarActionPerformed
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "INGRESO DE PRODUCTOS\n"
+                + "Botón NUEVO limpia las casillas y enfoca el cursor en nombre\n"
+                + "Botón GRABAR: debe ingresar nuevos Productos (Todos los datos son Obligatorios) presionar botón Grabar\n"
+                + "Ingresar el nombre del Producto, la presentacion en que viene, escoger las unidades (si no estan puede crearlas\n"
+                + "en la seccion Unidades colocar el stock or otra forma de ver las cantidades y el stock minimo para que le\n"
+                + "recuerde que tiene cantidad mínima\n"
+                + "Botón CANCELAR solo limpia los datos ingresados en las casillas\n"
+                + "Botón ELIMINAR para eliminar un Producto debe seleccionar en la tabla de Productos a eliminar\n"
+                + "apareceran los datos en las casillas y presionar el botón Eliminar y se eliminara la empresa designada\n"
+                + "Botón MODIFICAR seleccionar el Producto en la Tabla hacer la modificacion que desee y presionar Modificar\n"
+                + "Botón ACTIVAR se activaran los Productos Inactivados\n"
+                + "Botón INACTIVAR se desactivaran los Productos que dejaran de usar o descontinuados\n"
+                + "Botón LIMPIAR limpia las casillas y las deja vacias\n"
+                + "En la casilla Busqueda podra ir escribiendo el nombre y se ira filtrando el dato a buscar\n"
+                + "Esta Plataforma es para Ingresar PRODUCTOS con los que Trabajará");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnActivar;
@@ -758,6 +774,7 @@ public class Productos extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnExit;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnInactivar;
     private javax.swing.JButton btnNew;
     private javax.swing.JButton btnSerch;
@@ -789,29 +806,26 @@ public class Productos extends javax.swing.JInternalFrame {
     Connection connect = con.getConexion();
 
     public void MostrarUnidades(JComboBox<CustomItem> cbxUnidades) {
-    String sql = "SELECT * FROM unidades";
-    Statement st;
+        String sql = "SELECT * FROM unidades";
+        Statement st;
 
-    try {
-        st = con.getConexion().createStatement();
-        ResultSet rs = st.executeQuery(sql);
-        cbxUnidades.removeAllItems();
-        while (rs.next()) {
-            CustomItem item = new CustomItem(rs.getInt("id_unidades"), rs.getString("nombre"));
-            cbxUnidades.addItem(item);
+        try {
+            st = con.getConexion().createStatement();
+            ResultSet rs = st.executeQuery(sql);
+            cbxUnidades.removeAllItems();
+            while (rs.next()) {
+                CustomItem item = new CustomItem(rs.getInt("id_unidades"), rs.getString("nombre"));
+                cbxUnidades.addItem(item);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla: " + e.toString());
         }
-    } catch (SQLException e) {
-        JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla: " + e.toString());
     }
-}
 
     public void MostrarCodigoUnidades(JComboBox<CustomItem> cbxUnidades, JTextField idUnidades) {
-    CustomItem selectedItem = (CustomItem) cbxUnidades.getSelectedItem();
-    if (selectedItem != null) {
-        idUnidades.setText(String.valueOf(selectedItem.getId()));
+        CustomItem selectedItem = (CustomItem) cbxUnidades.getSelectedItem();
+        if (selectedItem != null) {
+            idUnidades.setText(String.valueOf(selectedItem.getId()));
+        }
     }
 }
-}
-
-
-

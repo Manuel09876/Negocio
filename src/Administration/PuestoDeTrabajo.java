@@ -515,8 +515,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         }
     }
 
-    
-     //Para Calculo de Pagos
+    //Para Calculo de Pagos
     public String obtenerIdOverTime(String descripcion) {
         String idOverTime = "";
         String consulta = "SELECT id FROM overtime WHERE descripcion = ?";
@@ -562,7 +561,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         }
         return idPDT;
     }
-    
+
     public String obtenerPeriodoPago(int idPDT) {
         String sql = "SELECT p.descripcion FROM periodo p JOIN puestodetrabajo pt ON p.id = pt.id_periodo WHERE pt.idPDT = ?";
         try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
@@ -576,22 +575,21 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         }
         return "Semanal"; // Valor predeterminado
     }
-    
+
     public boolean verificarOvertime(int idPDT) {
-        boolean tieneOvertime = false;
         String sql = "SELECT id_overtime FROM puestodetrabajo WHERE idPDT = ?";
         try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
             pst.setInt(1, idPDT);
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
-                tieneOvertime = rs.getInt("id_overtime") > 0;
+                return rs.getInt("id_overtime") > 0;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return tieneOvertime;
+        return false;
     }
-    
+
     public double obtenerPagoPorHora(int idPDT) {
         double pagoPorHora = 0.0;
         String sql = "SELECT pagoPorHora FROM puestodetrabajo WHERE idPDT = ?";
@@ -606,7 +604,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         }
         return pagoPorHora;
     }
-    
+
     public double obtenerSueldo(int idPDT) {
         double sueldo = 0.0;
         String sql = "SELECT sueldo FROM puestodetrabajo WHERE idPDT = ?";
@@ -621,7 +619,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         }
         return sueldo;
     }
-    
+
     public int calcularDiasDeVacaciones(int idPDT) {
         String sql = "SELECT tiempoVacaciones FROM puestodetrabajo WHERE idPDT = ?";
         try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
@@ -640,60 +638,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     
     
     
-    
-//    public double calcularPagoTrabajador(int idTrabajador) {
-//        double salarioBruto = 0.0;
-//        int idPDT = obtenerIdPuestoActivo(idTrabajador);
-//
-//        if (idPDT == -1) {
-//            JOptionPane.showMessageDialog(null, "No se encontró un puesto de trabajo activo para el trabajador con ID: " + idTrabajador);
-//            return salarioBruto;
-//        }
-//
-//        double horasTrabajadas = obtenerHorasTrabajadas(idTrabajador);
-//        double pagoPorHora = obtenerPagoPorHora(idPDT);
-//        double sueldo = obtenerSueldo(idPDT);
-//        boolean tieneOvertime = verificarOvertime(idPDT);
-//        double horasExtras = 0.0;
-//
-//        if (tieneOvertime && horasTrabajadas > 40) {
-//            horasExtras = horasTrabajadas - 40;
-//            horasTrabajadas = 40;
-//        }
-//
-//        salarioBruto = (horasTrabajadas * pagoPorHora) + (horasExtras * pagoPorHora * 1.5);
-//
-//        return salarioBruto;
-//    }
-//
-   
-//
-//    private double obtenerHorasTrabajadas(int idTrabajador) {
-//        double totalHoras = 0.0;
-//        String sql = "SELECT SUM(TIMESTAMPDIFF(HOUR, hi.fInicio, hs.fSalida)) as horas_trabajadas\n"
-//                + "FROM horas_ingreso hi\n"
-//                + "JOIN horas_salida hs ON hi.trabajador_id = hs.trabajador_id\n"
-//                + "WHERE hi.trabajador_id = ?";
-//        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
-//            pst.setInt(1, idTrabajador);
-//            ResultSet rs = pst.executeQuery();
-//            if (rs.next()) {
-//                totalHoras = rs.getDouble("horas");
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return totalHoras;
-//    }
-
-    
-
-    
-
-    
-    
-    
-
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -733,6 +677,9 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         txtIdPDT = new javax.swing.JTextField();
         txtPagoPorHora = new javax.swing.JTextField();
         txtVacaciones = new javax.swing.JTextField();
+        btnGuia = new javax.swing.JButton();
+        btnActivar = new javax.swing.JButton();
+        btnDesactivar = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbPuestosDeTrabajo = new javax.swing.JTable();
@@ -888,6 +835,20 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         jPanel1.add(txtPagoPorHora, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 160, 110, -1));
         jPanel1.add(txtVacaciones, new org.netbeans.lib.awtextra.AbsoluteConstraints(840, 60, 100, -1));
 
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(890, 210, -1, -1));
+
+        btnActivar.setText("Activar");
+        jPanel1.add(btnActivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 210, -1, -1));
+
+        btnDesactivar.setText("Desactivar");
+        jPanel1.add(btnDesactivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 210, -1, -1));
+
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 1160, 250));
 
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -1028,11 +989,27 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_cbxVacacionesItemStateChanged
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "PUESTOS DE TRABAJO\n"
+                + "Tenemos una una casilla de Trabajadores, una casilla para elección de Puestos de Trabajo\n"
+                + "otras casillas para determinar las condiciones de trabajo y la fecha de ingreso\n"
+                + "Botón GUARDAR para guardar los datos que se mostraran en una Tabla\n"
+                + "Botón CANCELAR para limpiar las casillas\n"
+                + "Botón MODIFICAR  seleccionamos una fila de la Tabla para modificar los datos y presionamos Modificar\n"
+                + "Botón ELIMINAR seleccionamos la fila de la Tabla que queremos eliminar y click en Eliminar\n"
+                + "Botón ACTIVAR para activar un trabajador que habia sido desactivado\n"
+                + "Botón DESACTIVAR´para desactivar a un Trabajador\n"
+                + "Botón NUEVO TIPO DE TRABAJO  es para guardar los acuerdos de las condiciones de trabajo de los trabajadores");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnActivar;
     private javax.swing.JButton btnCancelar;
+    private javax.swing.JButton btnDesactivar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnModificar;
     private javax.swing.JButton btnNuevoTipoDeTrabajo;
     private javax.swing.JButton btnSalir;

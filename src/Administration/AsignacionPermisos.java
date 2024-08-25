@@ -80,7 +80,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     private Stock st;
     private Trabajos tbs;
     private BudgetManager b;
-    
+
     private List<Permiso> permisos;
 
     // Definir JTextFields como variables de instancia
@@ -119,6 +119,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     private JTable tbPuestosDeTrabajo;
     private JRadioButton rdRelacionar;
 
+    JTable tbUsuTrab = null;
 
     public AsignacionPermisos(VentanaPrincipal vp) throws SQLException {
         this.vp = vp;
@@ -188,19 +189,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         setupTableModelListener(tbRegistros, "Registros");
         setupTableModelListener(tbReportes, "Reportes");
     }
-
-//    private void setupPermisos() {
-//        permisos = new ArrayList<>();
-//        // Definir los JTextField
-//        JTextField txtCodigo = new JTextField(20);
-//        JTextField txtNombre = new JTextField(20);
-//        JTextField txtUsuario = new JTextField(20);
-//        JTextField txtPassword = new JTextField(20);
-//
-//        // Asociar permisos y JTextField
-//        permisos.add(new Permiso(chAdministracion, txtCodigo, txtNombre, txtUsuario, txtPassword));
-//        // Agregar más permisos según sea necesario...
-//    }
 
     private void setupTableCheckBoxes(JTable table) {
         for (int i = 2; i <= 6; i++) {
@@ -273,7 +261,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     }
 
     // Método actualizado para configurar los oyentes del modelo de tabla
-     // Método actualizado para configurar los oyentes del modelo de tabla
+    // Método actualizado para configurar los oyentes del modelo de tabla
     private void setupTableModelListener(JTable table, String tableName) {
         table.getModel().addTableModelListener(new TableModelListener() {
             @Override
@@ -445,27 +433,39 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         });
     }
 
-    
     private void handleUsuarios(int column, Boolean selected) {
+        // Limpieza de botones antes de aplicar la lógica
+        u.btnGrabar.setEnabled(false);
+        u.btnCancelar.setEnabled(false);
+        u.btnEliminar.setEnabled(false);
+        u.btnModificar.setEnabled(false);
+        u.cbxTrabajador.setEnabled(false);
+        u.rdRelacionar.setVisible(false);
         switch (column) {
+
             case 2: // Visualizar
                 if (selected) {
                     u.CargarDatosTable("");
+                    u.CargarDatosTablaUsuariosTrabajadores(tbUsuTrab);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    u.Guardar();
+                    u.btnGrabar.setEnabled(true);
+                    u.cbxTrabajador.setEnabled(true);
+                    u.rdRelacionar.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    u.ModificarUsuario(txtIdTPU, txtNombre, txtUsuario, txtBuscar);
+                    u.btnModificar.setVisible(true);
+                    u.cbxTrabajador.setEnabled(true);
+                    u.rdRelacionar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    u.Eliminar(txtIdTPU);
+                    u.btnEliminar.setVisible(true);
                 }
                 break;
         }
@@ -1638,7 +1638,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 //                .setCellRenderer(table.getDefaultRenderer(Boolean.class
 //                ));
 //    }
-
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {

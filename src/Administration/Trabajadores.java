@@ -377,7 +377,6 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         JOptionPane.showMessageDialog(null, "El registro NO se guardó exitosamente, Error " + e.toString());
     }
 }
-
     
     
     public void Eliminar(JTextField codigo) {
@@ -679,7 +678,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         jPanel1.add(txtBuscarTrabajador, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 40, 266, -1));
 
         btnBuscar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/lupa.png"))); // NOI18N
-        btnBuscar.setText("Limpiar");
+        btnBuscar.setText("Buscar");
         btnBuscar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnBuscarActionPerformed(evt);

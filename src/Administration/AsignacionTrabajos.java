@@ -317,6 +317,7 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
         cbSeleccionaTodo = new javax.swing.JCheckBox();
         btnSoloEmpresa = new javax.swing.JButton();
         btnMostrarTodo = new javax.swing.JButton();
+        btnGuia = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbAsignacionTrabajos = new javax.swing.JTable();
 
@@ -397,6 +398,13 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
             }
         });
 
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -423,6 +431,8 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
                         .addGap(114, 114, 114)
                         .addComponent(btnMostrarTodo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnGuia)
+                        .addGap(91, 91, 91)
                         .addComponent(btnProgramar, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(16, 16, 16))
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -453,7 +463,8 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cbSeleccionaTodo)
                     .addComponent(btnProgramar, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnMostrarTodo))
+                    .addComponent(btnMostrarTodo)
+                    .addComponent(btnGuia))
                 .addGap(9, 9, 9))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(13, 13, 13)
@@ -592,9 +603,23 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_btnProgramarActionPerformed
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "ASIGNACIÓN DE TRABAJOS\n"
+                + "Tenemos una Tabla con una casilla de selección, una casilla para elección de Trabajadores\n"
+                + "otra casilla para la elección de empresa\n"
+                + "Botón FILTRAR POR EMPRESA mostrara los clientes por empresa\n"
+                + "Botón FILTRAR FECHA EMPRESA  tenemos 2 casillas de Fechas F.Inicio y F.Final para buscar los trabajos entre\n"
+                + "un rango de fecha y por Empresa\n"
+                + "Botón MOSTRAR TODO nos mostrara todos los trabajos por realizar\n"
+                + "Botón PROGRAMAR después de seleccionados los trabajos y el tabrajador se presionara el Botón Programar,\n"
+                + "para asignarles los trabajos a determinado Trabajador y saldran de la Tabla\n"
+                + "Esta Plataforma es para ASIGNAR TRABAJOS");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFiltrar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnMostrarTodo;
     private javax.swing.JButton btnProgramar;
     private javax.swing.JButton btnSalir;

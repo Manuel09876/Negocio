@@ -56,29 +56,28 @@ public class Roles extends javax.swing.JInternalFrame {
 
     public Roles() {
         initComponents();
-        
-        txtId.setVisible(false);
+
+        txtId.setEnabled(false);
         CargarDatosTabla("");
     }
 
-     //Conexión
+    //Conexión
     Conectar con = new Conectar();
     Connection connect = con.getConexion();
     PreparedStatement ps;
     ResultSet rs;
 
     //Metodos
-   
-    void CargarDatosTabla(String Valores){
+    void CargarDatosTabla(String Valores) {
 
         try {
-            String[] titulosTabla = {"Código", "Descripción","Estado"}; //Titulos de la Tabla
+            String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];
-            
+
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
-            
+
             String ConsultaSQL = "SELECT * FROM roles";
-            
+
             Statement st = connect.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
@@ -89,12 +88,12 @@ public class Roles extends javax.swing.JInternalFrame {
 
                 model.addRow(RegistroBD);
             }
-            
+
             tbTipoUsuario.setModel(model);
             tbTipoUsuario.getColumnModel().getColumn(0).setPreferredWidth(150);
             tbTipoUsuario.getColumnModel().getColumn(1).setPreferredWidth(350);
             tbTipoUsuario.getColumnModel().getColumn(2).setPreferredWidth(100);
-            
+
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -109,22 +108,21 @@ public class Roles extends javax.swing.JInternalFrame {
 
         //Obtenemos la informacion de las cajas de texto
         tipoDeUsuario = txtNuevoTU.getText();
-        
+
         //Consulta para evitar duplicados
         String consulta = "SELECT * FROM roles WHERE nombre = ?";
-        
+
         //Consulta sql para insertar los datos (nombres como en la base de datos)
         sql = "INSERT INTO roles (nombre)VALUES (?)";
 
         //Para almacenar los datos empleo un try cash
         try {
-            
+
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
             PreparedStatement pst = connect.prepareStatement(sql);
-   
+
             pst.setString(1, tipoDeUsuario);
-           
-            
+
             //Declara otra variable para validar los registros
             int n = pst.executeUpdate();
 
@@ -133,7 +131,6 @@ public class Roles extends javax.swing.JInternalFrame {
                 JOptionPane.showMessageDialog(null, "El registro se guardo exitosamente");
 
                 //Luego Bloquera campos
-                
             }
             CargarDatosTabla("");
 
@@ -143,7 +140,7 @@ public class Roles extends javax.swing.JInternalFrame {
         }
 
     }
-    
+
     public void Eliminar(JTextField codigo) {
 
         setId_rol(Integer.parseInt(codigo.getText()));
@@ -158,7 +155,7 @@ public class Roles extends javax.swing.JInternalFrame {
 
             JOptionPane.showMessageDialog(null, "Se Elimino");
 
-        } catch (Exception e) {
+        } catch (HeadlessException | SQLException e) {
 
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
 
@@ -167,48 +164,102 @@ public class Roles extends javax.swing.JInternalFrame {
     }
 
     public void SeleccionarTipoDeUsuario(JTable Tabla, JTextField codigo, JTextField tipoDeUsuario) {
-
         try {
-
             int fila = tbTipoUsuario.getSelectedRow();
 
             if (fila >= 0) {
+                // Solo asigna el ID y nombre si son necesarios para la operación actual
+                String idSeleccionado = tbTipoUsuario.getValueAt(fila, 0).toString();
+                String nombreSeleccionado = tbTipoUsuario.getValueAt(fila, 1).toString();
 
-                codigo.setText(tbTipoUsuario.getValueAt(fila, 0).toString());
-                tipoDeUsuario.setText(tbTipoUsuario.getValueAt(fila, 1).toString());
-                
+                // Verificar si es necesario actualizar los campos de texto
+                if (!idSeleccionado.equals(codigo.getText())) {
+                    codigo.setText(idSeleccionado);
+                }
+                if (!nombreSeleccionado.equals(tipoDeUsuario.getText())) {
+                    tipoDeUsuario.setText(nombreSeleccionado);
+                }
 
+                // Debug: Imprimir después de la selección
+                System.out.println("ID seleccionado: " + codigo.getText());
+                System.out.println("Nombre seleccionado después de la selección: " + tipoDeUsuario.getText());
             } else {
                 JOptionPane.showMessageDialog(null, "Fila No seleccionada");
             }
 
         } catch (HeadlessException e) {
-            JOptionPane.showMessageDialog(null, "Error de Seleccion, Error: ");
+            JOptionPane.showMessageDialog(null, "Error de Selección, Error: " + e.toString());
         }
-
     }
 
-
     public void modificar(JTextField id, JTextField nombre) {
-        
         try {
-        
-            setId_rol(Integer.parseInt(id.getText()));
-            setName(nombre.getText());
-            
-        String sql = "UPDATE roles SET nombre = ?  WHERE id = ?";
-        
+            // Obtener y verificar el nuevo nombre
+            String idText = id.getText().trim();
+            String nuevoNombre = nombre.getText().trim();
+
+            // Debug: Verificar el nuevo nombre antes de la actualización
+            System.out.println("Nuevo nombre antes de la actualización: " + nuevoNombre);
+
+            // Validaciones y configuración de valores en el objeto
+            // Establecer la conexión y preparar la consulta
             connect = con.getConexion();
+            String sql = "UPDATE roles SET nombre = ? WHERE id = ?";
             ps = connect.prepareStatement(sql);
-            ps.setString(1, getRol());
-            ps.setInt(2, getId_rol());
-            ps.execute();
-            
-            JOptionPane.showMessageDialog(null, "Modificacion exitosa");
-            
+
+            // Configurar los valores en el objeto
+            ps.setString(1, nuevoNombre);
+            ps.setInt(2, Integer.parseInt(idText));
+
+            // Debug: Verificar antes de ejecutar el SQL
+            System.out.println("Actualizando en la base de datos con ID: " + idText + " y Nombre: " + nuevoNombre);
+
+            // Ejecución de la consulta de actualización en la base de datos
+            int rowsAffected = ps.executeUpdate();
+
+            if (rowsAffected > 0) {
+                // Confirmación de actualización
+                System.out.println("Actualización exitosa en la base de datos");
+                JOptionPane.showMessageDialog(null, "Modificación exitosa");
+
+                // Verificar la actualización en la base de datos
+                verificarActualizacion(Integer.parseInt(idText), nuevoNombre);
+            } else {
+                System.out.println("La actualización en la base de datos no tuvo éxito.");
+                JOptionPane.showMessageDialog(null, "Error al modificar el rol");
+            }
+
+            // ...
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al Modificar "+e.toString());
-            
+            System.out.println("Error al Modificar: " + e.toString());
+            JOptionPane.showMessageDialog(null, "Error al Modificar: " + e.toString());
+        }
+    }
+
+    public void verificarActualizacion(int idRol, String nuevoNombre) {
+        String sqlVerificacion = "SELECT nombre FROM roles WHERE id = ?";
+        try {
+            PreparedStatement psVerificacion = connect.prepareStatement(sqlVerificacion);
+            psVerificacion.setInt(1, idRol);
+            ResultSet rs = psVerificacion.executeQuery();
+
+            if (rs.next()) {
+                String nombreEnBD = rs.getString("nombre");
+                System.out.println("Nombre en la base de datos después de la actualización: " + nombreEnBD);
+
+                if (nombreEnBD.equals(nuevoNombre)) {
+                    System.out.println("Verificación exitosa: Los cambios se realizaron correctamente.");
+                } else {
+                    System.out.println("Verificación fallida: El nombre no coincide con el valor esperado.");
+                }
+            } else {
+                System.out.println("No se encontró el rol con ID: " + idRol);
+            }
+
+            rs.close();
+            psVerificacion.close();
+        } catch (SQLException e) {
+            System.out.println("Error al verificar la actualización: " + e.getMessage());
         }
     }
 
@@ -227,11 +278,11 @@ public class Roles extends javax.swing.JInternalFrame {
         }
     }
 
-     public void Limpiar(){
+    public void Limpiar() {
         txtNuevoTU.setText("");
         txtNuevoTU.requestFocus();
     }
-   
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -246,10 +297,7 @@ public class Roles extends javax.swing.JInternalFrame {
         btnModificar = new javax.swing.JButton();
         btnLimpiar = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        txtBuscarTU = new javax.swing.JTextField();
-        btnBuscarTU = new javax.swing.JButton();
+        btnGuia = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbTipoUsuario = new javax.swing.JTable();
@@ -259,6 +307,7 @@ public class Roles extends javax.swing.JInternalFrame {
         btnActivar = new javax.swing.JButton();
         btnInactivar = new javax.swing.JButton();
 
+        setTitle("Roles");
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setBackground(new java.awt.Color(0, 102, 204));
@@ -315,22 +364,13 @@ public class Roles extends javax.swing.JInternalFrame {
 
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel3.setText("Busqueda de Tipo de Usuario");
-        jPanel2.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(106, 0, -1, -1));
-
-        jLabel4.setText("Descripción");
-        jPanel2.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 25, -1, -1));
-        jPanel2.add(txtBuscarTU, new org.netbeans.lib.awtextra.AbsoluteConstraints(86, 22, 212, -1));
-
-        btnBuscarTU.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/lupa.png"))); // NOI18N
-        btnBuscarTU.setText("Buscar");
-        btnBuscarTU.addActionListener(new java.awt.event.ActionListener() {
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBuscarTUActionPerformed(evt);
+                btnGuiaActionPerformed(evt);
             }
         });
-        jPanel2.add(btnBuscarTU, new org.netbeans.lib.awtextra.AbsoluteConstraints(316, 14, -1, -1));
+        jPanel2.add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 20, -1, -1));
 
         getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 90, 440, 60));
 
@@ -420,10 +460,6 @@ public class Roles extends javax.swing.JInternalFrame {
 
     }//GEN-LAST:event_btnGrabarTUActionPerformed
 
-    private void btnBuscarTUActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarTUActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnBuscarTUActionPerformed
-
     private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
         txtNuevoTU.setText("");
         txtNuevoTU.requestFocus();
@@ -437,18 +473,35 @@ public class Roles extends javax.swing.JInternalFrame {
         SeleccionarTipoDeUsuario(tbTipoUsuario, txtId, txtNuevoTU);
         Eliminar(txtId);
         CargarDatosTabla("");
-        
+
         txtNuevoTU.setText("");
         txtNuevoTU.requestFocus();
     }//GEN-LAST:event_btnEliminarActionPerformed
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        // Debug: Verificar el valor de txtNuevoTU antes de cualquier operación
+        System.out.println("Contenido de txtNuevoTU antes de modificar: " + txtNuevoTU.getText());
+
+        // Asegúrate de capturar el nuevo nombre de usuario antes de cualquier cambio
+        String nuevoNombre = txtNuevoTU.getText().trim();
+        String idActual = txtId.getText().trim();
+
+        // Verifica si se seleccionó un ID válido y el nuevo nombre no está vacío
+        if (idActual.isEmpty() || nuevoNombre.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Debe seleccionar un usuario y proporcionar un nuevo nombre.");
+            return;
+        }
+
+        // Realiza la modificación con el nuevo nombre
         modificar(txtId, txtNuevoTU);
+
+        // Cargar datos de la tabla y limpiar campos después de la actualización
         CargarDatosTabla("");
         Limpiar();
     }//GEN-LAST:event_btnModificarActionPerformed
 
     private void tbTipoUsuarioMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbTipoUsuarioMouseClicked
+        // Llamar a SeleccionarTipoDeUsuario para llenar los JTextFields con los valores seleccionados
         SeleccionarTipoDeUsuario(tbTipoUsuario, txtId, txtNuevoTU);
     }//GEN-LAST:event_tbTipoUsuarioMouseClicked
 
@@ -462,7 +515,7 @@ public class Roles extends javax.swing.JInternalFrame {
         if (accion("Activo", id)) {
             JOptionPane.showMessageDialog(null, "Activado");
             CargarDatosTabla("");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Error al Activar");
         }
     }//GEN-LAST:event_btnActivarActionPerformed
@@ -473,36 +526,46 @@ public class Roles extends javax.swing.JInternalFrame {
         if (accion("Inactivo", id)) {
             JOptionPane.showMessageDialog(null, "Inactivado");
             CargarDatosTabla("");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Error al Inactivar");
         }
     }//GEN-LAST:event_btnInactivarActionPerformed
 
-    private void formMouseClicked(java.awt.event.MouseEvent evt) { 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "Esta Interfaz es para Crear NUEVOS TIPOS DE USUARIOS o ROLES\n"
+                + "USUARIO SOLO VER: Podra solo ver los datos de la Tablas\n"
+                + "Botón GRABAR: debe ingresar el nuevo tipo de usuario y presionar botón Grabar\n"
+                + "Botón CANCELAR solo borra el dato ingresado en las casilla , Descripción\n"
+                + "Botón ELIMINAR para eliminar un Rol o Tipo de Usuario debe seleccionar en la tabla \n"
+                + "aparecera el dato en el recuadro presionar el botón Eliminar y se eliminara el dato designado\n"
+                + "Botón MODIFICAR seleccionar el Rol en la Tabla hacer la modificacion que desee y presionar Modificar\n"
+                + "Botón ACTIVAR se activaran los Roles Inactivados\n"
+                + "Botón INACTIVAR se desactivaran los Roles que no deban ingresar al sistema\n"
+                + "Esta Plataforma es para determinar los Roles de quien puede INGRESAR A TU SISTEMA");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
+    private void formMouseClicked(java.awt.event.MouseEvent evt) {
         SeleccionarTipoDeUsuario(tbTipoUsuario, txtNuevoTU, txtId);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnActivar;
-    private javax.swing.JButton btnBuscarTU;
     private javax.swing.JButton btnCancelar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGrabarTU;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnInactivar;
     private javax.swing.JButton btnLimpiar;
     private javax.swing.JButton btnModificar;
     private javax.swing.JButton btnSalir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tbTipoUsuario;
-    private javax.swing.JTextField txtBuscarTU;
     private javax.swing.JTextField txtId;
     private javax.swing.JTextField txtNuevoTU;
     // End of variables declaration//GEN-END:variables

@@ -24,7 +24,7 @@ import javax.swing.table.JTableHeader;
 public class Proveedor extends javax.swing.JInternalFrame {
 
     DefaultTableModel model;
-    
+
     int idSuplier;
     String nameSuplier, address;
     int zipCode;
@@ -139,21 +139,14 @@ public class Proveedor extends javax.swing.JInternalFrame {
     DefaultTableModel modelo = new DefaultTableModel();
 
     public void MostrarProveedor(String Valores) {
-
         try {
-
             String[] tituloTabla = {"idSuplier", "Proveedor", "Dirección", "ZipCode", "Ciudad", "Estado", "Telefono", "Wensite", "email", "Estatus"};
             String[] RegistroBD = new String[10];
-
             model = new DefaultTableModel(null, tituloTabla);
-
             String sql = "SELECT * FROM suplier";
-
             Statement st = connect.createStatement();
             ResultSet rs = st.executeQuery(sql);
-
             while (rs.next()) {
-
                 RegistroBD[0] = rs.getString("idSuplier");
                 RegistroBD[1] = rs.getString("nameSuplier");
                 RegistroBD[2] = rs.getString("address");
@@ -164,10 +157,8 @@ public class Proveedor extends javax.swing.JInternalFrame {
                 RegistroBD[7] = rs.getString("website");
                 RegistroBD[8] = rs.getString("email");
                 RegistroBD[9] = rs.getString("estado");
-
                 model.addRow(RegistroBD);
             }
-
             tbSuplier.setModel(model);
             tbSuplier.getColumnModel().getColumn(0).setPreferredWidth(50);
             tbSuplier.getColumnModel().getColumn(1).setPreferredWidth(200);
@@ -178,11 +169,8 @@ public class Proveedor extends javax.swing.JInternalFrame {
             tbSuplier.getColumnModel().getColumn(6).setPreferredWidth(200);
             tbSuplier.getColumnModel().getColumn(7).setPreferredWidth(150);
             tbSuplier.getColumnModel().getColumn(8).setPreferredWidth(150);
-            
-
-        } catch (Exception e) {
+        } catch (SQLException e) {
         }
-
     }
 
     public void Insertar() {
@@ -200,7 +188,7 @@ public class Proveedor extends javax.swing.JInternalFrame {
         phoneNumber = txtPhonenNumber.getText();
         website = txtWebsite.getText();
         email = txtEmail.getText();
-        
+
         //Consulta sql para insertar los datos (nombres como en la base de datos)
         String sql = "INSERT INTO suplier (nameSuplier, address, zipCode, city, state, phoneNumber, website,email) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -259,7 +247,6 @@ public class Proveedor extends javax.swing.JInternalFrame {
                 PhoneNumber.setText(tbProveedor.getValueAt(fila, 6).toString());
                 Website.setText(tbProveedor.getValueAt(fila, 7).toString());
                 Email.setText(tbProveedor.getValueAt(fila, 8).toString());
-                
 
             } else {
                 JOptionPane.showMessageDialog(null, "Fila no seleccionada");
@@ -281,7 +268,6 @@ public class Proveedor extends javax.swing.JInternalFrame {
         setPhoneNumber(PhoneNumber.getText());
         setWebsite(Website.getText());
         setEmail(Email.getText());
-        
 
         String consulta = "UPDATE suplier SET nameSuplier=?, address=?, zipCode=?, city=?, state=?, phoneNumber=?, website=?,email=? WHERE idSuplier=?";
 
@@ -329,10 +315,46 @@ public class Proveedor extends javax.swing.JInternalFrame {
 
     }
 
-   
+    public Proveedor BuscarProveedor(java.awt.event.KeyEvent evt) {
+        String[] tituloTabla = {"idSuplier", "Proveedor", "Dirección", "ZipCode", "Ciudad", "Estado", "Telefono", "Wensite", "email", "Estatus"};
+        String[] RegistroBD = new String[10];
+        
+        Proveedor proveedor = new Proveedor();
+        String sql = "SELECT * FROM suplier WHERE nameSuplier LIKE '%" + txtBuscar.getText() + "%'";
+        model = new DefaultTableModel(null, tituloTabla); //Le pasamos los titulos a la tabla
+        try {
+            Statement st = connect.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+            while (rs.next()) {
+                RegistroBD[0] = rs.getString("idSuplier");
+                RegistroBD[1] = rs.getString("nameSuplier");
+                RegistroBD[2] = rs.getString("address");
+                RegistroBD[3] = rs.getString("zipCode");
+                RegistroBD[4] = rs.getString("city");
+                RegistroBD[5] = rs.getString("state");
+                RegistroBD[6] = rs.getString("phoneNumber");
+                RegistroBD[7] = rs.getString("website");
+                RegistroBD[8] = rs.getString("email");
+                RegistroBD[9] = rs.getString("estado");
+                model.addRow(RegistroBD);
+            }
+            tbSuplier.setModel(model);
+            tbSuplier.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tbSuplier.getColumnModel().getColumn(1).setPreferredWidth(200);
+            tbSuplier.getColumnModel().getColumn(2).setPreferredWidth(150);
+            tbSuplier.getColumnModel().getColumn(3).setPreferredWidth(150);
+            tbSuplier.getColumnModel().getColumn(4).setPreferredWidth(200);
+            tbSuplier.getColumnModel().getColumn(5).setPreferredWidth(50);
+            tbSuplier.getColumnModel().getColumn(6).setPreferredWidth(200);
+            tbSuplier.getColumnModel().getColumn(7).setPreferredWidth(150);
+            tbSuplier.getColumnModel().getColumn(8).setPreferredWidth(150);            
+        }catch (SQLException e) {
+            System.out.println(e.toString());
+        }        
+        return proveedor;
+    }
 
-   // Posiblemente para usarlos despues para Busqueda
-
+    // Posiblemente para usarlos despues para Busqueda
     public boolean accion(String estado, int idSuplier) {
         String sql = "UPDATE suplier SET estado = ? WHERE idSuplier = ?";
         try {
@@ -400,7 +422,6 @@ public class Proveedor extends javax.swing.JInternalFrame {
         return prov;
     }
 
-   
     private void limpiar() {
         txtIdSuplier.setText("");
         txtNameSuplier.setText("");
@@ -413,17 +434,12 @@ public class Proveedor extends javax.swing.JInternalFrame {
         txtEmail.setText("");
     }
 
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
-     */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        btnBuscar = new javax.swing.JButton();
+        btnMostrar = new javax.swing.JButton();
         txtBuscar = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
@@ -455,6 +471,7 @@ public class Proveedor extends javax.swing.JInternalFrame {
         btnReingresar = new javax.swing.JButton();
         btnInactivar = new javax.swing.JButton();
         btnExit = new javax.swing.JButton();
+        btnGuia = new javax.swing.JButton();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -463,11 +480,21 @@ public class Proveedor extends javax.swing.JInternalFrame {
 
         jPanel1.setBackground(new java.awt.Color(204, 255, 204));
 
-        btnBuscar.setText("Search");
+        btnMostrar.setText("Mostrar");
+        btnMostrar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnMostrarActionPerformed(evt);
+            }
+        });
 
         txtBuscar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtBuscarActionPerformed(evt);
+            }
+        });
+        txtBuscar.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txtBuscarKeyPressed(evt);
             }
         });
 
@@ -483,7 +510,7 @@ public class Proveedor extends javax.swing.JInternalFrame {
                 .addGap(18, 18, 18)
                 .addComponent(txtBuscar, javax.swing.GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE)
                 .addGap(26, 26, 26)
-                .addComponent(btnBuscar)
+                .addComponent(btnMostrar)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -493,7 +520,7 @@ public class Proveedor extends javax.swing.JInternalFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel9)
-                    .addComponent(btnBuscar))
+                    .addComponent(btnMostrar))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -621,7 +648,7 @@ public class Proveedor extends javax.swing.JInternalFrame {
                 btnReingresarActionPerformed(evt);
             }
         });
-        getContentPane().add(btnReingresar, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 10, -1, -1));
+        getContentPane().add(btnReingresar, new org.netbeans.lib.awtextra.AbsoluteConstraints(690, 10, -1, -1));
 
         btnInactivar.setText("Inactivar");
         btnInactivar.addActionListener(new java.awt.event.ActionListener() {
@@ -629,16 +656,24 @@ public class Proveedor extends javax.swing.JInternalFrame {
                 btnInactivarActionPerformed(evt);
             }
         });
-        getContentPane().add(btnInactivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(670, 10, -1, -1));
+        getContentPane().add(btnInactivar, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 10, -1, -1));
 
         btnExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
-        btnExit.setText("Exit");
+        btnExit.setText("Salir");
         btnExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnExitActionPerformed(evt);
             }
         });
         getContentPane().add(btnExit, new org.netbeans.lib.awtextra.AbsoluteConstraints(1040, 10, -1, -1));
+
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(890, 10, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -691,7 +726,7 @@ public class Proveedor extends javax.swing.JInternalFrame {
         if (accion("Activo", id)) {
             JOptionPane.showMessageDialog(null, "Activado");
             MostrarProveedor("");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Error al Activar");
         }
     }//GEN-LAST:event_btnReingresarActionPerformed
@@ -717,20 +752,46 @@ public class Proveedor extends javax.swing.JInternalFrame {
         if (accion("Inactivo", id)) {
             JOptionPane.showMessageDialog(null, "Inactivado");
             MostrarProveedor("");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Error al Inactivar");
         }
     }//GEN-LAST:event_btnInactivarActionPerformed
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "INGRESO DE PROVEEDORES\n"
+                + "Botón NUEVO limpia las casillas y enfoca el cursor en nombre\n"
+                + "Botón GRABAR: debe ingresar nuevos Proveedores (Todos los datos son Obligatorios) presionar botón Grabar\n"
+                + "Ingresar el nombre del Proveedor, y sus datos\n"
+                + "Botón CANCELAR solo limpia los datos ingresados en las casillas\n"
+                + "Botón ELIMINAR para eliminar un Proveedor debe seleccionar en la tabla de Proveedores a eliminar\n"
+                + "apareceran los datos en las casillas y presionar el botón Eliminar y se eliminara el Proveedor designado\n"
+                + "Botón MODIFICAR seleccionar el Proveedor en la Tabla hacer la modificacion que desee y presionar Modificar\n"
+                + "Botón ACTIVAR se activara el Proveedor Inactivado\n"
+                + "Botón INACTIVAR se desactivara el Proveedor que dejara de trabajar con usted\n"
+                + "Botón LIMPIAR limpia las casillas y las deja vacias\n"
+                + "En la casilla Busqueda podra ir escribiendo el nombre y se ira filtrando el dato a buscar\n"
+                + "Esta Plataforma es para Ingresar los PROVEEDORES con los que Trabajará");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
+    private void btnMostrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarActionPerformed
+        txtBuscar.setText("");
+        MostrarProveedor("");
+    }//GEN-LAST:event_btnMostrarActionPerformed
+
+    private void txtBuscarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscarKeyPressed
+        BuscarProveedor(evt);
+    }//GEN-LAST:event_txtBuscarKeyPressed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnBuscar;
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnGrabar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnInactivar;
     private javax.swing.JButton btnModificar;
+    private javax.swing.JButton btnMostrar;
     private javax.swing.JButton btnNew;
     private javax.swing.JButton btnReingresar;
     private javax.swing.JLabel jLabel1;
