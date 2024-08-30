@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.WindowConstants;
 
 public class VentanaPrincipal extends javax.swing.JFrame {
 
@@ -49,6 +50,36 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
         System.out.println("Usuario en VentanaPrincipal: " + this.usuario); // Mensaje de depuración
         lbUsuario.setText(usuario); // Mostrar el nombre de usuario en la interfaz
+        
+        // Inhabilitar la "X" de cierre del JFrame
+    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+    // Agregar WindowListener para manejar el cierre manualmente
+    addWindowListener(new java.awt.event.WindowAdapter() {
+        @Override
+        public void windowClosing(java.awt.event.WindowEvent e) {
+            // Aquí puedes agregar la lógica para manejar el cierre de la ventana
+            if (JOptionPane.showConfirmDialog(null, "¿Desea salir del Sistema?", "Confirmar salida", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                int trabajadorId = obtenerTrabajadorId(usuario);
+                if (trabajadorId != 0) {
+                    ht.registrarFinSesion(trabajadorId);
+                    if (ht.puestoDeTrabajo != null) {
+                        int idPDT = ht.puestoDeTrabajo.obtenerIdPuestoActivo(trabajadorId);
+                        if (idPDT != -1) {
+                            ht.calcularPagos(trabajadorId);
+                        } else {
+                            System.out.println("No hay puesto activo para el trabajador ID: " + trabajadorId);
+                        }
+                    } else {
+                        System.out.println("Error: puestoDeTrabajo no está inicializado.");
+                    }
+                } else {
+                    System.out.println("No se encontró el ID del trabajador.");
+                }
+                System.exit(0);
+            }
+        }
+    });
     }
 
     // Constructor vacío para evitar errores en la inicialización por defecto
@@ -57,6 +88,20 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         this.conectar = new Conectar();
         this.puestoDeTrabajo = new PuestoDeTrabajo(); // Inicializamos puestoDeTrabajo
         this.ht = new HorasTrabajadas(this.puestoDeTrabajo); // Pasamos puestoDeTrabajo a HorasTrabajadas
+        
+        // Inhabilitar la "X" de cierre del JFrame
+    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+    // Agregar WindowListener para manejar el cierre manualmente
+    addWindowListener(new java.awt.event.WindowAdapter() {
+        @Override
+        public void windowClosing(java.awt.event.WindowEvent e) {
+            if (JOptionPane.showConfirmDialog(null, "¿Desea salir del Sistema?", "Confirmar salida", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                // Lógica para cerrar la aplicación aquí
+                System.exit(0);
+            }
+        }
+    });
     }
 
     @SuppressWarnings("unchecked")

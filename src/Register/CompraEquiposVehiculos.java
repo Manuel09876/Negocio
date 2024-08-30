@@ -225,11 +225,12 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         MostrarFormaDePago(cbxPagarCon);
         MostrarTabla("");
         txtId_Compra.setEnabled(false);
+        txtId_Compra.setEnabled(false);
         txtIdCred.setEnabled(false);
-        txtIdMarca.setEnabled(false);
-        txtIdTipo.setEnabled(false);
-        txtIdProveedor.setEnabled(false);
-        txtIdPagarCon.setEnabled(false);
+        txtIdMarca.setVisible(false);
+        txtIdTipo.setVisible(false);
+        txtIdProveedor.setVisible(false);
+        txtIdPagarCon.setVisible(false);
         txtEquipo.requestFocus();
         txt_Inicial.setEnabled(false);
         txt_diferencia.setEnabled(false);
@@ -571,7 +572,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
-        btnSalir = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -594,8 +594,9 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         txtCondicion = new javax.swing.JTextField();
         txtIdCred = new javax.swing.JTextField();
         txtAnioFabricacion = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
+        btnNuevo = new javax.swing.JButton();
         btnLimpiar = new javax.swing.JButton();
+        btnGuia = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tbEquipos = new javax.swing.JTable();
@@ -617,8 +618,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         jLabel20 = new javax.swing.JLabel();
         cbxPagarCon = new javax.swing.JComboBox<>();
         txtIdPagarCon = new javax.swing.JTextField();
-        txtBuscar = new javax.swing.JTextField();
-        btnBuscar = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
         txtTotal1 = new javax.swing.JTextField();
         jLabel12 = new javax.swing.JLabel();
@@ -630,12 +629,11 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         txtNumeroCuotas = new javax.swing.JTextField();
         jLabel18 = new javax.swing.JLabel();
         txtValorCuota = new javax.swing.JTextField();
-        btnModifCred = new javax.swing.JButton();
-        btnEliminarCred = new javax.swing.JButton();
         dateFechaPagoCred = new com.toedter.calendar.JDateChooser();
         jLabel21 = new javax.swing.JLabel();
         btnRegistrarCredito = new javax.swing.JButton();
         txtIdCompra = new javax.swing.JTextField();
+        btnSalir = new javax.swing.JButton();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -645,15 +643,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
 
         jPanel1.setBackground(new java.awt.Color(153, 153, 255));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
-        btnSalir.setText("Salir");
-        btnSalir.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSalirActionPerformed(evt);
-            }
-        });
-        jPanel1.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(418, 28, -1, -1));
 
         jLabel1.setText("Nombre");
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(88, 35, -1, -1));
@@ -737,13 +726,13 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         txtAnioFabricacion.setToolTipText("");
         jPanel1.add(txtAnioFabricacion, new org.netbeans.lib.awtextra.AbsoluteConstraints(161, 233, 224, -1));
 
-        jButton2.setText("Nuevo");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnNuevo.setText("Nuevo");
+        btnNuevo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnNuevoActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(31, 400, -1, -1));
+        jPanel1.add(btnNuevo, new org.netbeans.lib.awtextra.AbsoluteConstraints(31, 400, -1, -1));
 
         btnLimpiar.setText("Limpiar");
         btnLimpiar.addActionListener(new java.awt.event.ActionListener() {
@@ -753,7 +742,15 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         });
         jPanel1.add(btnLimpiar, new org.netbeans.lib.awtextra.AbsoluteConstraints(182, 400, -1, -1));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, 510, 612));
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 410, -1, -1));
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 510, 540));
 
         jPanel2.setBackground(new java.awt.Color(204, 255, 204));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -776,9 +773,9 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         });
         jScrollPane1.setViewportView(tbEquipos);
 
-        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 706, 219));
+        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 706, 210));
 
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(522, 355, 727, -1));
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(522, 305, 727, 240));
 
         jPanel3.setBackground(new java.awt.Color(204, 204, 204));
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -853,11 +850,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         });
         jPanel3.add(cbxPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(414, 11, 176, -1));
         jPanel3.add(txtIdPagarCon, new org.netbeans.lib.awtextra.AbsoluteConstraints(612, 11, 91, -1));
-        jPanel3.add(txtBuscar, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 280, 170, -1));
-
-        btnBuscar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/lupa.png"))); // NOI18N
-        btnBuscar.setText("Buscar");
-        jPanel3.add(btnBuscar, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 270, -1, -1));
 
         jLabel7.setText("Total");
         jPanel3.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(359, 36, -1, -1));
@@ -882,13 +874,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         jPanel3.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(339, 156, -1, -1));
         jPanel3.add(txtValorCuota, new org.netbeans.lib.awtextra.AbsoluteConstraints(449, 153, 100, -1));
 
-        btnModifCred.setText("Modificar");
-        jPanel3.add(btnModifCred, new org.netbeans.lib.awtextra.AbsoluteConstraints(609, 53, -1, -1));
-
-        btnEliminarCred.setText("Eliminar");
-        btnEliminarCred.setToolTipText("");
-        jPanel3.add(btnEliminarCred, new org.netbeans.lib.awtextra.AbsoluteConstraints(619, 103, -1, -1));
-
         dateFechaPagoCred.setDateFormatString("yyyy-MM-dd");
         jPanel3.add(dateFechaPagoCred, new org.netbeans.lib.awtextra.AbsoluteConstraints(449, 193, 150, -1));
 
@@ -902,9 +887,18 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
             }
         });
         jPanel3.add(btnRegistrarCredito, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 240, -1, -1));
-        jPanel3.add(txtIdCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 290, 80, -1));
+        jPanel3.add(txtIdCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 190, 80, -1));
 
-        getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(522, 6, 710, 330));
+        btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
+        btnSalir.setText("Salir");
+        btnSalir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSalirActionPerformed(evt);
+            }
+        });
+        jPanel3.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 60, -1, -1));
+
+        getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(522, 6, 710, 290));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -975,11 +969,11 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_cbxPagarConActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNuevoActionPerformed
         Limpiar();
         txtEquipo.requestFocus();
 
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btnNuevoActionPerformed
 
     private void txt_diferenciaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_diferenciaKeyReleased
 
@@ -1001,15 +995,37 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
 
     }//GEN-LAST:event_txtTotalKeyPressed
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        JOptionPane.showMessageDialog(null, "COMPRA DE EQUIPOS Y VEHICULOS\n"
+                + "El ingreso de compras de Equipos y Vehículos\n"
+                + "Colocar El dato del Equipo o Vehiculo, Numero de serie\n"
+                + "Buscar el Tipo, La marca, Proveedor(Si no los tuviese crearlos antes de ingresar estos datos\n"
+                + "Año de fabricación, Condición de Compra: Nuevo, Usado, Funcionando, Malogrado\n)"
+                + "Colocar el NÚMERO DE Factura si no lo tiene ponga S/R\n"
+                + "LLenar los datos SubTotal, Taxes Total,la fecha\n"
+                + "Ubicar la Forma de Pago en Pagar con:Cash, Cheque, tarjeta de debito o transferencia: son pagos directos\n"
+                + "es decir es dinero que existe en su cuenta o en efectivo, Tarjeta de Credito, Préstamo o Crédito, es dinero prestado\n"
+                + "esto generará una serie de pagos ya sea pagar una tarjeta o un préstamo, llenaremos una serie de casillas\n"
+                + "para guardar ese datos y podamos saber también nuestras deudas\n"
+                + "colocar en inicial si es que damos un dinero inicial de lo contrario ponemos 0 y presionar ENTER aparecerá la Diferencia\n"
+                + "Colocar la proxima Fecha de Pago\n"
+                + "En el caso de Trajeta de Credito la pagamos en una o pocas partes podemos establecer si pagamos a una o mas pagos\n"
+                + "y la frecuencia de pago, cada cuantos días de diferencia entre pagos, la tasa de interes como referencia\n"
+                + "Colocar el numero de cuotas y el valor de cuotas, el subtotal y los taxes, todos estos datos son referenciales\n"
+                + "cada entidad utiliza diferentes tipos de tasas de interes, Lo mismo para los préstamos para compras de vehículos etc\n"
+                + "estas son cuotas fijas.\n"
+                + "después de ingresar los datos podra registrarlo mediante el botón REGISTRAR CREDITO\n"
+                + "");
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBorrar;
-    private javax.swing.JButton btnBuscar;
-    private javax.swing.JButton btnEliminarCred;
     private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnLimpiar;
-    private javax.swing.JButton btnModifCred;
     private javax.swing.JButton btnModificar;
+    private javax.swing.JButton btnNuevo;
     private javax.swing.JButton btnRegistrarCredito;
     private javax.swing.JButton btnSalir;
     private javax.swing.ButtonGroup buttonGroup1;
@@ -1019,7 +1035,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
     private javax.swing.JComboBox<String> cbxTipoMaqVe;
     private com.toedter.calendar.JDateChooser dateFechaPago;
     private com.toedter.calendar.JDateChooser dateFechaPagoCred;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1048,7 +1063,6 @@ public class CompraEquiposVehiculos extends javax.swing.JInternalFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tbEquipos;
     private javax.swing.JTextField txtAnioFabricacion;
-    private javax.swing.JTextField txtBuscar;
     private javax.swing.JTextField txtCondicion;
     private javax.swing.JTextField txtEquipo;
     private javax.swing.JTextField txtFrecuencia;

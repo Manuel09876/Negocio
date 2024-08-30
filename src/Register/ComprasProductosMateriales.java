@@ -999,8 +999,28 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
     private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
         JOptionPane.showMessageDialog(null, "COMPRA DE PRODUCTOS Y MATERIALES\n"
                 + "El ingreso de compras de Productos y Materiales\n"
-                + "Colocar el Numero de Recibo si no lo tiene ponga S/R\n"
-                + "Buscar El Producto, El tipo de producto, Marca, Proveedor");
+                + "Colocar el NÚMERO DE RECIBO si no lo tiene ponga S/R\n"
+                + "Buscar El Producto, El tipo de producto, Marca, Proveedor\n"
+                + "Si no existiera alguno de los anteriores prodra crearlos, de esa forma se hará mas facil de ingresarlo\n"
+                + "posteriormente\n"
+                + "Si presiona el botón Mostrar Stock, le mostrara la cantidad de producto en Stock\n"
+                + "Coloque el PRECIO UNITARIO este podrá variar en el tiempo\n"
+                + "la CANTIDAD y presionar ENTER en tu teclado así se agregara en el cuadro el producto y podrá seguir\n"
+                + "agregando mas productos; Después de agrgados todos los productos correspondientes a un mismo recibo\n"
+                + "Agregar la fecha de compra que figura en el recibo\n"
+                + "Ubicar la Forma de Pago en Pagar con:Cash, Cheque, tarjeta de debito o transferencia: son pagos directos\n"
+                + "es decir es dinero que existe en su cuenta o en efectivo, Tarjeta de Credito, Préstamo o Crédito, es dinero prestado\n"
+                + "esto generará una serie de pagos ya sea pagar una tarjeta o un préstamo, llenaremos una serie de casillas\n"
+                + "para guardar ese datos y podamos saber también nuestras deudas\n"
+                + "colocar en inicial si es que damos un dinero inicial de lo contrario ponemos 0 y presionar ENTER aparecerá la Diferencia\n"
+                + "Colocar la proxima Fecha de Pago\n"
+                + "En el caso de Trajeta de Credito la pagamos en una o pocas partes podemos establecer si pagamos a una o mas pagos\n"
+                + "y la frecuencia de pago, cada cuantos días de diferencia entre pagos, la tasa de interes como referencia\n"
+                + "Colocar el numero de cuotas y el valor de cuotas, el subtotal y los taxes, todos estos datos son referenciales\n"
+                + "cada entidad utiliza diferentes tipos de tasas de interes, Lo mismo para los préstamos para compras de vehículos etc\n"
+                + "estas son cuotas fijas.\n"
+                + "después de ingresar los datos podra registrarlo mediante el botón REGISTRAR CREDITO\n"
+                + "El Botón con una X eliminara la fila que haya ingresado con datos errornes par corregir los datos que se estan ingresando.");
     }//GEN-LAST:event_btnGuiaActionPerformed
 
 

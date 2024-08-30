@@ -153,6 +153,10 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         MostrarProveedor(cbxProveedor);
         txtId.setEnabled(false);
         MostrarDatos("");
+        txtIdPagarCon.setVisible(false);
+        txtIdProveedor.setVisible(false);
+        txtIdTipodeGastGen.setVisible(false);
+        
     }
 
     public void MostrarDatos(String Valores) {
@@ -499,6 +503,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         txtNumeroCuotas = new javax.swing.JTextField();
         txtValorCuota = new javax.swing.JTextField();
         jLabel18 = new javax.swing.JLabel();
+        btnGuia = new javax.swing.JButton();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -704,7 +709,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
         jButton1.setBackground(new java.awt.Color(0, 102, 255));
         jButton1.setText("Limpiar");
-        jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(850, 10, -1, -1));
+        jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(850, 10, -1, 30));
         jPanel2.add(txtFrecuencia, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 250, 100, -1));
 
         jLabel19.setText("Inicial");
@@ -756,6 +761,14 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
         jLabel18.setText("Numero de cuotas");
         jPanel2.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 310, -1, 30));
+
+        btnGuia.setText("Guia");
+        btnGuia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGuiaActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(950, 300, -1, -1));
 
         getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 181, 1040, 380));
 
@@ -859,6 +872,10 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         txtValorCuota.setEnabled(false);
     }//GEN-LAST:event_btnRegistrarCreditoActionPerformed
 
+    private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnGuiaActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBorrar;
@@ -866,6 +883,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnGuardar;
+    private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnModificar;
     private javax.swing.JButton btnNuevo;
     private javax.swing.JButton btnRegistrarCredito;

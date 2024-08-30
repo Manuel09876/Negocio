@@ -69,74 +69,86 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     public void Mostrar(JTable Tabla, int trabajadorId) {
-        DefaultTableModel modelo = new DefaultTableModel();
-        modelo.addColumn("ID Ingreso");
-        modelo.addColumn("ID Salida");
-        modelo.addColumn("Fecha");
-        modelo.addColumn("Hora de Ingreso");
-        modelo.addColumn("Hora de Salida");
-        modelo.addColumn("Horas Trabajadas");
+    DefaultTableModel modelo = new DefaultTableModel();
+    modelo.addColumn("ID Ingreso");
+    modelo.addColumn("ID Salida");
+    modelo.addColumn("Fecha Ingreso");
+    modelo.addColumn("Fecha Salida");
+    modelo.addColumn("Hora de Ingreso");
+    modelo.addColumn("Hora de Salida");
+    modelo.addColumn("Horas Trabajadas");
+
+    Tabla.setModel(modelo);
+
+    String sql = "SELECT hi.id_ingreso AS idIngreso, "
+            + "(SELECT hs.id_salida FROM horas_salida hs "
+            + " WHERE hs.trabajador_id = hi.trabajador_id "
+            + " AND hs.fSalida > hi.fInicio "
+            + " ORDER BY hs.fSalida ASC LIMIT 1) AS idSalida, "
+            + "hi.fInicio, "
+            + "(SELECT hs.fSalida FROM horas_salida hs "
+            + " WHERE hs.trabajador_id = hi.trabajador_id "
+            + " AND hs.fSalida > hi.fInicio "
+            + " ORDER BY hs.fSalida ASC LIMIT 1) AS fSalida, "
+            + "TIMESTAMPDIFF(MINUTE, hi.fInicio, "
+            + "(SELECT hs.fSalida FROM horas_salida hs "
+            + " WHERE hs.trabajador_id = hi.trabajador_id "
+            + " AND hs.fSalida > hi.fInicio "
+            + " ORDER BY hs.fSalida ASC LIMIT 1)) / 60.0 AS horasTrabajadas "
+            + "FROM horas_ingreso hi "
+            + "WHERE hi.trabajador_id = ? "
+            + "ORDER BY hi.fInicio ASC";
+
+    try (PreparedStatement pst = conect.prepareStatement(sql)) {
+        pst.setInt(1, trabajadorId);
+        ResultSet rs = pst.executeQuery();
+
+        while (rs.next()) {
+            String idIngreso = rs.getString("idIngreso");
+            String idSalida = rs.getString("idSalida");
+            String fechaIngreso = rs.getTimestamp("fInicio").toLocalDateTime().toLocalDate().toString();
+            String fechaSalida = (rs.getTimestamp("fSalida") != null) ? rs.getTimestamp("fSalida").toLocalDateTime().toLocalDate().toString() : "Pendiente";
+            String horaIngreso = rs.getTimestamp("fInicio").toLocalDateTime().toLocalTime().toString();
+            String horaSalida = (rs.getTimestamp("fSalida") != null) ? rs.getTimestamp("fSalida").toLocalDateTime().toLocalTime().toString() : "Pendiente";
+            String horasTrabajadas = (rs.getString("horasTrabajadas") != null) ? rs.getString("horasTrabajadas") : "0";
+
+            modelo.addRow(new Object[]{idIngreso, idSalida, fechaIngreso, fechaSalida, horaIngreso, horaSalida, horasTrabajadas});
+        }
 
         Tabla.setModel(modelo);
 
-        String sql = "SELECT hi.id_ingreso AS idIngreso, "
-                + "(SELECT hs.id_salida FROM horas_salida hs "
-                + " WHERE hs.trabajador_id = hi.trabajador_id "
-                + " AND hs.fSalida > hi.fInicio "
-                + " ORDER BY hs.fSalida ASC LIMIT 1) AS idSalida, "
-                + "hi.fInicio, "
-                + "(SELECT hs.fSalida FROM horas_salida hs "
-                + " WHERE hs.trabajador_id = hi.trabajador_id "
-                + " AND hs.fSalida > hi.fInicio "
-                + " ORDER BY hs.fSalida ASC LIMIT 1) AS fSalida, "
-                + "TIMESTAMPDIFF(MINUTE, hi.fInicio, "
-                + "(SELECT hs.fSalida FROM horas_salida hs "
-                + " WHERE hs.trabajador_id = hi.trabajador_id "
-                + " AND hs.fSalida > hi.fInicio "
-                + " ORDER BY hs.fSalida ASC LIMIT 1)) / 60.0 AS horasTrabajadas "
-                + "FROM horas_ingreso hi "
-                + "WHERE hi.trabajador_id = ? "
-                + "ORDER BY hi.fInicio ASC";
-
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            ResultSet rs = pst.executeQuery();
-
-            while (rs.next()) {
-                String idIngreso = rs.getString("idIngreso");
-                String idSalida = rs.getString("idSalida");
-                String fecha = rs.getTimestamp("fInicio").toLocalDateTime().toLocalDate().toString();
-                String horaIngreso = rs.getTimestamp("fInicio").toLocalDateTime().toLocalTime().toString();
-                String horaSalida = (rs.getTimestamp("fSalida") != null) ? rs.getTimestamp("fSalida").toLocalDateTime().toLocalTime().toString() : "Pendiente";
-                String horasTrabajadas = (rs.getString("horasTrabajadas") != null) ? rs.getString("horasTrabajadas") : "0";
-
-                modelo.addRow(new Object[]{idIngreso, idSalida, fecha, horaIngreso, horaSalida, horasTrabajadas});
-            }
-
-            Tabla.setModel(modelo);
-
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al mostrar los registros, error: " + e.toString());
-        }
+    } catch (SQLException e) {
+        JOptionPane.showMessageDialog(null, "Error al mostrar los registros, error: " + e.toString());
     }
+}
 
-    public void Seleccionar(JTable Tabla, JTextField codigoIngreso, JTextField codigoSalida, JTextField Fecha, JTextField HoraIngreso, JTextField HoraSalida, JTextField HorasTrabajadas) {
-        try {
-            int fila = Tabla.getSelectedRow();
-            if (fila >= 0) {
-                codigoIngreso.setText(Tabla.getValueAt(fila, 0).toString());
-                codigoSalida.setText(Tabla.getValueAt(fila, 1).toString());
-                Fecha.setText(Tabla.getValueAt(fila, 2).toString());
-                HoraIngreso.setText(Tabla.getValueAt(fila, 3).toString());
-                HoraSalida.setText(Tabla.getValueAt(fila, 4).toString());
-                HorasTrabajadas.setText(Tabla.getValueAt(fila, 5).toString());
-            } else {
-                JOptionPane.showMessageDialog(null, "Fila No seleccionada");
-            }
-        } catch (HeadlessException e) {
-            JOptionPane.showMessageDialog(null, "Error de Selección, Error: " + e.toString());
-        }
+
+    public void seleccionar(JTable tabla) {
+    // Obtener el índice de la fila seleccionada
+    int filaSeleccionada = tabla.getSelectedRow();
+
+    if (filaSeleccionada != -1) { // Verificar si se ha seleccionado alguna fila
+        // Obtener los valores de las columnas de la fila seleccionada
+        String idIngreso = tabla.getValueAt(filaSeleccionada, 0).toString();
+        String idSalida = tabla.getValueAt(filaSeleccionada, 1).toString();
+        String fechaIngreso = tabla.getValueAt(filaSeleccionada, 2).toString();
+        String fechaSalida = tabla.getValueAt(filaSeleccionada, 3).toString();
+        String horaIngreso = tabla.getValueAt(filaSeleccionada, 4).toString();
+        String horaSalida = tabla.getValueAt(filaSeleccionada, 5).toString();
+
+        // Aquí puedes mostrar estos valores en campos de texto (JTextFields) o usarlos para otros propósitos
+        // Ejemplo:
+        txtIdIngreso.setText(idIngreso);
+        txtIdSalida.setText(idSalida);
+        txtFechaIngreso.setText(fechaIngreso);
+        txtFechaSalida.setText(fechaSalida);
+        txtHoraIngreso.setText(horaIngreso);
+        txtHoraSalida.setText(horaSalida);
+    } else {
+        JOptionPane.showMessageDialog(null, "Por favor, seleccione una fila.");
     }
+}
+
 
     public void eliminar(int idIngreso, int idSalida) {
         // Eliminar registro de horas_ingreso
@@ -484,19 +496,21 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         btnMostrarDatos = new javax.swing.JButton();
         txtIdIngreso = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        txtFecha = new javax.swing.JTextField();
+        txtFechaIngreso = new javax.swing.JTextField();
         txtTiempoTrabajado = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
-        txtHingreso = new javax.swing.JTextField();
-        txtHSalida = new javax.swing.JTextField();
+        txtHoraIngreso = new javax.swing.JTextField();
+        txtHoraSalida = new javax.swing.JTextField();
         btnEliminar = new javax.swing.JButton();
         btnModificar = new javax.swing.JButton();
         txtIdSalida = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         btnGuardarHorasTrabajadas = new javax.swing.JButton();
+        jLabel10 = new javax.swing.JLabel();
+        txtFechaSalida = new javax.swing.JTextField();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -540,11 +554,11 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             }
         });
         jPanel12.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(1090, 20, -1, -1));
-        jPanel12.add(jDateChooser1, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 50, 140, -1));
+        jPanel12.add(jDateChooser1, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 110, 140, -1));
         jPanel12.add(jDateChooser2, new org.netbeans.lib.awtextra.AbsoluteConstraints(920, 50, 120, -1));
 
         jLabel1.setText("Fecha de Inicio de Pagos");
-        jPanel12.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(750, 30, -1, -1));
+        jPanel12.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 90, -1, -1));
 
         jLabel2.setText("Final");
         jPanel12.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(950, 30, -1, -1));
@@ -571,26 +585,26 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             }
         });
         jPanel12.add(btnMostrarDatos, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 100, -1, -1));
-        jPanel12.add(txtIdIngreso, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 20, 100, -1));
+        jPanel12.add(txtIdIngreso, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 20, 70, -1));
 
         jLabel4.setText("id Ingreso");
         jPanel12.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 20, -1, -1));
-        jPanel12.add(txtFecha, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 100, 100, -1));
+        jPanel12.add(txtFechaIngreso, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 20, 100, -1));
         jPanel12.add(txtTiempoTrabajado, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 100, 100, -1));
 
-        jLabel5.setText("Fecha");
-        jPanel12.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(330, 100, -1, -1));
+        jLabel5.setText("Fecha Ingreso");
+        jPanel12.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 20, -1, -1));
 
         jLabel6.setText("Horas Trabajadas");
         jPanel12.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 100, -1, -1));
 
         jLabel7.setText("Hora de Ingreso");
-        jPanel12.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 20, -1, -1));
+        jPanel12.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 20, -1, -1));
 
         jLabel8.setText("Hora de Salida");
-        jPanel12.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 60, -1, -1));
-        jPanel12.add(txtHingreso, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 20, 90, -1));
-        jPanel12.add(txtHSalida, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 60, 90, -1));
+        jPanel12.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 60, -1, -1));
+        jPanel12.add(txtHoraIngreso, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 20, 90, -1));
+        jPanel12.add(txtHoraSalida, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 60, 90, -1));
 
         btnEliminar.setText("Eliminar");
         btnEliminar.addActionListener(new java.awt.event.ActionListener() {
@@ -607,13 +621,17 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             }
         });
         jPanel12.add(btnModificar, new org.netbeans.lib.awtextra.AbsoluteConstraints(840, 90, -1, -1));
-        jPanel12.add(txtIdSalida, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 60, 100, -1));
+        jPanel12.add(txtIdSalida, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 60, 70, -1));
 
         jLabel9.setText("id Salida");
         jPanel12.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 60, -1, -1));
 
         btnGuardarHorasTrabajadas.setText("Guardar Horas");
         jPanel12.add(btnGuardarHorasTrabajadas, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 90, -1, -1));
+
+        jLabel10.setText("Fecha Salida");
+        jPanel12.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 60, -1, -1));
+        jPanel12.add(txtFechaSalida, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 50, 100, -1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -674,17 +692,17 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnMostrarDatosActionPerformed
 
     private void TablaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TablaMouseClicked
-        Seleccionar(Tabla, txtIdIngreso, txtIdSalida, txtFecha, txtHingreso, txtHSalida, txtTiempoTrabajado);
+        seleccionar(Tabla);
     }//GEN-LAST:event_TablaMouseClicked
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
-        Seleccionar(Tabla, txtIdIngreso, txtIdSalida, txtFecha, txtHingreso, txtHSalida, txtTiempoTrabajado);
+        seleccionar(Tabla);
         int idIngreso = Integer.parseInt(txtIdIngreso.getText());
         int idSalida = Integer.parseInt(txtIdSalida.getText());
         eliminar(idIngreso, idSalida);
-        txtFecha.setText("");
-        txtHSalida.setText("");
-        txtHingreso.setText("");
+        txtFechaIngreso.setText("");
+        txtHoraSalida.setText("");
+        txtHoraIngreso.setText("");
         txtIdIngreso.setText("");
         txtIdSalida.setText("");
         txtTiempoTrabajado.setText("");
@@ -697,14 +715,14 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             int idSalida = Integer.parseInt(txtIdSalida.getText());
 
             // Obtener la fecha del JTextField Fecha si es requerido en formato LocalDate
-            LocalDate fecha = LocalDate.parse(txtFecha.getText());
+            LocalDate fecha = LocalDate.parse(txtFechaIngreso.getText());
 
             // Obtener la hora de ingreso y de salida del JTextField y convertirlos a enteros
-            int horaIngreso = Integer.parseInt(txtHingreso.getText().split(":")[0]);
-            int minutoIngreso = Integer.parseInt(txtHingreso.getText().split(":")[1]);
+            int horaIngreso = Integer.parseInt(txtHoraIngreso.getText().split(":")[0]);
+            int minutoIngreso = Integer.parseInt(txtHoraIngreso.getText().split(":")[1]);
 
-            int horaSalida = Integer.parseInt(txtHSalida.getText().split(":")[0]);
-            int minutoSalida = Integer.parseInt(txtHSalida.getText().split(":")[1]);
+            int horaSalida = Integer.parseInt(txtHoraSalida.getText().split(":")[0]);
+            int minutoSalida = Integer.parseInt(txtHoraSalida.getText().split(":")[1]);
 
             // Construir objetos LocalDateTime con los valores obtenidos
             LocalDateTime nuevaHoraIngreso = LocalDateTime.of(fecha, LocalTime.of(horaIngreso, minutoIngreso));
@@ -724,9 +742,9 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         }
 
         // Limpiar campos de texto después de la operación
-        txtFecha.setText("");
-        txtHSalida.setText("");
-        txtHingreso.setText("");
+        txtFechaIngreso.setText("");
+        txtHoraSalida.setText("");
+        txtHoraIngreso.setText("");
         txtIdIngreso.setText("");
         txtIdSalida.setText("");
         txtTiempoTrabajado.setText("");
@@ -745,6 +763,7 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     private com.toedter.calendar.JDateChooser jDateChooser1;
     private com.toedter.calendar.JDateChooser jDateChooser2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -755,9 +774,10 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel12;
     private javax.swing.JScrollPane jScrollPane14;
-    private javax.swing.JTextField txtFecha;
-    private javax.swing.JTextField txtHSalida;
-    private javax.swing.JTextField txtHingreso;
+    private javax.swing.JTextField txtFechaIngreso;
+    private javax.swing.JTextField txtFechaSalida;
+    private javax.swing.JTextField txtHoraIngreso;
+    private javax.swing.JTextField txtHoraSalida;
     public javax.swing.JTextField txtIdHoras;
     private javax.swing.JTextField txtIdIngreso;
     private javax.swing.JTextField txtIdSalida;
