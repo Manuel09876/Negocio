@@ -1,5 +1,6 @@
 package Reports;
 
+import Bases.PeriodoPago;
 import conectar.Conectar;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -7,6 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -21,68 +24,143 @@ public class Sueldos extends javax.swing.JInternalFrame {
     public Sueldos() {
         initComponents();
         AutoCompleteDecorator.decorate(cbxTrabajador);
+        AutoCompleteDecorator.decorate(cbxPeriodoPago);
         MostrarTrabajador(cbxTrabajador);
+        llenarComboPeriodoPago(cbxPeriodoPago); // Llenar el JComboBox de períodos de pago
     }
 
-    public Sueldos(Connection connection) {
-        this.conexion = new Conectar();
-        this.conect = conexion.getConexion();
+    // Método para llenar el JComboBox de períodos de pago
+    private void llenarComboPeriodoPago(JComboBox<String> comboPeriodoPago) {
+        comboPeriodoPago.removeAllItems(); // Limpiar cualquier item existente
+        comboPeriodoPago.addItem("Semanal");
+        comboPeriodoPago.addItem("Quincenal");
+        comboPeriodoPago.addItem("Mensual");
     }
 
-    public void mostrarSueldos(int trabajadorId, java.util.Date fechaInicio, java.util.Date fechaFin) {
-    DefaultTableModel modelo = new DefaultTableModel();
-    
-    // Definir las columnas de la tabla
-    modelo.addColumn("ID Trabajador");
-    modelo.addColumn("Nombre");
-    modelo.addColumn("Fecha");
-    modelo.addColumn("Horas Trabajadas");
-    modelo.addColumn("Horas Extras");
-    modelo.addColumn("Sueldo Bruto");
-    modelo.addColumn("Sueldo Neto");
-    
-    TableSueldos.setModel(modelo);
+//    public Sueldos(Connection connection) {
+//        initComponents(); // Asegúrate de inicializar los componentes en este constructor también
+//        this.conect = connection; // Asignar la conexión a la variable adecuada
+//        AutoCompleteDecorator.decorate(cbxTrabajador);
+//        MostrarTrabajador(cbxTrabajador);
+//    }
+    // Método para mostrar sueldos basado en el rango de fechas y tipo de período
+    public void mostrarSueldos(int trabajadorId, java.sql.Date fechaInicio, java.sql.Date fechaFin) {
+        // Definir el modelo de tabla
+        DefaultTableModel modelo = new DefaultTableModel();
+        modelo.addColumn("ID Trabajador");
+        modelo.addColumn("Nombre");
+        modelo.addColumn("Fecha");
+        modelo.addColumn("Horas Trabajadas");
+        modelo.addColumn("Horas Extras");
+        modelo.addColumn("Sueldo Bruto");
+        modelo.addColumn("Sueldo Neto");
+        TableSueldos.setModel(modelo);
 
-    // SQL para calcular y obtener los datos de sueldos
-    String sql = "SELECT t.idWorker, t.nombre, ht.fecha, ht.horas, ht.horas_extras, "
-               + "(ht.horas * p.pagoPorHora + ht.horas_extras * p.pagoPorHora * 1.5) AS sueldo_bruto, "
-               + "(ht.horas * p.pagoPorHora + ht.horas_extras * p.pagoPorHora * 1.5) - "
-               + "(ht.horas * p.pagoPorHora + ht.horas_extras * p.pagoPorHora * 1.5) * 0.3 AS sueldo_neto " // Supongamos que el 30% son deducciones
-               + "FROM horas_trabajadas ht "
-               + "JOIN worker t ON ht.trabajador_id = t.idWorker "
-               + "JOIN puestodetrabajo p ON t.idWorker = p.idTrabajador "
-               + "WHERE ht.trabajador_id = ? AND ht.fecha BETWEEN ? AND ? "
-               + "ORDER BY ht.fecha ASC";
+        // SQL para obtener los datos de sueldos
+        String sql = "SELECT t.idWorker, t.nombre, ht.fecha, ht.horas, COALESCE(ht.horas_extras, 0) AS horas_extras, "
+                + "(ht.horas * p.pagoPorHora + COALESCE(ht.horas_extras, 0) * p.pagoPorHora * 1.5) AS sueldo_bruto, "
+                + "(ht.horas * p.pagoPorHora + COALESCE(ht.horas_extras, 0) * p.pagoPorHora * 1.5) * 0.7 AS sueldo_neto "
+                + "FROM horas_trabajadas ht "
+                + "JOIN worker t ON ht.trabajador_id = t.idWorker "
+                + "JOIN puestodetrabajo p ON t.idWorker = p.idTrabajador "
+                + "WHERE ht.trabajador_id = ? AND ht.fecha BETWEEN ? AND ? "
+                + "ORDER BY ht.fecha ASC";
 
-    try (PreparedStatement pst = conect.prepareStatement(sql)) {
-        pst.setInt(1, trabajadorId);
-        pst.setDate(2, new java.sql.Date(fechaInicio.getTime()));
-        pst.setDate(3, new java.sql.Date(fechaFin.getTime()));
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);  // Parámetro 1
+            pst.setDate(2, fechaInicio);  // Parámetro 2
+            pst.setDate(3, fechaFin);  // Parámetro 3
 
-        ResultSet rs = pst.executeQuery();
-        
-        // Llenar la tabla con los datos obtenidos
-        while (rs.next()) {
-            modelo.addRow(new Object[]{
-                rs.getInt("idWorker"),
-                rs.getString("nombre"),
-                rs.getDate("fecha"),
-                rs.getDouble("horas"),
-                rs.getDouble("horas_extras"),
-                rs.getDouble("sueldo_bruto"),
-                rs.getDouble("sueldo_neto")
-            });
-            System.out.println("Datos añadidos a la tabla: " + rs.getString("nombre"));
+            ResultSet rs = pst.executeQuery();
+            // Llenar la tabla con los datos obtenidos
+            while (rs.next()) {
+                modelo.addRow(new Object[]{
+                    rs.getInt("idWorker"),
+                    rs.getString("nombre"),
+                    rs.getDate("fecha"),
+                    rs.getDouble("horas"),
+                    rs.getDouble("horas_extras"),
+                    rs.getDouble("sueldo_bruto"),
+                    rs.getDouble("sueldo_neto")
+                });
+            }
+
+            TableSueldos.setModel(modelo);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error al mostrar sueldos: " + e.getMessage());
         }
-        
-        TableSueldos.setModel(modelo);  // Asegurarse de que el modelo se asigna a la tabla
-
-    } catch (SQLException e) {
-        e.printStackTrace();
-        JOptionPane.showMessageDialog(null, "Error al mostrar sueldos: " + e.getMessage());
     }
-}
 
+    private java.util.Date[] obtenerFechasPeriodoPago(int trabajadorId, String periodoPago) {
+        java.util.Date[] periodo = new java.util.Date[2];
+        LocalDate fechaInicioActividades = obtenerFechaInicioActividades(trabajadorId); // Método para obtener la fecha de inicio de actividades
+        LocalDate fechaInicio = null;
+        LocalDate fechaFin = null;
+
+        switch (periodoPago) {
+            case "Semanal":
+                fechaInicio = fechaInicioActividades.with(DayOfWeek.MONDAY); // Inicia el lunes
+                fechaFin = fechaInicio.plusDays(6); // Termina el domingo
+                break;
+            case "Quincenal":
+                fechaInicio = fechaInicioActividades; // Inicia en el primer día del periodo quincenal
+                fechaFin = fechaInicio.plusDays(13); // Termina después de 14 días
+                break;
+            case "Mensual":
+                fechaInicio = fechaInicioActividades.withDayOfMonth(1); // Inicia en el primer día del mes
+                fechaFin = fechaInicio.withDayOfMonth(fechaInicio.lengthOfMonth()); // Termina en el último día del mes
+                break;
+        }
+
+        // Convertir LocalDate a java.util.Date
+        periodo[0] = java.sql.Date.valueOf(fechaInicio);
+        periodo[1] = java.sql.Date.valueOf(fechaFin);
+        return periodo;
+    }
+
+    private LocalDate obtenerFechaInicioActividades(int trabajadorId) {
+        String sql = "SELECT fechaDePuesto FROM puestodetrabajo WHERE idTrabajador = ? ORDER BY fechaDePuesto ASC LIMIT 1";
+
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                return rs.getDate("fechaDePuesto").toLocalDate();
+            } else {
+                throw new SQLException("No se encontró la fecha de inicio de actividades para el trabajador con ID: " + trabajadorId);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al obtener la fecha de inicio de actividades: " + e.getMessage());
+            return LocalDate.now();
+        }
+    }
+
+//    // Método para obtener el período de pago del trabajador
+//    public java.util.Date[] obtenerPeriodoPago(int trabajadorId) {
+//        java.util.Date[] periodo = new java.util.Date[2];
+//
+//        String sql = "SELECT p.tipo_periodo, p.fecha_inicio, p.fecha_fin "
+//                + "FROM puestodetrabajo pt "
+//                + "JOIN periodos_pago p ON pt.id_periodo = p.id "
+//                + "WHERE pt.idTrabajador = ?";
+//
+//        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+//            pst.setInt(1, trabajadorId);
+//            ResultSet rs = pst.executeQuery();
+//
+//            if (rs.next()) {
+//                periodo[0] = rs.getDate("fecha_inicio");
+//                periodo[1] = rs.getDate("fecha_fin");
+//            }
+//        } catch (SQLException e) {
+//            JOptionPane.showMessageDialog(null, "Error al obtener período de pago: " + e.getMessage());
+//        }
+//
+//        return periodo;
+//    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -94,13 +172,15 @@ public class Sueldos extends javax.swing.JInternalFrame {
         btnHistorial = new javax.swing.JButton();
         txtIdSueldos = new javax.swing.JTextField();
         btnSalir = new javax.swing.JButton();
-        jDateChooser1 = new com.toedter.calendar.JDateChooser();
-        jDateChooser2 = new com.toedter.calendar.JDateChooser();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
         cbxTrabajador = new javax.swing.JComboBox<>();
         txtIdTrabajador = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
+        cbxPeriodoPago = new javax.swing.JComboBox<>();
+        jLabel1 = new javax.swing.JLabel();
+        jDateChooserInicio = new com.toedter.calendar.JDateChooser();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jDateChooserFin = new com.toedter.calendar.JDateChooser();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -138,15 +218,7 @@ public class Sueldos extends javax.swing.JInternalFrame {
                 btnSalirActionPerformed(evt);
             }
         });
-        jPanel12.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 20, -1, -1));
-        jPanel12.add(jDateChooser1, new org.netbeans.lib.awtextra.AbsoluteConstraints(770, 30, 130, -1));
-        jPanel12.add(jDateChooser2, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 30, 120, -1));
-
-        jLabel1.setText("Inicio");
-        jPanel12.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 10, -1, -1));
-
-        jLabel2.setText("Final");
-        jPanel12.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(970, 10, -1, -1));
+        jPanel12.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 20, -1, -1));
 
         cbxTrabajador.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -159,6 +231,19 @@ public class Sueldos extends javax.swing.JInternalFrame {
         jLabel3.setText("Trabajador");
         jPanel12.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 10, -1, -1));
 
+        jPanel12.add(cbxPeriodoPago, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 20, 180, -1));
+
+        jLabel1.setText("Priodo");
+        jPanel12.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 20, -1, -1));
+        jPanel12.add(jDateChooserInicio, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 60, 120, -1));
+
+        jLabel2.setText("Inicio");
+        jPanel12.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 60, -1, -1));
+
+        jLabel4.setText("Fin");
+        jPanel12.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(840, 60, -1, -1));
+        jPanel12.add(jDateChooserFin, new org.netbeans.lib.awtextra.AbsoluteConstraints(870, 60, 110, -1));
+
         getContentPane().add(jPanel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 1200, 589));
 
         pack();
@@ -170,24 +255,20 @@ public class Sueldos extends javax.swing.JInternalFrame {
 
     private void btnHistorialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHistorialActionPerformed
         if (txtIdTrabajador.getText().trim().isEmpty()) {
-        JOptionPane.showMessageDialog(null, "Por favor, seleccione un trabajador válido.");
-        return;
-    }
-
-    try {
-        int trabajadorId = Integer.parseInt(txtIdTrabajador.getText().trim());
-        java.util.Date fechaInicio = jDateChooser1.getDate();
-        java.util.Date fechaFin = jDateChooser2.getDate();
-        
-        if (fechaInicio == null || fechaFin == null) {
-            JOptionPane.showMessageDialog(null, "Por favor, seleccione las fechas de inicio y fin.");
+            JOptionPane.showMessageDialog(null, "Por favor, seleccione un trabajador válido.");
             return;
         }
 
-        mostrarSueldos(trabajadorId, fechaInicio, fechaFin);
-    } catch (NumberFormatException e) {
-        JOptionPane.showMessageDialog(null, "El ID de trabajador debe ser un número válido.");
-    }
+        try {
+            int trabajadorId = Integer.parseInt(txtIdTrabajador.getText().trim());
+            // Supongamos que obtienes las fechas de inicio y fin de algún componente de la interfaz
+            java.sql.Date fechaInicio = new java.sql.Date(jDateChooserInicio.getDate().getTime());
+            java.sql.Date fechaFin = new java.sql.Date(jDateChooserFin.getDate().getTime());
+
+            mostrarSueldos(trabajadorId, fechaInicio, fechaFin);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "El ID de trabajador debe ser un número válido.");
+        }
     }//GEN-LAST:event_btnHistorialActionPerformed
 
     private void cbxTrabajadorItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxTrabajadorItemStateChanged
@@ -199,12 +280,14 @@ public class Sueldos extends javax.swing.JInternalFrame {
     public javax.swing.JTable TableSueldos;
     public javax.swing.JButton btnHistorial;
     private javax.swing.JButton btnSalir;
+    private javax.swing.JComboBox<String> cbxPeriodoPago;
     private javax.swing.JComboBox<String> cbxTrabajador;
-    private com.toedter.calendar.JDateChooser jDateChooser1;
-    private com.toedter.calendar.JDateChooser jDateChooser2;
+    private com.toedter.calendar.JDateChooser jDateChooserFin;
+    private com.toedter.calendar.JDateChooser jDateChooserInicio;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel12;
     private javax.swing.JScrollPane jScrollPane14;
     public javax.swing.JTextField txtIdSueldos;
@@ -223,15 +306,11 @@ public void MostrarTrabajador(JComboBox comboTrabajador) {
     }
 
     public void MostrarCodigoTrabajador(JComboBox trabajador, JTextField IdTrabajador) {
+        String consulta = "SELECT worker.idWorker FROM worker WHERE worker.nombre=?";
 
-        String consuta = "select worker.idWorker from worker where worker.nombre=?";
-
-        try {
-            CallableStatement cs = conect.prepareCall(consuta);
-            cs.setString(1, trabajador.getSelectedItem().toString());
-            cs.execute();
-
-            ResultSet rs = cs.executeQuery();
+        try (PreparedStatement ps = conect.prepareStatement(consulta)) {
+            ps.setString(1, trabajador.getSelectedItem().toString()); // Asegúrate de que estás proporcionando el parámetro
+            ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
                 IdTrabajador.setText(rs.getString("idWorker"));

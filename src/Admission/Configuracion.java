@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -26,6 +27,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
     private String nombre, direccion, ciudad, estado, telefono, email, webpage, mensaje, emailPassword;
     private int zipcode;
     private byte[] logo;
+    private Date fechaInicioActividades;
 
     public int getId() {
         return id;
@@ -123,6 +125,14 @@ public class Configuracion extends javax.swing.JInternalFrame {
         this.logo = logo;
     }
 
+    public Date getFechaInicioActividades() {
+        return fechaInicioActividades;
+    }
+
+    public void setFechaInicioActividades(Date fechaInicioActividades) {
+        this.fechaInicioActividades = fechaInicioActividades;
+    }
+
     public Configuracion BuscarDatos() {
         String sql = "SELECT * FROM configuracion";
         try {
@@ -141,7 +151,8 @@ public class Configuracion extends javax.swing.JInternalFrame {
                 setWebpage(rs.getString("webpage"));
                 setMensaje(rs.getString("mensaje"));
                 setLogo(rs.getBytes("logo")); // Obtener el logo como byte[]
-//                System.out.println("Logo recuperado de la base de datos, tamaño: " + (getLogo() != null ? getLogo().length : 0) + " bytes");
+                setFechaInicioActividades(rs.getDate("fecha_inicio_actividades")); // Recuperar la fecha de inicio de actividades
+                //                System.out.println("Logo recuperado de la base de datos, tamaño: " + (getLogo() != null ? getLogo().length : 0) + " bytes");
             }
         } catch (SQLException e) {
             System.out.println(e.toString());
@@ -164,7 +175,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
     }
 
     public boolean GuardarConfig() {
-        String sql = "INSERT INTO configuracion(nombre, direccion, ciudad, zipcode, estado, telefono, email, webpage, mensaje, logo, email_password) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO configuracion(nombre, direccion, ciudad, zipcode, estado, telefono, email, webpage, mensaje, logo, email_password, fecha_inicio_actividades) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
         try {
             connect = con.getConexion();
             ps = connect.prepareStatement(sql);
@@ -177,8 +188,9 @@ public class Configuracion extends javax.swing.JInternalFrame {
             ps.setString(7, getEmail());
             ps.setString(8, getWebpage());
             ps.setString(9, getMensaje());
-            ps.setBytes(10, getLogo()); // Guardar el logo como byte[]
-            ps.setString(11, getEmailPassword()); // Guardar la contraseña del email
+            ps.setBytes(10, getLogo());
+            ps.setString(11, getEmailPassword());//Guardar la contraseña del email
+            ps.setDate(12, new java.sql.Date(getFechaInicioActividades().getTime())); // Guardar la fecha de inicio de actividades
 
             System.out.println("Guardando datos con logo de tamaño: " + (getLogo() != null ? getLogo().length : 0) + " bytes");
 
@@ -205,8 +217,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
     }
 
     public boolean ModificarDatos() {
-        String sql = "UPDATE configuracion SET nombre=?, direccion=?, ciudad=?, zipcode=?, estado=?, telefono=?, email=?, webpage=?, mensaje=?, logo=?, email_password=? WHERE id=?";
-        // Abre la conexión aquí
+        String sql = "UPDATE configuracion SET nombre=?, direccion=?, ciudad=?, zipcode=?, estado=?, telefono=?, email=?, webpage=?, mensaje=?, logo=?, email_password=?, fecha_inicio_actividades=? WHERE id=?";
         try {
             connect = con.getConexion();
             ps = connect.prepareStatement(sql);
@@ -219,9 +230,16 @@ public class Configuracion extends javax.swing.JInternalFrame {
             ps.setString(7, getEmail());
             ps.setString(8, getWebpage());
             ps.setString(9, getMensaje());
-            ps.setBytes(10, getLogo()); // Guardar el logo como byte[]
-            ps.setString(11, getEmailPassword()); // Guardar la contraseña del email
-            ps.setInt(12, getId());
+            ps.setBytes(10, getLogo());
+            ps.setString(11, getEmailPassword());
+            // Verificar si fechaInicioActividades es null antes de usarlo
+            if (getFechaInicioActividades() != null) {
+                ps.setDate(12, new java.sql.Date(getFechaInicioActividades().getTime())); // Guardar la fecha de inicio de actividades
+            } else {
+                ps.setNull(12, java.sql.Types.DATE); // Manejar el caso donde la fecha es null
+            }
+            
+            ps.setInt(13, getId());
 
             System.out.println("Actualizando datos con logo de tamaño: " + (getLogo() != null ? getLogo().length : 0) + " bytes");
 
@@ -302,6 +320,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
     public Configuracion() {
         initComponents();
         ListarConfig();
+        txtId.setVisible(false);
     }
 
     @SuppressWarnings("unchecked")
@@ -336,6 +355,8 @@ public class Configuracion extends javax.swing.JInternalFrame {
         jLabel10 = new javax.swing.JLabel();
         txtContrasenia = new javax.swing.JPasswordField();
         btnGuia = new javax.swing.JButton();
+        dateFechaInicio = new com.toedter.calendar.JDateChooser();
+        jLabel11 = new javax.swing.JLabel();
 
         setTitle("Configuración");
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -365,8 +386,8 @@ public class Configuracion extends javax.swing.JInternalFrame {
         jPanel1.add(txtEstado, new org.netbeans.lib.awtextra.AbsoluteConstraints(25, 343, 154, -1));
 
         jLabel5.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
-        jLabel5.setText("Estado");
-        jPanel1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(25, 314, -1, -1));
+        jLabel5.setText("Fecha de Inicio Actividades");
+        jPanel1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 310, -1, 20));
 
         jLabel6.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel6.setText("Teléfono");
@@ -417,7 +438,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
             }
         });
         jPanel1.add(btnSalir, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 340, -1, -1));
-        jPanel1.add(txtId, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 340, 80, -1));
+        jPanel1.add(txtId, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 20, -1, -1));
 
         btnCargarLogo.setText("Cargar Imagen");
         btnCargarLogo.addActionListener(new java.awt.event.ActionListener() {
@@ -440,7 +461,12 @@ public class Configuracion extends javax.swing.JInternalFrame {
                 btnGuiaActionPerformed(evt);
             }
         });
-        jPanel1.add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 340, -1, -1));
+        jPanel1.add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(630, 10, -1, -1));
+        jPanel1.add(dateFechaInicio, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 340, 190, -1));
+
+        jLabel11.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
+        jLabel11.setText("Estado");
+        jPanel1.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(25, 314, -1, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 730, 386));
 
@@ -457,7 +483,8 @@ public class Configuracion extends javax.swing.JInternalFrame {
                 && !"".equals(txtCiudad.getText()) && !"".equals(txtZipCode.getText())
                 && !"".equals(txtEstado.getText()) && !"".equals(txtTelefono.getText())
                 && !"".equals(txtEmail.getText()) && !"".equals(txtWebPage.getText())
-                && !"".equals(txtMensaje.getText()) && !"".equals(new String(txtContrasenia.getPassword()))) {
+                && !"".equals(txtMensaje.getText()) && !"".equals(new String(txtContrasenia.getPassword()))
+                && dateFechaInicio.getDate() != null) { // Asegúrate de que la fecha de inicio no esté vacía
 
             // Establecer los valores a la instancia actual de Configuracion
             setNombre(txtNombre.getText());
@@ -470,6 +497,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
             setWebpage(txtWebPage.getText());
             setMensaje(txtMensaje.getText());
             setEmailPassword(new String(txtContrasenia.getPassword()));
+            setFechaInicioActividades(dateFechaInicio.getDate()); // Establece la fecha de inicio de actividades
 
             // Guardar la configuración
             if (GuardarConfig()) {
@@ -532,8 +560,10 @@ public class Configuracion extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnSalir;
+    private com.toedter.calendar.JDateChooser dateFechaInicio;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
