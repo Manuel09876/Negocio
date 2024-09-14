@@ -2,6 +2,7 @@ package Reports;
 
 import Administration.PuestoDeTrabajo;
 import Bases.PeriodoPago;
+import Bases.SalidaForzadaRenderer;
 import Bases.Servidor;
 import com.toedter.calendar.JDateChooser;
 import java.sql.Connection;
@@ -50,6 +51,12 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.swing.Timer;
+import java.time.LocalDateTime;
+import java.util.Properties;
+import java.util.Properties;
+import javax.mail.*;
+import javax.mail.internet.*;
 
 public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
@@ -57,7 +64,7 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     private Conectar conexion;
     private Connection conect;
     public PuestoDeTrabajo puestoDeTrabajo; // Instancia de PuestoDeTrabajo
-//    private static LocalDate fechaInicioCobros;
+    private Timer cierreAutomatico;
     private LocalDate fechaInicioActividades;
 
     public HorasTrabajadas(PuestoDeTrabajo puestoDeTrabajo) {
@@ -79,13 +86,6 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         // Supongamos que recuperas la fecha desde la base de datos
         this.fechaInicioActividades = obtenerFechaInicioActividadesDesdeBD(); // Aquí también asegura que `conect` esté inicializado.
 
-//        // Inicializa dateSemanlQuincenal y dateMensual si no se hace en initComponents()
-//        if (dateSemanlQuincenal == null) {
-//            dateSemanlQuincenal = new JDateChooser(); // Asegura la inicialización
-//        }
-//        if (dateMensual == null) {
-//            dateMensual = new JDateChooser(); // Asegura la inicialización
-//        }
         AutoCompleteDecorator.decorate(cbxTrabajador);
         MostrarTrabajador(cbxTrabajador);
         Mostrar(Tabla, 0); // Mostrar inicialmente con ID 0 o ajusta según sea necesario
@@ -99,47 +99,109 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         });
     }
 
-//    // Constructor que inicializa la conexión a la base de datos
-//    public HorasTrabajadas(Connection connection) {
-//        this.conect = connection;
-//    }
-    private LocalDate obtenerFechaInicioActividadesDesdeBD() {
-        if (conect == null) {
-            JOptionPane.showMessageDialog(null, "Conexión a la base de datos no establecida.");
-            return LocalDate.now(); // Retornar la fecha actual como fallback
-        }
-        String sql = "SELECT fecha_inicio_actividades FROM configuracion"; // Ajusta el nombre de la tabla y la columna según tu base de datos
+    // Método para configurar el cierre automático
+    public void configurarCierreAutomatico() {
+        long delay = calcularMilisegundosHastaMedianoche();
+        cierreAutomatico = new Timer((int) delay, evt -> {
+            cerrarSesionesPendientes();
+            enviarNotificacion("Cierre automático realizado", "El sistema ha cerrado automáticamente las sesiones.");
+            configurarCierreAutomatico();  // Reprogramar para el próximo día.
+        });
+        cierreAutomatico.setRepeats(false);
+        cierreAutomatico.start();
+    }
 
+    // Método para enviar correos electrónicos
+//    public void enviarCorreoElectronico(String destinatario, String asunto, String cuerpo) {
+//        // Configurar propiedades para la conexión de correo
+//        Properties props = new Properties();
+//        props.put("mail.smtp.host", "smtp.tuServidorCorreo.com");  // Cambia al servidor SMTP correcto
+//        props.put("mail.smtp.port", "587");  // Cambia el puerto según el servidor
+//        props.put("mail.smtp.auth", "true");
+//        props.put("mail.smtp.starttls.enable", "true");
+//
+//        // Aquí usas las variables de entorno para manejar credenciales de manera segura
+//        final String username = System.getenv("EMAIL_USERNAME");  // Configura la variable de entorno EMAIL_USERNAME
+//        final String password = System.getenv("EMAIL_PASSWORD");  // Configura la variable de entorno EMAIL_PASSWORD
+//
+//        // Autenticación
+//        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+//            @Override
+//            protected PasswordAuthentication getPasswordAuthentication() {
+//                return new PasswordAuthentication(username, password);  // Usa las variables de entorno
+//            }
+//        });
+//
+//        try {
+//            // Crear el mensaje de correo
+//            Message message = new MimeMessage(session);
+//            message.setFrom(new InternetAddress(username));  // Usa la variable de entorno para el correo
+//            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
+//            message.setSubject(asunto);
+//            message.setText(cuerpo);
+//
+//            // Enviar el correo
+//            Transport.send(message);
+//            System.out.println("Correo enviado exitosamente.");
+//
+//        } catch (MessagingException e) {
+//            e.printStackTrace();
+//        }
+//    }
+    // Método para calcular milisegundos hasta la medianoche
+    private long calcularMilisegundosHastaMedianoche() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime midnight = now.toLocalDate().atStartOfDay().plusDays(1);
+        return Duration.between(now, midnight).toMillis();
+    }
+
+    // Cierre de sesiones pendientes
+    public void cerrarSesionesPendientes() {
+        String sql = "SELECT trabajador_id FROM horas_ingreso WHERE NOT EXISTS "
+                + "(SELECT 1 FROM horas_salida WHERE horas_ingreso.id_ingreso = horas_salida.id_ingreso)";
+        try (Statement st = conect.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                int trabajadorId = rs.getInt("trabajador_id");
+                registrarFinSesionForzada(trabajadorId);
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public LocalDate obtenerFechaInicioActividadesDesdeBD() {
+        String sql = "SELECT fecha_inicio_actividades FROM configuracion";  // Cambiar el nombre de la columna y tabla según corresponda
         try (PreparedStatement pst = conect.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
             if (rs.next()) {
-                return rs.getDate("fecha_inicio_actividades").toLocalDate(); // Convierte java.sql.Date a LocalDate
-            } else {
-                throw new SQLException("No se encontró la fecha de inicio de actividades en la tabla de configuración.");
+                return rs.getDate("fecha_inicio_actividades").toLocalDate();  // Convertir java.sql.Date a LocalDate
             }
-
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al obtener la fecha de inicio de actividades: " + e.getMessage());
-            return LocalDate.now(); // Retorna la fecha actual como fallback en caso de error
+            e.printStackTrace();
+            System.out.println("Error al obtener fecha de inicio de actividades: " + e.getMessage());
         }
+        return LocalDate.now();  // Si hay un error, usa la fecha actual
     }
 
-    public LocalDate calcularInicioPeriodo(int numeroPeriodo, String tipoPeriodo) {
+    public LocalDate[] calcularInicioYFinPeriodo(String tipoPeriodo, LocalDate fechaInicioActividades, int numeroPeriodo) {
         switch (tipoPeriodo) {
             case "Semanal":
-                return fechaInicioActividades.plusWeeks(numeroPeriodo - 1);
+                return new LocalDate[]{
+                    fechaInicioActividades.plusWeeks(numeroPeriodo - 1),
+                    fechaInicioActividades.plusWeeks(numeroPeriodo - 1).plusDays(6)
+                };
             case "Quincenal":
-                return fechaInicioActividades.plusDays((numeroPeriodo - 1) * 14);
+                return new LocalDate[]{
+                    fechaInicioActividades.plusDays((numeroPeriodo - 1) * 14),
+                    fechaInicioActividades.plusDays((numeroPeriodo - 1) * 14).plusDays(13)
+                };
             case "Mensual":
-                return fechaInicioActividades.plusMonths(numeroPeriodo - 1).withDayOfMonth(1);
+                return new LocalDate[]{
+                    fechaInicioActividades.plusMonths(numeroPeriodo - 1).withDayOfMonth(1),
+                    fechaInicioActividades.plusMonths(numeroPeriodo - 1).with(TemporalAdjusters.lastDayOfMonth())
+                };
             default:
-                throw new IllegalArgumentException("Tipo de periodo de pago desconocido: " + tipoPeriodo);
+                throw new IllegalArgumentException("Tipo de periodo no válido: " + tipoPeriodo);
         }
-    }
-
-    public double calcularHorasTrabajadasPorPeriodo(String periodoPago, int trabajadorId, int numeroPeriodo) {
-        LocalDate fechaInicioPeriodo = calcularInicioPeriodo(numeroPeriodo, periodoPago);
-        LocalDate fechaFinPeriodo = obtenerFechaFinPeriodo(fechaInicioPeriodo, periodoPago);
-        return calcularHorasTrabajadas(trabajadorId, fechaInicioPeriodo, fechaFinPeriodo);
     }
 
     private LocalDate obtenerFechaFinPeriodo(LocalDate fechaInicio, String tipoPeriodo) {
@@ -155,70 +217,54 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         }
     }
 
-    private double calcularHorasTrabajadas(int trabajadorId, LocalDate fechaInicio, LocalDate fechaFin) {
-        double totalHorasTrabajadas = 0.0;
-        String sql = "SELECT SUM(TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida)) / 60.0 AS horasTrabajadas "
-                + "FROM horas_ingreso hi "
-                + "JOIN horas_salida hs ON hi.trabajador_id = hs.trabajador_id "
-                + "WHERE hi.trabajador_id = ? AND hi.fInicio BETWEEN ? AND ?";
-
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            pst.setDate(2, java.sql.Date.valueOf(fechaInicio));
-            pst.setDate(3, java.sql.Date.valueOf(fechaFin));
-            ResultSet rs = pst.executeQuery();
-
-            if (rs.next()) {
-                totalHorasTrabajadas = rs.getDouble("horasTrabajadas");
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-        // Formatear a dos decimales
-        DecimalFormat df = new DecimalFormat("#.00");
-        return Double.valueOf(df.format(totalHorasTrabajadas));
-    }
-
-    //Muestra los Datos en la Tabla
-    public void Mostrar(JTable Tabla, int trabajadorId) {
+    // Mostrar horas trabajadas
+    public void Mostrar(JTable tabla, int trabajadorId) {
         DefaultTableModel modelo = new DefaultTableModel();
         modelo.addColumn("ID Ingreso");
         modelo.addColumn("ID Salida");
         modelo.addColumn("Fecha Ingreso");
+        modelo.addColumn("Hora Ingreso");
         modelo.addColumn("Fecha Salida");
-        modelo.addColumn("Hora de Ingreso");
-        modelo.addColumn("Hora de Salida");
+        modelo.addColumn("Hora Salida");
         modelo.addColumn("Horas Trabajadas");
+        modelo.addColumn("Forzado");
 
-        Tabla.setModel(modelo);
+        tabla.setModel(modelo);
 
-        String sql = "SELECT hi.id_ingreso AS idIngreso, hs.id_salida AS idSalida, hi.fInicio, hs.fSalida, "
-                + "TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida) / 60.0 AS horasTrabajadas "
-                + "FROM horas_ingreso hi "
-                + "JOIN horas_salida hs ON hi.trabajador_id = hs.trabajador_id AND hs.fSalida > hi.fInicio "
-                + "AND hs.fSalida = (SELECT MIN(hs2.fSalida) FROM horas_salida hs2 WHERE hs2.trabajador_id = hi.trabajador_id AND hs2.fSalida > hi.fInicio) "
-                + "WHERE hi.trabajador_id = ? ORDER BY hi.fInicio ASC;";
+        String sql = "SELECT hi.id_ingreso, hs.id_salida, hi.fInicio, hs.fSalida, "
+                + "TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida) / 60.0 AS horasTrabajadas, hs.forzado "
+                + "FROM horas_ingreso hi JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso "
+                + "WHERE hi.trabajador_id = ?";
 
         try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);  // Ahora este parámetro es válido
+            pst.setInt(1, trabajadorId);
             ResultSet rs = pst.executeQuery();
-
             while (rs.next()) {
-                String idIngreso = rs.getString("idIngreso");
-                String idSalida = rs.getString("idSalida");
-                String fechaIngreso = rs.getTimestamp("fInicio").toLocalDateTime().toLocalDate().toString();
-                String fechaSalida = (rs.getTimestamp("fSalida") != null) ? rs.getTimestamp("fSalida").toLocalDateTime().toLocalDate().toString() : "Pendiente";
-                String horaIngreso = rs.getTimestamp("fInicio").toLocalDateTime().toLocalTime().toString();
-                String horaSalida = (rs.getTimestamp("fSalida") != null) ? rs.getTimestamp("fSalida").toLocalDateTime().toLocalTime().toString() : "Pendiente";
-                String horasTrabajadas = (rs.getString("horasTrabajadas") != null) ? rs.getString("horasTrabajadas") : "0";
+                Timestamp fInicio = rs.getTimestamp("fInicio");
+                Timestamp fSalida = rs.getTimestamp("fSalida");
 
-                modelo.addRow(new Object[]{idIngreso, idSalida, fechaIngreso, fechaSalida, horaIngreso, horaSalida, horasTrabajadas});
+                // Extraer fecha y hora por separado
+                String fechaIngreso = fInicio.toLocalDateTime().toLocalDate().toString();
+                String horaIngreso = fInicio.toLocalDateTime().toLocalTime().toString();
+                String fechaSalida = fSalida != null ? fSalida.toLocalDateTime().toLocalDate().toString() : "Pendiente";
+                String horaSalida = fSalida != null ? fSalida.toLocalDateTime().toLocalTime().toString() : "Pendiente";
+
+                modelo.addRow(new Object[]{
+                    rs.getInt("id_ingreso"),
+                    rs.getInt("id_salida"),
+                    fechaIngreso,
+                    horaIngreso,
+                    fechaSalida,
+                    horaSalida,
+                    rs.getDouble("horasTrabajadas"),
+                    rs.getBoolean("forzado")
+                });
             }
-
-            Tabla.setModel(modelo);
-
+            tabla.setModel(modelo);
+            // Aplicamos el renderer personalizado en la columna "Forzado"
+            tabla.getColumnModel().getColumn(modelo.getColumnCount() - 1).setCellRenderer(new SalidaForzadaRenderer());
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error al mostrar los registros, error: " + e.toString());
+            JOptionPane.showMessageDialog(null, "Error al mostrar los registros: " + e.getMessage());
         }
     }
 
@@ -227,32 +273,36 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         int filaSeleccionada = tabla.getSelectedRow();
 
         if (filaSeleccionada != -1) { // Verificar si se ha seleccionado alguna fila
-            // Obtener los valores de las columnas de la fila seleccionada
-            Object valueIdIngreso = tabla.getValueAt(filaSeleccionada, 0);
-            Object valueIdSalida = tabla.getValueAt(filaSeleccionada, 1);
-            Object valueFechaIngreso = tabla.getValueAt(filaSeleccionada, 2);
-            Object valueFechaSalida = tabla.getValueAt(filaSeleccionada, 3);
-            Object valueHoraIngreso = tabla.getValueAt(filaSeleccionada, 4);
-            Object valueHoraSalida = tabla.getValueAt(filaSeleccionada, 5);
-            Object valueHorasTrabajadas = tabla.getValueAt(filaSeleccionada, 6);
+            // Asegúrate de que la tabla tiene al menos las 8 columnas que se intentan acceder
+            if (tabla.getColumnCount() >= 8) {
+                // Obtener los valores de las columnas de la fila seleccionada
+                Object valueIdIngreso = tabla.getValueAt(filaSeleccionada, 0);
+                Object valueIdSalida = tabla.getValueAt(filaSeleccionada, 1);
+                Object valueFechaIngreso = tabla.getValueAt(filaSeleccionada, 2);
+                Object valueHoraIngreso = tabla.getValueAt(filaSeleccionada, 3);
+                Object valueFechaSalida = tabla.getValueAt(filaSeleccionada, 4);
+                Object valueHoraSalida = tabla.getValueAt(filaSeleccionada, 5);
+                Object valueHorasTrabajadas = tabla.getValueAt(filaSeleccionada, 6);
 
-            String idIngreso = (valueIdIngreso != null) ? valueIdIngreso.toString() : "";
-            String idSalida = (valueIdSalida != null) ? valueIdSalida.toString() : "";
-            String fechaIngreso = (valueFechaIngreso != null) ? valueFechaIngreso.toString() : "";
-            String fechaSalida = (valueFechaSalida != null) ? valueFechaSalida.toString() : "";
-            String horaIngreso = (valueHoraIngreso != null) ? valueHoraIngreso.toString() : "";
-            String horaSalida = (valueHoraSalida != null) ? valueHoraSalida.toString() : "";
-            String horasTrabajadas = (valueHorasTrabajadas != null) ? valueHorasTrabajadas.toString() : "";
+                String idIngreso = (valueIdIngreso != null) ? valueIdIngreso.toString() : "";
+                String idSalida = (valueIdSalida != null) ? valueIdSalida.toString() : "";
+                String fechaIngreso = (valueFechaIngreso != null) ? valueFechaIngreso.toString() : "";
+                String horaIngreso = (valueHoraIngreso != null) ? valueHoraIngreso.toString() : "";
+                String fechaSalida = (valueFechaSalida != null) ? valueFechaSalida.toString() : "";
+                String horaSalida = (valueHoraSalida != null) ? valueHoraSalida.toString() : "";
+                String horasTrabajadas = (valueHorasTrabajadas != null) ? valueHorasTrabajadas.toString() : "";
 
-            // Aquí puedes mostrar estos valores en campos de texto (JTextFields) o usarlos para otros propósitos
-            // Ejemplo:
-            txtIdIngreso.setText(idIngreso);
-            txtIdSalida.setText(idSalida);
-            txtFechaIngreso.setText(fechaIngreso);
-            txtFechaSalida.setText(fechaSalida);
-            txtHoraIngreso.setText(horaIngreso);
-            txtHoraSalida.setText(horaSalida);
-            txtTiempoTrabajado.setText(horasTrabajadas);
+                // Mostrar estos valores en los JTextFields
+                txtIdIngreso.setText(idIngreso);
+                txtIdSalida.setText(idSalida);
+                txtFechaIngreso.setText(fechaIngreso);
+                txtHoraIngreso.setText(horaIngreso);
+                txtFechaSalida.setText(fechaSalida);
+                txtHoraSalida.setText(horaSalida);
+                txtTiempoTrabajado.setText(horasTrabajadas);
+            } else {
+                JOptionPane.showMessageDialog(null, "La tabla no contiene suficientes columnas.");
+            }
         } else {
             JOptionPane.showMessageDialog(null, "Por favor, seleccione una fila.");
         }
@@ -280,7 +330,7 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         }
     }
 
-    public void modificar(int idIngreso, int idSalida, LocalDateTime nuevaHoraIngreso, LocalDateTime nuevaHoraSalida) throws SQLException {
+    public void modificar(int idIngreso, int idSalida, LocalDateTime nuevaHoraIngreso, LocalDateTime nuevaHoraSalida, int trabajadorId) throws SQLException {
         boolean autoCommitOriginal = conect.getAutoCommit();
 
         try {
@@ -303,6 +353,20 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                     pst.setInt(2, idSalida);
                     int affectedRowsSalida = pst.executeUpdate();
                     System.out.println("Hora de salida actualizada con éxito en horas_salida. Filas afectadas: " + affectedRowsSalida);
+
+                    // Verificar si la salida era forzada y corregirla
+                    String sqlSelectForzado = "SELECT forzado FROM horas_salida WHERE id_salida = ?";
+                    try (PreparedStatement pstForzado = conect.prepareStatement(sqlSelectForzado)) {
+                        pstForzado.setInt(1, idSalida);
+                        ResultSet rs = pstForzado.executeQuery();
+                        if (rs.next()) {
+                            boolean esForzado = rs.getBoolean("forzado");
+                            if (esForzado) {
+                                // Si es forzado, corregir la salida
+                                corregirSalidaForzada(idSalida, nuevaHoraSalida, trabajadorId);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -310,7 +374,6 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             System.out.println("Transacción realizada con éxito.");
         } catch (SQLException e) {
             conect.rollback();  // Revertir la transacción si ocurre un error
-            LOGGER.log(Level.SEVERE, "Error al realizar la transacción: ", e);
             e.printStackTrace();
             System.out.println("Error al modificar las horas: " + e.getMessage());
         } finally {
@@ -318,21 +381,17 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         }
     }
 
-    public void guardarHorasTrabajadas(int trabajadorId, double horasTrabajadas, LocalDate fecha, String periodoPago) {
-        // Asegúrate de que la fecha sea válida
-        if (fecha == null || fecha.equals(LocalDate.EPOCH)) {
-            fecha = LocalDate.now(); // Usa la fecha actual si la fecha es nula o no válida
-        }
-
+    // Guardar horas trabajadas
+    public void guardarHorasTrabajadas(int trabajadorId, double horasTrabajadas, LocalDate fecha, String tipoPeriodo) {
+        String periodoPago = determinarPeriodoPago(fecha, fechaInicioActividades, tipoPeriodo);
         String sql = "INSERT INTO horas_trabajadas (trabajador_id, horas, fecha, periodo_pago) VALUES (?, ?, ?, ?) "
                 + "ON DUPLICATE KEY UPDATE horas = VALUES(horas), periodo_pago = VALUES(periodo_pago)";
         try (PreparedStatement pst = conect.prepareStatement(sql)) {
             pst.setInt(1, trabajadorId);
             pst.setDouble(2, horasTrabajadas);
             pst.setDate(3, java.sql.Date.valueOf(fecha));
-            pst.setString(4, periodoPago); // Asegúrate de añadir el período de pago aquí
+            pst.setString(4, periodoPago);
             pst.executeUpdate();
-            System.out.println("Horas trabajadas registradas para trabajador ID: " + trabajadorId + " en la fecha: " + fecha);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al guardar horas trabajadas: ", ex);
         }
@@ -373,14 +432,6 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                     int rowsAffected = pstSalida.executeUpdate();
                     System.out.println("Filas afectadas: " + rowsAffected);
 
-//                    if (rowsAffected > 0) {
-//                        System.out.println("Fin de sesión registrado para trabajador ID: " + trabajadorId);
-//                        double horasTrabajadas = calcularHorasTrabajadasPorDia(trabajadorId);
-//                        guardarHorasTrabajadas(trabajadorId, horasTrabajadas, LocalDate.EPOCH);
-//                        actualizarCalculosPago(trabajadorId); // Este método puede ser problemático si hay errores o bloqueos
-//                    } else {
-//                        System.out.println("No se pudo registrar el fin de sesión para trabajador ID: " + trabajadorId);
-//                    }
                 } catch (SQLException ex) {
                     LOGGER.log(Level.SEVERE, "Error al registrar fin de sesión: ", ex);
                 }
@@ -392,28 +443,70 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             LOGGER.log(Level.SEVERE, "Error al obtener id_ingreso: ", ex);
         }
     }
-    
-    public void calcularPagos(int trabajadorId) {
-        int idPDT = puestoDeTrabajo.obtenerIdPuestoActivo(trabajadorId);
-        String periodoPago = puestoDeTrabajo.obtenerPeriodoPago(idPDT);
-        boolean tieneOvertime = puestoDeTrabajo.verificarOvertime(idPDT);
-        //DECLARAR Y OBTENER EL VALOR DE pagoPorHora AQUÍ
-        double pagoPorHora = puestoDeTrabajo.obtenerPagoPorHora(idPDT);  // Asegúrate de que este método exista y funcione correctamente
-        double sueldo = puestoDeTrabajo.obtenerSueldo(idPDT);
-        double totalHorasTrabajadas = calcularHorasTrabajadasPorPeriodo(periodoPago, trabajadorId, PROPERTIES);
-        double totalHorasExtras = 0.0;
 
-        if (tieneOvertime && totalHorasTrabajadas > 40) {
-            totalHorasExtras = totalHorasTrabajadas - 40;
-            totalHorasTrabajadas = 40;
+    // Registrar fin de sesión forzada
+    public void registrarFinSesionForzada(int trabajadorId) throws SQLException {
+        String sql = "SELECT id_ingreso FROM horas_ingreso WHERE trabajador_id = ? ORDER BY fInicio DESC LIMIT 1";
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                int idIngreso = rs.getInt("id_ingreso");
+
+                String sqlCheck = "SELECT id_salida FROM horas_salida WHERE id_ingreso = ?";
+                try (PreparedStatement pstCheck = conect.prepareStatement(sqlCheck)) {
+                    pstCheck.setInt(1, idIngreso);
+                    ResultSet rsCheck = pstCheck.executeQuery();
+                    if (!rsCheck.next()) {
+                        String sqlInsert = "INSERT INTO horas_salida (trabajador_id, fSalida, id_ingreso, forzado) VALUES (?, ?, ?, 1)";
+                        try (PreparedStatement pstInsert = conect.prepareStatement(sqlInsert)) {
+                            pstInsert.setInt(1, trabajadorId);
+                            pstInsert.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+                            pstInsert.setInt(3, idIngreso);
+                            pstInsert.executeUpdate();
+                        }
+                    }
+                }
+            }
         }
-
-        double salarioBruto = pagoPorHora > 0 ? (totalHorasTrabajadas * pagoPorHora) + (totalHorasExtras * pagoPorHora * 1.5) : sueldo;
-        double salarioNeto = calcularSalarioNeto(salarioBruto, trabajadorId);
-        guardarPagos(trabajadorId, salarioBruto, salarioNeto);
     }
-    
-    private void guardarPagos(int trabajadorId, double salarioBruto, double salarioNeto) {
+
+    public void corregirSalidaForzada(int idSalida, LocalDateTime nuevaHoraSalida, int trabajadorId) throws SQLException {
+        String sql = "UPDATE horas_salida SET fSalida = ?, forzado = 0 WHERE id_salida = ? AND forzado = 1";
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setTimestamp(1, Timestamp.valueOf(nuevaHoraSalida));  // Nueva hora de salida
+            pst.setInt(2, idSalida);
+            int filasAfectadas = pst.executeUpdate();
+            if (filasAfectadas > 0) {
+                System.out.println("Salida forzada corregida con éxito.");
+                // Después de corregir, refrescar la tabla
+                Mostrar(Tabla, trabajadorId);  // Ahora pasamos trabajadorId correctamente
+            } else {
+                System.out.println("No se encontró una salida forzada con ese ID.");
+            }
+        }
+    }
+
+    public void calcularSueldos(int trabajadorId, LocalDate fechaInicio, LocalDate fechaFin) throws SQLException {
+        int idPDT = 0;
+        String tipoPeriodo = obtenerTipoPeriodo(idPDT);
+        boolean tieneOvertime = verificarOvertime(trabajadorId);
+        double pagoPorHora = obtenerPagoPorHora(trabajadorId);
+
+        double totalHorasTrabajadas = calcularHorasTrabajadas(trabajadorId, fechaInicio, fechaFin);
+        double totalHorasExtras = calcularHorasExtras(trabajadorId, fechaInicio, fechaFin, tipoPeriodo, tieneOvertime);
+
+        // Calcular salario bruto
+        double salarioBruto = (totalHorasTrabajadas * pagoPorHora) + (totalHorasExtras * pagoPorHora * 1.5);
+
+        // Aplicar deducciones
+        double salarioNeto = calcularSalarioNeto(salarioBruto, trabajadorId);
+
+        // Guardar en la tabla de pagos
+        guardarPago(trabajadorId, salarioBruto, salarioNeto);
+    }
+
+    private void guardarPago(int trabajadorId, double salarioBruto, double salarioNeto) {
         String sql = "INSERT INTO pagos (trabajador_id, salario_bruto, salario_neto, fecha_pago) VALUES (?, ?, ?, ?)";
         try (PreparedStatement pst = conect.prepareStatement(sql)) {
             pst.setInt(1, trabajadorId);
@@ -425,7 +518,262 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             LOGGER.log(Level.SEVERE, "Error al guardar pagos: ", ex);
         }
     }
-    
+
+    public String obtenerTipoPeriodo(int idPuestoDeTrabajo) throws SQLException {
+        String tipoPeriodo = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            Conectar con = new Conectar();
+            conn = con.getConexion();
+
+            String consulta = "SELECT p.descripcion FROM puestodetrabajo pt\n"
+                    + "INNER JOIN periodo p ON pt.id_periodo=p.id\n"
+                    + "WHERE idPDT = ?";
+            ps = conn.prepareStatement(consulta);
+            ps.setInt(1, idPuestoDeTrabajo);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                tipoPeriodo = rs.getString("periodo");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error al obtener tipo de periodo: " + e.getMessage());
+            throw e;
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        }
+
+        return tipoPeriodo;
+    }
+
+    public double calcularHorasTrabajadas(int trabajadorId, LocalDate fechaInicio, LocalDate fechaFin) throws SQLException {
+        double totalHoras = 0.0;
+        String sql = "SELECT SUM(TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida)) / 60.0 AS horasTrabajadas FROM horas_ingreso hi JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso WHERE hi.trabajador_id = ? AND hi.fInicio BETWEEN ? AND ?";
+
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            pst.setDate(2, java.sql.Date.valueOf(fechaInicio));
+            pst.setDate(3, java.sql.Date.valueOf(fechaFin));
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                totalHoras = rs.getDouble("horasTrabajadas");
+            }
+        }
+        return totalHoras;
+    }
+
+    public double calcularDeducciones(double salarioBruto, int trabajadorId) {
+        double impuestoFederal = salarioBruto * obtenerTasaImpuestoFederal(trabajadorId);
+        double seguroSocial = salarioBruto * 0.062;
+        double medicare = salarioBruto * 0.0145;
+        double impuestoEstatal = salarioBruto * obtenerTasaImpuestoEstatal(trabajadorId);
+        double otrasDeducciones = obtenerOtrasDeducciones(trabajadorId);
+
+        return impuestoFederal + seguroSocial + medicare + impuestoEstatal + otrasDeducciones;
+    }
+
+    public void acumularVacaciones(int trabajadorId, int diasTrabajados) throws SQLException {
+        String sql = "UPDATE vacaciones SET dias_acumulados = dias_acumulados + ? WHERE trabajador_id = ?";
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            int diasAcumulados = diasTrabajados / 20;  // Ejemplo: Cada 20 días trabajados se acumula 1 día de vacaciones.
+            pst.setInt(1, diasAcumulados);
+            pst.setInt(2, trabajadorId);
+            pst.executeUpdate();
+        }
+    }
+
+    public void registrarAuditoria(int trabajadorId, String accion, LocalDateTime fechaHora) {
+        String sql = "INSERT INTO auditoria (trabajador_id, accion, fecha_hora) VALUES (?, ?, ?)";
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            pst.setString(2, accion);
+            pst.setTimestamp(3, Timestamp.valueOf(fechaHora));
+            pst.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private double calcularHorasExtrasMensuales(int trabajadorId, LocalDate fechaInicio, LocalDate fechaFin) {
+        double totalHorasExtras = 0.0;
+
+        String sql = "SELECT SUM(CASE WHEN TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida) / 60.0 > 8 THEN TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida) / 60.0 - 8 ELSE 0 END) AS horasExtras "
+                + "FROM horas_ingreso hi "
+                + "JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso "
+                + "WHERE hi.trabajador_id = ? AND hi.fInicio BETWEEN ? AND ?";
+
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            pst.setDate(2, java.sql.Date.valueOf(fechaInicio));
+            pst.setDate(3, java.sql.Date.valueOf(fechaFin));
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                totalHorasExtras = rs.getDouble("horasExtras");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return totalHorasExtras;
+    }
+
+    public boolean verificarOvertime(int trabajadorId) {
+        String sql = "SELECT ot.descripcion FROM puestodetrabajo pt \n"
+                + "INNER JOIN overtime ot ON pt.id_overtime = ot.id \n"
+                + "WHERE pt.idTrabajador = ?";
+
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                String descripcionOvertime = rs.getString("descripcion");  // Obtén la descripción de overtime
+                // Retorna true si la descripción de overtime corresponde a un tipo válido de overtime
+                return descripcionOvertime != null && !descripcionOvertime.isEmpty();
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al verificar overtime: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public double obtenerPagoPorHora(int trabajadorId) {
+        String sql = "SELECT pagoPorHora FROM puestodetrabajo WHERE idTrabajador = ?";
+
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                return rs.getDouble("pagoPorHora");  // Retorna el pago por hora.
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al obtener el pago por hora: " + e.getMessage());
+        }
+        return 0.0;  // Retorna 0 si no se encuentra el valor.
+    }
+
+    public double calcularPagoVacaciones(int trabajadorId, int diasVacaciones) {
+        double pagoVacaciones = 0.0;
+        double pagoPorHora = obtenerPagoPorHora(trabajadorId);
+        String tipoPago = obtenerTipoPago(trabajadorId);
+
+        if (tipoPago.equals("Mensual")) {
+            pagoVacaciones = (obtenerSueldoMensual(trabajadorId) / 30) * diasVacaciones;
+        } else {
+            pagoVacaciones = pagoPorHora * diasVacaciones * 8; // Vacaciones a valor de hora normal
+        }
+
+        return pagoVacaciones;
+    }
+
+    private double obtenerSueldoMensual(int trabajadorId) {
+        String sql = "SELECT sueldo FROM puestodetrabajo WHERE idTrabajador = ?";
+
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                return rs.getDouble("sueldo");  // Retorna el pago por hora.
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al obtener el sueldo: " + e.getMessage());
+        }
+        return 0.0;  // Retorna 0 si no se encuentra el valor.
+    }
+
+    private String obtenerTipoPago(int trabajadorId) {
+        String sql = "SELECT p.descripcion FROM puestodetrabajo pt\n"
+                + "INNER JOIN periodo p ON pt.id_periodo= p.id WHERE pt.idTrabajador = ?";
+        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                return rs.getString("periodo");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "Semanal"; // Por defecto semanal
+    }
+
+    private double calcularHorasExtras(int trabajadorId, LocalDate fechaInicio, LocalDate fechaFin, String tipoPeriodo, boolean tieneOvertime) {
+        // Verificamos que tipoPeriodo no sea null antes de llamar a equals
+        if (tipoPeriodo != null && tipoPeriodo.equals("Semanal") && tieneOvertime) {
+            return calcularHorasExtrasMensuales(trabajadorId, fechaInicio, fechaFin); // Reutilizamos la lógica
+        }
+
+        // Aquí puedes añadir más lógica para los casos quincenal o mensual
+        if (tipoPeriodo != null && tipoPeriodo.equals("Quincenal") && tieneOvertime) {
+            return calcularHorasExtrasQuincenales(trabajadorId, fechaInicio, fechaFin);
+        }
+
+        if (tipoPeriodo != null && tipoPeriodo.equals("Mensual") && tieneOvertime) {
+            return calcularHorasExtrasMensuales(trabajadorId, fechaInicio, fechaFin);
+        }
+
+        // Si no hay overtime o no hay un tipo de periodo válido, devolvemos 0
+        return 0.0;
+    }
+
+    private double calcularHorasExtrasQuincenales(int trabajadorId, LocalDate fechaInicio, LocalDate fechaFin) {
+        // Límite de horas regulares en un periodo quincenal (14 días)
+        final double HORAS_REGULARES_QUINCENAL = 80.0;
+
+        // Obtener las horas trabajadas en el periodo quincenal para el trabajador
+        double horasTrabajadas = obtenerHorasTrabajadas(trabajadorId, fechaInicio, fechaFin);
+
+        // Si las horas trabajadas son mayores a las horas regulares, calculamos las extras
+        if (horasTrabajadas > HORAS_REGULARES_QUINCENAL) {
+            // Las horas extras son las que exceden las horas regulares
+            return horasTrabajadas - HORAS_REGULARES_QUINCENAL;
+        } else {
+            // Si no ha excedido el límite, no hay horas extras
+            return 0.0;
+        }
+    }
+
+    private double obtenerHorasTrabajadas(int trabajadorId, LocalDate fechaInicio, LocalDate fechaFin) {
+        // Aquí debes implementar la lógica para obtener las horas trabajadas del trabajador
+        // Por ejemplo, a partir de una consulta a la base de datos o sumando los registros de horas.
+
+        double horasTrabajadas = 0.0;
+
+        // Consulta a la base de datos o cálculo de horas trabajadas en el periodo (ejemplo)
+        String sql = "SELECT SUM(horas) AS total_horas FROM horas_trabajadas WHERE trabajador_id = ? AND fecha BETWEEN ? AND ?";
+
+        try (PreparedStatement ps = conect.prepareStatement(sql)) {
+            ps.setInt(1, trabajadorId);
+            ps.setDate(2, java.sql.Date.valueOf(fechaInicio));
+            ps.setDate(3, java.sql.Date.valueOf(fechaFin));
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                horasTrabajadas = rs.getDouble("total_horas");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return horasTrabajadas;
+    }
+
     private double calcularSalarioNeto(double salarioBruto, int trabajadorId) {
         // Aquí puedes añadir deducciones como impuestos, seguridad social, etc.
         double impuestoFederal = salarioBruto * obtenerTasaImpuestoFederal(trabajadorId);
@@ -437,7 +785,7 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
         return salarioBruto - impuestoFederal - seguridadSocial - medicare - impuestoEstatal - impuestoLocal - otrasDeducciones;
     }
-    
+
     private double obtenerTasaImpuestoFederal(int trabajadorId) {
         // Implementar lógica para obtener la tasa de impuesto federal basada en el formulario W-4 del trabajador
         return 0.1; // Ejemplo, reemplazar con lógica real
@@ -457,8 +805,6 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         // Implementar lógica para obtener otras deducciones
         return 50.0; // Ejemplo, reemplazar con lógica real
     }
-    
-    
 
     private void consolidarHorasTrabajadas(int trabajadorId, LocalDate fecha) {
         double totalHoras = 0.0;
@@ -479,18 +825,54 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             ex.printStackTrace();
         }
 
-        guardarHorasTrabajadas(trabajadorId, totalHoras, fecha, determinarPeriodoPago(fecha));
+        guardarHorasTrabajadas(trabajadorId, totalHoras, fecha);
     }
 
-    public String determinarPeriodoPago(LocalDate fechaTrabajo) {
-        if (esSemanal(fechaTrabajo)) {
-            return "Semanal";
-        } else if (esQuincenal(fechaTrabajo)) {
-            return "Quincenal";
-        } else if (esMensual(fechaTrabajo)) {
-            return "Mensual";
-        } else {
-            return "Otro"; // Ajusta a un valor corto si el valor desconocido es demasiado largo
+    public String determinarPeriodoPago(LocalDate fechaTrabajo, LocalDate fechaInicioActividades, String tipoPeriodo) {
+        LocalDate primerLunesDespues = fechaInicioActividades.with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));  // Primer lunes después de la fecha de inicio
+
+        long diferenciaDias = ChronoUnit.DAYS.between(primerLunesDespues, fechaTrabajo);
+
+        switch (tipoPeriodo) {
+            case "Semanal":
+                long semanas = diferenciaDias / 7;  // Calcula el número de semanas completas desde el primer lunes
+                return "Semana " + (semanas + 1);   // La primera semana es desde el lunes más cercano
+
+            case "Quincenal":
+                long quincenas = diferenciaDias / 14;  // Calcula el número de quincenas completas desde el primer lunes
+                return "Quincena " + (quincenas + 1);
+
+            case "Mensual":
+                long meses = ChronoUnit.MONTHS.between(primerLunesDespues.withDayOfMonth(1), fechaTrabajo.withDayOfMonth(1));  // Calcula los meses completos
+                return "Mes " + (meses + 1);
+
+            default:
+                return "Desconocido";  // Si el tipo de periodo no es válido, devuelve "Desconocido"
+        }
+    }
+
+    public void recalcularPeriodos(int trabajadorId, String tipoPeriodo) throws SQLException {
+        LocalDate fechaInicioActividades = obtenerFechaInicioActividadesDesdeBD();  // Obtener la nueva fecha de inicio de actividades
+        LocalDate fechaActual = LocalDate.now();
+
+        // Lógica para recalcular los periodos semanales, quincenales o mensuales
+        int numeroPeriodo = 1; // Puedes empezar desde el primer periodo y ajustar según corresponda
+
+        while (!fechaInicioActividades.isAfter(fechaActual)) {
+            // Calcular el inicio y fin del periodo basado en el tipo de periodo
+            LocalDate[] fechasPeriodo = calcularInicioYFinPeriodo(tipoPeriodo, fechaInicioActividades, numeroPeriodo);
+            LocalDate fechaInicioPeriodo = fechasPeriodo[0];
+            LocalDate fechaFinPeriodo = fechasPeriodo[1];
+
+            // Calcular las horas trabajadas en ese periodo
+            double horasTrabajadas = calcularHorasTrabajadas(trabajadorId, fechaFinPeriodo, fechaActual);
+
+            // Guardar las horas trabajadas en la base de datos
+            guardarHorasTrabajadas(trabajadorId, horasTrabajadas, fechaInicioPeriodo, tipoPeriodo);
+
+            // Incrementar el número de periodo y avanzar la fecha de inicio al siguiente periodo
+            numeroPeriodo++;
+            fechaInicioActividades = fechaFinPeriodo.plusDays(1);  // Mover al día siguiente del fin del periodo actual
         }
     }
 
@@ -607,10 +989,6 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         }
     }
 
-    
-
-    
-
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -647,10 +1025,6 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         txtFechaSalida = new javax.swing.JTextField();
         btnCierre = new javax.swing.JButton();
         jLabel11 = new javax.swing.JLabel();
-        dateMensual = new com.toedter.calendar.JDateChooser();
-        jLabel12 = new javax.swing.JLabel();
-        dateSemanlQuincenal = new com.toedter.calendar.JDateChooser();
-        jLabel13 = new javax.swing.JLabel();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -780,14 +1154,6 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
         jLabel11.setText("Mes");
         jPanel12.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 550, -1, -1));
-        jPanel12.add(dateMensual, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 550, 190, -1));
-
-        jLabel12.setText("Semanal - Quincenal");
-        jPanel12.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 550, -1, -1));
-        jPanel12.add(dateSemanlQuincenal, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 550, 160, -1));
-
-        jLabel13.setText("Establecer el inicio de las fechas de Pagos");
-        jPanel12.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 510, -1, -1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -837,7 +1203,7 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             }
 
             // Llamada a generarReporte con los parámetros correctos
-//            generarReporte(trabajadorId, fechaInicio, fechaFin);
+            generarReporte(trabajadorId, fechaInicio, fechaFin);
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "ID de trabajador no válido.");
         }
@@ -896,7 +1262,7 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             LocalDateTime nuevaHoraIngreso = LocalDateTime.of(fecha, LocalTime.of(horaIngreso, minutoIngreso));
             LocalDateTime nuevaHoraSalida = LocalDateTime.of(fecha, LocalTime.of(horaSalida, minutoSalida));
 
-            modificar(idIngreso, idSalida, nuevaHoraIngreso, nuevaHoraSalida);
+            modificar(idIngreso, idSalida, nuevaHoraIngreso, nuevaHoraSalida, ABORT);
 
             System.out.println("ID Ingreso: " + idIngreso);
             System.out.println("ID Salida: " + idSalida);
@@ -924,16 +1290,6 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             try {
                 int trabajadorId = Integer.parseInt(txtIdTrabajador.getText()); // Obtén el ID del trabajador desde el JTextField
 
-//                // Verificar si hay una sesión activa
-//                if (verificarSesionActiva(trabajadorId)) {
-//                    // Cierra la sesión activa del trabajador
-//                    cerrarSesionTrabajador(trabajadorId);
-//
-//                    // Actualiza la tabla para reflejar los cambios
-//                    Mostrar(Tabla, trabajadorId);
-//                } else {
-//                    JOptionPane.showMessageDialog(null, "No se encontró una sesión activa para el trabajador con ID: " + trabajadorId);
-//                }
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "El ID del trabajador no es válido. Por favor, verifique el valor en txtIdTrabajador.");
             }
@@ -953,15 +1309,11 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnMostrarDatos;
     private javax.swing.JButton btnSalir;
     private javax.swing.JComboBox<String> cbxTrabajador;
-    private com.toedter.calendar.JDateChooser dateMensual;
-    private com.toedter.calendar.JDateChooser dateSemanlQuincenal;
     private com.toedter.calendar.JDateChooser jDateChooser1;
     private com.toedter.calendar.JDateChooser jDateChooser2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -1020,23 +1372,6 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         }
     }
 
-    private void reiniciarHorasYPagos(int trabajadorId) {
-        String sqlHoras = "DELETE FROM horas_trabajadas WHERE trabajador_id = ?";
-        String sqlPagos = "DELETE FROM pagos_acumulados WHERE trabajador_id = ?";
-
-        try (PreparedStatement pstHoras = conect.prepareStatement(sqlHoras); PreparedStatement pstPagos = conect.prepareStatement(sqlPagos)) {
-            pstHoras.setInt(1, trabajadorId);
-            pstHoras.executeUpdate();
-
-            pstPagos.setInt(1, trabajadorId);
-            pstPagos.executeUpdate();
-
-            System.out.println("Registros de horas y pagos acumulados reiniciados para trabajador ID: " + trabajadorId);
-        } catch (SQLException ex) {
-            LOGGER.log(Level.SEVERE, "Error al reiniciar registros: ", ex);
-        }
-    }
-
     // Método para guardar las horas trabajadas en la base de datos
     private void guardarHorasTrabajadas(int trabajadorId, double horasTrabajadas, LocalDate fecha) {
         // Asegúrate de que la fecha sea válida
@@ -1055,6 +1390,10 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al guardar horas trabajadas: ", ex);
         }
+    }
+
+    private void enviarNotificacion(String cierre_automático_realizado, String el_sistema_ha_cerrado_automáticamente_las) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
 }

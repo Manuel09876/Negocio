@@ -22,10 +22,10 @@ public class Menus extends javax.swing.JInternalFrame {
 
     public Menus() {
         initComponents();
-        
+
         CargarDatosTableMenu("");
         CargarDatosTableSubMenu("");
-        
+
     }
 
     void CargarDatosTableMenu(String Valores) {
@@ -37,7 +37,7 @@ public class Menus extends javax.swing.JInternalFrame {
             Statement st = conect.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
             while (result.next()) {
-                RegistroBD[0] = result.getString("id");
+                RegistroBD[0] = result.getString("id_menu");
                 RegistroBD[1] = result.getString("nombre_menu");
 
                 model.addRow(RegistroBD);
@@ -57,8 +57,9 @@ public class Menus extends javax.swing.JInternalFrame {
             String[] RegistroBD = new String[3];                                   //Registros de la Basede Datos
             modelo = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
             String ConsultaSQL = """
-                                 SELECT s.id AS Id, m.nombre_menu AS Menu, s.nombre_submenu AS Submenu FROM submenus AS s
-                                 INNER JOIN menus AS m ON s.menu_id=m.id""";
+                                 SELECT s.id_submenu AS Id, m.nombre_menu AS Menu, s.nombre_submenu AS Submenu 
+                                 FROM submenus AS s
+                                 INNER JOIN menus AS m ON s.menu_id = m.id_menu""";
             Statement st = conect.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
             while (result.next()) {
@@ -89,14 +90,13 @@ public class Menus extends javax.swing.JInternalFrame {
             CargarDatosTableMenu("");
             JOptionPane.showMessageDialog(null, "Menú agregado exitosamente.");
         } catch (SQLException e) {
-            e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error al agregar el menú.");
         }
     }
 
     private void insertarSubmenu(String nombreSubmenu, int menuId) {
         nombreSubmenu = txtSubmenu.getText();
-        
+
         String sql = "INSERT INTO submenus (nombre_submenu, menu_id) VALUES (?, ?)";
         try (PreparedStatement ps = conect.prepareStatement(sql)) {
             ps.setString(1, nombreSubmenu);
@@ -106,24 +106,26 @@ public class Menus extends javax.swing.JInternalFrame {
             CargarDatosTableSubMenu("");
             JOptionPane.showMessageDialog(null, "Submenú agregado exitosamente.");
         } catch (SQLException e) {
-            e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error al agregar el submenú.");
         }
     }
 
     private int obtenerMenuId(String menuName) {
-        String sql = "SELECT id FROM menus WHERE nombre_menu = ?";
+        String sql = "SELECT id_menu FROM menus WHERE nombre_menu = ?";
         try (PreparedStatement ps = conect.prepareStatement(sql)) {
             ps.setString(1, menuName);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt("id");
+                return rs.getInt("id_menu");
             }
+            System.out.println(menuName);
         } catch (SQLException e) {
-            e.printStackTrace();
         }
         return -1;
     }
+    
+    
+    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -333,5 +335,4 @@ public class Menus extends javax.swing.JInternalFrame {
     private javax.swing.JTextField txtSubmenu;
     // End of variables declaration//GEN-END:variables
 
-    
 }

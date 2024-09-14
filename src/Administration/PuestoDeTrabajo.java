@@ -427,20 +427,31 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
             double precioPorHora = 0.0;
             double sueldo = 0.0;
 
-            // Validar y convertir los valores de pago por hora y sueldo
+             // Validar y convertir los valores de pago por hora y sueldo
+        try {
             if (!pagoPorHoraField.getText().isEmpty()) {
                 precioPorHora = Double.parseDouble(pagoPorHoraField.getText());  // Este puede tener decimales
             }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "El valor de 'Pago por Hora' no es válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;  // Detenemos la ejecución si el valor no es válido
+        }
+
+        try {
             if (!sueldoField.getText().isEmpty()) {
                 sueldo = Double.parseDouble(sueldoField.getText());  // Este puede tener decimales
             }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "El valor de 'Sueldo' no es válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;  // Detenemos la ejecución si el valor no es válido
+        }
 
-            // Asegurarse de que uno de los valores sea cero
-            if (precioPorHora > 0) {
-                sueldo = 0.0;
-            } else if (sueldo > 0) {
-                precioPorHora = 0.0;
-            }
+        // Asegurarse de que uno de los valores sea cero
+        if (precioPorHora > 0) {
+            sueldo = 0.0;
+        } else if (sueldo > 0) {
+            precioPorHora = 0.0;
+        }
 
             int idOvertime = Integer.parseInt(txtIdOverTime.getText());
             int idHorario = Integer.parseInt(txtIdHorario.getText());
@@ -448,8 +459,8 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
             int idVacaciones = Integer.parseInt(txtIdVacaciones.getText());
             int tiempoVacaciones = Integer.parseInt(tiempoVacacionesField.getText());
 
+            // Validar la fecha de inicio del puesto
             java.util.Date ingreso = dateInicioPuesto.getDate();
-
             if (ingreso == null) {
                 JOptionPane.showMessageDialog(null, "Por favor, ingrese una fecha de ingreso válida.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -457,10 +468,11 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
             java.sql.Date fechaSQL = new java.sql.Date(ingreso.getTime());
 
-            if (!verificarRegistroExiste(idPDT)) {
-                JOptionPane.showMessageDialog(null, "No se encontró el registro con idPDT = " + idPDT);
-                return;
-            }
+            // Verificar si el registro existe en la base de datos antes de modificar
+        if (!verificarRegistroExiste(idPDT)) {
+            JOptionPane.showMessageDialog(null, "No se encontró el registro con idPDT = " + idPDT);
+            return;
+        }
 
             Conectar con = new Conectar();
             conn = con.getConexion();

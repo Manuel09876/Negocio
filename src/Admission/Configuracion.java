@@ -353,10 +353,10 @@ public class Configuracion extends javax.swing.JInternalFrame {
         txtId = new javax.swing.JTextField();
         btnCargarLogo = new javax.swing.JButton();
         jLabel10 = new javax.swing.JLabel();
-        txtContrasenia = new javax.swing.JPasswordField();
         btnGuia = new javax.swing.JButton();
         dateFechaInicio = new com.toedter.calendar.JDateChooser();
         jLabel11 = new javax.swing.JLabel();
+        txtContrasenia = new javax.swing.JTextField();
 
         setTitle("Configuración");
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -452,9 +452,6 @@ public class Configuracion extends javax.swing.JInternalFrame {
         jLabel10.setText("Mensaje");
         jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 260, -1, -1));
 
-        txtContrasenia.setText("jPasswordField1");
-        jPanel1.add(txtContrasenia, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 170, 160, -1));
-
         btnGuia.setText("Guia");
         btnGuia.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -467,6 +464,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
         jLabel11.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel11.setText("Estado");
         jPanel1.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(25, 314, -1, -1));
+        jPanel1.add(txtContrasenia, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 180, 150, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 730, 386));
 
@@ -483,7 +481,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
                 && !"".equals(txtCiudad.getText()) && !"".equals(txtZipCode.getText())
                 && !"".equals(txtEstado.getText()) && !"".equals(txtTelefono.getText())
                 && !"".equals(txtEmail.getText()) && !"".equals(txtWebPage.getText())
-                && !"".equals(txtMensaje.getText()) && !"".equals(new String(txtContrasenia.getPassword()))
+                && !"".equals(txtMensaje.getText()) && !"".equals(new String(txtContrasenia.getText()))
                 && dateFechaInicio.getDate() != null) { // Asegúrate de que la fecha de inicio no esté vacía
 
             // Establecer los valores a la instancia actual de Configuracion
@@ -496,7 +494,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
             setEmail(txtEmail.getText());
             setWebpage(txtWebPage.getText());
             setMensaje(txtMensaje.getText());
-            setEmailPassword(new String(txtContrasenia.getPassword()));
+            setEmailPassword(new String(txtContrasenia.getText()));
             setFechaInicioActividades(dateFechaInicio.getDate()); // Establece la fecha de inicio de actividades
 
             // Guardar la configuración
@@ -521,7 +519,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
             setEmail(txtEmail.getText());
             setWebpage(txtWebPage.getText());
             setMensaje(txtMensaje.getText());
-            setEmailPassword(new String(txtContrasenia.getPassword()));
+            setEmailPassword(new String(txtContrasenia.getText()));
             ModificarDatos();
             JOptionPane.showMessageDialog(null, "Datos de la empresa modificado");
             ListarConfig();
@@ -574,7 +572,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField txtCiudad;
-    private javax.swing.JPasswordField txtContrasenia;
+    private javax.swing.JTextField txtContrasenia;
     private javax.swing.JTextField txtDireccion;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtEstado;

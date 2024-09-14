@@ -804,34 +804,52 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
     private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirActionPerformed
         System.out.println("Botón de salida presionado");
+
         if (JOptionPane.showConfirmDialog(null, "¿Desea salir del Sistema?", "Acceso", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            int trabajadorId = obtenerTrabajadorId(this.usuario);
-            if (trabajadorId != 0) {
-                ht.registrarFinSesion(trabajadorId); // Registro de fin de sesión
+            try {
+                int trabajadorId = obtenerTrabajadorId(this.usuario);
 
-                if (ht.puestoDeTrabajo != null) {
-                    int idPDT = ht.puestoDeTrabajo.obtenerIdPuestoActivo(trabajadorId);
+                if (trabajadorId != 0) {
+                    ht.registrarFinSesion(trabajadorId); // Registro de fin de sesión
 
-                    if (idPDT != -1) {
-                        // Calcular y guardar horas trabajadas y período de pago
-                        double horasTrabajadas = ht.calcularHorasTrabajadasPorDia(trabajadorId);
-                        LocalDate fecha = LocalDate.now();
-                        String periodoPago = ht.determinarPeriodoPago(fecha);
+                    if (ht.puestoDeTrabajo != null) {
+                        int idPDT = ht.puestoDeTrabajo.obtenerIdPuestoActivo(trabajadorId);
 
-                        ht.guardarHorasTrabajadas(trabajadorId, horasTrabajadas, fecha, periodoPago);
+                        if (idPDT != -1) {
+                            // Calcular y guardar horas trabajadas y período de pago
+                            double horasTrabajadas = ht.calcularHorasTrabajadasPorDia(trabajadorId);
+                            LocalDate fecha = LocalDate.now();
+                            LocalDate fechaInicioActividades = ht.obtenerFechaInicioActividadesDesdeBD();
 
-                        // Calcular y guardar pagos
-                        ht.calcularPagos(trabajadorId);
+                            // Obtener el tipo de periodo (Semanal, Quincenal, Mensual)
+                            String tipoPeriodo = ht.puestoDeTrabajo.obtenerPeriodoPago(idPDT);
+                            if (tipoPeriodo != null) {
+                                LocalDate[] fechasPeriodo = ht.calcularInicioYFinPeriodo(tipoPeriodo, fechaInicioActividades, 1);  // Obtener las fechas del periodo
+                                LocalDate fechaInicio = fechasPeriodo[0];  // Fecha de inicio del periodo
+                                LocalDate fechaFin = fechasPeriodo[1];  // Fecha de fin del periodo
+
+                                ht.guardarHorasTrabajadas(trabajadorId, horasTrabajadas, fecha, tipoPeriodo);
+
+                                // Calcular y guardar pagos
+                                ht.calcularSueldos(trabajadorId, fechaInicio, fechaFin);
+                            } else {
+                                System.out.println("Error: no se pudo determinar el tipo de periodo.");
+                            }
+                        } else {
+                            System.out.println("No hay puesto activo para el trabajador ID: " + trabajadorId);
+                        }
                     } else {
-                        System.out.println("No hay puesto activo para el trabajador ID: " + trabajadorId);
+                        System.out.println("Error: puestoDeTrabajo no está inicializado.");
                     }
                 } else {
-                    System.out.println("Error: puestoDeTrabajo no está inicializado.");
+                    System.out.println("No se encontró el ID del trabajador.");
                 }
-            } else {
-                System.out.println("No se encontró el ID del trabajador.");
+            } catch (Exception ex) {
+                System.out.println("Ocurrió un error al registrar fin de sesión o calcular pagos: " + ex.getMessage());
+                ex.printStackTrace();  // Registrar cualquier error inesperado
+            } finally {
+                System.exit(0); // Cerrar el sistema independientemente de cualquier error
             }
-            System.exit(0);
         }
     }//GEN-LAST:event_btnSalirActionPerformed
 
@@ -1026,11 +1044,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     private void cargarPermisos() {
-        String sql = "SELECT nombre_menu AS menu_name, nombre_submenu AS submenu_name "
-                + "FROM roles_permisos rp "
-                + "JOIN menus m ON rp.menu_id = m.id "
-                + "LEFT JOIN submenus s ON rp.submenu_id = s.id "
-                + "WHERE rp.rol_id = ?";
+        String sql = "SELECT nombre_menu AS menu_name, nombre_submenu AS submenu_name\n"
+                + "FROM roles_permisos rp\n"
+                + "JOIN menus m ON rp.menu_id = m.id_menu\n"
+                + "LEFT JOIN submenus s ON rp.submenu_id = s.id_submenu\n"
+                + "WHERE rp.rol_id =  ?";
         try (PreparedStatement pst = conectar.getConexion().prepareStatement(sql)) {
             pst.setInt(1, tipUsu);
             ResultSet rs = pst.executeQuery();

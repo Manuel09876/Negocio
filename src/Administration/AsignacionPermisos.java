@@ -1510,7 +1510,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
     // Método para obtener el ID del menú
     private int obtenerMenuId(String menuName) {
-        String sql = "SELECT id FROM menus WHERE nombre_menu = ?";
+        String sql = "SELECT id_menu FROM menus WHERE nombre_menu = ?";
         try (PreparedStatement ps = conect.prepareStatement(sql)) {
             ps.setString(1, menuName);
             ResultSet rs = ps.executeQuery();
@@ -1525,12 +1525,12 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
     // Método para obtener el ID del submenú
     private int obtenerSubmenuId(String submenuName) {
-        String sql = "SELECT id FROM submenus WHERE nombre_submenu = ?";
+        String sql = "SELECT id_submenu FROM submenus WHERE nombre_submenu = ?";
         try (PreparedStatement ps = conect.prepareStatement(sql)) {
             ps.setString(1, submenuName);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt("id");
+                return rs.getInt("id_submenu");
             }
         } catch (SQLException e) {
             e.printStackTrace();
