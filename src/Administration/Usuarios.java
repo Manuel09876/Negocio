@@ -535,7 +535,7 @@ public class Usuarios extends javax.swing.JInternalFrame {
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         txtBuscar = new javax.swing.JTextField();
-        btnBuscar = new javax.swing.JButton();
+        btnMostrarDatos = new javax.swing.JButton();
         btnGuia = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -778,11 +778,10 @@ public class Usuarios extends javax.swing.JInternalFrame {
             }
         });
 
-        btnBuscar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/lupa.png"))); // NOI18N
-        btnBuscar.setText("Mostrar");
-        btnBuscar.addActionListener(new java.awt.event.ActionListener() {
+        btnMostrarDatos.setText("Mostrar Datos");
+        btnMostrarDatos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBuscarActionPerformed(evt);
+                btnMostrarDatosActionPerformed(evt);
             }
         });
 
@@ -808,7 +807,7 @@ public class Usuarios extends javax.swing.JInternalFrame {
                         .addGap(18, 18, 18)
                         .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(38, 38, 38)
-                .addComponent(btnBuscar)
+                .addComponent(btnMostrarDatos)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnGuia)
                 .addGap(28, 28, 28))
@@ -824,7 +823,7 @@ public class Usuarios extends javax.swing.JInternalFrame {
                             .addComponent(jLabel8)
                             .addComponent(txtBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnBuscar)
+                        .addComponent(btnMostrarDatos)
                         .addComponent(btnGuia)))
                 .addContainerGap())
         );
@@ -996,10 +995,10 @@ public class Usuarios extends javax.swing.JInternalFrame {
         MostrarCodigoTipoDeUsuario(cbxTipoDeUsuario, txtIdTPU);
     }//GEN-LAST:event_cbxTipoDeUsuarioItemStateChanged
 
-    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
+    private void btnMostrarDatosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarDatosActionPerformed
         txtBuscar.setText("");
         CargarDatosTable("");
-    }//GEN-LAST:event_btnBuscarActionPerformed
+    }//GEN-LAST:event_btnMostrarDatosActionPerformed
 
     private void cbxTrabajadorItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxTrabajadorItemStateChanged
         MostrarCodigoTrabajador(cbxTrabajador, txtIdTrabajador);
@@ -1057,16 +1056,16 @@ public class Usuarios extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnActivar;
-    public javax.swing.JButton btnBuscar;
+    public javax.swing.JButton btnActivar;
     public javax.swing.JButton btnCancelar;
     public javax.swing.JButton btnEliminar;
     public javax.swing.JButton btnGrabar;
-    private javax.swing.JButton btnGuia;
-    private javax.swing.JButton btnInactivar;
+    public javax.swing.JButton btnGuia;
+    public javax.swing.JButton btnInactivar;
     public javax.swing.JButton btnModificar;
-    private javax.swing.JButton btnNuevo;
-    private javax.swing.JButton btnSalir;
+    public javax.swing.JButton btnMostrarDatos;
+    public javax.swing.JButton btnNuevo;
+    public javax.swing.JButton btnSalir;
     private javax.swing.JComboBox<Object> cbxTipoDeUsuario;
     public javax.swing.JComboBox<String> cbxTrabajador;
     private javax.swing.JLabel jLabel1;

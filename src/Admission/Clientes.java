@@ -1040,15 +1040,15 @@ public class Clientes extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnActivar;
-    private javax.swing.JButton btnActualizar;
-    private javax.swing.JButton btnBorrar;
-    private javax.swing.JButton btnCancelar;
-    private javax.swing.JButton btnGuardar;
+    public javax.swing.JButton btnActivar;
+    public javax.swing.JButton btnActualizar;
+    public javax.swing.JButton btnBorrar;
+    public javax.swing.JButton btnCancelar;
+    public javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnGuia;
-    private javax.swing.JButton btnInactivar;
-    private javax.swing.JButton btnLimpiar;
-    private javax.swing.JButton btnNuevo;
+    public javax.swing.JButton btnInactivar;
+    public javax.swing.JButton btnLimpiar;
+    public javax.swing.JButton btnNuevo;
     private javax.swing.JButton btnSalir;
     private javax.swing.JComboBox<String> cbxEmpresa;
     private javax.swing.JLabel jLabel1;

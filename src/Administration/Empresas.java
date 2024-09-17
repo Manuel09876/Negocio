@@ -591,8 +591,8 @@ public class Empresas extends javax.swing.JInternalFrame {
         btnEliminar = new javax.swing.JButton();
         btnCancelar = new javax.swing.JButton();
         btnAgregar = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        btnActivar = new javax.swing.JButton();
+        btnInactivar = new javax.swing.JButton();
         btnGuia = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         txtZipCode = new javax.swing.JTextField();
@@ -720,17 +720,17 @@ public class Empresas extends javax.swing.JInternalFrame {
             }
         });
 
-        jButton1.setText("Activar");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnActivar.setText("Activar");
+        btnActivar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnActivarActionPerformed(evt);
             }
         });
 
-        jButton2.setText("Inactivar");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnInactivar.setText("Inactivar");
+        btnInactivar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnInactivarActionPerformed(evt);
             }
         });
 
@@ -769,8 +769,8 @@ public class Empresas extends javax.swing.JInternalFrame {
                     .addComponent(btnCancelar))
                 .addGap(36, 36, 36)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
+                    .addComponent(btnActivar)
+                    .addComponent(btnInactivar))
                 .addGap(56, 56, 56)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnGuia)
@@ -792,7 +792,7 @@ public class Empresas extends javax.swing.JInternalFrame {
                             .addComponent(btnAgregar)
                             .addComponent(btnSalir)
                             .addComponent(btnModificar)
-                            .addComponent(jButton1))
+                            .addComponent(btnActivar))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -815,7 +815,7 @@ public class Empresas extends javax.swing.JInternalFrame {
                                 .addGap(50, 50, 50))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jButton2)
+                                    .addComponent(btnInactivar)
                                     .addComponent(btnCancelar))
                                 .addGap(18, 18, 18)))))
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1073,7 +1073,7 @@ public class Empresas extends javax.swing.JInternalFrame {
         BuscarEmp(evt);
     }//GEN-LAST:event_txtBuscarEmpresaKeyPressed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnActivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActivarActionPerformed
         int fila = tbEmpresa.getSelectedRow();
         int id = Integer.parseInt(txtId.getText());
         if (accion("Activo", id)) {
@@ -1082,9 +1082,9 @@ public class Empresas extends javax.swing.JInternalFrame {
         } else {
             JOptionPane.showMessageDialog(null, "Error al Activar");
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnActivarActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnInactivarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInactivarActionPerformed
         int fila = tbEmpresa.getSelectedRow();
         int id = Integer.parseInt(txtId.getText());
         if (accion("Inactivo", id)) {
@@ -1093,7 +1093,7 @@ public class Empresas extends javax.swing.JInternalFrame {
         } else {
             JOptionPane.showMessageDialog(null, "Error al Inactivar");
         }
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btnInactivarActionPerformed
 
     private void btnGuiaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuiaActionPerformed
         JOptionPane.showMessageDialog(null, "INGRESO DE EMPRESAS\n"
@@ -1111,17 +1111,17 @@ public class Empresas extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnAgregar;
-    private javax.swing.JButton btnCancelar;
-    private javax.swing.JButton btnEliminar;
+    public javax.swing.JButton btnActivar;
+    public javax.swing.JButton btnAgregar;
+    public javax.swing.JButton btnCancelar;
+    public javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuia;
-    private javax.swing.JButton btnLimpiar;
-    private javax.swing.JButton btnModificar;
-    private javax.swing.JButton btnNuevo;
+    public javax.swing.JButton btnInactivar;
+    public javax.swing.JButton btnLimpiar;
+    public javax.swing.JButton btnModificar;
+    public javax.swing.JButton btnNuevo;
     private javax.swing.JButton btnSalir;
     private com.toedter.calendar.JDateChooser calendar;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;

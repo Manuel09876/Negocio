@@ -962,15 +962,15 @@ public class Trabajadores extends javax.swing.JInternalFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private com.toedter.calendar.JDateChooser JDateFechaNac;
-    private javax.swing.JButton btnActivar;
+    public javax.swing.JButton btnActivar;
     private javax.swing.JButton btnBuscar;
-    private javax.swing.JButton btnCancelar;
-    private javax.swing.JButton btnEliminar;
-    private javax.swing.JButton btnGrabar;
+    public javax.swing.JButton btnCancelar;
+    public javax.swing.JButton btnEliminar;
+    public javax.swing.JButton btnGrabar;
     private javax.swing.JButton btnGuia;
-    private javax.swing.JButton btnInactivar;
-    private javax.swing.JButton btnModificar;
-    private javax.swing.JButton btnNuevo;
+    public javax.swing.JButton btnInactivar;
+    public javax.swing.JButton btnModificar;
+    public javax.swing.JButton btnNuevo;
     private javax.swing.JButton btnSalir;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<String> cbxSexo;

@@ -655,12 +655,12 @@ public class Tarifario extends javax.swing.JInternalFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnBuscar;
-    private javax.swing.JButton btnCancelar;
-    private javax.swing.JButton btnEliminar;
-    private javax.swing.JButton btnGuardar;
+    public javax.swing.JButton btnCancelar;
+    public javax.swing.JButton btnEliminar;
+    public javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnImprimir;
-    private javax.swing.JButton btnModificar;
+    public javax.swing.JButton btnModificar;
     private javax.swing.JButton btnSalir;
     private javax.swing.JComboBox<String> cbxEmpresas;
     private javax.swing.JLabel jLabel1;

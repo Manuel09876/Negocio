@@ -784,16 +784,16 @@ public class Proveedor extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnCancel;
-    private javax.swing.JButton btnEliminar;
+    public javax.swing.JButton btnCancel;
+    public javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnExit;
-    private javax.swing.JButton btnGrabar;
+    public javax.swing.JButton btnGrabar;
     private javax.swing.JButton btnGuia;
-    private javax.swing.JButton btnInactivar;
-    private javax.swing.JButton btnModificar;
+    public javax.swing.JButton btnInactivar;
+    public javax.swing.JButton btnModificar;
     private javax.swing.JButton btnMostrar;
-    private javax.swing.JButton btnNew;
-    private javax.swing.JButton btnReingresar;
+    public javax.swing.JButton btnNew;
+    public javax.swing.JButton btnReingresar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

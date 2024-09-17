@@ -4,10 +4,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-
 public class Conectar {
 
-    public static final String URL = "jdbc:mysql://localhost:3306/business2";
+    // Agregar autoReconnect=true a la URL de conexión
+    public static final String URL = "jdbc:mysql://localhost:3306/business2?autoReconnect=true&useSSL=false";
     public static final String USER = "root";
     public static final String PASSWORD = "";
 
@@ -21,7 +21,5 @@ public class Conectar {
         }
         return con;
     }
-
-    
 
 }

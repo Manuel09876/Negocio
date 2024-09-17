@@ -100,6 +100,7 @@ public class Productos extends javax.swing.JInternalFrame {
         CargarDatosTable("");
         txtIdProducto.setEnabled(false);
         txtName.requestFocus();
+
     }
 
     //Constructores de Metodos que vamos a necesitar
@@ -312,31 +313,49 @@ public class Productos extends javax.swing.JInternalFrame {
         }
     }
 
-    public Productos BuscarProductos(java.awt.event.KeyEvent evt) {
-        String[] titulosTabla = {"Id", "Nombre", "Presentacion", "Unidades", "Stock", "Stock2", "Estado", "Stock Minimo"}; //Titulos de la Tabla
-        String[] RegistroBD = new String[8];                                   //Registros de la Basede Datos
+    public void BuscarProductos(java.awt.event.KeyEvent evt) {
+        String textoBusqueda = txtBuscarProductos.getText().trim();
 
-        Productos productos = new Productos();
+        // Verifica si el campo de búsqueda no está vacío
+        if (textoBusqueda.isEmpty()) {
+            CargarDatosTable(""); // Si no hay texto, carga todos los productos
+            return;
+        }
+
+        String[] titulosTabla = {"Id", "Nombre", "Presentacion", "Unidades", "Stock", "Stock2", "Estado", "Stock Minimo"};
+        String[] RegistroBD = new String[8];
+
         String ConsultaSQL = """
-                             SELECT product.idProduct, product.nameProduct, product.presentation, unidades.nombre AS Unidades, product.stock, product.stock2, product.estado, product.stock_minimo
-                             FROM product
-                             INNER JOIN unidades ON product.id_units=unidades.id_unidades
-                             WHERE nameProduct LIKE '%""" + txtBuscarProductos.getText() + "%'";
-        model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
+                         SELECT product.idProduct, product.nameProduct, product.presentation, unidades.nombre AS Unidades, 
+                         product.stock, product.stock2, product.estado, product.stock_minimo
+                         FROM product
+                         INNER JOIN unidades ON product.id_units = unidades.id_unidades
+                         WHERE product.nameProduct LIKE ?
+                         """;
+
+        model = new DefaultTableModel(null, titulosTabla);
+
         try {
-            Statement st = connect.createStatement();
-            ResultSet result = st.executeQuery(ConsultaSQL);
-            connect = con.getConexion();
+            connect = con.getConexion();  // Verificamos la conexión
+            PreparedStatement ps = connect.prepareStatement(ConsultaSQL);
+            ps.setString(1, "%" + textoBusqueda + "%");  // Utilizamos el valor de búsqueda con comodines
+
+            ResultSet result = ps.executeQuery();
+
             while (result.next()) {
-                RegistroBD[0] = result.getString(1);
-                RegistroBD[1] = result.getString(2);
-                RegistroBD[2] = result.getString(3);
-                RegistroBD[3] = result.getString(4);
-                RegistroBD[4] = result.getString(5);
-                RegistroBD[5] = result.getString(6);
-                model.addRow(RegistroBD);
+                RegistroBD[0] = result.getString("idProduct");
+                RegistroBD[1] = result.getString("nameProduct");
+                RegistroBD[2] = result.getString("presentation");
+                RegistroBD[3] = result.getString("Unidades");
+                RegistroBD[4] = result.getString("stock");
+                RegistroBD[5] = result.getString("stock2");
+                RegistroBD[6] = result.getString("estado");
+                RegistroBD[7] = result.getString("stock_minimo");
+
+                model.addRow(RegistroBD);  // Añadimos los datos a la tabla
             }
-            tbProducts.setModel(model);
+
+            tbProducts.setModel(model);  // Actualizamos la tabla con el nuevo modelo
             tbProducts.getColumnModel().getColumn(0).setPreferredWidth(50);
             tbProducts.getColumnModel().getColumn(1).setPreferredWidth(150);
             tbProducts.getColumnModel().getColumn(2).setPreferredWidth(100);
@@ -345,9 +364,8 @@ public class Productos extends javax.swing.JInternalFrame {
             tbProducts.getColumnModel().getColumn(5).setPreferredWidth(100);
 
         } catch (SQLException e) {
-            System.out.println(e.toString());
+            System.out.println("Error al buscar productos: " + e.getMessage());
         }
-        return productos;
     }
 
     public boolean accion(String estado, int idTipoDeUsuario) {
@@ -389,7 +407,6 @@ public class Productos extends javax.swing.JInternalFrame {
         btnUpdate = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         btnDelete = new javax.swing.JButton();
-        btnExit = new javax.swing.JButton();
         txtStockMinimo = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
@@ -400,6 +417,7 @@ public class Productos extends javax.swing.JInternalFrame {
         btnActivar = new javax.swing.JButton();
         btnInactivar = new javax.swing.JButton();
         btnGuia = new javax.swing.JButton();
+        btnExit = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(0, 255, 0));
         setIconifiable(true);
@@ -485,16 +503,6 @@ public class Productos extends javax.swing.JInternalFrame {
             }
         });
 
-        btnExit.setBackground(new java.awt.Color(0, 153, 0));
-        btnExit.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
-        btnExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
-        btnExit.setText("Salir");
-        btnExit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnExitActionPerformed(evt);
-            }
-        });
-
         jLabel2.setText("Stock Mínimo");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -540,11 +548,8 @@ public class Productos extends javax.swing.JInternalFrame {
                                 .addComponent(btnNew)
                                 .addComponent(btnCancel))
                             .addGap(39, 39, 39)
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addGroup(jPanel1Layout.createSequentialGroup()
-                                    .addComponent(btnDelete)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(btnExit, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(btnDelete)
                                 .addGroup(jPanel1Layout.createSequentialGroup()
                                     .addComponent(btnAdd)
                                     .addGap(18, 18, 18)
@@ -589,8 +594,7 @@ public class Productos extends javax.swing.JInternalFrame {
                 .addGap(27, 27, 27)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnExit, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnDelete, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(45, Short.MAX_VALUE))
         );
 
@@ -632,6 +636,9 @@ public class Productos extends javax.swing.JInternalFrame {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txtBuscarProductosKeyPressed(evt);
             }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtBuscarProductosKeyReleased(evt);
+            }
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 txtBuscarProductosKeyTyped(evt);
             }
@@ -640,8 +647,7 @@ public class Productos extends javax.swing.JInternalFrame {
 
         btnSerch.setBackground(new java.awt.Color(0, 102, 255));
         btnSerch.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
-        btnSerch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/lupa.png"))); // NOI18N
-        btnSerch.setText("Buscar");
+        btnSerch.setText("Cargar Datos");
         btnSerch.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSerchActionPerformed(evt);
@@ -667,6 +673,17 @@ public class Productos extends javax.swing.JInternalFrame {
             }
         });
         jPanel2.add(btnGuia, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 360, -1, -1));
+
+        btnExit.setBackground(new java.awt.Color(0, 153, 0));
+        btnExit.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
+        btnExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
+        btnExit.setText("Salir");
+        btnExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExitActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnExit, new org.netbeans.lib.awtextra.AbsoluteConstraints(570, 10, 105, 30));
 
         getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(417, 6, -1, 404));
 
@@ -731,7 +748,7 @@ public class Productos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_tbProductsMouseClicked
 
     private void txtBuscarProductosKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscarProductosKeyPressed
-        BuscarProductos(evt);
+
     }//GEN-LAST:event_txtBuscarProductosKeyPressed
 
     private void cbxUnidadesItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxUnidadesItemStateChanged
@@ -767,18 +784,22 @@ public class Productos extends javax.swing.JInternalFrame {
                 + "Esta Plataforma es para Ingresar PRODUCTOS con los que Trabajará");
     }//GEN-LAST:event_btnGuiaActionPerformed
 
+    private void txtBuscarProductosKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscarProductosKeyReleased
+        BuscarProductos(evt);  // Llama al método de búsqueda
+    }//GEN-LAST:event_txtBuscarProductosKeyReleased
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnActivar;
-    private javax.swing.JButton btnAdd;
-    private javax.swing.JButton btnCancel;
-    private javax.swing.JButton btnDelete;
+    public javax.swing.JButton btnActivar;
+    public javax.swing.JButton btnAdd;
+    public javax.swing.JButton btnCancel;
+    public javax.swing.JButton btnDelete;
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnGuia;
-    private javax.swing.JButton btnInactivar;
-    private javax.swing.JButton btnNew;
+    public javax.swing.JButton btnInactivar;
+    public javax.swing.JButton btnNew;
     private javax.swing.JButton btnSerch;
-    private javax.swing.JButton btnUpdate;
+    public javax.swing.JButton btnUpdate;
     private javax.swing.JComboBox<CustomItem> cbxUnidades;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

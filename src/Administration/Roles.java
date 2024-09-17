@@ -68,7 +68,7 @@ public class Roles extends javax.swing.JInternalFrame {
     ResultSet rs;
 
     //Metodos
-    void CargarDatosTabla(String Valores) {
+    public void CargarDatosTabla(String Valores) {
 
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
@@ -99,7 +99,7 @@ public class Roles extends javax.swing.JInternalFrame {
         }
     }
 
-    void Guardar() {
+    public void Guardar() {
 
         // Variables
         int idTipoDeUsuario;
@@ -549,15 +549,15 @@ public class Roles extends javax.swing.JInternalFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnActivar;
-    private javax.swing.JButton btnCancelar;
-    private javax.swing.JButton btnEliminar;
-    private javax.swing.JButton btnGrabarTU;
-    private javax.swing.JButton btnGuia;
-    private javax.swing.JButton btnInactivar;
-    private javax.swing.JButton btnLimpiar;
-    private javax.swing.JButton btnModificar;
-    private javax.swing.JButton btnSalir;
+    public javax.swing.JButton btnActivar;
+    public javax.swing.JButton btnCancelar;
+    public javax.swing.JButton btnEliminar;
+    public javax.swing.JButton btnGrabarTU;
+    public javax.swing.JButton btnGuia;
+    public javax.swing.JButton btnInactivar;
+    public javax.swing.JButton btnLimpiar;
+    public javax.swing.JButton btnModificar;
+    public javax.swing.JButton btnSalir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
@@ -565,8 +565,8 @@ public class Roles extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable tbTipoUsuario;
+    public javax.swing.JTable tbTipoUsuario;
     private javax.swing.JTextField txtId;
-    private javax.swing.JTextField txtNuevoTU;
+    public javax.swing.JTextField txtNuevoTU;
     // End of variables declaration//GEN-END:variables
 }

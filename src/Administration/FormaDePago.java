@@ -467,12 +467,12 @@ public class FormaDePago extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnActivar;
-    private javax.swing.JButton btnCancelar;
-    private javax.swing.JButton btnEliminar;
-    private javax.swing.JButton btnGuardar;
+    public javax.swing.JButton btnActivar;
+    public javax.swing.JButton btnCancelar;
+    public javax.swing.JButton btnEliminar;
+    public javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnGuia;
-    private javax.swing.JButton btnInactivar;
+    public javax.swing.JButton btnInactivar;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;

@@ -123,9 +123,23 @@ public class Menus extends javax.swing.JInternalFrame {
         }
         return -1;
     }
-    
-    
-    
+
+    private void modificarSubmenu(int submenuId, String nuevoNombre) {
+        String sql = "UPDATE submenus SET nombre_submenu = ? WHERE id_submenu = ?";
+        try (PreparedStatement ps = conect.prepareStatement(sql)) {
+            ps.setString(1, nuevoNombre);  // Asignar el nuevo nombre del submenú
+            ps.setInt(2, submenuId);  // Especificar el ID del submenú a modificar
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected > 0) {
+                JOptionPane.showMessageDialog(null, "Submenú modificado exitosamente.");
+                CargarDatosTableSubMenu("");  // Recargar la tabla de submenús
+            } else {
+                JOptionPane.showMessageDialog(null, "No se encontró el submenú a modificar.");
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al modificar el submenú: " + e.getMessage());
+        }
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -171,6 +185,11 @@ public class Menus extends javax.swing.JInternalFrame {
         });
 
         btnModificar.setText("Modificar");
+        btnModificar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnModificarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -318,11 +337,31 @@ public class Menus extends javax.swing.JInternalFrame {
         dispose();
     }//GEN-LAST:event_btnSalirActionPerformed
 
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        int fila = tbSubmenus.getSelectedRow();  // Obtener la fila seleccionada
+        if (fila >= 0) {
+            // Obtener el ID del submenú seleccionado y el nuevo nombre desde la tabla
+            int submenuId = Integer.parseInt(tbSubmenus.getValueAt(fila, 0).toString());  // Columna 0 es el ID
+            String nombreActual = tbSubmenus.getValueAt(fila, 2).toString();  // Columna 2 es el nombre del submenú
+
+            // Solicitar el nuevo nombre al usuario
+            String nuevoNombre = JOptionPane.showInputDialog(null, "Ingrese el nuevo nombre para el submenú:", nombreActual);
+
+            if (nuevoNombre != null && !nuevoNombre.trim().isEmpty()) {
+                modificarSubmenu(submenuId, nuevoNombre);  // Llamar al método para modificar
+            } else {
+                JOptionPane.showMessageDialog(null, "El nombre no puede estar vacío.");
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Seleccione un submenú para modificar.");
+        }
+    }//GEN-LAST:event_btnModificarActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnAddMenu;
-    private javax.swing.JButton btnAddSubmenu;
-    private javax.swing.JButton btnModificar;
+    public javax.swing.JButton btnAddMenu;
+    public javax.swing.JButton btnAddSubmenu;
+    public javax.swing.JButton btnModificar;
     private javax.swing.JButton btnSalir;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;

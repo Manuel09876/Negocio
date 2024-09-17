@@ -261,7 +261,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     }
 
     // Método actualizado para configurar los oyentes del modelo de tabla
-    // Método actualizado para configurar los oyentes del modelo de tabla
     private void setupTableModelListener(JTable table, String tableName) {
         table.getModel().addTableModelListener(new TableModelListener() {
             @Override
@@ -436,31 +435,36 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     private void handleUsuarios(int column, Boolean selected) {
         // Limpieza de botones antes de aplicar la lógica
         u.btnGrabar.setEnabled(false);
-        u.btnCancelar.setEnabled(false);
         u.btnEliminar.setEnabled(false);
         u.btnModificar.setEnabled(false);
-        u.cbxTrabajador.setEnabled(false);
-        u.rdRelacionar.setVisible(false);
+        u.btnActivar.setVisible(false);
+        u.btnInactivar.setVisible(false);
+        u.btnCancelar.setEnabled(true);
+        u.btnGuia.setVisible(true);
+        u.btnSalir.setVisible(true);
+        u.btnNuevo.setVisible(true);
+        u.btnMostrarDatos.setVisible(true);
+        u.cbxTrabajador.setEnabled(true);
+        u.rdRelacionar.setVisible(true);
+        u.CargarDatosTable("");
+        u.CargarDatosTablaUsuariosTrabajadores(tbUsuTrab);
         switch (column) {
 
             case 2: // Visualizar
                 if (selected) {
-                    u.CargarDatosTable("");
-                    u.CargarDatosTablaUsuariosTrabajadores(tbUsuTrab);
+
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
                     u.btnGrabar.setEnabled(true);
-                    u.cbxTrabajador.setEnabled(true);
-                    u.rdRelacionar.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
                     u.btnModificar.setVisible(true);
-                    u.cbxTrabajador.setEnabled(true);
-                    u.rdRelacionar.setVisible(true);
+                    u.btnActivar.setVisible(true);
+                    u.btnInactivar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
@@ -472,6 +476,13 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     }
 
     private void handleRoles(int column, Boolean selected) {
+        r.CargarDatosTabla("");
+        r.btnActivar.setVisible(false);
+        r.btnInactivar.setVisible(false);
+        r.btnCancelar.setVisible(true);
+        r.btnGrabarTU.setVisible(false);
+        r.btnEliminar.setVisible(false);
+        r.btnModificar.setVisible(false);        
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
@@ -480,42 +491,47 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 break;
             case 3: // Agregar
                 if (selected) {
-                    r.Guardar();
+                    r.btnGrabarTU.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    r.modificar(txtId, txtNombre);
+                    r.btnModificar.setVisible(true);
+                    r.btnActivar.setVisible(true);
+                    r.btnInactivar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    r.Eliminar(txtId);
+                    r.btnEliminar.setVisible(true);
                 }
                 break;
         }
     }
 
     private void handleAsignacionPermisos(int column, Boolean selected) {
+        btnGrabar.setVisible(false);
+        btnModificar.setVisible(false);
+        btnCancelar.setVisible(false);
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    // Implementar lógica de visualizar
+                    
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    // Implementar lógica de agregar
+                    btnGrabar.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    // Implementar lógica de editar
+                    btnModificar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    // Implementar lógica de eliminar
+                    btnCancelar.setVisible(true);
                 }
                 break;
         }
@@ -525,22 +541,33 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    em.CargarDatosTable("");
+                    em.btnActivar.setVisible(false);
+                    em.btnAgregar.setVisible(false);
+                    em.btnCancelar.setVisible(false);
+                    em.btnEliminar.setVisible(false);
+                    em.btnInactivar.setVisible(false);
+                    em.btnLimpiar.setVisible(false);
+                    em.btnModificar.setVisible(false);
+                    em.btnNuevo.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    em.Guardar();
+                    em.btnAgregar.setVisible(true);
+                    em.btnEliminar.setVisible(true);
+                    em.btnNuevo.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    em.ModificarEmpresa(txtId, txtBusinessName, txtAddress, txtZipCode, txtCity, txtState, txtNameOwner, txtCellphoneOwner, txtEmailOwner, txtNameContact, txtCellphoneContact, txtEmailContact, txtWebsiteBusiness, calendar);
+                    em.btnModificar.setVisible(true);
+                    em.btnActivar.setVisible(true);
+                    em.btnInactivar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    em.Eliminar(txtId);
+                    em.btnEliminar.setVisible(true);
                 }
                 break;
         }
@@ -550,22 +577,31 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    tb.CargarDatosTable("");
+                    tb.btnActivar.setVisible(false);
+                    tb.btnCancelar.setVisible(false);
+                    tb.btnEliminar.setVisible(false);
+                    tb.btnGrabar.setVisible(false);
+                    tb.btnInactivar.setVisible(false);
+                    tb.btnModificar.setVisible(false);
+                    tb.btnNuevo.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    tb.Guardar();
+                    tb.btnGrabar.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    tb.ModificarTrabajador(txtId, txtTipoDocumento, txtNumeroDocumento, txtNombres, cbxSexo, JDateFechaNac, txtEdad, txtDireccion, txtZipCode, txtCiudad, txtState, txtTelefono, txtEmail, dateIngreso);
+                    tb.btnModificar.setVisible(true);
+                    tb.btnNuevo.setVisible(true);
+                    tb.btnActivar.setVisible(true);
+                    tb.btnInactivar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    tb.Eliminar(txtCodigo);
+                    tb.btnEliminar.setVisible(true);
                 }
                 break;
         }
@@ -575,22 +611,26 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    tf.MostrarServicios("");
+                    tf.btnCancelar.setVisible(false);
+                    tf.btnEliminar.setVisible(false);
+                    tf.btnGuardar.setVisible(false);
+                    tf.btnModificar.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    tf.Insertar();
+                    tf.btnGuardar.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    tf.Modificar(txtId, txtServicio, txtPrecio);
+                    tf.btnModificar.setVisible(true);
+                    tf.btnCancelar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    tf.Eliminar(txtCodigo);
+                    tf.btnEliminar.setVisible(true);
                 }
                 break;
         }
@@ -600,22 +640,32 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    p.CargarDatosTable("");
+                    p.btnActivar.setVisible(false);
+                    p.btnAdd.setVisible(false);
+                    p.btnCancel.setVisible(false);
+                    p.btnDelete.setVisible(false);
+                    p.btnInactivar.setVisible(false);
+                    p.btnNew.setVisible(false);
+                    p.btnUpdate.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    p.Guardar();
+                    p.btnNew.setVisible(true);
+                    p.btnAdd.setVisible(true);
+                    p.btnCancel.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    // Implementar lógica de editar
+                    p.btnUpdate.setVisible(true);
+                    p.btnActivar.setVisible(true);
+                    p.btnInactivar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    p.Eliminar(txtCodigo);
+                    p.btnDelete.setVisible(true);
                 }
                 break;
         }
@@ -650,22 +700,31 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    pr.MostrarProveedor("");
+                    pr.btnCancel.setVisible(false);
+                    pr.btnEliminar.setVisible(false);
+                    pr.btnGrabar.setVisible(false);
+                    pr.btnInactivar.setVisible(false);
+                    pr.btnModificar.setVisible(false);
+                    pr.btnNew.setVisible(false);
+                    pr.btnReingresar.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    pr.Insertar();
+                    pr.btnGrabar.setVisible(true);
+                    pr.btnNew.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    pr.Modificar(txtUsuario, txtUsuario, txtAddress, txtZipCode, txtCity, txtState, txtPhoneNumber, txtWebsite, txtEmail);
+                    pr.btnModificar.setVisible(true);
+                    pr.btnInactivar.setVisible(true);
+                    pr.btnReingresar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    pr.Eliminar(txtCodigo);
+                    pr.btnEliminar.setVisible(true);
                 }
                 break;
         }
@@ -725,12 +784,15 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    // Implementar lógica de visualizar
+                    at.btnFiltrar.setVisible(true);
+                    at.btnMostrarTodo.setVisible(true);
+                    at.btnSoloEmpresa.setVisible(true);
+                    at.btnProgramar.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    // Implementar lógica de agregar
+                    at.btnProgramar.setVisible(true);
                 }
                 break;
             case 4: // Editar
@@ -750,22 +812,31 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    pt.Mostrar(tbPuestosDeTrabajo);
+                    pt.btnActivar.setVisible(false);
+                    pt.btnCancelar.setVisible(false);
+                    pt.btnDesactivar.setVisible(false);
+                    pt.btnEliminar.setVisible(false);
+                    pt.btnGuardar.setVisible(false);
+                    pt.btnModificar.setVisible(false);
+                    pt.btnNuevoTipoDeTrabajo.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    // Implementar lógica de agregar
+                    pt.btnGuardar.setVisible(true);
+                    pt.btnCancelar.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    // Implementar lógica de editar
+                    pt.btnModificar.setVisible(true);
+                    pt.btnActivar.setVisible(true);
+                    pt.btnDesactivar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    // Implementar lógica de eliminar
+                    pt.btnEliminar.setVisible(true);
                 }
                 break;
         }
@@ -775,22 +846,28 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    // Implementar lógica de visualizar
+                    fp.btnActivar.setVisible(false);
+                    fp.btnCancelar.setVisible(false);
+                    fp.btnEliminar.setVisible(false);
+                    fp.btnGuardar.setVisible(false);
+                    fp.btnInactivar.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    // Implementar lógica de agregar
+                    fp.btnGuardar.setVisible(true);
+                    fp.btnCancelar.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    // Implementar lógica de editar
+                    fp.btnInactivar.setVisible(true);
+                    fp.btnActivar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    // Implementar lógica de eliminar
+                    fp.btnEliminar.setVisible(true);
                 }
                 break;
         }
@@ -800,17 +877,20 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    // Implementar lógica de visualizar
+                    ms.btnAddMenu.setVisible(false);
+                    ms.btnAddSubmenu.setVisible(false);
+                    ms.btnModificar.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    // Implementar lógica de agregar
+                    ms.btnAddMenu.setVisible(true);
+                    ms.btnAddSubmenu.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    // Implementar lógica de editar
+                    ms.btnModificar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
@@ -825,22 +905,34 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    c.MostrarClientes("");
+                    c.btnActivar.setVisible(false);
+                    c.btnActualizar.setVisible(false);
+                    c.btnBorrar.setVisible(false);
+                    c.btnCancelar.setVisible(false);
+                    c.btnGuardar.setVisible(false);
+                    c.btnInactivar.setVisible(false);
+                    c.btnLimpiar.setVisible(false);
+                    c.btnNuevo.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    c.InsertarCliente();
+                    c.btnGuardar.setVisible(true);
+                    c.btnCancelar.setVisible(true);
+                    c.btnLimpiar.setVisible(true);
+                    c.btnNuevo.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    c.ModificarCliente(txtCodigo, txtIdBusiness, txtNameCustomer, txtNameAddress, txtZipCode, txtCity, txtState, txtPhoneNumber, txtEmail, txtArea, txtNotaCliente);
+                    c.btnActivar.setVisible(true);
+                    c.btnActualizar.setVisible(true);
+                    c.btnInactivar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    c.EliminarClientes(txtCodigo);
+                    c.btnBorrar.setVisible(true);
                 }
                 break;
         }
@@ -850,22 +942,30 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    mc.CargarDatosTabla("");
+                    mc.btnActivar.setVisible(false);
+                    mc.btnCancelar.setVisible(false);
+                    mc.btnEliminar.setVisible(false);
+                    mc.btnGuardar.setVisible(false);
+                    mc.btnInactivar.setVisible(false);
+                    mc.btnModificar.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    mc.Guardar();
+                    mc.btnGuardar.setVisible(true);
+                    mc.btnCancelar.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    mc.Modificar(txtId, txtNombre);
+                    mc.btnModificar.setVisible(true);
+                    mc.btnActivar.setVisible(true);
+                    mc.btnInactivar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    mc.Eliminar(txtId);
+                    mc.btnEliminar.setVisible(true);
                 }
                 break;
         }
@@ -875,22 +975,30 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    // Implementar lógica de visualizar
+                    un.btnActivar.setVisible(false);
+                    un.btnCancelar.setVisible(false);
+                    un.btnEliminar.setVisible(false);
+                    un.btnGuardar.setVisible(false);
+                    un.btnInactivar.setVisible(false);
+                    un.btnModificar.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    // Implementar lógica de agregar
+                    un.btnGuardar.setVisible(true);
+                    un.btnCancelar.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    // Implementar lógica de editar
+                    un.btnActivar.setVisible(true);
+                    un.btnInactivar.setVisible(true);
+                    un.btnModificar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    // Implementar lógica de eliminar
+                    un.btnEliminar.setVisible(true);
                 }
                 break;
         }
@@ -900,22 +1008,32 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    // Implementar lógica de visualizar
+                    tp.btnActivar.setVisible(false);
+                    tp.btnCancelar.setVisible(false);
+                    tp.btnEliminar.setVisible(false);
+                    tp.btnGuardar.setVisible(false);
+                    tp.btnInactivar.setVisible(false);
+                    tp.btnModificar.setVisible(false);
+                    tp.btnLimpiar.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
-                    // Implementar lógica de agregar
+                    tp.btnCancelar.setVisible(true);
+                    tp.btnGuardar.setVisible(true);
+                    tp.btnLimpiar.setVisible(true);
                 }
                 break;
             case 4: // Editar
                 if (selected) {
-                    // Implementar lógica de editar
+                    tp.btnActivar.setVisible(true);
+                    tp.btnInactivar.setVisible(true);
+                    tp.btnModificar.setVisible(true);
                 }
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    // Implementar lógica de eliminar
+                    tp.btnEliminar.setVisible(true);
                 }
                 break;
         }
@@ -925,7 +1043,12 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
-                    // Implementar lógica de visualizar
+                    tpm.btnActivar.setVisible(false);
+                    tpm.btnCancelar.setVisible(false);
+                    tpm.btnEliminar.setVisible(false);
+                    tpm.btnGuardar.setVisible(false);
+                    tpm.btnInactivar.setVisible(false);
+                    tpm.btnModificar.setVisible(false);
                 }
                 break;
             case 3: // Agregar
@@ -1512,30 +1635,37 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     private int obtenerMenuId(String menuName) {
         String sql = "SELECT id_menu FROM menus WHERE nombre_menu = ?";
         try (PreparedStatement ps = conect.prepareStatement(sql)) {
-            ps.setString(1, menuName);
+            ps.setString(1, menuName);  // Asegúrate de que el nombre de columna sea correcto
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt("id");
+                System.out.println("Menu ID encontrado: " + rs.getInt("id_menu"));
+                return rs.getInt("id_menu");  // Verifica que el nombre de la columna es 'id_menu'
+            } else {
+                System.out.println("No se encontró menu con el nombre: " + menuName);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1;
+
+        return -1;  // Devuelve -1 si no se encuentra un resultado válido
     }
 
     // Método para obtener el ID del submenú
     private int obtenerSubmenuId(String submenuName) {
         String sql = "SELECT id_submenu FROM submenus WHERE nombre_submenu = ?";
         try (PreparedStatement ps = conect.prepareStatement(sql)) {
-            ps.setString(1, submenuName);
+            ps.setString(1, submenuName);  // Asegúrate de que el nombre de columna sea correcto
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                return rs.getInt("id_submenu");
+                System.out.println("Submenu ID encontrado: " + rs.getInt("id_submenu"));
+                return rs.getInt("id_submenu");  // Verifica que el nombre de la columna es 'id_submenu'
+            } else {
+                System.out.println("No se encontró submenu con el nombre: " + submenuName);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1;
+        return -1;  // Devuelve -1 si no se encuentra un resultado válido
     }
 
     // Método para obtener el ID del permiso basado en la columna
@@ -1550,22 +1680,26 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
             case 5:
                 return 4; // Eliminar
             default:
-                return -1;
+                System.out.println("Error: Columna no válida para permisos.");
+                System.out.println("Obteniendo permiso para la columna: " + column);
+                return -1;  // Devuelve -1 si no es una columna válida
+
         }
     }
 
     // Método para guardar el permiso en la base de datos
     private void guardarPermisoEnBaseDeDatos(String menuName, String submenuName, int column, Boolean selected) {
-        int menuId = obtenerMenuId(menuName);
-        int submenuId = obtenerSubmenuId(submenuName);
-        int permisoId = obtenerPermisoIdPorColumna(column);
+        int menuId = obtenerMenuId(menuName);    // Cambiar para que obtenga el ID correcto del menú
+        int submenuId = obtenerSubmenuId(submenuName); // Cambiar para obtener el ID correcto del submenú
+        int permisoId = obtenerPermisoIdPorColumna(column); // Cambiar para obtener el permiso (2, 3, 4 o 5)
 
         if (menuId == -1 || submenuId == -1 || permisoId == -1) {
             System.out.println("Error: No se pudo obtener el ID del menú, submenú o permiso.");
             return;
         }
 
-        String sql = "INSERT INTO permisos_menus_submenus (menu_id, submenu_id, permiso_id, estado) VALUES (?, ?, ?, ?) "
+        // Cambiar a roles_permisos si es la tabla correcta
+        String sql = "INSERT INTO roles_permisos (menu_id, submenu_id, permiso_id, estado) VALUES (?, ?, ?, ?) "
                 + "ON DUPLICATE KEY UPDATE estado = ?";
 
         try (PreparedStatement ps = conect.prepareStatement(sql)) {
@@ -1590,54 +1724,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         repaint();
     }
 
-//    private void initTable(javax.swing.JTable table, javax.swing.JButton btn) {
-//        addCheckBox(2, table);
-//        addCheckBox(3, table);
-//        addCheckBox(4, table);
-//        addCheckBox(5, table);
-//        addCheckBox(6, table);
-//        btn.setVisible(false); // Botón oculto al inicio
-//    }
-//
-//    private void addTableModelListener(javax.swing.JTable table, javax.swing.JButton btn) {
-//        table.getModel().addTableModelListener(e -> {
-//            if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
-//                int column = e.getColumn();
-//                int row = e.getFirstRow();
-//
-//                if (column < 2 || column > 5) {
-//                    return; // No hacemos nada si se modifica una columna distinta a las primeras 4 columnas
-//                }
-//
-//                boolean allSelected = true;
-//
-//                for (int i = 2; i <= 5; i++) {
-//                    Object value = table.getValueAt(row, i);
-//                    if (!(value instanceof Boolean) || !(Boolean) value) {
-//                        allSelected = false;
-//                        break;
-//                    }
-//                }
-//
-//                // Si todas las primeras 4 casillas están marcadas, marcamos la casilla 5, si no, la desmarcamos
-//                table.setValueAt(allSelected, row, 6);
-//
-//                // Mostramos u ocultamos el botón dependiendo del estado de la casilla 5
-//                btn.setVisible(allSelected);
-//                updateLayout();
-//            }
-//        });
-//    }
-//
-//    private void addCheckBox(int column, javax.swing.JTable table) {
-//        TableColumn tc = table.getColumnModel().getColumn(column);
-//        tc
-//                .setCellEditor(table.getDefaultEditor(Boolean.class
-//                ));
-//        tc
-//                .setCellRenderer(table.getDefaultRenderer(Boolean.class
-//                ));
-//    }
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -2180,12 +2266,12 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdministracion;
     private javax.swing.JButton btnAdmision;
-    private javax.swing.JButton btnCancelar;
-    private javax.swing.JButton btnGrabar;
-    private javax.swing.JButton btnModificar;
+    public javax.swing.JButton btnCancelar;
+    public javax.swing.JButton btnGrabar;
+    public javax.swing.JButton btnModificar;
     private javax.swing.JButton btnRegistros;
     private javax.swing.JButton btnReportes;
-    private javax.swing.JButton btnSalir;
+    public javax.swing.JButton btnSalir;
     private javax.swing.JComboBox<String> cbxTPU;
     private javax.swing.JCheckBox chAdministracion;
     private javax.swing.JCheckBox chAdmision;

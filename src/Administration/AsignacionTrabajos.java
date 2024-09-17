@@ -427,14 +427,10 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
                         .addComponent(btnSoloEmpresa)
                         .addGap(57, 57, 57)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                         .addGap(114, 114, 114)
                         .addComponent(btnMostrarTodo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnGuia)
-                        .addGap(91, 91, 91)
-                        .addComponent(btnProgramar, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(16, 16, 16))
+                        .addContainerGap())
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(txtIdTrabajador, javax.swing.GroupLayout.DEFAULT_SIZE, 76, Short.MAX_VALUE)
@@ -453,8 +449,15 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
                                 .addComponent(btnSalir)
                                 .addContainerGap())
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(btnFiltrar, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(176, 176, 176))))))
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(btnProgramar, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(109, 109, 109)
+                                        .addComponent(btnGuia))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(btnFiltrar, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(148, 148, 148)))
+                                .addGap(28, 28, 28))))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -462,9 +465,9 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cbSeleccionaTodo)
-                    .addComponent(btnProgramar, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnMostrarTodo)
-                    .addComponent(btnGuia))
+                    .addComponent(btnGuia)
+                    .addComponent(btnProgramar, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(9, 9, 9))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(13, 13, 13)
@@ -618,12 +621,12 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnFiltrar;
+    public javax.swing.JButton btnFiltrar;
     private javax.swing.JButton btnGuia;
-    private javax.swing.JButton btnMostrarTodo;
-    private javax.swing.JButton btnProgramar;
+    public javax.swing.JButton btnMostrarTodo;
+    public javax.swing.JButton btnProgramar;
     private javax.swing.JButton btnSalir;
-    private javax.swing.JButton btnSoloEmpresa;
+    public javax.swing.JButton btnSoloEmpresa;
     private javax.swing.JCheckBox cbSeleccionaTodo;
     private javax.swing.JComboBox<String> cbxEmpresa;
     private javax.swing.JComboBox<String> cbxTrabajador;
