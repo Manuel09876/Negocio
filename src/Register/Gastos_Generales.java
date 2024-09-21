@@ -478,13 +478,12 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jLabel11 = new javax.swing.JLabel();
         txtBuscar = new javax.swing.JTextField();
-        btnBuscar = new javax.swing.JButton();
         btnNuevo = new javax.swing.JButton();
         btnGuardar = new javax.swing.JButton();
         btnModificar = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         btnExit = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        btnLimpiar = new javax.swing.JButton();
         txtFrecuencia = new javax.swing.JTextField();
         jLabel19 = new javax.swing.JLabel();
         btnRegistrarCredito = new javax.swing.JButton();
@@ -641,17 +640,6 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         });
         jPanel2.add(txtBuscar, new org.netbeans.lib.awtextra.AbsoluteConstraints(86, 13, 190, -1));
 
-        btnBuscar.setBackground(new java.awt.Color(0, 102, 255));
-        btnBuscar.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
-        btnBuscar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/lupa.png"))); // NOI18N
-        btnBuscar.setText("Buscar");
-        btnBuscar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnBuscarActionPerformed(evt);
-            }
-        });
-        jPanel2.add(btnBuscar, new org.netbeans.lib.awtextra.AbsoluteConstraints(288, 11, -1, 30));
-
         btnNuevo.setBackground(new java.awt.Color(0, 102, 255));
         btnNuevo.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
         btnNuevo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/new product.png"))); // NOI18N
@@ -707,9 +695,9 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         });
         jPanel2.add(btnExit, new org.netbeans.lib.awtextra.AbsoluteConstraints(950, 230, -1, 30));
 
-        jButton1.setBackground(new java.awt.Color(0, 102, 255));
-        jButton1.setText("Limpiar");
-        jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(850, 10, -1, 30));
+        btnLimpiar.setBackground(new java.awt.Color(0, 102, 255));
+        btnLimpiar.setText("Limpiar");
+        jPanel2.add(btnLimpiar, new org.netbeans.lib.awtextra.AbsoluteConstraints(850, 10, -1, 30));
         jPanel2.add(txtFrecuencia, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 250, 100, -1));
 
         jLabel19.setText("Inicial");
@@ -795,10 +783,6 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
     }//GEN-LAST:event_txtBuscarKeyTyped
 
-    private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
-
-    }//GEN-LAST:event_btnBuscarActionPerformed
-
     private void btnNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNuevoActionPerformed
         txtRecibo.setText("");
         txtSubTotal.setText("");
@@ -878,22 +862,21 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnBorrar;
-    private javax.swing.JButton btnBuscar;
-    private javax.swing.JButton btnCancel;
+    public javax.swing.JButton btnBorrar;
+    public javax.swing.JButton btnCancel;
     private javax.swing.JButton btnExit;
-    private javax.swing.JButton btnGuardar;
+    public javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnGuia;
-    private javax.swing.JButton btnModificar;
-    private javax.swing.JButton btnNuevo;
-    private javax.swing.JButton btnRegistrarCredito;
+    public javax.swing.JButton btnLimpiar;
+    public javax.swing.JButton btnModificar;
+    public javax.swing.JButton btnNuevo;
+    public javax.swing.JButton btnRegistrarCredito;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<String> cbxPagarCon;
     private javax.swing.JComboBox<String> cbxProveedor;
     private javax.swing.JComboBox<String> cbxTipodeGastGen;
     private com.toedter.calendar.JDateChooser dateFecha;
     private com.toedter.calendar.JDateChooser dateFechaPagoCred;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

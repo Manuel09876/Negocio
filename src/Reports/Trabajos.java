@@ -592,12 +592,12 @@ public class Trabajos extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnFiltrar;
-    private javax.swing.JButton btnMostrarTodo;
-    private javax.swing.JButton btnReasignar;
-    private javax.swing.JButton btnReprogramar;
+    public javax.swing.JButton btnFiltrar;
+    public javax.swing.JButton btnMostrarTodo;
+    public javax.swing.JButton btnReasignar;
+    public javax.swing.JButton btnReprogramar;
     private javax.swing.JButton btnSalir;
-    private javax.swing.JButton btnTrabajoRealizado;
+    public javax.swing.JButton btnTrabajoRealizado;
     private javax.swing.JCheckBox cbSeleccion;
     private javax.swing.JComboBox<String> cbxTrabajador;
     private javax.swing.JPanel jPanel1;

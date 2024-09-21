@@ -246,13 +246,13 @@ public class Orden extends javax.swing.JInternalFrame {
 
         btnGenerarCompra.setBackground(new java.awt.Color(204, 204, 204));
         btnGenerarCompra.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
-        btnGenerarCompra.setText("Generar");
+        btnGenerarCompra.setText("Generar Servicios");
         btnGenerarCompra.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnGenerarCompraActionPerformed(evt);
             }
         });
-        jPanel16.add(btnGenerarCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 390, 90, 30));
+        jPanel16.add(btnGenerarCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 390, 150, 30));
 
         jLabel46.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel46.setText("Cliente");
@@ -290,7 +290,7 @@ public class Orden extends javax.swing.JInternalFrame {
         txtNotaE.setRows(5);
         jScrollPane1.setViewportView(txtNotaE);
 
-        jPanel16.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 420, 180, 60));
+        jPanel16.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 420, 180, 60));
 
         jLabel3.setFont(new java.awt.Font("Times New Roman", 1, 14)); // NOI18N
         jLabel3.setText("Nota Empresa");
@@ -652,14 +652,14 @@ public class Orden extends javax.swing.JInternalFrame {
     private com.toedter.calendar.JDateChooser DateInicio;
     public javax.swing.JLabel JLabelTotal;
     public javax.swing.JTable TableOrdenDeServicio;
-    private javax.swing.JButton btnAdicionar;
-    private javax.swing.JButton btnEliminar;
+    public javax.swing.JButton btnAdicionar;
+    public javax.swing.JButton btnEliminar;
     public javax.swing.JButton btnGenerarCompra;
     private javax.swing.JButton btnGuia;
-    private javax.swing.JButton btnLista;
-    private javax.swing.JButton btnMTP;
-    private javax.swing.JButton btnServicios;
-    private javax.swing.JButton btnTotal;
+    public javax.swing.JButton btnLista;
+    public javax.swing.JButton btnMTP;
+    public javax.swing.JButton btnServicios;
+    public javax.swing.JButton btnTotal;
     private javax.swing.JComboBox<String> cbxBusiness;
     public javax.swing.JComboBox<Object> cbxCustomer;
     private javax.swing.JComboBox<String> cbxTrabajador;

@@ -553,9 +553,9 @@ public class Configuracion extends javax.swing.JInternalFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel LabelLogo;
-    private javax.swing.JButton btnActualizar;
-    private javax.swing.JButton btnCargarLogo;
-    private javax.swing.JButton btnGuardar;
+    public javax.swing.JButton btnActualizar;
+    public javax.swing.JButton btnCargarLogo;
+    public javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnSalir;
     private com.toedter.calendar.JDateChooser dateFechaInicio;

@@ -655,11 +655,11 @@ public class Sueldos extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTable TableSueldos;
-    private javax.swing.JButton btnCargarPeriodos;
-    private javax.swing.JButton btnHistorial;
-    private javax.swing.JButton btnLimpiar;
-    private javax.swing.JButton btnReporte;
+    public javax.swing.JTable TableSueldos;
+    public javax.swing.JButton btnCargarPeriodos;
+    public javax.swing.JButton btnHistorial;
+    public javax.swing.JButton btnLimpiar;
+    public javax.swing.JButton btnReporte;
     private javax.swing.JButton btnSalir;
     private javax.swing.JComboBox<String> cbxNumeroPeriodo;
     private javax.swing.JComboBox<String> cbxPeriodoPago;
@@ -683,7 +683,7 @@ public class Sueldos extends javax.swing.JInternalFrame {
     private javax.swing.JTable tablaResumen;
     private javax.swing.JTable tablaTrabajadores;
     private javax.swing.JTextField txtFechaPeriodo;
-    private javax.swing.JTextField txtIdSueldos;
+    public javax.swing.JTextField txtIdSueldos;
     private javax.swing.JTextField txtIdTrabajador;
     // End of variables declaration//GEN-END:variables
 

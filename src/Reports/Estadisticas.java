@@ -378,7 +378,7 @@ public class Estadisticas extends javax.swing.JInternalFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton btnHistorialCompra;
-    private javax.swing.JButton btnImprimirGrafica;
+    public javax.swing.JButton btnImprimirGrafica;
     private javax.swing.JButton btnSalir;
     private com.toedter.calendar.JDateChooser dateFin;
     private com.toedter.calendar.JDateChooser dateInicio;

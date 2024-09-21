@@ -260,6 +260,7 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
         setMaximizable(true);
         setResizable(true);
         setTitle("Trabajos Realizados");
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel12.setBackground(new java.awt.Color(153, 153, 255));
         jPanel12.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -288,7 +289,7 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
         });
         jScrollPane14.setViewportView(tbVentas);
 
-        jPanel12.add(jScrollPane14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 120, 1170, 270));
+        jPanel12.add(jScrollPane14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 120, 1170, 240));
 
         btnBusquedaEmpresa.setText("Busqueda Empresa");
         btnBusquedaEmpresa.addActionListener(new java.awt.event.ActionListener() {
@@ -363,6 +364,8 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
 
         jLabel15.setText("Cliente");
         jPanel12.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, -1, -1));
+
+        getContentPane().add(jPanel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, 1190, 372));
 
         jPanel1.setBackground(new java.awt.Color(153, 255, 153));
 
@@ -491,26 +494,7 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
                 .addContainerGap(35, Short.MAX_VALUE))
         );
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, 1190, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, 406, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(23, 23, 23))
-        );
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 390, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -737,14 +721,14 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton btnBusquedaEmpresa;
-    private javax.swing.JButton btnBusquedaFechaEmpresa;
-    private javax.swing.JButton btnMostrarTodo;
+    public javax.swing.JButton btnBusquedaFechaEmpresa;
+    public javax.swing.JButton btnMostrarTodo;
     private javax.swing.JButton btnSalir;
     private javax.swing.JCheckBox cbSeleccionaTodo;
     private javax.swing.JComboBox<String> cbxEmpresa;
     private com.toedter.calendar.JDateChooser dateFin;
     private com.toedter.calendar.JDateChooser dateInicio;
-    private javax.swing.JButton jButton1;
+    public javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

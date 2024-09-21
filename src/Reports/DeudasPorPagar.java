@@ -362,7 +362,6 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
         jPanel12 = new javax.swing.JPanel();
         txtBuscarCompra = new javax.swing.JTextField();
-        btnHistorialCompra = new javax.swing.JButton();
         btnSalir = new javax.swing.JButton();
         cbSeleccionaTodo = new javax.swing.JCheckBox();
         btnPagadas = new javax.swing.JButton();
@@ -383,10 +382,6 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         jPanel12.setBackground(new java.awt.Color(204, 204, 204));
         jPanel12.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
         jPanel12.add(txtBuscarCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 30, 240, 30));
-
-        btnHistorialCompra.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/lupa.png"))); // NOI18N
-        btnHistorialCompra.setText("Buscar");
-        jPanel12.add(btnHistorialCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 20, 100, 40));
 
         btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
         btnSalir.setText("Salir");
@@ -491,12 +486,11 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnEliminar;
-    public javax.swing.JButton btnHistorialCompra;
-    private javax.swing.JButton btnPagadas;
+    public javax.swing.JButton btnEliminar;
+    public javax.swing.JButton btnPagadas;
     private javax.swing.JButton btnSalir;
-    private javax.swing.JCheckBox cbSeleccionaTodo;
-    private javax.swing.JButton jButton1;
+    public javax.swing.JCheckBox cbSeleccionaTodo;
+    public javax.swing.JButton jButton1;
     private com.toedter.calendar.JDateChooser jDateChooser1;
     private com.toedter.calendar.JDateChooser jDateChooser2;
     private javax.swing.JLabel jLabel1;

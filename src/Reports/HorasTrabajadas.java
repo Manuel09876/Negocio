@@ -1302,10 +1302,10 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JTable Tabla;
-    private javax.swing.JButton btnCierre;
-    private javax.swing.JButton btnEliminar;
+    public javax.swing.JButton btnCierre;
+    public javax.swing.JButton btnEliminar;
     public javax.swing.JButton btnGenerar;
-    private javax.swing.JButton btnModificar;
+    public javax.swing.JButton btnModificar;
     private javax.swing.JButton btnMostrarDatos;
     private javax.swing.JButton btnSalir;
     private javax.swing.JComboBox<String> cbxTrabajador;

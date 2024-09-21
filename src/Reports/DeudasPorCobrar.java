@@ -1189,13 +1189,13 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnAbrirPDF;
+    public javax.swing.JButton btnAbrirPDF;
     public javax.swing.JButton btnBusquedaEmpresa;
-    private javax.swing.JButton btnBusquedaFechaEmpresa;
-    private javax.swing.JButton btnEnviarEmail;
-    private javax.swing.JButton btnMostrarCanceladas;
-    private javax.swing.JButton btnMostrarDeudas;
-    private javax.swing.JButton btnPagar;
+    public javax.swing.JButton btnBusquedaFechaEmpresa;
+    public javax.swing.JButton btnEnviarEmail;
+    public javax.swing.JButton btnMostrarCanceladas;
+    public javax.swing.JButton btnMostrarDeudas;
+    public javax.swing.JButton btnPagar;
     private javax.swing.JButton btnSalir;
     private javax.swing.JCheckBox cbSeleccionaTodo;
     private javax.swing.JComboBox<String> cbxEmpresa;

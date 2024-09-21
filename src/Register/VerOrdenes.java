@@ -513,11 +513,11 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable TablaRegistro;
-    private javax.swing.JButton btnBuscarFechaEmpresa;
+    public javax.swing.JButton btnBuscarFechaEmpresa;
     private javax.swing.JButton btnGuia;
-    private javax.swing.JButton btnMostrarTodo;
+    public javax.swing.JButton btnMostrarTodo;
     private javax.swing.JButton btnSalir;
-    private javax.swing.JButton btnSoloEmpresa;
+    public javax.swing.JButton btnSoloEmpresa;
     private javax.swing.JComboBox<String> cbxEmpresa;
     private com.toedter.calendar.JDateChooser dateFin;
     private com.toedter.calendar.JDateChooser dateInicio;

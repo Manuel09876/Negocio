@@ -276,7 +276,7 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
             String[] RegistroBD = new String[2];
             modelo = new DefaultTableModel(null, tituloTabla);
             tbPreciosCot.setModel(modelo);
-            String sql = "SELECT services.servicio, services.precio FROM services INNER JOIN bussiness ON services.id_empresa=bussiness.idBusiness WHERE id_empresa=3";
+            String sql = "SELECT services.servicio, services.precio FROM services INNER JOIN bussiness ON services.id_empresa=bussiness.idBusiness WHERE id_empresa=1";
             Statement st = connect.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
@@ -687,7 +687,7 @@ private void guardarPDFEnBaseDeDatos(int cotizacionId, String filePath) {
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
-        jButton3 = new javax.swing.JButton();
+        btnGenerar = new javax.swing.JButton();
         jDateChooser3 = new com.toedter.calendar.JDateChooser();
         jLabel11 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
@@ -791,13 +791,13 @@ private void guardarPDFEnBaseDeDatos(int cotizacionId, String filePath) {
         jLabel10.setText("Servicios");
         jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(439, 126, -1, -1));
 
-        jButton3.setText("Generar");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        btnGenerar.setText("Generar");
+        btnGenerar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                btnGenerarActionPerformed(evt);
             }
         });
-        jPanel1.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(965, 58, -1, -1));
+        jPanel1.add(btnGenerar, new org.netbeans.lib.awtextra.AbsoluteConstraints(965, 58, -1, -1));
         jPanel1.add(jDateChooser3, new org.netbeans.lib.awtextra.AbsoluteConstraints(826, 47, 120, -1));
 
         jLabel11.setText("F.Cotizacion");
@@ -974,10 +974,10 @@ private void guardarPDFEnBaseDeDatos(int cotizacionId, String filePath) {
 
     }//GEN-LAST:event_btnEliminarActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+    private void btnGenerarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerarActionPerformed
         GuardarCotizacion();
         LimpiarCajas();
-    }//GEN-LAST:event_jButton3ActionPerformed
+    }//GEN-LAST:event_btnGenerarActionPerformed
 
     private void tbCotizacionesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbCotizacionesMouseClicked
         // TODO add your handling code here:
@@ -989,10 +989,10 @@ private void guardarPDFEnBaseDeDatos(int cotizacionId, String filePath) {
     private com.toedter.calendar.JDateChooser DateInicio;
     private javax.swing.JLabel Labeltotalpagar;
     private javax.swing.JTable TableOrdenDeServiciosCot;
-    private javax.swing.JButton btnAdicionar;
-    private javax.swing.JButton btnEliminar;
+    public javax.swing.JButton btnAdicionar;
+    public javax.swing.JButton btnEliminar;
+    public javax.swing.JButton btnGenerar;
     private javax.swing.JButton btnSalir;
-    private javax.swing.JButton jButton3;
     private com.toedter.calendar.JDateChooser jDateChooser3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;

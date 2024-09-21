@@ -263,7 +263,7 @@ public class Stock extends javax.swing.JInternalFrame {
         jPanel12 = new javax.swing.JPanel();
         jScrollPane14 = new javax.swing.JScrollPane();
         tbStock = new javax.swing.JTable();
-        btnHistorialCompra = new javax.swing.JButton();
+        btnAsignar = new javax.swing.JButton();
         txtIdProducto = new javax.swing.JTextField();
         btnSalir = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -301,8 +301,8 @@ public class Stock extends javax.swing.JInternalFrame {
 
         jPanel12.add(jScrollPane14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 90, 990, 250));
 
-        btnHistorialCompra.setText("Generar Reporte");
-        jPanel12.add(btnHistorialCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 20, 120, 50));
+        btnAsignar.setText("Asignar");
+        jPanel12.add(btnAsignar, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 20, 120, 50));
         jPanel12.add(txtIdProducto, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 30, 70, 40));
 
         btnSalir.setText("Salir");
@@ -360,7 +360,7 @@ public class Stock extends javax.swing.JInternalFrame {
             }
         });
 
-        btnSolicitantes.setText("Solicitantes");
+        btnSolicitantes.setText("Solicitudes");
         btnSolicitantes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSolicitantesActionPerformed(evt);
@@ -518,7 +518,7 @@ public class Stock extends javax.swing.JInternalFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnActualizarStock;
-    public javax.swing.JButton btnHistorialCompra;
+    public javax.swing.JButton btnAsignar;
     private javax.swing.JButton btnInstruccion;
     private javax.swing.JButton btnMostrarTodo;
     private javax.swing.JButton btnSalir;

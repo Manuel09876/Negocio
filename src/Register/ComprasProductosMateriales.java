@@ -1026,11 +1026,11 @@ public class ComprasProductosMateriales extends javax.swing.JInternalFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JLabel JLabelTotalCompra;
-    private javax.swing.JButton btnEliminar;
-    private javax.swing.JButton btnGuardar;
+    public javax.swing.JButton btnEliminar;
+    public javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnGuia;
-    private javax.swing.JButton btnMostrarStock;
-    private javax.swing.JButton btnRegistrarCredito;
+    public javax.swing.JButton btnMostrarStock;
+    public javax.swing.JButton btnRegistrarCredito;
     private javax.swing.JButton btnSalir;
     private javax.swing.ButtonGroup buttonGroup1;
     public javax.swing.JComboBox<Object> cbxMarca;
