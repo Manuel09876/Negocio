@@ -264,7 +264,7 @@ public class Estadisticas extends javax.swing.JInternalFrame {
 
         jPanel12 = new javax.swing.JPanel();
         txtTotalEgresos = new javax.swing.JTextField();
-        btnHistorialCompra = new javax.swing.JButton();
+        btnGenerarReporte = new javax.swing.JButton();
         txtTotalIngresos = new javax.swing.JTextField();
         btnSalir = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -288,13 +288,13 @@ public class Estadisticas extends javax.swing.JInternalFrame {
         jPanel12.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
         jPanel12.add(txtTotalEgresos, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 70, 150, 30));
 
-        btnHistorialCompra.setText("Generar Reporte");
-        btnHistorialCompra.addActionListener(new java.awt.event.ActionListener() {
+        btnGenerarReporte.setText("Generar Reporte");
+        btnGenerarReporte.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnHistorialCompraActionPerformed(evt);
+                btnGenerarReporteActionPerformed(evt);
             }
         });
-        jPanel12.add(btnHistorialCompra, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 20, 120, 50));
+        jPanel12.add(btnGenerarReporte, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 20, 120, 50));
         jPanel12.add(txtTotalIngresos, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 30, 150, 30));
 
         btnSalir.setText("Salir");
@@ -363,9 +363,9 @@ public class Estadisticas extends javax.swing.JInternalFrame {
         dispose();
     }//GEN-LAST:event_btnSalirActionPerformed
 
-    private void btnHistorialCompraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHistorialCompraActionPerformed
+    private void btnGenerarReporteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerarReporteActionPerformed
         generarGraficas();
-    }//GEN-LAST:event_btnHistorialCompraActionPerformed
+    }//GEN-LAST:event_btnGenerarReporteActionPerformed
 
     private void btnImprimirGraficaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImprimirGraficaActionPerformed
         DefaultCategoryDataset barDataset = createDataset();
@@ -377,7 +377,7 @@ public class Estadisticas extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    public javax.swing.JButton btnHistorialCompra;
+    public javax.swing.JButton btnGenerarReporte;
     public javax.swing.JButton btnImprimirGrafica;
     private javax.swing.JButton btnSalir;
     private com.toedter.calendar.JDateChooser dateFin;

@@ -331,6 +331,7 @@ public class Usuarios extends javax.swing.JInternalFrame {
     public void ModificarUsuario(JTextField codigo, JTextField nombre, JTextField usuario, JTextField password) {
         // Obtener el ID del usuario desde el JTextField
         setIdUsuarios(Integer.parseInt(codigo.getText()));
+        int idRol = Integer.parseInt(txtIdTPU.getText());
 
         // Depuración: Verifica si el ID se obtiene correctamente
         System.out.println("ID del usuario a modificar: " + getIdUsuarios());

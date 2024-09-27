@@ -369,7 +369,7 @@ public class Sueldos extends javax.swing.JInternalFrame {
         jPanel12 = new javax.swing.JPanel();
         jScrollPane14 = new javax.swing.JScrollPane();
         TableSueldos = new javax.swing.JTable();
-        btnHistorial = new javax.swing.JButton();
+        btnMostrar = new javax.swing.JButton();
         txtIdSueldos = new javax.swing.JTextField();
         btnSalir = new javax.swing.JButton();
         cbxTrabajador = new javax.swing.JComboBox<>();
@@ -429,13 +429,13 @@ public class Sueldos extends javax.swing.JInternalFrame {
 
         jPanel12.add(jScrollPane14, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 110, 710, 110));
 
-        btnHistorial.setText("Mostrar");
-        btnHistorial.addActionListener(new java.awt.event.ActionListener() {
+        btnMostrar.setText("Mostrar");
+        btnMostrar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnHistorialActionPerformed(evt);
+                btnMostrarActionPerformed(evt);
             }
         });
-        jPanel12.add(btnHistorial, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 10, 80, 30));
+        jPanel12.add(btnMostrar, new org.netbeans.lib.awtextra.AbsoluteConstraints(720, 10, 80, 30));
         jPanel12.add(txtIdSueldos, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 50, 20));
 
         btnSalir.setText("Salir");
@@ -576,7 +576,7 @@ public class Sueldos extends javax.swing.JInternalFrame {
         dispose();
     }//GEN-LAST:event_btnSalirActionPerformed
 
-    private void btnHistorialActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHistorialActionPerformed
+    private void btnMostrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarActionPerformed
         if (txtIdTrabajador.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Por favor, seleccione un trabajador válido.");
             return;
@@ -613,7 +613,7 @@ public class Sueldos extends javax.swing.JInternalFrame {
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "El ID de trabajador debe ser un número válido.");
         }
-    }//GEN-LAST:event_btnHistorialActionPerformed
+    }//GEN-LAST:event_btnMostrarActionPerformed
 
     private void btnCargarPeriodosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCargarPeriodosActionPerformed
         String tipoPeriodo = cbxPeriodoPago.getSelectedItem().toString();
@@ -657,8 +657,8 @@ public class Sueldos extends javax.swing.JInternalFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JTable TableSueldos;
     public javax.swing.JButton btnCargarPeriodos;
-    public javax.swing.JButton btnHistorial;
     public javax.swing.JButton btnLimpiar;
+    public javax.swing.JButton btnMostrar;
     public javax.swing.JButton btnReporte;
     private javax.swing.JButton btnSalir;
     private javax.swing.JComboBox<String> cbxNumeroPeriodo;

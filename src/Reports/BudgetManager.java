@@ -22,7 +22,7 @@ public class BudgetManager extends javax.swing.JInternalFrame {
     private DefaultTableModel budgetTableModel;
     private JTextField nameField, amountField;
     private JComboBox<String> typeComboBox;
-    private JButton addButton, editButton, deleteButton, exportButton;
+    public JButton addButton, editButton, deleteButton, exportButton;
 
     public BudgetManager() {
         initComponents();

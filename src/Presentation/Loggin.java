@@ -1,5 +1,6 @@
 package Presentation;
 
+import Administration.AsignacionPermisos;
 import Reports.HorasTrabajadas;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,19 +10,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import conectar.Conectar;
+import java.awt.ComponentOrientation;
 
 public class Loggin extends javax.swing.JFrame {
 
     private static final Logger LOGGER = Logger.getLogger(HorasTrabajadas.class.getName());
     private int trabajadorId; // Variable de instancia para almacenar el ID del trabajador
     private HorasTrabajadas ht; // Asegúrate de que esta instancia esté correctamente inicializada
+    private AsignacionPermisos ap;
+    private Conectar conexion;
+    private Connection conect;
 
     public Loggin() {
-        initComponents();
+        initComponents();  // Asegúrate de que los componentes estén inicializados antes
+        conexion = new Conectar();
+        conect = conexion.getConexion();
         ht = new HorasTrabajadas();
-        txtUser.requestFocus();
+        txtUser.requestFocus();  // Ahora puedes llamar a requestFocus() aquí sin problemas
         btnTest.setVisible(false);
-
     }
 
     public void IngresaSistema(String usuario, String contrasena) {
@@ -34,19 +40,18 @@ public class Loggin extends javax.swing.JFrame {
             try (ResultSet result = pst.executeQuery()) {
                 if (result.next()) {
                     String passwordBD = result.getString("password");
-                    System.out.println("Password en BD: " + passwordBD);
-                    System.out.println("Password ingresado: " + contrasena);
-
                     if (passwordBD.equals(contrasena)) {  // Asegúrate de que la comparación sea segura si usas hash
-                        int tipUsu = result.getInt("rol");
+                        int rolId = result.getInt("rol");
                         int idUsuarios = result.getInt("idUsuarios");
-                        System.out.println("ID del usuario al ingresar: " + idUsuarios);
 
                         // Obtener el idTrabajador relacionado con el idUsuarios
                         int idTrabajador = obtenerTrabajadorId(usuario);
                         if (idTrabajador != 0) {
-                            System.out.println("ID del trabajador al ingresar: " + idTrabajador);
                             ht.registrarInicioSesion(idTrabajador); // Registrar inicio de sesión del trabajador
+
+                            // Este código se ejecuta después de que el trabajador inicia sesión
+                            cargarPermisosDelUsuario(rolId); // Cargar y aplicar los permisos
+                            abrirVentanaPrincipal(rolId, usuario);
                         }
                     } else {
                         JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
@@ -56,7 +61,7 @@ public class Loggin extends javax.swing.JFrame {
                 }
             }
         } catch (SQLException ex) {
-            Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, "Error al ingresar al sistema", ex);
+            LOGGER.log(Level.SEVERE, "Error al ingresar al sistema", ex);
             JOptionPane.showMessageDialog(this, "Error al ingresar al sistema. Por favor, intente de nuevo.");
         }
     }
@@ -78,6 +83,28 @@ public class Loggin extends javax.swing.JFrame {
             Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
         }
         return 0;
+    }
+
+    private void cargarPermisosDelUsuario(int rolId) {
+        try {
+            // Crea una nueva instancia de VentanaPrincipal con los datos necesarios
+            VentanaPrincipal ventanaPrincipal = new VentanaPrincipal(rolId, txtUser.getText());
+
+            // Pasar la instancia de VentanaPrincipal a AsignacionPermisos
+            AsignacionPermisos ap = new AsignacionPermisos(ventanaPrincipal);
+
+            // Cargar y aplicar los permisos para el rol
+//            ap.cargarPermisosDelUsuario(rolId); // Implementa este método en AsignacionPermisos
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error al cargar permisos del usuario.");
+        }
+    }
+
+    private void abrirVentanaPrincipal(int rolId, String usuario) {
+        VentanaPrincipal objVP = new VentanaPrincipal(rolId, usuario);
+        objVP.setVisible(true);
+        this.dispose();
     }
 
     @SuppressWarnings("unchecked")
@@ -313,9 +340,6 @@ public class Loggin extends javax.swing.JFrame {
     private javax.swing.JPasswordField txtPassword;
     private javax.swing.JTextField txtUser;
     // End of variables declaration//GEN-END:variables
-
-    Conectar conexion = new Conectar();
-    Connection conect = conexion.getConexion();
 
     private int obtenerTrabajadorId(String usuario) {
         String sql = "SELECT ut.id_trabajador FROM usuario_trabajador ut INNER JOIN usuarios u ON ut.id_usuario = u.idUsuarios WHERE u.usuario = ?";

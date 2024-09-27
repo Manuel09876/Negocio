@@ -1306,7 +1306,7 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     public javax.swing.JButton btnEliminar;
     public javax.swing.JButton btnGenerar;
     public javax.swing.JButton btnModificar;
-    private javax.swing.JButton btnMostrarDatos;
+    public javax.swing.JButton btnMostrarDatos;
     private javax.swing.JButton btnSalir;
     private javax.swing.JComboBox<String> cbxTrabajador;
     private com.toedter.calendar.JDateChooser jDateChooser1;

@@ -254,7 +254,7 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
         jTextField9 = new javax.swing.JTextField();
         jLabel14 = new javax.swing.JLabel();
         jTextField10 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        btnPagar = new javax.swing.JButton();
 
         setIconifiable(true);
         setMaximizable(true);
@@ -389,11 +389,11 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
 
         jLabel14.setText("Total");
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
-        jButton1.setText("PAGAR");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnPagar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
+        btnPagar.setText("PAGAR");
+        btnPagar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnPagarActionPerformed(evt);
             }
         });
 
@@ -447,7 +447,7 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
                         .addGap(18, 18, 18)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jTextField10, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
+                    .addComponent(btnPagar))
                 .addContainerGap(28, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -467,7 +467,7 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel13)
                             .addComponent(jTextField9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton1)))
+                            .addComponent(btnPagar)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel5)
@@ -667,7 +667,7 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
         txtST.setText(tbVentas.getValueAt(seleccionar, 12).toString());
     }//GEN-LAST:event_tbVentasMouseClicked
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnPagarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPagarActionPerformed
     double subtotal = 0.0;
     double impuesto = 0.06; // Impuesto del 6%
     double total = 0.0;
@@ -716,19 +716,19 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
         JOptionPane.showMessageDialog(null, "Antes de obtener los datos, debe de seleccionar por lo menos un checkbox.",
                 "Mensaje", JOptionPane.WARNING_MESSAGE);
     }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnPagarActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton btnBusquedaEmpresa;
     public javax.swing.JButton btnBusquedaFechaEmpresa;
     public javax.swing.JButton btnMostrarTodo;
+    public javax.swing.JButton btnPagar;
     private javax.swing.JButton btnSalir;
     private javax.swing.JCheckBox cbSeleccionaTodo;
     private javax.swing.JComboBox<String> cbxEmpresa;
     private com.toedter.calendar.JDateChooser dateFin;
     private com.toedter.calendar.JDateChooser dateInicio;
-    public javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

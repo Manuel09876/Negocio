@@ -369,7 +369,7 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         jDateChooser2 = new com.toedter.calendar.JDateChooser();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        btnCanceladas = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tbDeudasCombinadas = new javax.swing.JTable();
         jLabel5 = new javax.swing.JLabel();
@@ -378,6 +378,7 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         setIconifiable(true);
         setMaximizable(true);
         setTitle("Deudas por Pagar");
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel12.setBackground(new java.awt.Color(204, 204, 204));
         jPanel12.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -417,8 +418,13 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         jLabel2.setText("Termino");
         jPanel12.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 10, -1, -1));
 
-        jButton1.setText("Canceladas");
-        jPanel12.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 30, 100, -1));
+        btnCanceladas.setText("Canceladas");
+        btnCanceladas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCanceladasActionPerformed(evt);
+            }
+        });
+        jPanel12.add(btnCanceladas, new org.netbeans.lib.awtextra.AbsoluteConstraints(860, 30, 100, -1));
 
         tbDeudasCombinadas.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -439,24 +445,14 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
         jPanel12.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 110, -1, -1));
 
         btnEliminar.setText("Eliminar");
+        btnEliminar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEliminarActionPerformed(evt);
+            }
+        });
         jPanel12.add(btnEliminar, new org.netbeans.lib.awtextra.AbsoluteConstraints(870, 70, -1, -1));
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, 1190, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+        getContentPane().add(jPanel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 6, 1190, 573));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -484,13 +480,21 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
     }//GEN-LAST:event_btnPagadasActionPerformed
 
+    private void btnCanceladasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCanceladasActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnCanceladasActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    public javax.swing.JButton btnCanceladas;
     public javax.swing.JButton btnEliminar;
     public javax.swing.JButton btnPagadas;
     private javax.swing.JButton btnSalir;
     public javax.swing.JCheckBox cbSeleccionaTodo;
-    public javax.swing.JButton jButton1;
     private com.toedter.calendar.JDateChooser jDateChooser1;
     private com.toedter.calendar.JDateChooser jDateChooser2;
     private javax.swing.JLabel jLabel1;
