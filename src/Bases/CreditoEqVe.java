@@ -20,6 +20,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
 public class CreditoEqVe extends javax.swing.JFrame {
+    
+    
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -140,12 +142,14 @@ public class CreditoEqVe extends javax.swing.JFrame {
 
     public CreditoEqVe() {
         initComponents();
+        
         txtIdCompra.setEnabled(false);
         txtIdCredito.setEnabled(false);
 //        initListeners(); //Inicializar los listener
 
     }
-
+    
+    
     private String inicial, diferencia;
 
     public void EnviarDatos(String inicial, String diferencia) {

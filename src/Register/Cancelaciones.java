@@ -6,19 +6,20 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 public class Cancelaciones extends javax.swing.JInternalFrame {
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
-
     public Cancelaciones() {
         initComponents();
+        
         MostrarTabla();
     }
-
+    
+   
     public void MostrarTabla() {
+        Connection connection = null;
         DefaultTableModel modelo = new DefaultTableModel();
         try {
             String[] tituloTabla = {"id", "Empresa", "Fecha", "Nombre", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Email", "Servicio", "Precio", "Status"};
@@ -32,7 +33,10 @@ public class Cancelaciones extends javax.swing.JInternalFrame {
                     + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness\n"
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer WHERE o.estado = 'Inactivo'\n"
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[0] = rs.getString("id");
@@ -66,6 +70,8 @@ public class Cancelaciones extends javax.swing.JInternalFrame {
             tbCancelaciones.getColumnModel().getColumn(11).setPreferredWidth(100);
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

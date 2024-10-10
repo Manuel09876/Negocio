@@ -21,19 +21,21 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 
 public class UsuarioStock extends javax.swing.JFrame {
+    
 
     DefaultTableModel model = new DefaultTableModel();
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
+        
 
     public UsuarioStock() {
         initComponents();
-        
+            
         MostrarTabla("");
     }
-
+    
+    
     public void MostrarTabla(String Valores) {
+        Connection connection = null;
         try {
             String[] titulosTabla = {"Id", "Producto", "Cantidad", "fecha", "Trabajador"}; // Titulos de la Tabla
             String[] RegistroBD = new String[5]; // Registros de la Base de Datos
@@ -46,7 +48,9 @@ public class UsuarioStock extends javax.swing.JFrame {
                     + "INNER JOIN product AS p ON r.id_producto=p.idProduct\n"
                     + "INNER JOIN worker AS w ON r.id_trabajador=w.idWorker";
 
-            Statement st = connect.createStatement();
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
             while (result.next()) {
@@ -68,6 +72,8 @@ public class UsuarioStock extends javax.swing.JFrame {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
     
@@ -124,11 +130,6 @@ public class UsuarioStock extends javax.swing.JFrame {
         }
     }
 
-
-
-    
-    
-    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents

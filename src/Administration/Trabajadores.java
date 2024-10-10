@@ -32,8 +32,8 @@ import java.util.GregorianCalendar;
 import javax.swing.JDesktopPane;
 
 public class Trabajadores extends javax.swing.JInternalFrame {
-//Variables
 
+//Variables
     private JDesktopPane desktopPane;
     DefaultTableModel model;
 
@@ -218,8 +218,10 @@ public class Trabajadores extends javax.swing.JInternalFrame {
     }
 
     void CargarDatosTable(String Valores) {
-
+        Connection connection = null;
         try {
+            // Obtener una conexión del pool 
+            connection = Conectar.getInstancia().obtenerConexion();
 
             String[] titulosTabla = {"Id", "Documento", "NumeroDoc", "Nombres", "Sexo", "FechaNac", "Edad", "Direccion",
                 "ZipCode", "Ciudad", "Estado", "Telefono", "email", "Ingreso", "Estado"}; //Titulos de la Tabla
@@ -229,7 +231,7 @@ public class Trabajadores extends javax.swing.JInternalFrame {
 
             String ConsultaSQL = "select * from worker";
 
-            Statement st = connect.createStatement();
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
             while (result.next()) {
@@ -270,10 +272,14 @@ public class Trabajadores extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool 
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Guardar() {
+        Connection connection = null; // Inicia la variable de conexión
         // Variables
         String tipoDocumento;
         String numDocumento;
@@ -332,16 +338,17 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         // Convertir la fecha de ingreso a LocalDate
         LocalDate ingresoDate = ingresoDateUtil.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-        // Consulta sql para insertar los datos (nombres como en la base de datos)
+        // Consulta SQL para insertar los datos
         String sql = "INSERT INTO worker (documentType, documentNumber, nombre, sex, "
                 + "bornDate, age, address, zipCode, city, state, cellphone, "
                 + "email, ingreso) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        // Para almacenar los datos empleo un try-catch
         try {
-            // Prepara la conexión para enviar al SQL (Evita ataques al SQL)
-            PreparedStatement ps = connect.prepareStatement(sql);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
+            // Preparar la conexión para enviar al SQL
+            PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, tipoDocumento);
             ps.setString(2, numDocumento);
             ps.setString(3, nombres);
@@ -356,44 +363,46 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             ps.setString(12, email);
             ps.setObject(13, ingresoDate);
 
-            // Declara otra variable para validar los registros
             int n = ps.executeUpdate();
 
-            // Si existe un registro en la BD el registro se guardó con éxito
             if (n > 0) {
                 JOptionPane.showMessageDialog(null, "El registro se guardó exitosamente");
-
-                // Limpiar campos
-                limpiarCajas();
+                limpiarCajas(); // Limpiar campos
             }
+
             CargarDatosTable("");
 
         } catch (SQLException e) {
             Logger.getLogger(Tarifario.class.getName()).log(Level.SEVERE, null, e);
             JOptionPane.showMessageDialog(null, "El registro NO se guardó exitosamente, Error " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Eliminar(JTextField codigo) {
-
+        Connection connection = null;
         setId(Integer.parseInt(codigo.getText()));
 
         String consulta = "DELETE from worker where idWorker=?";
 
         try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId());
             cs.executeUpdate();
 
-            JOptionPane.showMessageDialog(null, "Se Elimino");
+            JOptionPane.showMessageDialog(null, "Se Eliminó");
 
         } catch (SQLException e) {
-
-            JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
-
+            JOptionPane.showMessageDialog(null, "No se Eliminó, error: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
-
     }
 
     public void SeleccionarTrabajador(JTable TablaTrabajador, JTextField Id, JTextField tipodeDocumento, JTextField numeroDocumento,
@@ -435,6 +444,8 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             JComboBox Sexo, JDateChooser FechaNacimiento, JTextField Edad, JTextField Direccion, JTextField ZipCode, JTextField Ciudad,
             JTextField State, JTextField Telefono, JTextField Email, JDateChooser Ingreso) {
 
+        Connection connection = null; // Inicia la variable de conexión
+
         setId(Integer.parseInt(Id.getText()));
         setTipoDocumento(tipodeDocumento.getText());
         setNumDocumento(numeroDocumento.getText());
@@ -471,7 +482,10 @@ public class Trabajadores extends javax.swing.JInternalFrame {
                 + "bornDate=?, age=?, address=?, zipCode=?, city=?, state=?, cellphone=?, "
                 + "email=?, ingreso=? where idWorker=?";
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setString(1, getTipoDocumento());
             cs.setString(2, getNumDocumento());
             cs.setString(3, getNombres());
@@ -491,11 +505,14 @@ public class Trabajadores extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Modificación Exitosa");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se Modificó, error: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void BuscarTrabajadores(java.awt.event.KeyEvent evt) {
-
+        Connection connection = null;
         try {
 
             String[] titulosTabla = {"Id", "Documento", "NumeroDoc", "Nombres",
@@ -507,7 +524,10 @@ public class Trabajadores extends javax.swing.JInternalFrame {
 
             String ConsultaSQL = "select * from worker WHERE nombre LIKE '%" + txtBuscarTrabajador.getText() + "%'";
 
-            Statement st = connect.createStatement();
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
             while (result.next()) {
@@ -548,15 +568,21 @@ public class Trabajadores extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public boolean accion(String estado, int idWorker) {
+        Connection connection = null;
         String sql = "UPDATE worker SET estado = ? WHERE idWorker = ?";
         try {
-            connect = con.getConexion();
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
             PreparedStatement ps;
-            ps = connect.prepareStatement(sql);
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, idWorker);
             ps.execute();
@@ -564,11 +590,15 @@ public class Trabajadores extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public Trabajadores() {
         initComponents();
+
 
         CargarDatosTable("");
         txtId.setEnabled(false);
@@ -1008,6 +1038,4 @@ public class Trabajadores extends javax.swing.JInternalFrame {
     private javax.swing.JTextField txtZipCode;
     // End of variables declaration//GEN-END:variables
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
 }

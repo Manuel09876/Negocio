@@ -46,6 +46,7 @@ import javax.swing.table.TableCellRenderer;
 
 public class Cotizaciones extends javax.swing.JInternalFrame {
     
+    
     public class Configuracion {
     private String nombre;
     private String direccion;
@@ -137,15 +138,13 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
     DefaultTableModel modelo = new DefaultTableModel();
     DefaultTableModel tmp;
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
-
     PreparedStatement pstmt;
     int item;
     double TotalPagar = 0.00;
 
     public Cotizaciones() {
         initComponents();
+        
         MostrarListaPrecios();
         txtDias.setEnabled(false);
 
@@ -236,12 +235,16 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
         }
 
         private void abrirPDF() {
+            Connection connection = null;
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
                 int cotizacionId = (int) table.getValueAt(selectedRow, 0);
                 try {
                     String sql = "SELECT pdf FROM cotizaciones WHERE id = ?";
-                    PreparedStatement pst = connect.prepareStatement(sql);
+                    
+                    Conectar.getInstancia().obtenerConexion();
+                    
+                    PreparedStatement pst = connection.prepareStatement(sql);
                     pst.setInt(1, cotizacionId);
                     ResultSet rs = pst.executeQuery();
 
@@ -264,12 +267,15 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
                     }
                 } catch (SQLException | IOException e) {
                     JOptionPane.showMessageDialog(null, "Error al abrir el PDF: " + e.getMessage());
+                }finally{
+                    Conectar.getInstancia().devolverConexion(connection);
                 }
             }
         }
     }
 
     public void MostrarListaPrecios() {
+        Connection connection = null;
         try {
             DefaultTableModel modelo = new DefaultTableModel();
             String[] tituloTabla = {"Servicio", "Precio"};
@@ -277,7 +283,10 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
             modelo = new DefaultTableModel(null, tituloTabla);
             tbPreciosCot.setModel(modelo);
             String sql = "SELECT services.servicio, services.precio FROM services INNER JOIN bussiness ON services.id_empresa=bussiness.idBusiness WHERE id_empresa=1";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[0] = rs.getString("servicio");
@@ -289,6 +298,8 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
             tbPreciosCot.getColumnModel().getColumn(1).setPreferredWidth(50);
         } catch (SQLException e) {
             System.out.println("Error" + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -405,9 +416,13 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
     }
 
     private void guardarDetalle(int cotizacionId) {
+        Connection connection = null;
         try {
             String sql = "INSERT INTO detalle_cotizacion (cotizacion_id, descripcion, cantidad, precio, total) VALUES (?, ?, ?, ?, ?)";
-            PreparedStatement pst = connect.prepareStatement(sql);
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            PreparedStatement pst = connection.prepareStatement(sql);
             for (int i = 0; i < TableOrdenDeServiciosCot.getRowCount(); i++) {
                 pst.setInt(1, cotizacionId);
                 pst.setString(2, TableOrdenDeServiciosCot.getValueAt(i, 0).toString());
@@ -419,10 +434,13 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
             pst.executeBatch();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al guardar el detalle de la cotización: " + e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     private void GuardarCotizacion() {
+        Connection connection = null;
     String nombre = txtNombreCot.getText().trim();
     String direccion = txtDireccionCot.getText().trim();
     String tamaño = txtTamañoCot.getText().trim();
@@ -442,7 +460,10 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
 
     try {
         String sql = "INSERT INTO cotizaciones (nombre, direccion, tamaño, ciudad, estado, zip_code, telefono, fecha_inicio, fecha_fin, total, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        PreparedStatement pst = connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        
+        Conectar.getInstancia().obtenerConexion();
+        
+        PreparedStatement pst = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         pst.setString(1, nombre);
         pst.setString(2, direccion);
         pst.setString(3, tamaño);
@@ -470,6 +491,8 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
         }
     } catch (SQLException e) {
         JOptionPane.showMessageDialog(null, "Error al guardar la cotización: " + e.getMessage());
+    }finally{
+        Conectar.getInstancia().devolverConexion(connection);
     }
 }
 
@@ -486,10 +509,13 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
     
     //Obtener los datos de la Empresa para los PDF
     private Configuracion obtenerConfiguracion() {
+        Connection connection = null;
     Configuracion config = new Configuracion();
     String sql = "SELECT nombre, direccion, ciudad, estado, zipcode, telefono, email, webpage, logo FROM configuracion WHERE id = 1";
     try {
-        Statement st = connect.createStatement();
+        Conectar.getInstancia().obtenerConexion();
+        
+        Statement st = connection.createStatement();
         ResultSet rs = st.executeQuery(sql);
         if (rs.next()) {
             config.setNombre(rs.getString("nombre"));
@@ -504,6 +530,8 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
         }
     } catch (SQLException e) {
         JOptionPane.showMessageDialog(null, "Error al obtener la configuración: " + e.getMessage());
+    }finally{
+        Conectar.getInstancia().devolverConexion(connection);
     }
     return config;
 }
@@ -592,9 +620,13 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
 }
 
 private void guardarPDFEnBaseDeDatos(int cotizacionId, String filePath) {
+    Connection connection = null;
     try {
         String sql = "UPDATE cotizaciones SET pdf = ? WHERE id = ?";
-        PreparedStatement pst = connect.prepareStatement(sql);
+        
+        Conectar.getInstancia().obtenerConexion();
+        
+        PreparedStatement pst = connection.prepareStatement(sql);
 
         // Leer el archivo PDF y convertirlo en un array de bytes
         File pdfFile = new File(filePath);
@@ -610,16 +642,22 @@ private void guardarPDFEnBaseDeDatos(int cotizacionId, String filePath) {
         JOptionPane.showMessageDialog(null, "PDF guardado en la base de datos correctamente.");
     } catch (SQLException | IOException e) {
         JOptionPane.showMessageDialog(null, "Error al guardar el PDF en la base de datos: " + e.getMessage());
+    }finally{
+        Conectar.getInstancia().devolverConexion(connection);
     }
 }
    
     private void actualizarTablaCotizaciones() {
+        Connection connection = null;
         try {
             DefaultTableModel modelo = (DefaultTableModel) tbCotizaciones.getModel();
             modelo.setRowCount(0); // Limpiar la tabla
 
             String sql = "SELECT id, nombre, direccion, tamaño, ciudad, estado, zip_code, telefono, fecha_inicio, fecha_fin, total, fecha FROM cotizaciones";
-            Statement st = connect.createStatement();
+        
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 Object[] row = new Object[13];
@@ -643,6 +681,8 @@ private void guardarPDFEnBaseDeDatos(int cotizacionId, String filePath) {
             tbCotizaciones.getColumnModel().getColumn(12).setCellEditor(new ButtonEditor(new JCheckBox(), tbCotizaciones));
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al actualizar la tabla de cotizaciones: " + e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

@@ -131,21 +131,26 @@ public class Proveedor extends javax.swing.JInternalFrame {
 
     }
 
-    Conectar objconexion = new Conectar();
-    Connection connect = objconexion.getConexion();
     private static final Logger LOGGER = Logger.getLogger(Proveedor.class.getName());
     ResultSet rs;
 
     DefaultTableModel modelo = new DefaultTableModel();
 
     public void MostrarProveedor(String Valores) {
+        Connection connection = null;
         try {
-            String[] tituloTabla = {"idSuplier", "Proveedor", "Dirección", "ZipCode", "Ciudad", "Estado", "Telefono", "Wensite", "email", "Estatus"};
+            String[] tituloTabla = {"idSuplier", "Proveedor", "Dirección", "ZipCode", "Ciudad", "Estado", "Telefono", "Website", "Email", "Estatus"};
             String[] RegistroBD = new String[10];
             model = new DefaultTableModel(null, tituloTabla);
+
             String sql = "SELECT * FROM suplier";
-            Statement st = connect.createStatement();
+
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
+
             while (rs.next()) {
                 RegistroBD[0] = rs.getString("idSuplier");
                 RegistroBD[1] = rs.getString("nameSuplier");
@@ -159,6 +164,7 @@ public class Proveedor extends javax.swing.JInternalFrame {
                 RegistroBD[9] = rs.getString("estado");
                 model.addRow(RegistroBD);
             }
+
             tbSuplier.setModel(model);
             tbSuplier.getColumnModel().getColumn(0).setPreferredWidth(50);
             tbSuplier.getColumnModel().getColumn(1).setPreferredWidth(200);
@@ -169,11 +175,19 @@ public class Proveedor extends javax.swing.JInternalFrame {
             tbSuplier.getColumnModel().getColumn(6).setPreferredWidth(200);
             tbSuplier.getColumnModel().getColumn(7).setPreferredWidth(150);
             tbSuplier.getColumnModel().getColumn(8).setPreferredWidth(150);
+
         } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al mostrar proveedores: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            // Devolver la conexión al pool
+            if (connection != null) {
+                Conectar.getInstancia().devolverConexion(connection);
+            }
         }
     }
 
     public void Insertar() {
+        Connection connection = null;
         //Variables
         String nameSuplier, address;
         int zipCode;
@@ -194,9 +208,11 @@ public class Proveedor extends javax.swing.JInternalFrame {
 
         //Para almacenar los datos empleo un try cash
         try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
-            PreparedStatement pst = connect.prepareStatement(sql);
+            PreparedStatement pst = connection.prepareStatement(sql);
 
             pst.setString(1, nameSuplier);
             pst.setString(2, address);
@@ -228,8 +244,10 @@ public class Proveedor extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             Logger.getLogger(Tarifario.class.getName()).log(Level.SEVERE, null, e);
             JOptionPane.showMessageDialog(null, "El registro NO se guardo exitosamente, Error " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
-
     }
 
     public void Seleccionar(JTable tbProveedor, JTextField IdSuplier, JTextField NameSuplier, JTextField Addres, JTextField ZipCode, JTextField City, JTextField State, JTextField PhoneNumber, JTextField Website, JTextField Email) {
@@ -259,6 +277,7 @@ public class Proveedor extends javax.swing.JInternalFrame {
 
     public void Modificar(JTextField IdSuplier, JTextField NameSuplier, JTextField Addres, JTextField ZipCode, JTextField City, JTextField State, JTextField PhoneNumber, JTextField Website, JTextField Email) {
 
+        Connection connection = null;
         setIdSuplier(Integer.parseInt(IdSuplier.getText()));
         setNameSuplier(NameSuplier.getText());
         setAddress(Addres.getText());
@@ -272,7 +291,10 @@ public class Proveedor extends javax.swing.JInternalFrame {
         String consulta = "UPDATE suplier SET nameSuplier=?, address=?, zipCode=?, city=?, state=?, phoneNumber=?, website=?,email=? WHERE idSuplier=?";
 
         try {
-            CallableStatement cs = objconexion.getConexion().prepareCall(consulta);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            CallableStatement cs = connection.prepareCall(consulta);
 
             cs.setString(1, getNameSuplier());
             cs.setString(2, getAddress());
@@ -290,19 +312,24 @@ public class Proveedor extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
 
             JOptionPane.showMessageDialog(null, "Error al modificar, error: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
 
     public void Eliminar(JTextField codigo) {
-
+        Connection connection = null;
         setIdSuplier(Integer.parseInt(codigo.getText()));
 
         String consulta = "DELETE FROM suplier WHERE idSuplier=?";
 
         try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            CallableStatement cs = objconexion.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getIdSuplier());
             cs.execute();
 
@@ -311,20 +338,31 @@ public class Proveedor extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
 
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
 
     public Proveedor BuscarProveedor(java.awt.event.KeyEvent evt) {
-        String[] tituloTabla = {"idSuplier", "Proveedor", "Dirección", "ZipCode", "Ciudad", "Estado", "Telefono", "Wensite", "email", "Estatus"};
+        Connection connection = null;
+        String[] tituloTabla = {"idSuplier", "Proveedor", "Dirección", "ZipCode", "Ciudad", "Estado", "Telefono", "Website", "email", "Estatus"};
         String[] RegistroBD = new String[10];
-        
+
         Proveedor proveedor = new Proveedor();
-        String sql = "SELECT * FROM suplier WHERE nameSuplier LIKE '%" + txtBuscar.getText() + "%'";
+        String sql = "SELECT * FROM suplier WHERE nameSuplier LIKE ?";
         model = new DefaultTableModel(null, tituloTabla); //Le pasamos los titulos a la tabla
+
         try {
-            Statement st = connect.createStatement();
-            ResultSet rs = st.executeQuery(sql);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            // Usar PreparedStatement para evitar inyección SQL
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, "%" + txtBuscar.getText().trim() + "%");
+
+            ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 RegistroBD[0] = rs.getString("idSuplier");
                 RegistroBD[1] = rs.getString("nameSuplier");
@@ -336,8 +374,12 @@ public class Proveedor extends javax.swing.JInternalFrame {
                 RegistroBD[7] = rs.getString("website");
                 RegistroBD[8] = rs.getString("email");
                 RegistroBD[9] = rs.getString("estado");
+
                 model.addRow(RegistroBD);
+
             }
+
+            // Actualizar la tabla
             tbSuplier.setModel(model);
             tbSuplier.getColumnModel().getColumn(0).setPreferredWidth(50);
             tbSuplier.getColumnModel().getColumn(1).setPreferredWidth(200);
@@ -347,20 +389,29 @@ public class Proveedor extends javax.swing.JInternalFrame {
             tbSuplier.getColumnModel().getColumn(5).setPreferredWidth(50);
             tbSuplier.getColumnModel().getColumn(6).setPreferredWidth(200);
             tbSuplier.getColumnModel().getColumn(7).setPreferredWidth(150);
-            tbSuplier.getColumnModel().getColumn(8).setPreferredWidth(150);            
-        }catch (SQLException e) {
-            System.out.println(e.toString());
-        }        
+            tbSuplier.getColumnModel().getColumn(8).setPreferredWidth(150);
+
+        } catch (SQLException e) {
+            System.out.println("Error al buscar proveedor: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            if (connection != null) {
+                Conectar.getInstancia().devolverConexion(connection);
+            }
+        }
         return proveedor;
     }
 
     // Posiblemente para usarlos despues para Busqueda
     public boolean accion(String estado, int idSuplier) {
+        Connection connection = null;
         String sql = "UPDATE suplier SET estado = ? WHERE idSuplier = ?";
         try {
-            connect = objconexion.getConexion();
-            PreparedStatement pst = connect.prepareStatement(sql);
-            pst = connect.prepareStatement(sql);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            PreparedStatement pst = connection.prepareStatement(sql);
+            pst = connection.prepareStatement(sql);
             pst.setString(1, estado);
             pst.setInt(2, idSuplier);
             pst.execute();
@@ -368,16 +419,24 @@ public class Proveedor extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        } finally {
+            // Devolver la conexión al pool
+            if (connection != null) {
+                Conectar.getInstancia().devolverConexion(connection);
+            }
         }
     }
 
     public Proveedor buscarProv(int id) {
+        Connection connection = null;
         String sql = "SELECT * FROM suplier WHERE idSuplier = ?";
         Proveedor prov = new Proveedor();
         try {
-            connect = objconexion.getConexion();
-            PreparedStatement pst = connect.prepareStatement(sql);
-            pst = connect.prepareStatement(sql);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            PreparedStatement pst = connection.prepareStatement(sql);
+            pst = connection.prepareStatement(sql);
             pst.setInt(1, id);
             rs = pst.executeQuery();
             if (rs.next()) {
@@ -393,16 +452,24 @@ public class Proveedor extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            if (connection != null) {
+                Conectar.getInstancia().devolverConexion(connection);
+            }
         }
         return prov;
     }
 
     public Proveedor buscarCodigo(String codigo) {
+        Connection connection = null;
         String sql = "SELECT * FROM suplier WHERE nameSuplier = ? AND estado = 'Activo'";
         Proveedor prov = new Proveedor();
         try {
-            connect = objconexion.getConexion();
-            PreparedStatement pst = connect.prepareStatement(sql);
+            // Obtener la conexión del pool
+        connection = Conectar.getInstancia().obtenerConexion();
+
+            PreparedStatement pst = connection.prepareStatement(sql);
             pst.setString(1, codigo);
             rs = pst.executeQuery();
             if (rs.next()) {
@@ -418,7 +485,12 @@ public class Proveedor extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
+        }finally {
+        // Devolver la conexión al pool
+        if (connection != null) {
+            Conectar.getInstancia().devolverConexion(connection);
         }
+    }
         return prov;
     }
 

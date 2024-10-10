@@ -13,14 +13,16 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class Convenios extends javax.swing.JInternalFrame {
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
-
+   
     public Convenios() {
         initComponents();
+
+        
         AutoCompleteDecorator.decorate(cbxEmpresa);
         MostrarEmpresa(cbxEmpresa);
     }
+    
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -193,14 +195,15 @@ public class Convenios extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
      public void MostrarEmpresa(JComboBox cbxEmpresa) {
-
+         Connection connection = null;
         String sql = "";
         sql = "select * from bussiness";
         Statement st;
 
         try {
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            st = con.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxEmpresa.removeAllItems();
 
@@ -211,15 +214,20 @@ public class Convenios extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar en Combo " + e.toString());
-        }
+        }finally {
+        // Devolver la conexión al pool
+        Conectar.getInstancia().devolverConexion(connection);
+    }
     }
 
     public void MostrarCodigoEmpresa(JComboBox cbxEmpresa, JTextField idBusiness) {
-
+        Connection connection = null;
         String consuta = "select bussiness.idBusiness from bussiness where bussiness.nameBusiness=?";
 
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            connection = Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxEmpresa.getSelectedItem().toString());
             cs.execute();
 
@@ -231,6 +239,9 @@ public class Convenios extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
-        }
+        }finally {
+        // Devolver la conexión al pool
+        Conectar.getInstancia().devolverConexion(connection);
+    }
     }
 }

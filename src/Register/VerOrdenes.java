@@ -21,13 +21,10 @@ import javax.swing.RowFilter;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class VerOrdenes extends javax.swing.JInternalFrame {
-
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
-
+    
     public VerOrdenes() {
         initComponents();
-        //Inicio();
+        
         AutoCompleteDecorator.decorate(cbxEmpresa);
         MostrarEmpresa(cbxEmpresa);
         MostrarTabla();
@@ -37,6 +34,7 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
 
 //Mostrar datos en la Tabla
     public void MostrarTabla() {
+        Connection connection = null;
         DefaultTableModel modelo = new DefaultTableModel();
         try {
             String[] tituloTabla = {"id", "Empresa", "Fecha", "Nombre", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Email", "Servicio", "Precio", "Status"};
@@ -50,7 +48,10 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
                     + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness\n"
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer\n"
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[0] = rs.getString("id");
@@ -84,11 +85,14 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
             TablaRegistro.getColumnModel().getColumn(11).setPreferredWidth(100);
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
     
     //Codigo Para buscar dentro de la tabla por medio del txtField Busqueda
     public DefaultTableModel buscarTabla(String buscar) {
+        Connection connection = null;
         DefaultTableModel modelo = new DefaultTableModel();
         try {
             String[] tituloTabla = {"id", "Empresa", "Fecha", "Nombre", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Email", "Servicio", "Precio", "Status"};
@@ -102,7 +106,10 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
                     + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness\n"
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer WHERE customer.nameCustomer LIKE '%"+buscar+"%' OR customer.address LIKE '%"+buscar+"%'\n"
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[0] = rs.getString("id");
@@ -137,6 +144,8 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
             
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return modelo;
     }
@@ -144,11 +153,13 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
     
 //Codigo para Cambiar el Estado
     public boolean accion(String estado, int id) {
+        Connection connection = null;
         String sql = "UPDATE orderservice SET estado = ? WHERE id = ?";
         try {
-            connect = con.getConexion();
+            Conectar.getInstancia().obtenerConexion();
+            
             PreparedStatement ps;
-            ps = connect.prepareStatement(sql);
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, id);
             ps.execute();
@@ -156,6 +167,8 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
     
@@ -341,6 +354,8 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbxEmpresaActionPerformed
 //Filtramos Fecha y Empresa con Boton Buscar
     private void btnBuscarFechaEmpresaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarFechaEmpresaActionPerformed
+        Connection connection = null;
+        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String fechaInicio = dateFormat.format(dateInicio.getDate());
@@ -364,7 +379,10 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer \n"
                     + ID_buscar + "AND o.fechaT BETWEEN '" + fechaInicio + "' AND '" + fechaFin + "' \n"
                     + "ORDER BY o.fechaT ASC;";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
                 RegistroBD[0] = rs.getString("id");
@@ -397,6 +415,8 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
             TablaRegistro.getColumnModel().getColumn(11).setPreferredWidth(100);
         } catch (SQLException e) {
             System.out.println("Error " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
         
     }//GEN-LAST:event_btnBuscarFechaEmpresaActionPerformed
@@ -443,6 +463,8 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnMostrarTodoActionPerformed
 //Boton para la busqueda solo por Empresa
     private void btnSoloEmpresaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSoloEmpresaActionPerformed
+        Connection connection = null;
+        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String ID = txtIdBusiness.getText();
@@ -462,7 +484,10 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
                     + "FROM orderservice AS o \n"
                     + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness \n"
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer " + ID_buscar + " ORDER BY o.fechaT ASC;";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(query);
             while (rs.next()) {
                 RegistroBD[0] = rs.getString("id");
@@ -495,6 +520,8 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
             TablaRegistro.getColumnModel().getColumn(11).setPreferredWidth(100);
         } catch (SQLException e) {
             System.out.println("Error " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }//GEN-LAST:event_btnSoloEmpresaActionPerformed
 
@@ -538,11 +565,14 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarEmpresa(JComboBox cbxEmpresa) {
+        Connection connection = null;
         String sql = "";
         sql = "select * from bussiness";
         Statement st;
         try {
-            st = con.getConexion().createStatement();
+            Conectar.getInstancia().obtenerConexion();
+            
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxEmpresa.removeAllItems();
             while (rs.next()) {
@@ -550,13 +580,19 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar en Combo " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoEmpresa(JComboBox cbxEmpresa, JTextField idBusiness) {
+        Connection connection = null;
+
         String consuta = "select bussiness.idBusiness from bussiness where bussiness.nameBusiness=?";
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxEmpresa.getSelectedItem().toString());
             cs.execute();
             ResultSet rs = cs.executeQuery();
@@ -565,6 +601,8 @@ public class VerOrdenes extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 }

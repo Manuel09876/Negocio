@@ -19,17 +19,17 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class Trabajos extends javax.swing.JInternalFrame {
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
-
     public Trabajos() {
         initComponents();
+        
         AutoCompleteDecorator.decorate(cbxTrabajador);
         MostrarTabla();
         MostrarTrabajador(cbxTrabajador);
         addCheckBox(0, tbTrabajos);
     }
 
+    
+    
     //Metodo que agrega el checkBox
     public void addCheckBox(int column, JTable table) {
         TableColumn tc = table.getColumnModel().getColumn(column);
@@ -43,6 +43,7 @@ public class Trabajos extends javax.swing.JInternalFrame {
 
 //Muestra la tabla con los datos completos
     public void MostrarTabla() {
+        Connection connection = null;
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -79,7 +80,10 @@ public class Trabajos extends javax.swing.JInternalFrame {
                     + "WHERE o.estado = 'Programado' \n"
                     + "ORDER BY \n"
                     + "    o.fechaT ASC";
-            Statement st = connect.createStatement();
+    
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -128,11 +132,14 @@ public class Trabajos extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     //Filtrar por Trabajador
     public void FiltrarTabla() {
+        Connection connection = null;
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String ID = txtIdTrabajador.getText();
@@ -176,7 +183,10 @@ public class Trabajos extends javax.swing.JInternalFrame {
                     + ID_buscar + " AND o.estado = 'Programado' \n"
                     + "ORDER BY \n"
                     + "    o.fechaT ASC";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -226,17 +236,23 @@ public class Trabajos extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     //Asignar Trabajo a otro Trabajador
-    public static void modificarIdST(int nuevoId, int idST) {
+    public void modificarIdST(int nuevoId, int idST) {
+        Connection connection = null;
         DefaultTableModel modelo = new DefaultTableModel();
-        Conectar con = new Conectar();
-        Connection connect = con.getConexion();
+        
 
         String sql = "UPDATE servicio_trabajador SET id_Trabajador = ? WHERE id_ST= ?";
-        try (PreparedStatement declaracion = connect.prepareStatement(sql)) {
+        
+        try{
+        Conectar.getInstancia().obtenerConexion();
+            
+        try (PreparedStatement declaracion = connection.prepareStatement(sql)) {
             declaracion.setInt(1, nuevoId);
             declaracion.setInt(2, idST); // Aquí asumo que tienes una columna id_fila que identifica cada fila en tu tabla
             System.out.println("Nuevo id Trabajador " + nuevoId + " el idST " + idST);
@@ -246,8 +262,11 @@ public class Trabajos extends javax.swing.JInternalFrame {
             } else {
                 System.out.println("No se ha actualizado ningún registro en la base de datos.");
             }
+        }
         } catch (SQLException e) {
             System.err.println("Error al conectar a la base de datos: " + e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -470,6 +489,7 @@ public class Trabajos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnMostrarTodoActionPerformed
 
     private void btnReprogramarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReprogramarActionPerformed
+        Connection connection = null;
         try {
             // Recorremos todas las filas de la tabla
             for (int i = 0; i < tbTrabajos.getRowCount(); i++) {
@@ -482,7 +502,10 @@ public class Trabajos extends javax.swing.JInternalFrame {
                     System.out.println(id);
                     // Actualizar el estado del registro a "Activo" en la tabla orderservice
                     String sqlUpdate = "UPDATE orderservice SET estado = 'Activo' WHERE id = ?";
-                    try (PreparedStatement pstmtUpdate = connect.prepareStatement(sqlUpdate)) {
+                    
+                    Conectar.getInstancia().obtenerConexion();
+                    
+                    try (PreparedStatement pstmtUpdate = connection.prepareStatement(sqlUpdate)) {
                         pstmtUpdate.setInt(1, id);
                         pstmtUpdate.executeUpdate();
                     }
@@ -491,7 +514,9 @@ public class Trabajos extends javax.swing.JInternalFrame {
                     System.out.println(idST);
                     // Borrar el registro correspondiente de la tabla servicio_trabajador
                     String deleteQuery = "DELETE FROM servicio_trabajador WHERE id_ST = ?";
-                    try (PreparedStatement pstmtDelete = connect.prepareStatement(deleteQuery)) {
+                    Conectar.getInstancia().obtenerConexion();
+                    
+                    try (PreparedStatement pstmtDelete = connection.prepareStatement(deleteQuery)) {
                         pstmtDelete.setInt(1, idST);
                         pstmtDelete.executeUpdate();
                         JOptionPane.showMessageDialog(null, "Se eliminó el registro de servicio_trabajador");
@@ -503,11 +528,13 @@ public class Trabajos extends javax.swing.JInternalFrame {
         } catch (SQLException e) { // Captura otras excepciones diferentes de SQLException
             System.err.println("Error general: " + e.getMessage());
             e.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }//GEN-LAST:event_btnReprogramarActionPerformed
 
     private void btnReasignarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReasignarActionPerformed
-
+Connection connection = null;
         try {
             cambiarIdTrabajador(tbTrabajos, txtIdTrabajador);
             // Recorremos todas las filas de la tabla
@@ -524,7 +551,10 @@ public class Trabajos extends javax.swing.JInternalFrame {
 //                    System.out.println("idST "+idST+ " id_Trabajador "+id_Trabajador);
 // Actualizar el estado del registro a "Activo"                    
                     String sqlUpdate = "UPDATE servicio_trabajador SET id_Trabajador = ? WHERE id_ST = ?";
-                    PreparedStatement pstmtUpdate = connect.prepareStatement(sqlUpdate);
+                    
+                    Conectar.getInstancia().obtenerConexion();
+                    
+                    PreparedStatement pstmtUpdate = connection.prepareStatement(sqlUpdate);
                     pstmtUpdate.setInt(1, id_Trabajador);
                     pstmtUpdate.setInt(2, idST);
                     pstmtUpdate.executeUpdate();
@@ -535,6 +565,8 @@ public class Trabajos extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             System.err.println("Error al intentar actualizar el estado: " + e.getMessage());
             e.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }//GEN-LAST:event_btnReasignarActionPerformed
@@ -554,6 +586,7 @@ public class Trabajos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbSeleccionActionPerformed
 
     private void btnTrabajoRealizadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTrabajoRealizadoActionPerformed
+        Connection connection = null;
         try {
             // Recorremos todas las filas de la tabla
             for (int i = 0; i < tbTrabajos.getRowCount(); i++) {
@@ -566,7 +599,10 @@ public class Trabajos extends javax.swing.JInternalFrame {
                     System.out.println(id);
                     // Actualizar el estado del registro a "Realizado" en la tabla orderservice
                     String sqlUpdate = "UPDATE orderservice SET estado = 'Realizado' WHERE id = ?";
-                    try (PreparedStatement pstmtUpdate = connect.prepareStatement(sqlUpdate)) {
+                    
+                    Conectar.getInstancia().obtenerConexion();
+                    
+                    try (PreparedStatement pstmtUpdate = connection.prepareStatement(sqlUpdate)) {
                         pstmtUpdate.setInt(1, id);
                         pstmtUpdate.executeUpdate();
                     }
@@ -575,7 +611,10 @@ public class Trabajos extends javax.swing.JInternalFrame {
                     System.out.println(idST);
                     // Borrar el registro correspondiente de la tabla servicio_trabajador
                     String deleteQuery = "DELETE FROM servicio_trabajador WHERE id_ST = ?";
-                    try (PreparedStatement pstmtDelete = connect.prepareStatement(deleteQuery)) {
+                    
+                    Conectar.getInstancia().obtenerConexion();
+                    
+                    try (PreparedStatement pstmtDelete = connection.prepareStatement(deleteQuery)) {
                         pstmtDelete.setInt(1, idST);
                         pstmtDelete.executeUpdate();
                         JOptionPane.showMessageDialog(null, "Se eliminó el registro de servicio_trabajador");
@@ -587,6 +626,8 @@ public class Trabajos extends javax.swing.JInternalFrame {
         } catch (SQLException e) { // Captura otras excepciones diferentes de SQLException
             System.err.println("Error general: " + e.getMessage());
             e.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }//GEN-LAST:event_btnTrabajoRealizadoActionPerformed
 
@@ -608,14 +649,16 @@ public class Trabajos extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 //Muestra los Trabajadores en el ComboBox
     public void MostrarTrabajador(JComboBox comboTrabajador) {
+        Connection connection = null;
 
         String sql = "";
         sql = "select * from worker";
         Statement st;
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            st = con.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             comboTrabajador.removeAllItems();
 
@@ -626,15 +669,20 @@ public class Trabajos extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoTrabajador(JComboBox trabajador, JTextField IdTrabajador) {
+        Connection connection = null;
 
         String consuta = "select worker.idWorker from worker where worker.nombre=?";
 
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, trabajador.getSelectedItem().toString());
             cs.execute();
 
@@ -646,6 +694,8 @@ public class Trabajos extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

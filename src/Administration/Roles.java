@@ -57,50 +57,61 @@ public class Roles extends javax.swing.JInternalFrame {
     public Roles() {
         initComponents();
 
+        
         txtId.setEnabled(false);
         CargarDatosTabla("");
     }
 
-    //Conexión
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
     PreparedStatement ps;
     ResultSet rs;
 
-    //Metodos
     public void CargarDatosTabla(String Valores) {
-
+        Connection connection = null;
         try {
-            String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
+            // Definir los títulos de la tabla
+            String[] titulosTabla = {"Código", "Descripción", "Estado"};
             String[] RegistroBD = new String[3];
 
-            model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
+            // Inicializar el modelo de la tabla
+            model = new DefaultTableModel(null, titulosTabla);
 
+            // Consulta SQL para obtener los datos
             String ConsultaSQL = "SELECT * FROM roles";
 
-            Statement st = connect.createStatement();
-            ResultSet result = st.executeQuery(ConsultaSQL);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            while (result.next()) {
-                RegistroBD[0] = result.getString("id");
-                RegistroBD[1] = result.getString("nombre");
-                RegistroBD[2] = result.getString("estado");
+            // Crear el Statement y ejecutar la consulta
+            try (Statement st = connection.createStatement(); ResultSet result = st.executeQuery(ConsultaSQL)) {
 
-                model.addRow(RegistroBD);
+                // Iterar sobre los resultados de la consulta y agregar a la tabla
+                while (result.next()) {
+                    RegistroBD[0] = result.getString("id_rol");
+                    RegistroBD[1] = result.getString("nombre");
+                    RegistroBD[2] = result.getString("estado");
+
+                    model.addRow(RegistroBD);
+                }
             }
 
+            // Configurar la tabla
             tbTipoUsuario.setModel(model);
             tbTipoUsuario.getColumnModel().getColumn(0).setPreferredWidth(150);
             tbTipoUsuario.getColumnModel().getColumn(1).setPreferredWidth(350);
             tbTipoUsuario.getColumnModel().getColumn(2).setPreferredWidth(100);
 
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error: " + e.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            if (connection != null) {
+                Conectar.getInstancia().devolverConexion(connection);
+            }
         }
     }
 
     public void Guardar() {
-
+        Connection connection = null;
         // Variables
         int idTipoDeUsuario;
         String tipoDeUsuario;
@@ -117,9 +128,11 @@ public class Roles extends javax.swing.JInternalFrame {
 
         //Para almacenar los datos empleo un try cash
         try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
-            PreparedStatement pst = connect.prepareStatement(sql);
+            PreparedStatement pst = connection.prepareStatement(sql);
 
             pst.setString(1, tipoDeUsuario);
 
@@ -137,19 +150,24 @@ public class Roles extends javax.swing.JInternalFrame {
         } catch (SQLException ex) {
             Logger.getLogger(Productos.class.getName()).log(Level.SEVERE, null, ex);
 
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
 
     public void Eliminar(JTextField codigo) {
-
+        Connection connection = null;
         setId_rol(Integer.parseInt(codigo.getText()));
 
         String consulta = "DELETE from roles where id=?";
 
         try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId_rol());
             cs.executeUpdate();
 
@@ -159,6 +177,9 @@ public class Roles extends javax.swing.JInternalFrame {
 
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
 
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
@@ -193,6 +214,7 @@ public class Roles extends javax.swing.JInternalFrame {
     }
 
     public void modificar(JTextField id, JTextField nombre) {
+        Connection connection = null;
         try {
             // Obtener y verificar el nuevo nombre
             String idText = id.getText().trim();
@@ -202,10 +224,12 @@ public class Roles extends javax.swing.JInternalFrame {
             System.out.println("Nuevo nombre antes de la actualización: " + nuevoNombre);
 
             // Validaciones y configuración de valores en el objeto
-            // Establecer la conexión y preparar la consulta
-            connect = con.getConexion();
-            String sql = "UPDATE roles SET nombre = ? WHERE id = ?";
-            ps = connect.prepareStatement(sql);
+            String sql = "UPDATE roles SET nombre = ? WHERE id_rol = ?";
+
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            ps = connection.prepareStatement(sql);
 
             // Configurar los valores en el objeto
             ps.setString(1, nuevoNombre);
@@ -233,13 +257,19 @@ public class Roles extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             System.out.println("Error al Modificar: " + e.toString());
             JOptionPane.showMessageDialog(null, "Error al Modificar: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void verificarActualizacion(int idRol, String nuevoNombre) {
-        String sqlVerificacion = "SELECT nombre FROM roles WHERE id = ?";
+        Connection connection = null;
+        String sqlVerificacion = "SELECT nombre FROM roles WHERE id_rol = ?";
         try {
-            PreparedStatement psVerificacion = connect.prepareStatement(sqlVerificacion);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+            PreparedStatement psVerificacion = connection.prepareStatement(sqlVerificacion);
             psVerificacion.setInt(1, idRol);
             ResultSet rs = psVerificacion.executeQuery();
 
@@ -260,14 +290,20 @@ public class Roles extends javax.swing.JInternalFrame {
             psVerificacion.close();
         } catch (SQLException e) {
             System.out.println("Error al verificar la actualización: " + e.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public boolean accion(String estado, int idTipoDeUsuario) {
-        String sql = "UPDATE roles SET estado = ? WHERE id = ?";
+        Connection connection = null;
+        String sql = "UPDATE roles SET estado = ? WHERE id_rol = ?";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, idTipoDeUsuario);
             ps.execute();
@@ -275,6 +311,8 @@ public class Roles extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

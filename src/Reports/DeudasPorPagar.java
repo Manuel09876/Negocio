@@ -124,11 +124,10 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
     public DeudasPorPagar() throws SQLException {
         initComponents();
-
+        
         MostrarTablaCombinada("");
-
     }
-
+    
     // Método que agrega el CheckBox
     public void addCheckBox(int column, JTable table) {
         TableColumn tc = table.getColumnModel().getColumn(column);
@@ -164,6 +163,8 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
     // Método para mostrar la tabla combinada y verificar los avisos
     private void MostrarTablaCombinada(String Valores) throws SQLException {
+        Connection connection = null;
+        
         try {
             // Configurar las columnas del modelo de la tabla
             String[] titulosTabla = {"Seleccion", "id", "Descripcion", "Fecha de Pago", "Numero de Cuota", "Cuota", "Deuda", "Estado"};
@@ -209,15 +210,9 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
                      WHERE c.estado = 'Pendiente'
                      ORDER BY `Fecha de Pago` ASC""";
 
-            // Conexión a la base de datos
-            Conectar con = new Conectar();
-            Connection connect = con.getConexion();
-            if (connect == null) {
-                System.out.println("Error: No se pudo establecer la conexión con la base de datos.");
-                return;
-            }
+            Conectar.getInstancia().obtenerConexion();
 
-            Statement st = connect.createStatement();
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(sql);
 
             // Depuración: Mostrar si hay resultados
@@ -262,11 +257,15 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     //Muestra la Relación de Canceladas
     private void MostrarPagadas(String Valores) {
+        Connection connection = null;
+        
         try {
             // Configurar las columnas del modelo de la tabla
             String[] titulosTabla = {"Seleccion", "id", "Descripcion", "Fecha de Pago", "Cuota Numero", "Monto a Pagar", "Deuda", "Estado"};
@@ -281,10 +280,9 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
                      FROM credito AS c
                      INNER JOIN equipos AS e ON c.id_compra=e.id_equipos WHERE c.estado = 'Cancelado'""";
 
-            // Conexión a la base de datos
-            Conectar con = new Conectar();
-            Connection connect = con.getConexion();
-            Statement st = connect.createStatement();
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(sql);
 
             // Añadir filas al modelo de la tabla
@@ -312,16 +310,16 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
             tbDeudasCombinadas.doLayout();
 
         } catch (SQLException e) {
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     //Guardar selección y modificar estado, eliminando fila
     public void guardarSeleccion() {
+        Connection connection = null;
+        
         try {
-// Conexión a la base de datos
-            Conectar con = new Conectar();
-            Connection connect = con.getConexion();
-
 // Obtener el modelo de la tabla
             DefaultTableModel modelo = (DefaultTableModel) tbDeudasCombinadas.getModel();
 
@@ -337,7 +335,10 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
 // Actualizar el estado del registro a "Cancelado"
                     String sqlUpdate = "UPDATE credito SET estado = 'Cancelado' WHERE id = ?";
-                    PreparedStatement pstmtUpdate = connect.prepareStatement(sqlUpdate);
+                    
+                    Conectar.getInstancia().obtenerConexion();
+                    
+                    PreparedStatement pstmtUpdate = connection.prepareStatement(sqlUpdate);
                     pstmtUpdate.setInt(1, id);
                     pstmtUpdate.executeUpdate();
 
@@ -347,12 +348,13 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
                 }
 
             }
-            // Cerrar la conexión
-            connect.close();
+           
             // Mensaje de éxito
             JOptionPane.showMessageDialog(null, "Registros guardados correctamente");
         } catch (SQLException e) {
             System.out.println("Error al guardar en la base de datos: " + e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

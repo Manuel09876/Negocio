@@ -61,30 +61,30 @@ import javax.mail.internet.*;
 public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
     private static final Logger LOGGER = Logger.getLogger(HorasTrabajadas.class.getName());
-    private Conectar conexion;
-    private Connection conect;
+
     public PuestoDeTrabajo puestoDeTrabajo; // Instancia de PuestoDeTrabajo
     private Timer cierreAutomatico;
     private LocalDate fechaInicioActividades;
 
-    public HorasTrabajadas(PuestoDeTrabajo puestoDeTrabajo) {
-        this.puestoDeTrabajo = puestoDeTrabajo;
-        this.conexion = new Conectar();
-        this.conect = conexion.getConexion();
-        this.fechaInicioActividades = obtenerFechaInicioActividadesDesdeBD(); // Asegúrate de que `conect` esté inicializado antes de esta llamada.
-    }
-
+//    public HorasTrabajadas(PuestoDeTrabajo puestoDeTrabajo) {
+//        this.puestoDeTrabajo = puestoDeTrabajo;
+//        this.fechaInicioActividades = obtenerFechaInicioActividadesDesdeBD(); // Asegúrate de que `conect` esté inicializado antes de esta llamada.
+//    }
     public HorasTrabajadas() {
         initComponents();
+
+//        // Verifica si la conexión es nula
+//        if (connection == null) {
+//            throw new RuntimeException("No se pudo obtener la conexión a la base de datos.");
+//        }
+        // Llama a otros métodos que dependan de la conexión
+        this.fechaInicioActividades = obtenerFechaInicioActividadesDesdeBD();
+
+        // Instancia de PuestoDeTrabajo inicialmente nula
         this.puestoDeTrabajo = new PuestoDeTrabajo();
-        this.conexion = new Conectar();
-        this.conect = conexion.getConexion(); // Asegurando la inicialización de la conexión antes de cualquier uso
 
         txtIdHoras.setEnabled(false);
         txtIdTrabajador.setVisible(false);
-
-        // Supongamos que recuperas la fecha desde la base de datos
-        this.fechaInicioActividades = obtenerFechaInicioActividadesDesdeBD(); // Aquí también asegura que `conect` esté inicializado.
 
         AutoCompleteDecorator.decorate(cbxTrabajador);
         MostrarTrabajador(cbxTrabajador);
@@ -97,6 +97,11 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                 }
             }
         });
+    }
+
+    // Método para asignar el puesto de trabajo
+    public void setPuestoDeTrabajo(PuestoDeTrabajo puestoDeTrabajo) {
+        this.puestoDeTrabajo = puestoDeTrabajo;
     }
 
     // Método para configurar el cierre automático
@@ -157,29 +162,47 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
     // Cierre de sesiones pendientes
     public void cerrarSesionesPendientes() {
-        String sql = "SELECT trabajador_id FROM horas_ingreso WHERE NOT EXISTS "
-                + "(SELECT 1 FROM horas_salida WHERE horas_ingreso.id_ingreso = horas_salida.id_ingreso)";
-        try (Statement st = conect.createStatement(); ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-                int trabajadorId = rs.getInt("trabajador_id");
-                registrarFinSesionForzada(trabajadorId);
+        Connection connection = null;
+
+        try {
+            Conectar.getInstancia().obtenerConexion();
+
+            String sql = "SELECT trabajador_id FROM horas_ingreso WHERE NOT EXISTS "
+                    + "(SELECT 1 FROM horas_salida WHERE horas_ingreso.id_ingreso = horas_salida.id_ingreso)";
+            try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+                while (rs.next()) {
+                    int trabajadorId = rs.getInt("trabajador_id");
+                    registrarFinSesionForzada(trabajadorId);
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public LocalDate obtenerFechaInicioActividadesDesdeBD() {
-        String sql = "SELECT fecha_inicio_actividades FROM configuracion";  // Cambiar el nombre de la columna y tabla según corresponda
-        try (PreparedStatement pst = conect.prepareStatement(sql); ResultSet rs = pst.executeQuery()) {
-            if (rs.next()) {
-                return rs.getDate("fecha_inicio_actividades").toLocalDate();  // Convertir java.sql.Date a LocalDate
+        Connection connection = null;
+
+        String sql = "SELECT fecha_inicio_actividades FROM configuracion";
+
+        try {
+            Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+                if (rs.next()) {
+                    return rs.getDate("fecha_inicio_actividades").toLocalDate();
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("Error al obtener fecha de inicio de actividades: " + e.getMessage());
+            throw new RuntimeException("Error al obtener la fecha de inicio de actividades", e);
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
-        return LocalDate.now();  // Si hay un error, usa la fecha actual
+        return null;
     }
 
     public LocalDate[] calcularInicioYFinPeriodo(String tipoPeriodo, LocalDate fechaInicioActividades, int numeroPeriodo) {
@@ -219,6 +242,8 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
     // Mostrar horas trabajadas
     public void Mostrar(JTable tabla, int trabajadorId) {
+        Connection connection = null;
+
         DefaultTableModel modelo = new DefaultTableModel();
         modelo.addColumn("ID Ingreso");
         modelo.addColumn("ID Salida");
@@ -231,40 +256,46 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
         tabla.setModel(modelo);
 
-        String sql = "SELECT hi.id_ingreso, hs.id_salida, hi.fInicio, hs.fSalida, "
-                + "TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida) / 60.0 AS horasTrabajadas, hs.forzado "
-                + "FROM horas_ingreso hi JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso "
-                + "WHERE hi.trabajador_id = ?";
+        try {
+            Conectar.getInstancia().obtenerConexion();
 
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            ResultSet rs = pst.executeQuery();
-            while (rs.next()) {
-                Timestamp fInicio = rs.getTimestamp("fInicio");
-                Timestamp fSalida = rs.getTimestamp("fSalida");
+            String sql = "SELECT hi.id_ingreso, hs.id_salida, hi.fInicio, hs.fSalida, "
+                    + "TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida) / 60.0 AS horasTrabajadas, hs.forzado "
+                    + "FROM horas_ingreso hi JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso "
+                    + "WHERE hi.trabajador_id = ?";
 
-                // Extraer fecha y hora por separado
-                String fechaIngreso = fInicio.toLocalDateTime().toLocalDate().toString();
-                String horaIngreso = fInicio.toLocalDateTime().toLocalTime().toString();
-                String fechaSalida = fSalida != null ? fSalida.toLocalDateTime().toLocalDate().toString() : "Pendiente";
-                String horaSalida = fSalida != null ? fSalida.toLocalDateTime().toLocalTime().toString() : "Pendiente";
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, trabajadorId);
+                ResultSet rs = pst.executeQuery();
+                while (rs.next()) {
+                    Timestamp fInicio = rs.getTimestamp("fInicio");
+                    Timestamp fSalida = rs.getTimestamp("fSalida");
 
-                modelo.addRow(new Object[]{
-                    rs.getInt("id_ingreso"),
-                    rs.getInt("id_salida"),
-                    fechaIngreso,
-                    horaIngreso,
-                    fechaSalida,
-                    horaSalida,
-                    rs.getDouble("horasTrabajadas"),
-                    rs.getBoolean("forzado")
-                });
+                    // Extraer fecha y hora por separado
+                    String fechaIngreso = fInicio.toLocalDateTime().toLocalDate().toString();
+                    String horaIngreso = fInicio.toLocalDateTime().toLocalTime().toString();
+                    String fechaSalida = fSalida != null ? fSalida.toLocalDateTime().toLocalDate().toString() : "Pendiente";
+                    String horaSalida = fSalida != null ? fSalida.toLocalDateTime().toLocalTime().toString() : "Pendiente";
+
+                    modelo.addRow(new Object[]{
+                        rs.getInt("id_ingreso"),
+                        rs.getInt("id_salida"),
+                        fechaIngreso,
+                        horaIngreso,
+                        fechaSalida,
+                        horaSalida,
+                        rs.getDouble("horasTrabajadas"),
+                        rs.getBoolean("forzado")
+                    });
+                }
             }
             tabla.setModel(modelo);
             // Aplicamos el renderer personalizado en la columna "Forzado"
             tabla.getColumnModel().getColumn(modelo.getColumnCount() - 1).setCellRenderer(new SalidaForzadaRenderer());
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar los registros: " + e.getMessage());
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -309,36 +340,49 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     public void eliminar(int idIngreso, int idSalida) {
+        Connection connection = null;
+
         // Eliminar registro de horas_ingreso
         String sqlDeleteHorasIngreso = "DELETE FROM horas_ingreso WHERE id_ingreso = ?";
-        try (PreparedStatement pst = conect.prepareStatement(sqlDeleteHorasIngreso)) {
-            pst.setInt(1, idIngreso);
-            pst.executeUpdate();
-            System.out.println("Registro de horas_ingreso eliminado con éxito.");
-        } catch (SQLException e) {
-            System.out.println("Error al eliminar el registro de horas_ingreso: " + e.getMessage());
-        }
 
-        // Eliminar registro de horas_salida
-        String sqlDeleteHorasSalida = "DELETE FROM horas_salida WHERE id_salida = ?";
-        try (PreparedStatement pst = conect.prepareStatement(sqlDeleteHorasSalida)) {
-            pst.setInt(1, idSalida);
-            pst.executeUpdate();
-            System.out.println("Registro de horas_salida eliminado con éxito.");
+        try {
+            Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement pst = connection.prepareStatement(sqlDeleteHorasIngreso)) {
+                pst.setInt(1, idIngreso);
+                pst.executeUpdate();
+                System.out.println("Registro de horas_ingreso eliminado con éxito.");
+            } catch (SQLException e) {
+                System.out.println("Error al eliminar el registro de horas_ingreso: " + e.getMessage());
+            }
+
+            // Eliminar registro de horas_salida
+            String sqlDeleteHorasSalida = "DELETE FROM horas_salida WHERE id_salida = ?";
+
+            Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement pst = connection.prepareStatement(sqlDeleteHorasSalida)) {
+                pst.setInt(1, idSalida);
+                pst.executeUpdate();
+                System.out.println("Registro de horas_salida eliminado con éxito.");
+            }
+
         } catch (SQLException e) {
             System.out.println("Error al eliminar el registro de horas_salida: " + e.getMessage());
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void modificar(int idIngreso, int idSalida, LocalDateTime nuevaHoraIngreso, LocalDateTime nuevaHoraSalida, int trabajadorId) throws SQLException {
-        boolean autoCommitOriginal = conect.getAutoCommit();
+        Connection connection = null;
 
         try {
-            conect.setAutoCommit(false);  // Desactivar autocommit
+            Conectar.getInstancia().obtenerConexion();
 
             // Modificar registro de horas_ingreso
             String sqlUpdateHorasIngreso = "UPDATE horas_ingreso SET fInicio = ? WHERE id_ingreso = ?";
-            try (PreparedStatement pst = conect.prepareStatement(sqlUpdateHorasIngreso)) {
+            try (PreparedStatement pst = connection.prepareStatement(sqlUpdateHorasIngreso)) {
                 pst.setTimestamp(1, Timestamp.valueOf(nuevaHoraIngreso));
                 pst.setInt(2, idIngreso);
                 int affectedRowsIngreso = pst.executeUpdate();
@@ -348,7 +392,7 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             // Modificar registro de horas_salida
             if (idSalida > 0) {
                 String sqlUpdateHorasSalida = "UPDATE horas_salida SET fSalida = ? WHERE id_salida = ?";
-                try (PreparedStatement pst = conect.prepareStatement(sqlUpdateHorasSalida)) {
+                try (PreparedStatement pst = connection.prepareStatement(sqlUpdateHorasSalida)) {
                     pst.setTimestamp(1, Timestamp.valueOf(nuevaHoraSalida));
                     pst.setInt(2, idSalida);
                     int affectedRowsSalida = pst.executeUpdate();
@@ -356,7 +400,7 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
                     // Verificar si la salida era forzada y corregirla
                     String sqlSelectForzado = "SELECT forzado FROM horas_salida WHERE id_salida = ?";
-                    try (PreparedStatement pstForzado = conect.prepareStatement(sqlSelectForzado)) {
+                    try (PreparedStatement pstForzado = connection.prepareStatement(sqlSelectForzado)) {
                         pstForzado.setInt(1, idSalida);
                         ResultSet rs = pstForzado.executeQuery();
                         if (rs.next()) {
@@ -370,120 +414,172 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                 }
             }
 
-            conect.commit();  // Confirmar la transacción
             System.out.println("Transacción realizada con éxito.");
         } catch (SQLException e) {
-            conect.rollback();  // Revertir la transacción si ocurre un error
             e.printStackTrace();
             System.out.println("Error al modificar las horas: " + e.getMessage());
         } finally {
-            conect.setAutoCommit(autoCommitOriginal);  // Restaurar el estado original de autocommit
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     // Guardar horas trabajadas
     public void guardarHorasTrabajadas(int trabajadorId, double horasTrabajadas, LocalDate fecha, String tipoPeriodo) {
+        Connection connection = null;
+
         String periodoPago = determinarPeriodoPago(fecha, fechaInicioActividades, tipoPeriodo);
         String sql = "INSERT INTO horas_trabajadas (trabajador_id, horas, fecha, periodo_pago) VALUES (?, ?, ?, ?) "
                 + "ON DUPLICATE KEY UPDATE horas = VALUES(horas), periodo_pago = VALUES(periodo_pago)";
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            pst.setDouble(2, horasTrabajadas);
-            pst.setDate(3, java.sql.Date.valueOf(fecha));
-            pst.setString(4, periodoPago);
-            pst.executeUpdate();
+
+        try {
+            Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, trabajadorId);
+                pst.setDouble(2, horasTrabajadas);
+                pst.setDate(3, java.sql.Date.valueOf(fecha));
+                pst.setString(4, periodoPago);
+                pst.executeUpdate();
+            }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al guardar horas trabajadas: ", ex);
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     // Método para registrar el inicio de sesión
     public void registrarInicioSesion(int trabajadorId) {
+        Connection connection = null;
+
         //        revisarEstadoSesion(trabajadorId); // Revisa el estado de la sesión en intervalos
         // Registrar el inicio de sesión en horas_ingreso
         String sql = "INSERT INTO horas_ingreso (trabajador_id, fInicio) VALUES (?, ?)";
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            pst.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-            pst.executeUpdate();
+
+        try {
+            Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, trabajadorId);
+                pst.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+                pst.executeUpdate();
+            }
 //            System.out.println("Inicio de sesión registrado para trabajador ID: " + trabajadorId);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al registrar inicio de sesión: ", ex);
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     // Método para registrar el fin de sesión y calcular las horas de trabajo
     public void registrarFinSesion(int trabajadorId) {
+        Connection connection = null;
+
         //        System.out.println("Registrando fin de sesión para trabajador ID: " + trabajadorId);
         String obtenerIdIngresoSQL = "SELECT id_ingreso FROM horas_ingreso WHERE trabajador_id = ? ORDER BY fInicio DESC LIMIT 1";
-        try (PreparedStatement pstIngreso = conect.prepareStatement(obtenerIdIngresoSQL)) {
-            pstIngreso.setInt(1, trabajadorId);
-            ResultSet rs = pstIngreso.executeQuery();
 
-            if (rs.next()) {
-                int idIngreso = rs.getInt("id_ingreso");
+        try {
+            Conectar.getInstancia().obtenerConexion();
 
-                String sql = "INSERT INTO horas_salida (trabajador_id, fSalida, id_ingreso) VALUES (?, ?, ?)";
-                try (PreparedStatement pstSalida = conect.prepareStatement(sql)) {
-                    pstSalida.setInt(1, trabajadorId);
-                    pstSalida.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-                    pstSalida.setInt(3, idIngreso);
+            try (PreparedStatement pstIngreso = connection.prepareStatement(obtenerIdIngresoSQL)) {
+                pstIngreso.setInt(1, trabajadorId);
+                ResultSet rs = pstIngreso.executeQuery();
 
-                    int rowsAffected = pstSalida.executeUpdate();
-                    System.out.println("Filas afectadas: " + rowsAffected);
+                if (rs.next()) {
+                    int idIngreso = rs.getInt("id_ingreso");
 
-                } catch (SQLException ex) {
-                    LOGGER.log(Level.SEVERE, "Error al registrar fin de sesión: ", ex);
+                    String sql = "INSERT INTO horas_salida (trabajador_id, fSalida, id_ingreso) VALUES (?, ?, ?)";
+                    Conectar.getInstancia().obtenerConexion();
+                    try (PreparedStatement pstSalida = connection.prepareStatement(sql)) {
+                        pstSalida.setInt(1, trabajadorId);
+                        pstSalida.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+                        pstSalida.setInt(3, idIngreso);
+
+                        int rowsAffected = pstSalida.executeUpdate();
+                        System.out.println("Filas afectadas: " + rowsAffected);
+
+                    } catch (SQLException ex) {
+                        LOGGER.log(Level.SEVERE, "Error al registrar fin de sesión: ", ex);
+                    }
+                } else {
+                    System.out.println("No se encontró una sesión de inicio para el trabajador ID: " + trabajadorId);
+                    JOptionPane.showMessageDialog(null, "No se encontró una sesión activa para el trabajador con ID: " + trabajadorId);
                 }
-            } else {
-                System.out.println("No se encontró una sesión de inicio para el trabajador ID: " + trabajadorId);
-                JOptionPane.showMessageDialog(null, "No se encontró una sesión activa para el trabajador con ID: " + trabajadorId);
             }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al obtener id_ingreso: ", ex);
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     // Registrar fin de sesión forzada
     public void registrarFinSesionForzada(int trabajadorId) throws SQLException {
-        String sql = "SELECT id_ingreso FROM horas_ingreso WHERE trabajador_id = ? ORDER BY fInicio DESC LIMIT 1";
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            ResultSet rs = pst.executeQuery();
-            if (rs.next()) {
-                int idIngreso = rs.getInt("id_ingreso");
+        Connection connection = null;
 
-                String sqlCheck = "SELECT id_salida FROM horas_salida WHERE id_ingreso = ?";
-                try (PreparedStatement pstCheck = conect.prepareStatement(sqlCheck)) {
-                    pstCheck.setInt(1, idIngreso);
-                    ResultSet rsCheck = pstCheck.executeQuery();
-                    if (!rsCheck.next()) {
-                        String sqlInsert = "INSERT INTO horas_salida (trabajador_id, fSalida, id_ingreso, forzado) VALUES (?, ?, ?, 1)";
-                        try (PreparedStatement pstInsert = conect.prepareStatement(sqlInsert)) {
-                            pstInsert.setInt(1, trabajadorId);
-                            pstInsert.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-                            pstInsert.setInt(3, idIngreso);
-                            pstInsert.executeUpdate();
+        String sql = "SELECT id_ingreso FROM horas_ingreso WHERE trabajador_id = ? ORDER BY fInicio DESC LIMIT 1";
+
+        try {
+            Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, trabajadorId);
+                ResultSet rs = pst.executeQuery();
+                if (rs.next()) {
+                    int idIngreso = rs.getInt("id_ingreso");
+
+                    String sqlCheck = "SELECT id_salida FROM horas_salida WHERE id_ingreso = ?";
+
+                    try (PreparedStatement pstCheck = connection.prepareStatement(sqlCheck)) {
+                        pstCheck.setInt(1, idIngreso);
+                        ResultSet rsCheck = pstCheck.executeQuery();
+                        if (!rsCheck.next()) {
+                            String sqlInsert = "INSERT INTO horas_salida (trabajador_id, fSalida, id_ingreso, forzado) VALUES (?, ?, ?, 1)";
+
+                            try (PreparedStatement pstInsert = connection.prepareStatement(sqlInsert)) {
+                                pstInsert.setInt(1, trabajadorId);
+                                pstInsert.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+                                pstInsert.setInt(3, idIngreso);
+                                pstInsert.executeUpdate();
+                            }
                         }
                     }
                 }
             }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error al obtener id_ingreso: ", ex);
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
+
         }
     }
 
     public void corregirSalidaForzada(int idSalida, LocalDateTime nuevaHoraSalida, int trabajadorId) throws SQLException {
+        Connection connection = null;
+
         String sql = "UPDATE horas_salida SET fSalida = ?, forzado = 0 WHERE id_salida = ? AND forzado = 1";
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setTimestamp(1, Timestamp.valueOf(nuevaHoraSalida));  // Nueva hora de salida
-            pst.setInt(2, idSalida);
-            int filasAfectadas = pst.executeUpdate();
-            if (filasAfectadas > 0) {
-                System.out.println("Salida forzada corregida con éxito.");
-                // Después de corregir, refrescar la tabla
-                Mostrar(Tabla, trabajadorId);  // Ahora pasamos trabajadorId correctamente
-            } else {
-                System.out.println("No se encontró una salida forzada con ese ID.");
+
+        try {
+            Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setTimestamp(1, Timestamp.valueOf(nuevaHoraSalida));  // Nueva hora de salida
+                pst.setInt(2, idSalida);
+                int filasAfectadas = pst.executeUpdate();
+                if (filasAfectadas > 0) {
+                    System.out.println("Salida forzada corregida con éxito.");
+                    // Después de corregir, refrescar la tabla
+                    Mostrar(Tabla, trabajadorId);  // Ahora pasamos trabajadorId correctamente
+                } else {
+                    System.out.println("No se encontró una salida forzada con ese ID.");
+                }
             }
+        } catch (SQLException ex) {
+            LOGGER.log(Level.SEVERE, "Error al obtener id_ingreso: ", ex);
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
+
         }
     }
 
@@ -507,71 +603,80 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     private void guardarPago(int trabajadorId, double salarioBruto, double salarioNeto) {
+        Connection connection = null;
+
         String sql = "INSERT INTO pagos (trabajador_id, salario_bruto, salario_neto, fecha_pago) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            pst.setDouble(2, salarioBruto);
-            pst.setDouble(3, salarioNeto);
-            pst.setDate(4, java.sql.Date.valueOf(LocalDate.now())); // Fecha del pago
-            pst.executeUpdate();
+
+        try {
+            Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, trabajadorId);
+                pst.setDouble(2, salarioBruto);
+                pst.setDouble(3, salarioNeto);
+                pst.setDate(4, java.sql.Date.valueOf(LocalDate.now())); // Fecha del pago
+                pst.executeUpdate();
+            }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al guardar pagos: ", ex);
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public String obtenerTipoPeriodo(int idPuestoDeTrabajo) throws SQLException {
+        Connection connection = null;
+
         String tipoPeriodo = null;
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+
+        String consulta = "SELECT p.descripcion FROM puestodetrabajo pt\n"
+                + "INNER JOIN periodo p ON pt.id_periodo=p.id\n"
+                + "WHERE idPDT = ?";
 
         try {
-            Conectar con = new Conectar();
-            conn = con.getConexion();
+            Conectar.getInstancia().obtenerConexion();
 
-            String consulta = "SELECT p.descripcion FROM puestodetrabajo pt\n"
-                    + "INNER JOIN periodo p ON pt.id_periodo=p.id\n"
-                    + "WHERE idPDT = ?";
-            ps = conn.prepareStatement(consulta);
-            ps.setInt(1, idPuestoDeTrabajo);
-
-            rs = ps.executeQuery();
-
-            if (rs.next()) {
-                tipoPeriodo = rs.getString("periodo");
+            try (PreparedStatement ps = connection.prepareStatement(consulta)) {
+                ps.setInt(1, idPuestoDeTrabajo);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        tipoPeriodo = rs.getString("descripcion");
+                    }
+                }
             }
-
         } catch (SQLException e) {
             System.out.println("Error al obtener tipo de periodo: " + e.getMessage());
             throw e;
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (ps != null) {
-                ps.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
+            Conectar.getInstancia().devolverConexion(connection);
         }
-
         return tipoPeriodo;
     }
 
     public double calcularHorasTrabajadas(int trabajadorId, LocalDate fechaInicio, LocalDate fechaFin) throws SQLException {
+        Connection connection = null;
+
         double totalHoras = 0.0;
         String sql = "SELECT SUM(TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida)) / 60.0 AS horasTrabajadas FROM horas_ingreso hi JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso WHERE hi.trabajador_id = ? AND hi.fInicio BETWEEN ? AND ?";
 
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            pst.setDate(2, java.sql.Date.valueOf(fechaInicio));
-            pst.setDate(3, java.sql.Date.valueOf(fechaFin));
-            ResultSet rs = pst.executeQuery();
+        try {
+            Conectar.getInstancia().obtenerConexion();
 
-            if (rs.next()) {
-                totalHoras = rs.getDouble("horasTrabajadas");
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, trabajadorId);
+                pst.setDate(2, java.sql.Date.valueOf(fechaInicio));
+                pst.setDate(3, java.sql.Date.valueOf(fechaFin));
+                ResultSet rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    totalHoras = rs.getDouble("horasTrabajadas");
+                }
             }
+        } catch (SQLException e) {
+            System.out.println("Error al obtener tipo de periodo: " + e.getMessage());
+            throw e;
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return totalHoras;
     }
@@ -587,28 +692,51 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     public void acumularVacaciones(int trabajadorId, int diasTrabajados) throws SQLException {
+        Connection connection = null;
+
         String sql = "UPDATE vacaciones SET dias_acumulados = dias_acumulados + ? WHERE trabajador_id = ?";
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            int diasAcumulados = diasTrabajados / 20;  // Ejemplo: Cada 20 días trabajados se acumula 1 día de vacaciones.
-            pst.setInt(1, diasAcumulados);
-            pst.setInt(2, trabajadorId);
-            pst.executeUpdate();
+
+        try {
+            Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                int diasAcumulados = diasTrabajados / 20;  // Ejemplo: Cada 20 días trabajados se acumula 1 día de vacaciones.
+                pst.setInt(1, diasAcumulados);
+                pst.setInt(2, trabajadorId);
+                pst.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al obtener tipo de periodo: " + e.getMessage());
+            throw e;
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void registrarAuditoria(int trabajadorId, String accion, LocalDateTime fechaHora) {
+        Connection connection = null;
+
         String sql = "INSERT INTO auditoria (trabajador_id, accion, fecha_hora) VALUES (?, ?, ?)";
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            pst.setString(2, accion);
-            pst.setTimestamp(3, Timestamp.valueOf(fechaHora));
-            pst.executeUpdate();
+
+        try {
+            Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, trabajadorId);
+                pst.setString(2, accion);
+                pst.setTimestamp(3, Timestamp.valueOf(fechaHora));
+                pst.executeUpdate();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     private double calcularHorasExtrasMensuales(int trabajadorId, LocalDate fechaInicio, LocalDate fechaFin) {
+        Connection connection = null;
+
         double totalHorasExtras = 0.0;
 
         String sql = "SELECT SUM(CASE WHEN TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida) / 60.0 > 8 THEN TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida) / 60.0 - 8 ELSE 0 END) AS horasExtras "
@@ -616,54 +744,74 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                 + "JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso "
                 + "WHERE hi.trabajador_id = ? AND hi.fInicio BETWEEN ? AND ?";
 
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            pst.setDate(2, java.sql.Date.valueOf(fechaInicio));
-            pst.setDate(3, java.sql.Date.valueOf(fechaFin));
-            ResultSet rs = pst.executeQuery();
+        try {
+            Conectar.getInstancia().obtenerConexion();
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, trabajadorId);
+                pst.setDate(2, java.sql.Date.valueOf(fechaInicio));
+                pst.setDate(3, java.sql.Date.valueOf(fechaFin));
+                ResultSet rs = pst.executeQuery();
 
-            if (rs.next()) {
-                totalHorasExtras = rs.getDouble("horasExtras");
+                if (rs.next()) {
+                    totalHorasExtras = rs.getDouble("horasExtras");
+                }
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
         return totalHorasExtras;
     }
 
     public boolean verificarOvertime(int trabajadorId) {
+        Connection connection = null;
+
         String sql = "SELECT ot.descripcion FROM puestodetrabajo pt \n"
                 + "INNER JOIN overtime ot ON pt.id_overtime = ot.id \n"
                 + "WHERE pt.idTrabajador = ?";
+        try {
+            Conectar.getInstancia().obtenerConexion();
 
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            ResultSet rs = pst.executeQuery();
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, trabajadorId);
+                ResultSet rs = pst.executeQuery();
 
-            if (rs.next()) {
-                String descripcionOvertime = rs.getString("descripcion");  // Obtén la descripción de overtime
-                // Retorna true si la descripción de overtime corresponde a un tipo válido de overtime
-                return descripcionOvertime != null && !descripcionOvertime.isEmpty();
+                if (rs.next()) {
+                    String descripcionOvertime = rs.getString("descripcion");  // Obtén la descripción de overtime
+                    // Retorna true si la descripción de overtime corresponde a un tipo válido de overtime
+                    return descripcionOvertime != null && !descripcionOvertime.isEmpty();
+                }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al verificar overtime: " + e.getMessage());
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return false;
     }
 
     public double obtenerPagoPorHora(int trabajadorId) {
+        Connection connection = null;
+
         String sql = "SELECT pagoPorHora FROM puestodetrabajo WHERE idTrabajador = ?";
 
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            ResultSet rs = pst.executeQuery();
+        try {
+            Conectar.getInstancia().obtenerConexion();
 
-            if (rs.next()) {
-                return rs.getDouble("pagoPorHora");  // Retorna el pago por hora.
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, trabajadorId);
+                ResultSet rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    return rs.getDouble("pagoPorHora");  // Retorna el pago por hora.
+                }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al obtener el pago por hora: " + e.getMessage());
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return 0.0;  // Retorna 0 si no se encuentra el valor.
     }
@@ -683,32 +831,49 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     private double obtenerSueldoMensual(int trabajadorId) {
+        Connection connection = null;
+
         String sql = "SELECT sueldo FROM puestodetrabajo WHERE idTrabajador = ?";
 
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
-            pst.setInt(1, trabajadorId);
-            ResultSet rs = pst.executeQuery();
+        try {
+            Conectar.getInstancia().obtenerConexion();
 
-            if (rs.next()) {
-                return rs.getDouble("sueldo");  // Retorna el pago por hora.
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, trabajadorId);
+                ResultSet rs = pst.executeQuery();
+
+                if (rs.next()) {
+                    return rs.getDouble("sueldo");  // Retorna el pago por hora.
+                }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al obtener el sueldo: " + e.getMessage());
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return 0.0;  // Retorna 0 si no se encuentra el valor.
     }
 
     private String obtenerTipoPago(int trabajadorId) {
+        Connection connection = null;
+
         String sql = "SELECT p.descripcion FROM puestodetrabajo pt\n"
                 + "INNER JOIN periodo p ON pt.id_periodo= p.id WHERE pt.idTrabajador = ?";
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+        
+        try{
+            Conectar.getInstancia().obtenerConexion();
+        
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, trabajadorId);
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
                 return rs.getString("periodo");
             }
+        }
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return "Semanal"; // Por defecto semanal
     }
@@ -750,15 +915,17 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     private double obtenerHorasTrabajadas(int trabajadorId, LocalDate fechaInicio, LocalDate fechaFin) {
-        // Aquí debes implementar la lógica para obtener las horas trabajadas del trabajador
-        // Por ejemplo, a partir de una consulta a la base de datos o sumando los registros de horas.
+        Connection connection = null;
 
         double horasTrabajadas = 0.0;
 
         // Consulta a la base de datos o cálculo de horas trabajadas en el periodo (ejemplo)
         String sql = "SELECT SUM(horas) AS total_horas FROM horas_trabajadas WHERE trabajador_id = ? AND fecha BETWEEN ? AND ?";
-
-        try (PreparedStatement ps = conect.prepareStatement(sql)) {
+        
+        try{
+            Conectar.getInstancia().obtenerConexion();
+        
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, trabajadorId);
             ps.setDate(2, java.sql.Date.valueOf(fechaInicio));
             ps.setDate(3, java.sql.Date.valueOf(fechaFin));
@@ -767,8 +934,11 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             if (rs.next()) {
                 horasTrabajadas = rs.getDouble("total_horas");
             }
+        }
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
         return horasTrabajadas;
@@ -807,13 +977,18 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     private void consolidarHorasTrabajadas(int trabajadorId, LocalDate fecha) {
+        Connection connection = null;
+
         double totalHoras = 0.0;
         String sql = "SELECT SUM(TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida)) / 60.0 AS horasTrabajadas "
                 + "FROM horas_ingreso hi "
                 + "JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso "
                 + "WHERE hi.trabajador_id = ? AND DATE(hi.fInicio) = ?";
-
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+        
+        try{
+            Conectar.getInstancia().obtenerConexion();
+        
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, trabajadorId);
             pst.setDate(2, java.sql.Date.valueOf(fecha));
             ResultSet rs = pst.executeQuery();
@@ -821,8 +996,11 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             if (rs.next()) {
                 totalHoras = rs.getDouble("horasTrabajadas");
             }
+        }
         } catch (SQLException ex) {
             ex.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
         guardarHorasTrabajadas(trabajadorId, totalHoras, fecha);
@@ -896,29 +1074,43 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
     // Método para calcular las horas trabajadas después de registrar la salida
     public double calcularHorasTrabajadasPorDia(int trabajadorId) {
+        Connection connection = null;
+
         String sql = "SELECT DATE(hi.fInicio) as fecha, SUM(TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida)) / 60.0 AS horasTrabajadas "
                 + "FROM horas_ingreso hi "
                 + "JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso "
                 + "WHERE hi.trabajador_id = ? AND DATE(hi.fInicio) = CURDATE() "
                 + "GROUP BY DATE(hi.fInicio)";
         double totalHorasTrabajadas = 0.0;
-
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+        
+        try{
+            Conectar.getInstancia().obtenerConexion();
+        
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, trabajadorId);
             ResultSet rs = pst.executeQuery();
 
             if (rs.next()) {
                 totalHorasTrabajadas = rs.getDouble("horasTrabajadas");
             }
+        }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al calcular horas trabajadas por día: ", ex);
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return totalHorasTrabajadas;
     }
 
     public void generarReporte(int trabajadorId, java.util.Date fechaInicio, java.util.Date fechaFin) {
+        Connection connection = null;
+
         String sql = "SELECT * FROM deducciones WHERE trabajador_id = ? AND fecha BETWEEN ? AND ?";
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+        
+        try{
+            Conectar.getInstancia().obtenerConexion();
+        
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
             // Asegúrate de establecer todos los parámetros necesarios en la consulta SQL
             pst.setInt(1, trabajadorId); // Establece el parámetro para trabajador_id
             pst.setDate(2, new java.sql.Date(fechaInicio.getTime())); // Establece el parámetro para fecha de inicio
@@ -943,15 +1135,24 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                 };
                 model.addRow(row);
             }
+        }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al generar el reporte: " + ex.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     // Implementar métodos para generar el reporte
     public void generarReporte() {
+        Connection connection = null;
+
         String sql = "SELECT * FROM deducciones WHERE trabajador_id = ? AND fecha BETWEEN ? AND ?";
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+        
+        try{
+            Conectar.getInstancia().obtenerConexion();
+        
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
             // Verificar si los JDateChoosers están inicializados
             if (jDateChooser1 == null || jDateChooser2 == null) {
                 JOptionPane.showMessageDialog(null, "Por favor, seleccione un rango de fechas válido.");
@@ -984,8 +1185,11 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                 };
                 model.addRow(row);
             }
+        }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al generar el reporte: " + ex.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -1336,21 +1540,31 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarTrabajador(JComboBox<String> comboTrabajador) {
+        Connection connection = null;
+
         System.out.println("Método MostrarTrabajador llamado en: " + new java.util.Date());
         String sql = "SELECT * FROM worker";
-        try (Statement st = conect.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+        
+        try{
+            Conectar.getInstancia().obtenerConexion();
+        
+        try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             comboTrabajador.removeAllItems(); // Limpiar los elementos existentes en el comboBox
 
             while (rs.next()) {
                 comboTrabajador.addItem(rs.getString("nombre")); // Agregar cada trabajador al comboBox
                 System.out.println("Añadiendo trabajador al ComboBox: " + rs.getString("nombre"));
             }
+        }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Trabajadores: " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoTrabajador(JComboBox<String> trabajador, JTextField IdTrabajador) {
+        Connection connection = null;
         if (trabajador.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(null, "Seleccione un trabajador válido.");
             return;
@@ -1359,7 +1573,9 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         String consulta = "SELECT worker.idWorker FROM worker WHERE worker.nombre = ?";
 
         try {
-            CallableStatement cs = conexion.getConexion().prepareCall(consulta);
+            Conectar.getInstancia().obtenerConexion();
+
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setString(1, trabajador.getSelectedItem().toString());
             ResultSet rs = cs.executeQuery();
 
@@ -1369,11 +1585,15 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar código del trabajador: " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     // Método para guardar las horas trabajadas en la base de datos
     private void guardarHorasTrabajadas(int trabajadorId, double horasTrabajadas, LocalDate fecha) {
+        Connection connection = null;
+        
         // Asegúrate de que la fecha sea válida
         if (fecha == null || fecha.equals(LocalDate.EPOCH)) {
             fecha = LocalDate.now(); // Usa la fecha actual si la fecha es nula o no válida
@@ -1381,14 +1601,22 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
         String sql = "INSERT INTO horas_trabajadas (trabajador_id, horas, fecha) VALUES (?, ?, ?) "
                 + "ON DUPLICATE KEY UPDATE horas = VALUES(horas)";
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+        
+        
+        try{
+            Conectar.getInstancia().obtenerConexion();
+            
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, trabajadorId);
             pst.setDouble(2, horasTrabajadas);
             pst.setDate(3, java.sql.Date.valueOf(fecha));
             pst.executeUpdate();
             System.out.println("Horas trabajadas registradas para trabajador ID: " + trabajadorId + " en la fecha: " + fecha);
+        }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al guardar horas trabajadas: ", ex);
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

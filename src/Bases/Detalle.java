@@ -1,10 +1,6 @@
 package Bases;
 
-import conectar.Conectar;
-import java.sql.Connection;
 import java.util.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class Detalle {
 

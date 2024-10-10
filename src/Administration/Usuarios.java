@@ -123,9 +123,6 @@ public class Usuarios extends javax.swing.JInternalFrame {
 
     }
 
-    // Conexión
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
     PreparedStatement ps;
     ResultSet rs;
 
@@ -171,14 +168,18 @@ public class Usuarios extends javax.swing.JInternalFrame {
 
     // Es lo mismo que mostrar Tabla Clientes
     public void CargarDatosTable(String Valores) {
+        Connection connection = null; // Inicializamos la conexión en null
         try {
+            // Obtener una conexión del pool antes de ejecutar la consulta
+            connection = Conectar.getInstancia().obtenerConexion();
+
             String[] titulosTabla = {"id", "Nick", "Usuario", "Password", "Rol", "Estado"}; // Titulos de la Tabla
             String[] RegistroBD = new String[6]; // Registros de la Base de Datos
             model = new DefaultTableModel(null, titulosTabla); // Le pasamos los titulos a la tabla
             String ConsultaSQL = "SELECT u.idUsuarios AS id, u.nombre AS Nick, u.usuario AS Usuario, "
                     + "u.password AS Contrasenia, r.nombre AS Rol, u.estado AS Estado FROM usuarios u\n"
-                    + "INNER JOIN roles r ON u.rol=r.id";
-            Statement st = connect.createStatement();
+                    + "INNER JOIN roles r ON u.rol=r.id_rol";
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
             while (result.next()) {
                 RegistroBD[0] = result.getString("id");
@@ -198,11 +199,17 @@ public class Usuarios extends javax.swing.JInternalFrame {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
+        } finally {
+            // Devolver la conexión al pool después de completar la operación
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void CargarDatosTablaUsuariosTrabajadores(JTable table) {
+        Connection connection = null;
         try {
+// Obtener una conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
             String[] titulosTabla = {"Trabajador", "Rol"}; // Titulos de la Tabla
             String[] RegistroBD = new String[2]; // Registros de la Base de Datos
             DefaultTableModel model = new DefaultTableModel(null, titulosTabla); // Le pasamos los titulos a la tabla
@@ -210,8 +217,8 @@ public class Usuarios extends javax.swing.JInternalFrame {
                     + "FROM usuario_trabajador ut "
                     + "INNER JOIN worker w ON ut.id_trabajador = w.idWorker "
                     + "INNER JOIN usuarios u ON ut.id_usuario = u.idUsuarios "
-                    + "INNER JOIN roles r ON u.rol = r.id";
-            Statement st = connect.createStatement();
+                    + "INNER JOIN roles r ON u.rol = r.id_rol";
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
             while (result.next()) {
                 RegistroBD[0] = result.getString("NombreTrabajador");
@@ -223,176 +230,145 @@ public class Usuarios extends javax.swing.JInternalFrame {
             tbUsuTrab.getColumnModel().getColumn(1).setPreferredWidth(200);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Guardar() {
-        // Variables
-        String nombre = txtNombre.getText();
-        String usuario = txtUsuario.getText();
-        String password = txtPassword.getText();
-        int idRol = Integer.parseInt(txtIdTPU.getText());
-
-        // Consulta para evitar duplicados
-        String consultaDuplicado = "SELECT * FROM usuarios WHERE nombre = ?";
-
-        // Consulta SQL para insertar los datos (nombres como en la base de datos)
-        String sqlInsertUsuario = "INSERT INTO usuarios (nombre, usuario, password, rol) VALUES (?, ?, ?, ?)";
-
+        Connection connection = null;
         try {
+            // Obtener una conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            String nombre = txtNombre.getText();
+            String usuario = txtUsuario.getText();
+            String password = txtPassword.getText();
+            int idRol = Integer.parseInt(txtIdTPU.getText());
+
+            // Consulta para evitar duplicados
+            String consultaDuplicado = "SELECT * FROM usuarios WHERE nombre = ?";
+
+            // Consulta SQL para insertar los datos
+            String sqlInsertUsuario = "INSERT INTO usuarios (nombre, usuario, password, rol) VALUES (?, ?, ?, ?)";
+
             // Verificar duplicados
-            PreparedStatement pstDuplicado = connect.prepareStatement(consultaDuplicado);
+            PreparedStatement pstDuplicado = connection.prepareStatement(consultaDuplicado);
             pstDuplicado.setString(1, nombre);
             ResultSet rsDuplicado = pstDuplicado.executeQuery();
+
             if (rsDuplicado.next()) {
                 JOptionPane.showMessageDialog(null, "El usuario ya existe.");
                 return;
             }
 
-            // Debug: Verificar si se llega hasta este punto
-            System.out.println("Guardando usuario...");
-
             // Insertar usuario
-            PreparedStatement pstInsertUsuario = connect.prepareStatement(sqlInsertUsuario, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement pstInsertUsuario = connection.prepareStatement(sqlInsertUsuario, Statement.RETURN_GENERATED_KEYS);
             pstInsertUsuario.setString(1, nombre);
             pstInsertUsuario.setString(2, usuario);
             pstInsertUsuario.setString(3, password);
             pstInsertUsuario.setInt(4, idRol);
             int n = pstInsertUsuario.executeUpdate();
 
-            // Obtener el ID del usuario recién insertado
-            ResultSet generatedKeys = pstInsertUsuario.getGeneratedKeys();
-            int idUsuario = 0;
-            if (generatedKeys.next()) {
-                idUsuario = generatedKeys.getInt(1);
-            }
-
-            // Debug: Verificar el ID del usuario recién insertado
-            System.out.println("ID del nuevo usuario: " + idUsuario);
-
-            // Si se selecciona el radio botón `rdRelacionar`, insertar la relación con el trabajador
-            // Debug: Verificar si rdRelacionar está seleccionado
-            if (rdRelacionar.isSelected()) {
-                System.out.println("El radio botón rdRelacionar está seleccionado.");
-
-                // Aquí puedes agregar más mensajes de depuración para seguir la ejecución del código
-                int idTrabajador = Integer.parseInt(txtIdTrabajador.getText());
-                System.out.println("ID del trabajador obtenido: " + idTrabajador);
-
-                // Luego, realizar la inserción de la relación usuario-trabajador
-                insertarUsuarioTrabajador(idUsuario, idTrabajador);
-            } else {
-                System.out.println("El radio botón rdRelacionar NO está seleccionado.");
-            }
-
-            // Si el registro se guardó con éxito
             if (n > 0) {
                 JOptionPane.showMessageDialog(null, "El registro se guardó exitosamente.");
-                // Luego bloquear campos
                 BloquearCampos();
                 CargarDatosTable("");
             }
         } catch (SQLException ex) {
             Logger.getLogger(Usuarios.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Eliminar(JTextField codigo) {
-        setIdUsuarios(Integer.parseInt(codigo.getText()));
-        String consulta = "DELETE from usuarios where idUsuarios=?";
+        Connection connection = null;
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
-            cs.setInt(1, getIdUsuarios());
-            cs.executeUpdate();
-            JOptionPane.showMessageDialog(null, "Se Elimino");
-        } catch (HeadlessException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
+            // Obtener una conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            setIdUsuarios(Integer.parseInt(codigo.getText()));
+            String consulta = "DELETE from usuarios where idUsuarios=?";
+            PreparedStatement ps = connection.prepareCall(consulta);
+            ps.setInt(1, getIdUsuarios());
+            ps.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Se eliminó correctamente");
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "No se pudo eliminar, error: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void SeleccionarUsuario(JTable TablaUsuario, JTextField codigo, JTextField nombre, JTextField usuario, JTextField password) {
-    try {
-        int fila = TablaUsuario.getSelectedRow(); // Obtén la fila seleccionada
-        if (fila >= 0) {
-            // Asegúrate de obtener el valor correcto del modelo de la tabla
-            codigo.setText(TablaUsuario.getValueAt(fila, 0).toString()); // ID del rol
-            nombre.setText(TablaUsuario.getValueAt(fila, 1).toString());
-            usuario.setText(TablaUsuario.getValueAt(fila, 2).toString());
-            password.setText(TablaUsuario.getValueAt(fila, 3).toString());
-        } else {
-            JOptionPane.showMessageDialog(null, "Fila No seleccionada");
+        try {
+            int fila = TablaUsuario.getSelectedRow(); // Obtén la fila seleccionada
+            if (fila >= 0) {
+                // Asegúrate de obtener el valor correcto del modelo de la tabla
+                codigo.setText(TablaUsuario.getValueAt(fila, 0).toString()); // ID del rol
+                nombre.setText(TablaUsuario.getValueAt(fila, 1).toString());
+                usuario.setText(TablaUsuario.getValueAt(fila, 2).toString());
+                password.setText(TablaUsuario.getValueAt(fila, 3).toString());
+            } else {
+                JOptionPane.showMessageDialog(null, "Fila No seleccionada");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error de Selección, Error: " + e.toString());
         }
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(null, "Error de Selección, Error: " + e.toString());
     }
-}
-
 
     public void ModificarUsuario(JTextField codigo, JTextField nombre, JTextField usuario, JTextField password) {
-        // Obtener el ID del usuario desde el JTextField
-        setIdUsuarios(Integer.parseInt(codigo.getText()));
-        int idRol = Integer.parseInt(txtIdTPU.getText());
-
-        // Depuración: Verifica si el ID se obtiene correctamente
-        System.out.println("ID del usuario a modificar: " + getIdUsuarios());
-
-        setNombre(nombre.getText());
-        setUsuario(usuario.getText());
-        setPassword(password.getText());
-
-        String consulta = "UPDATE usuarios SET nombre=?, usuario=?, password=?, rol=? WHERE idUsuarios=?";
-        String consultaDuplicado = "SELECT * FROM usuarios WHERE nombre = ?";
+        Connection connection = null;
         try {
-            // Verificar duplicado
-            PreparedStatement pstDuplicado = connect.prepareStatement(consultaDuplicado);
-            pstDuplicado.setString(1, getNombre());
-            ResultSet rsDuplicado = pstDuplicado.executeQuery();
+            // Obtener una conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            if (rsDuplicado.next() && rsDuplicado.getInt("idUsuarios") != getIdUsuarios()) {
-                // Si ya existe un registro duplicado, modificar en lugar de insertar
-                JOptionPane.showMessageDialog(null, "El nombre de usuario ya existe. Realizando modificación...");
-                int idUsuarioExistente = rsDuplicado.getInt("idUsuarios");
-                // Realizar la actualización del registro existente con los nuevos valores
-                actualizarUsuarioTrabajador(idUsuarioExistente, Integer.parseInt(txtIdTrabajador.getText()));
-            } else {
-                // Si no hay duplicados, proceder con la modificación del registro
-                PreparedStatement ps = con.getConexion().prepareStatement(consulta);
-                ps.setString(1, getNombre());
-                ps.setString(2, getUsuario());
-                ps.setString(3, getPassword());
-                ps.setInt(4, Integer.parseInt(txtIdTPU.getText()));
-                ps.setInt(5, getIdUsuarios());
-                ps.executeUpdate();
+            setIdUsuarios(Integer.parseInt(codigo.getText()));
+            int idRol = Integer.parseInt(txtIdTPU.getText());
 
-                // Verificar si rdRelacionar está seleccionado
-                if (rdRelacionar.isSelected()) {
-                    System.out.println("El radio botón rdRelacionar está seleccionado.");
+            setNombre(nombre.getText());
+            setUsuario(usuario.getText());
+            setPassword(password.getText());
 
-                    // Obtener el ID del trabajador desde el JTextField
-                    int idTrabajador = Integer.parseInt(txtIdTrabajador.getText());
-                    System.out.println("ID del trabajador obtenido: " + idTrabajador);
+            String consulta = "UPDATE usuarios SET nombre=?, usuario=?, password=?, rol=? WHERE idUsuarios=?";
+            PreparedStatement ps = connection.prepareStatement(consulta);
+            ps.setString(1, getNombre());
+            ps.setString(2, getUsuario());
+            ps.setString(3, getPassword());
+            ps.setInt(4, idRol);
+            ps.setInt(5, getIdUsuarios());
+            ps.executeUpdate();
 
-                    // Luego, realizar la inserción de la relación usuario-trabajador
-                    insertarUsuarioTrabajador(getIdUsuarios(), idTrabajador);
-                }
-                JOptionPane.showMessageDialog(null, "Modificación Exitosa");
-            }
-        } catch (HeadlessException | SQLException e) {
+            JOptionPane.showMessageDialog(null, "Modificación Exitosa");
+
+        } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se Modificó, error: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void BuscarUsuario(java.awt.event.KeyEvent evt) {
+        Connection connection = null;
         try {
+            // Obtener una conexión del pool 
+            connection = Conectar.getInstancia().obtenerConexion();
+
             String[] titulosTabla = {"id", "Nick", "Usuario", "Password", "Rol", "Estado"};
             String[] RegistroBD = new String[6];
             model = new DefaultTableModel(null, titulosTabla);
 
             String ConsultaSQL = "SELECT u.idUsuarios AS id, u.nombre AS Nick, u.usuario AS Usuario, "
                     + "u.password AS Contrasenia, r.nombre AS Rol, u.estado AS Estado FROM usuarios u "
-                    + "INNER JOIN roles r ON u.rol = r.id WHERE u.nombre LIKE ? OR u.usuario LIKE ?";
+                    + "INNER JOIN roles r ON u.rol = r.id_rol WHERE u.nombre LIKE ? OR u.usuario LIKE ?";
 
-            PreparedStatement ps = connect.prepareStatement(ConsultaSQL);
+            PreparedStatement ps = connection.prepareStatement(ConsultaSQL);
             String searchParam = "%" + txtBuscar.getText() + "%";
             ps.setString(1, searchParam);
             ps.setString(2, searchParam);
@@ -418,40 +394,55 @@ public class Usuarios extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al buscar usuario: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            // Devolver la conexión al pool 
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void insertarOActualizarUsuarioTrabajador(int idUsuario, int idTrabajador) {
-        // Comprobar si ya existe una relación
-        String consultaSelect = "SELECT COUNT(*) FROM usuario_trabajador WHERE id_usuario = ?";
-        try (Connection connect = con.getConexion(); PreparedStatement psSelect = connect.prepareStatement(consultaSelect)) {
-            psSelect.setInt(1, idUsuario);
-            ResultSet rs = psSelect.executeQuery();
-            if (rs.next() && rs.getInt(1) > 0) {
-                // Si existe, actualizar
-                String consultaUpdate = "UPDATE usuario_trabajador SET id_trabajador = ? WHERE id_usuario = ?";
-                try (PreparedStatement psUpdate = connect.prepareStatement(consultaUpdate)) {
-                    psUpdate.setInt(1, idTrabajador);
-                    psUpdate.setInt(2, idUsuario);
-                    psUpdate.executeUpdate();
-                }
-            } else {
-                // Si no existe, insertar
-                String consultaInsert = "INSERT INTO usuario_trabajador (id_usuario, id_trabajador) VALUES (?, ?)";
-                try (PreparedStatement psInsert = connect.prepareStatement(consultaInsert)) {
-                    psInsert.setInt(1, idUsuario);
-                    psInsert.setInt(2, idTrabajador);
-                    psInsert.executeUpdate();
+        Connection connection = null; // Inicializamos la conexión en null
+        try {
+            // Obtener una conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            // Comprobar si ya existe una relación
+            String consultaSelect = "SELECT COUNT(*) FROM usuario_trabajador WHERE id_usuario = ?";
+            try (PreparedStatement psSelect = connection.prepareStatement(consultaSelect)) {
+                psSelect.setInt(1, idUsuario);
+                ResultSet rs = psSelect.executeQuery();
+
+                if (rs.next() && rs.getInt(1) > 0) {
+                    // Si existe, actualizar
+                    String consultaUpdate = "UPDATE usuario_trabajador SET id_trabajador = ? WHERE id_usuario = ?";
+                    try (PreparedStatement psUpdate = connection.prepareStatement(consultaUpdate)) {
+                        psUpdate.setInt(1, idTrabajador);
+                        psUpdate.setInt(2, idUsuario);
+                        psUpdate.executeUpdate();
+                    }
+                } else {
+                    // Si no existe, insertar
+                    String consultaInsert = "INSERT INTO usuario_trabajador (id_usuario, id_trabajador) VALUES (?, ?)";
+                    try (PreparedStatement psInsert = connection.prepareStatement(consultaInsert)) {
+                        psInsert.setInt(1, idUsuario);
+                        psInsert.setInt(2, idTrabajador);
+                        psInsert.executeUpdate();
+                    }
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            // Devolver la conexión al pool después de completar la operación
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public boolean existeRelacionUsuarioTrabajador(int idUsuario) {
+        Connection connection = null;
         String sql = "SELECT COUNT(*) FROM usuario_trabajador WHERE id_usuario=?";
-        try (PreparedStatement ps = connect.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            connection = Conectar.getInstancia().obtenerConexion();
             ps.setInt(1, idUsuario);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -459,49 +450,65 @@ public class Usuarios extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return false;
     }
 
     public void actualizarUsuarioTrabajador(int idUsuario, int idTrabajador) {
+        Connection connection = null;
         String consulta = "UPDATE usuario_trabajador SET id_trabajador=? WHERE id_usuario=?";
-        try (PreparedStatement ps = connect.prepareStatement(consulta)) {
-            ps.setInt(1, idTrabajador);
-            ps.setInt(2, idUsuario);
-            ps.executeUpdate();
+        try {
+            connection = Conectar.getInstancia().obtenerConexion();
+            try (PreparedStatement ps = connection.prepareStatement(consulta)) {
+                ps.setInt(1, idTrabajador);
+                ps.setInt(2, idUsuario);
+                ps.executeUpdate();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void insertarUsuarioTrabajador(int idUsuario, int idTrabajador) {
+        Connection connection = null;
         String sql = "INSERT INTO usuario_trabajador (id_usuario, id_trabajador) VALUES (?, ?)";
-        try (Connection connect = con.getConexion(); PreparedStatement ps = connect.prepareStatement(sql)) {
-            ps.setInt(1, idUsuario);
-            ps.setInt(2, idTrabajador);
-            ps.executeUpdate();
+        try {
+            connection = Conectar.getInstancia().obtenerConexion();
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, idUsuario);
+                ps.setInt(2, idTrabajador);
+                ps.executeUpdate();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error al insertar en usuario_trabajador: " + e.getMessage());
-        }
-    }
-    
-    public boolean accion(String estado, int idUsuario) {
-        String sql = "UPDATE usuarios SET estado = ? WHERE idUsuarios = ?";
-        try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
-            ps.setString(1, estado);
-            ps.setInt(2, idUsuario);
-            ps.execute();
-            return true;
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, e.toString());
-            return false;
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
-    
+    public boolean accion(String estado, int idUsuario) {
+        Connection connection = null;
+        String sql = "UPDATE usuarios SET estado = ? WHERE idUsuarios = ?";
+        try {
+            connection = Conectar.getInstancia().obtenerConexion();
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, estado);
+                ps.setInt(2, idUsuario);
+                ps.execute();
+                return true;
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, e.toString());
+            return false;
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
+        }
+    }
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -958,7 +965,7 @@ public class Usuarios extends javax.swing.JInternalFrame {
 
     private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
         SeleccionarUsuario(tbUsuarios, txtNombre, txtNombre, txtUsuario, txtPassword);
-        Eliminar(txtNombre);
+        Eliminar(txtIdUsuario);
         CargarDatosTable("");
         txtIdUsuario.setText("");
         txtNombre.setText("");
@@ -1039,7 +1046,7 @@ public class Usuarios extends javax.swing.JInternalFrame {
         if (accion("Activo", id)) {
             JOptionPane.showMessageDialog(null, "Activado");
             CargarDatosTable("");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Error al Activar");
         }
     }//GEN-LAST:event_btnActivarActionPerformed
@@ -1050,7 +1057,7 @@ public class Usuarios extends javax.swing.JInternalFrame {
         if (accion("Inactivo", id)) {
             JOptionPane.showMessageDialog(null, "Inactivado");
             CargarDatosTable("");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Error al Inactivar");
         }
     }//GEN-LAST:event_btnInactivarActionPerformed
@@ -1097,11 +1104,15 @@ public class Usuarios extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarCTipoDeUsuario(JComboBox cbxTipoDeUsuario) {
+        Connection connection = null;
         String sql = "";
         sql = "SELECT * FROM roles;";
         Statement st;
         try {
-            st = con.getConexion().createStatement();
+            // Obtener una conexión del pool 
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxTipoDeUsuario.removeAllItems();
             while (rs.next()) {
@@ -1109,56 +1120,86 @@ public class Usuarios extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Combo " + e.toString());
+        } finally {
+// Devolver la conexión al pool 
+            Conectar.getInstancia().devolverConexion(connection);
         }
+
     }
 
     public void MostrarCodigoTipoDeUsuario(JComboBox cbxTipoDeUsuario, JTextField idTPU) {
-        String consuta = "select id from roles where nombre=?";
+        Connection connection = null;
+        String consuta = "select id_rol from roles where nombre=?";
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            // Obtener una conexión del pool 
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxTipoDeUsuario.getSelectedItem().toString());
             cs.execute();
             ResultSet rs = cs.executeQuery();
             if (rs.next()) {
-                idTPU.setText(rs.getString("id"));
+                idTPU.setText(rs.getString("id_rol"));
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        } finally {
+// Devolver la conexión al pool 
+            Conectar.getInstancia().devolverConexion(connection);
         }
+
     }
 
     public void MostrarTrabajador(JComboBox comboTrabajador) {
+        Connection connection = null;
         String sql = "select * from worker";
-        try (Statement st = connect.createStatement(); ResultSet rs = st.executeQuery(sql)) {
-            comboTrabajador.removeAllItems();
-            while (rs.next()) {
-                comboTrabajador.addItem(rs.getString("nombre"));
+
+        try {
+            // Obtener la conexión
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            // Ejecutar la consulta
+            try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+                comboTrabajador.removeAllItems();
+                while (rs.next()) {
+                    comboTrabajador.addItem(rs.getString("nombre"));
+                }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Trabajadores: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoTrabajador(JComboBox trabajador, JTextField IdTrabajador) {
+        Connection connection = null;
         if (trabajador.getSelectedItem() != null) {
             String consulta = "SELECT idWorker FROM worker WHERE nombre=?";
             try {
-                CallableStatement cs = connect.prepareCall(consulta);
-                cs.setString(1, trabajador.getSelectedItem().toString());
-                cs.execute();
+                // Obtener una conexión del pool 
+                connection = Conectar.getInstancia().obtenerConexion();
 
-                ResultSet rs = cs.executeQuery();
+                try (CallableStatement cs = connection.prepareCall(consulta)) {
+                    cs.setString(1, trabajador.getSelectedItem().toString());
+                    ResultSet rs = cs.executeQuery();
 
-                if (rs.next()) {
-                    IdTrabajador.setText(rs.getString("idWorker"));
-                } else {
-                    IdTrabajador.setText("");
+                    if (rs.next()) {
+                        IdTrabajador.setText(rs.getString("idWorker"));
+                    } else {
+                        IdTrabajador.setText("");
+                    }
+                    rs.close(); // Asegurarse de cerrar el ResultSet
                 }
-                rs.close(); // Asegurarse de cerrar el ResultSet
 
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+            } finally {
+                // Devolver la conexión al pool 
+                Conectar.getInstancia().devolverConexion(connection);
             }
+
         } else {
             IdTrabajador.setText("");
             JOptionPane.showMessageDialog(null, "Por favor, seleccione un trabajador válido.", "Advertencia", JOptionPane.WARNING_MESSAGE);

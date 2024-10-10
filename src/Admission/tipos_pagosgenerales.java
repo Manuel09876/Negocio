@@ -18,7 +18,8 @@ import javax.swing.table.DefaultTableModel;
 
 
 public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
-
+    
+    
     DefaultTableModel model;
     int id_pagos;
     String nombre;
@@ -54,25 +55,29 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
         this.estado = estado;
     }
     
-    //Conexión
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
+   
     PreparedStatement ps;
     ResultSet rs;
 
     public tipos_pagosgenerales() {
         initComponents();
+            
         CargarDatosTabla("");
         txtId.setEnabled(false);
     }
-
+    
+    
     void CargarDatosTabla(String Valores) {
+        Connection connection = null;
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
             String ConsultaSQL = "SELECT * FROM tipos_pagosgenerales";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
             while (result.next()) {
                 RegistroBD[0] = result.getString("id_pagos");
@@ -86,10 +91,13 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
             tbPagos.getColumnModel().getColumn(2).setPreferredWidth(100);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     void Guardar() {
+        Connection connection = null;
         // Variables
         int id_pagos;
         String nombre;
@@ -102,8 +110,10 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
         sql = "INSERT INTO tipos_pagosgenerales (nombre)VALUES (?)";
         //Para almacenar los datos empleo un try cash
         try {
+            Conectar.getInstancia().obtenerConexion();
+            
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
-            PreparedStatement pst = connect.prepareStatement(sql);
+            PreparedStatement pst = connection.prepareStatement(sql);
             pst.setString(1, nombre);
             //Declara otra variable para validar los registros
             int n = pst.executeUpdate();
@@ -116,14 +126,19 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
             txtDescripcion.setText("");
             txtDescripcion.requestFocus();
         } catch (SQLException ex) {
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Eliminar(JTextField id) {
+        Connection connection = null;
         setId_pagos(Integer.parseInt(id.getText()));
         String consulta = "DELETE from tipos_pagosgenerales where id_pagos=?";
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId_pagos());
             cs.executeUpdate();
             JOptionPane.showMessageDialog(null, "Se Elimino");
@@ -133,6 +148,8 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
             txtDescripcion.requestFocus();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -150,27 +167,34 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
         }
     }
 
-    public void modificar(JTextField id, JTextField nombre) {        
+    public void modificar(JTextField id, JTextField nombre) {  
+        Connection connection = null;
         try {        
             setId_pagos(Integer.parseInt(txtId.getText()));
             setNombre(txtDescripcion.getText());            
         String sql = "UPDATE tipos_pagosgenerales SET nombre = ?  WHERE id_pagos = ?";        
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+        
+        Conectar.getInstancia().obtenerConexion();
+        
+            ps = connection.prepareStatement(sql);
             ps.setString(1, getNombre());
             ps.setInt(2, getId_pagos());
             ps.execute();            
             JOptionPane.showMessageDialog(null, "Modificacion exitosa");            
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Modificar "+e.toString());            
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
     
     public boolean accion(String estado, int IdPagos) {
+        Connection connection = null;
         String sql = "UPDATE tipos_pagosgenerales SET estado = ? WHERE id_pagos = ?";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, IdPagos);
             ps.execute();
@@ -178,6 +202,8 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
     

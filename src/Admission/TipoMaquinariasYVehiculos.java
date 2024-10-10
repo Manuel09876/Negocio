@@ -54,9 +54,7 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
         this.estado = estado;
     }
     
-    //Conexión
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
+   
     PreparedStatement ps;
     ResultSet rs;
 
@@ -66,7 +64,9 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
         CargarDatosTabla("");
     }
 
+    
     void CargarDatosTabla(String Valores) {
+        Connection connection = null;
 
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
@@ -76,7 +76,9 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
 
             String ConsultaSQL = "SELECT * FROM tipomaquinariasvehiculos";
 
-            Statement st = connect.createStatement();
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
             while (result.next()) {
@@ -94,10 +96,13 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     void Guardar() {
+        Connection connection = null;
 
         // Variables
         int idMaqVe;
@@ -115,9 +120,10 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
 
         //Para almacenar los datos empleo un try cash
         try {
+            Conectar.getInstancia().obtenerConexion();
 
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
-            PreparedStatement pst = connect.prepareStatement(sql);
+            PreparedStatement pst = connection.prepareStatement(sql);
 
             pst.setString(1, nombre);
 
@@ -137,19 +143,23 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al guardar " +ex.toString());
 
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
 
     public void Eliminar(JTextField id) {
+        Connection connection = null;
 
         setIdMaqVe(Integer.parseInt(id.getText()));
 
         String consulta = "DELETE from tipomaquinariasvehiculos where idMaqVe=?";
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getIdMaqVe());
             cs.executeUpdate();
 
@@ -163,6 +173,8 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
 
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
 
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
@@ -189,18 +201,20 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
     }
 
     public void ModificarTipo(JTextField paraId, JTextField paraNombre){
+        Connection connection = null;
         
         //Obtengo el valor en Cadena(String) de las cajas de Texto
         setIdMaqVe(Integer.parseInt(paraId.getText()));
         setNombre(paraNombre.getText());
         
-        Conectar con = new Conectar();
+       
         
         String consulta= "UPDATE tipomaquinariasvehiculos SET tiopomaquinariasvehiculos.nombre = ? WHERE tipomaquinariasvehiculos.idMaqVe=?";
         
         try {
+            Conectar.getInstancia().obtenerConexion();
             
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
             
             //
             cs.setString(1, getNombre());
@@ -212,15 +226,19 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
             
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se Modifico, error "+e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
         
     }
     
     public boolean accion(String estado, int IdMaqVe) {
+        Connection connection = null;
         String sql = "UPDATE tipomaquinariasvehiculos SET estado = ? WHERE idMaqVe = ?";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, IdMaqVe);
             ps.execute();
@@ -228,6 +246,8 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
     
@@ -236,7 +256,7 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
+        btnSalir = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         txtMaqVe = new javax.swing.JTextField();
         btnGuardar = new javax.swing.JButton();
@@ -258,11 +278,11 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
 
         jPanel1.setBackground(new java.awt.Color(153, 153, 255));
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
-        jButton1.setText("Salir");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
+        btnSalir.setText("Salir");
+        btnSalir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnSalirActionPerformed(evt);
             }
         });
 
@@ -337,7 +357,7 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnGuia)
                 .addGap(31, 31, 31)
-                .addComponent(jButton1))
+                .addComponent(btnSalir))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnGuardar)
@@ -371,7 +391,7 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButton1)
+                            .addComponent(btnSalir)
                             .addComponent(btnGuia))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -449,9 +469,9 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirActionPerformed
         dispose();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnSalirActionPerformed
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
         Guardar();
@@ -520,7 +540,7 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnGuia;
     public javax.swing.JButton btnInactivar;
     public javax.swing.JButton btnModificar;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnSalir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;

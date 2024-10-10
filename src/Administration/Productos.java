@@ -143,6 +143,7 @@ public class Productos extends javax.swing.JInternalFrame {
 
     //Es lo mismo que mostrar Tabla Clientes
     public void CargarDatosTable(String Valores) {
+        Connection connection = null;
         try {
             String[] titulosTabla = {"Id", "Nombre", "Presentacion", "Unidades", "Stock", "Stock2", "Estado", "Stock Minimo"}; // Titulos de la Tabla
             String[] RegistroBD = new String[8]; // Registros de la Base de Datos
@@ -155,7 +156,10 @@ public class Productos extends javax.swing.JInternalFrame {
                 INNER JOIN unidades ON product.id_units=unidades.id_unidades
                 """;
 
-            Statement st = connect.createStatement();
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
             while (result.next()) {
@@ -187,10 +191,14 @@ public class Productos extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Guardar() {
+        Connection connection = null;
         // Variables
         String nameProduct;
         String presentation;
@@ -212,7 +220,10 @@ public class Productos extends javax.swing.JInternalFrame {
 
         // Para almacenar los datos empleo un try catch
         try {
-            PreparedStatement pst = connect.prepareStatement(sql);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            PreparedStatement pst = connection.prepareStatement(sql);
             pst.setString(1, nameProduct);
             pst.setString(2, presentation);
             pst.setInt(3, id_units);
@@ -228,10 +239,14 @@ public class Productos extends javax.swing.JInternalFrame {
 
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al guardar " + ex.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void ModificarProducto(JTextField IdProducto, JTextField Name, JTextField Presentation, JTextField IdUnits, JTextField Stock, JTextField Or, JTextField StockMinimo) {
+        Connection connection = null;
         try {
             setIdProduct(Integer.parseInt(IdProducto.getText()));
             setNameProduct(Name.getText());
@@ -242,7 +257,10 @@ public class Productos extends javax.swing.JInternalFrame {
             int stockMinimo = Integer.parseInt(StockMinimo.getText()); // Obtener el valor del nuevo campo
 
             String consulta = "UPDATE product SET nameProduct=?, presentation=?, id_units=?, stock=?, stock2=?, stock_minimo=? WHERE idProduct=?";
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setString(1, getNameProduct());
             cs.setString(2, getPresentation());
             cs.setInt(3, getUnits());
@@ -260,18 +278,23 @@ public class Productos extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Error al ejecutar la actualización en la base de datos: " + ex.getMessage(), "Error de base de datos", JOptionPane.ERROR_MESSAGE);
         } catch (HeadlessException ex) {
             JOptionPane.showMessageDialog(null, "Ocurrió un error durante la modificación: " + ex.getMessage(), "Error inesperado", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Eliminar(JTextField codigo) {
-
+        Connection connection = null;
         setIdProduct(Integer.parseInt(codigo.getText()));
 
         String consulta = "DELETE from product where idProduct=?";
 
         try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getIdProduct());
             cs.executeUpdate();
 
@@ -281,6 +304,9 @@ public class Productos extends javax.swing.JInternalFrame {
 
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
 
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
@@ -314,6 +340,7 @@ public class Productos extends javax.swing.JInternalFrame {
     }
 
     public void BuscarProductos(java.awt.event.KeyEvent evt) {
+        Connection connection = null;
         String textoBusqueda = txtBuscarProductos.getText().trim();
 
         // Verifica si el campo de búsqueda no está vacío
@@ -336,8 +363,10 @@ public class Productos extends javax.swing.JInternalFrame {
         model = new DefaultTableModel(null, titulosTabla);
 
         try {
-            connect = con.getConexion();  // Verificamos la conexión
-            PreparedStatement ps = connect.prepareStatement(ConsultaSQL);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            PreparedStatement ps = connection.prepareStatement(ConsultaSQL);
             ps.setString(1, "%" + textoBusqueda + "%");  // Utilizamos el valor de búsqueda con comodines
 
             ResultSet result = ps.executeQuery();
@@ -365,15 +394,21 @@ public class Productos extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             System.out.println("Error al buscar productos: " + e.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public boolean accion(String estado, int idTipoDeUsuario) {
+        Connection connection = null;
         String sql = "UPDATE product SET estado = ? WHERE idProduct = ?";
         try {
-            connect = con.getConexion();
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
             PreparedStatement ps;
-            ps = connect.prepareStatement(sql);
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, idTipoDeUsuario);
             ps.execute();
@@ -381,6 +416,9 @@ public class Productos extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -823,15 +861,16 @@ public class Productos extends javax.swing.JInternalFrame {
     private javax.swing.JTextField txtStockMinimo;
     // End of variables declaration//GEN-END:variables
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
-
     public void MostrarUnidades(JComboBox<CustomItem> cbxUnidades) {
+        Connection connection = null;
         String sql = "SELECT * FROM unidades";
         Statement st;
 
         try {
-            st = con.getConexion().createStatement();
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxUnidades.removeAllItems();
             while (rs.next()) {
@@ -840,6 +879,9 @@ public class Productos extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

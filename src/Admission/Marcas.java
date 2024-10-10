@@ -1,4 +1,3 @@
-
 package Admission;
 
 import Administration.Productos;
@@ -16,9 +15,9 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-
 public class Marcas extends javax.swing.JInternalFrame {
 
+    
     DefaultTableModel model;
     int id_marca;
     String Nombre;
@@ -53,26 +52,30 @@ public class Marcas extends javax.swing.JInternalFrame {
     public void setEstado(String estado) {
         this.estado = estado;
     }
-        
-     //Conexión
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
+
     PreparedStatement ps;
     ResultSet rs;
 
     public Marcas() {
         initComponents();
+        
         CargarDatosTabla("");
         txtIdMarcas.setVisible(false);
     }
+
     
+
     public void CargarDatosTabla(String Valores) {
+        Connection connection = null;
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
             String ConsultaSQL = "SELECT * FROM marca";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
             while (result.next()) {
                 RegistroBD[0] = result.getString("id_marca");
@@ -86,10 +89,13 @@ public class Marcas extends javax.swing.JInternalFrame {
             tbMarcas.getColumnModel().getColumn(2).setPreferredWidth(100);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Guardar() {
+        Connection connection = null;
         // Variables
         int id_marca;
         String nombre;
@@ -102,8 +108,10 @@ public class Marcas extends javax.swing.JInternalFrame {
         sql = "INSERT INTO marca (nombre)VALUES (?)";
         //Para almacenar los datos empleo un try cash
         try {
+            Conectar.getInstancia().obtenerConexion();
+            
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
-            PreparedStatement pst = connect.prepareStatement(sql);
+            PreparedStatement pst = connection.prepareStatement(sql);
             pst.setString(1, nombre);
             //Declara otra variable para validar los registros
             int n = pst.executeUpdate();
@@ -117,14 +125,20 @@ public class Marcas extends javax.swing.JInternalFrame {
             txtMarcas.requestFocus();
         } catch (SQLException ex) {
             Logger.getLogger(Productos.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Eliminar(JTextField id) {
+        Connection connection = null;
+        
         setId_marca(Integer.parseInt(id.getText()));
         String consulta = "DELETE from marca where id_marca=?";
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId_marca());
             cs.executeUpdate();
             JOptionPane.showMessageDialog(null, "Se Elimino");
@@ -134,6 +148,8 @@ public class Marcas extends javax.swing.JInternalFrame {
             txtMarcas.requestFocus();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -151,29 +167,36 @@ public class Marcas extends javax.swing.JInternalFrame {
         }
     }
 
-    public void Modificar(JTextField paraId, JTextField paranombre) {        
-         //Obtengo el valor en Cadena(String) de las cajas de Texto
+    public void Modificar(JTextField paraId, JTextField paranombre) {
+        Connection connection = null;
+        //Obtengo el valor en Cadena(String) de las cajas de Texto
         setId_marca(Integer.parseInt(paraId.getText()));
-        setNombre(paranombre.getText());        
-        Conectar con = new Conectar();        
+        setNombre(paranombre.getText());
+
         String sql = "UPDATE marca SET nombre = ?  WHERE id_marca = ?";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             ps.setString(1, getNombre());
             ps.setInt(2, getId_marca());
-            ps.execute();            
-            JOptionPane.showMessageDialog(null, "Modificacion Exitosa");            
+            ps.execute();
+            JOptionPane.showMessageDialog(null, "Modificacion Exitosa");
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "No se Modifico, error "+e.toString());            
+            JOptionPane.showMessageDialog(null, "No se Modifico, error " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
-    
+
     public boolean accion(String estado, int IdMarca) {
+        Connection connection = null;
+        
         String sql = "UPDATE marca SET estado = ? WHERE id_marca = ?";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, IdMarca);
             ps.execute();
@@ -181,9 +204,10 @@ public class Marcas extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
-
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -343,7 +367,7 @@ public class Marcas extends javax.swing.JInternalFrame {
         if (accion("Activo", id)) {
             CargarDatosTabla("");
             JOptionPane.showMessageDialog(null, "Activado");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Error al reingresar");
         }
     }//GEN-LAST:event_btnActivarActionPerformed
@@ -354,7 +378,7 @@ public class Marcas extends javax.swing.JInternalFrame {
         if (accion("Inactivo", id)) {
             CargarDatosTabla("");
             JOptionPane.showMessageDialog(null, "Inactivado");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Error al eliminar");
         }
     }//GEN-LAST:event_btnInactivarActionPerformed

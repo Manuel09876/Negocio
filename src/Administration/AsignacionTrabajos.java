@@ -20,11 +20,9 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class AsignacionTrabajos extends javax.swing.JInternalFrame {
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
-
     public AsignacionTrabajos() {
         initComponents();
+
         AutoCompleteDecorator.decorate(cbxTrabajador);
         AutoCompleteDecorator.decorate(cbxEmpresa);
         MostrarTrabajador(cbxTrabajador);
@@ -49,9 +47,12 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
 //Muestra la tabla con los datos completos
 
     public void MostrarTabla() {
+        Connection connection = null;
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
+            connection = Conectar.getInstancia().obtenerConexion();
+
             String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Nota Cliente", "Nota Empresa", "Status"};
             String[] RegistroBD = new String[15];
             modelo = new DefaultTableModel(null, tituloTabla);
@@ -65,7 +66,7 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + "WHERE o.estado = 'Activo' "
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -103,11 +104,15 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
             tbAsignacionTrabajos.getColumnModel().getColumn(11).setPreferredWidth(150);
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
 //Muestra los datos despues de estar filtrados
     public void FiltrarTabla() {
+        Connection connection = null;
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         if (dateInicio.getDate() == null || dateFin.getDate() == null) {
@@ -134,7 +139,9 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
                     + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness \n"
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer " + ID_buscar + " AND o.fechaT BETWEEN '" + fechaInicio + "' AND '" + fechaFin + "' AND o.estado='Activo' \n"
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -175,10 +182,14 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
             tbAsignacionTrabajos.getColumnModel().getColumn(14).setPreferredWidth(150);
         } catch (SQLException e) {
             //System.out.println("Error al mostrar la Tabla " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void FiltrarSoloEmpresa() {
+        Connection connection = null;
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String ID = txtIdBusiness.getText();
@@ -199,7 +210,10 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
                     + "INNER JOIN bussiness ON o.id_empresa = bussiness.idBusiness \n"
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer " + ID_buscar + " AND o.estado='Activo' \n"
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -240,15 +254,17 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
             tbAsignacionTrabajos.getColumnModel().getColumn(14).setPreferredWidth(150);
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
 //Guardar selección y asignar trabajo a trabajador, eliminando fila
     public void guardarSeleccion(int rowIndex) {
+        Connection connection = null;
         try {
             // Conexión a la base de datos
-            Conectar con = new Conectar();
-            Connection connect = con.getConexion();
 
             // Obtener el modelo de la tabla
             DefaultTableModel modelo = (DefaultTableModel) tbAsignacionTrabajos.getModel();
@@ -259,14 +275,17 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
 
             // Insertar el registro en la base de datos
             String sql = "INSERT INTO servicio_trabajador (id_OS, id_Trabajador, comentario) VALUES (?, ?, 'sin comentario')";
-            PreparedStatement pstmt = connect.prepareStatement(sql);
+
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            PreparedStatement pstmt = connection.prepareStatement(sql);
             pstmt.setInt(1, id);
             pstmt.setInt(2, id_Trabajador);
             pstmt.executeUpdate();
 
             // Actualizar el estado del registro a "Programado"
             String sqlUpdate = "UPDATE orderservice SET estado = 'Programado' WHERE id = ?";
-            PreparedStatement pstmtUpdate = connect.prepareStatement(sqlUpdate);
+            PreparedStatement pstmtUpdate = connection.prepareStatement(sqlUpdate);
             pstmtUpdate.setInt(1, id);
             pstmtUpdate.executeUpdate();
 
@@ -274,10 +293,13 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
             modelo.removeRow(rowIndex);
 
             // Cerrar la conexión
-            connect.close();
+            connection.close();
 
         } catch (SQLException e) {
             System.out.println("Error al guardar en la base de datos: " + e.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -645,14 +667,14 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
 
 //Muestra los Trabajadores en el ComboBox
     public void MostrarTrabajador(JComboBox comboTrabajador) {
-
+        Connection connection = null;
         String sql = "";
         sql = "select * from worker";
         Statement st;
 
         try {
-
-            st = con.getConexion().createStatement();
+            connection = Conectar.getInstancia().obtenerConexion();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             comboTrabajador.removeAllItems();
 
@@ -663,15 +685,19 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoTrabajador(JComboBox trabajador, JTextField IdTrabajador) {
-
+        Connection connection = null;
         String consuta = "select worker.idWorker from worker where worker.nombre=?";
 
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            connection = Conectar.getInstancia().obtenerConexion();
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, trabajador.getSelectedItem().toString());
             cs.execute();
 
@@ -683,16 +709,21 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
 //Muestra las Empresas en el ComboBox
     public void MostrarEmpresa(JComboBox cbxEmpresa) {
+        Connection connection = null;
         String sql = "";
         sql = "select * from bussiness";
         Statement st;
         try {
-            st = con.getConexion().createStatement();
+            connection = Conectar.getInstancia().obtenerConexion();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxEmpresa.removeAllItems();
             while (rs.next()) {
@@ -700,13 +731,18 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar en Combo " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoEmpresa(JComboBox cbxEmpresa, JTextField idBusiness) {
+        Connection connection = null;
         String consuta = "select bussiness.idBusiness from bussiness where bussiness.nameBusiness=?";
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            connection = Conectar.getInstancia().obtenerConexion();
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxEmpresa.getSelectedItem().toString());
             cs.execute();
             ResultSet rs = cs.executeQuery();
@@ -715,6 +751,9 @@ public class AsignacionTrabajos extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 }

@@ -1,4 +1,3 @@
-
 package Administration;
 
 import conectar.Conectar;
@@ -52,21 +51,20 @@ public class FormaDePago extends javax.swing.JInternalFrame {
     public void setEstado(String estado) {
         this.estado = estado;
     }
-    
-     //Conexión
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
+
+    //Conexión
     PreparedStatement ps;
     ResultSet rs;
-  
+
     public FormaDePago() {
         initComponents();
+
         CargarDatosTabla("");
         txtIdFormasDePago.setEnabled(false);
     }
 
-   
     void CargarDatosTabla(String Valores) {
+        Connection connection = null;
 
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
@@ -76,7 +74,10 @@ public class FormaDePago extends javax.swing.JInternalFrame {
 
             String ConsultaSQL = "SELECT * FROM formadepago";
 
-            Statement st = connect.createStatement();
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
             while (result.next()) {
@@ -94,11 +95,14 @@ public class FormaDePago extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     void Guardar() {
-
+        Connection connection = null;
         // Variables
         int id_formadepago;
         String nombre;
@@ -115,9 +119,11 @@ public class FormaDePago extends javax.swing.JInternalFrame {
 
         //Para almacenar los datos empleo un try cash
         try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
-            PreparedStatement pst = connect.prepareStatement(sql);
+            PreparedStatement pst = connection.prepareStatement(sql);
 
             pst.setString(1, nombre);
 
@@ -137,19 +143,23 @@ public class FormaDePago extends javax.swing.JInternalFrame {
         } catch (SQLException ex) {
             Logger.getLogger(Productos.class.getName()).log(Level.SEVERE, null, ex);
 
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
-
     }
 
     public void Eliminar(JTextField id) {
-
+        Connection connection = null;
         setId_formasdepago(Integer.parseInt(id.getText()));
 
         String consulta = "DELETE from formadepago where id_formadepago=?";
 
         try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId_formasdepago());
             cs.executeUpdate();
 
@@ -163,8 +173,10 @@ public class FormaDePago extends javax.swing.JInternalFrame {
 
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
 
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
-
     }
 
     public void SeleccionarCategoria(JTable Tabla, JTextField IdFormaDePago, JTextField FormaDePago) {
@@ -189,10 +201,12 @@ public class FormaDePago extends javax.swing.JInternalFrame {
     }
 
     public boolean modificar(FormaDePago fp) {
+        Connection connection = null;
         String sql = "UPDATE formadepago SET nombre = ?  WHERE id_formadepago = ?";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            ps = connection.prepareStatement(sql);
             ps.setString(1, fp.getNombre());
             ps.setInt(2, fp.getId_formasdepago());
             ps.execute();
@@ -200,14 +214,19 @@ public class FormaDePago extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
-    
+
     public boolean accion(String estado, int IdFormaDePago) {
+        Connection connection = null;
         String sql = "UPDATE formadepago SET estado = ? WHERE id_formadepago = ?";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, IdFormaDePago);
             ps.execute();
@@ -215,9 +234,12 @@ public class FormaDePago extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
-        }
+        }finally {
+        // Devolver la conexión al pool
+        Conectar.getInstancia().devolverConexion(connection);
     }
- 
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -430,7 +452,7 @@ public class FormaDePago extends javax.swing.JInternalFrame {
         if (accion("Inactivo", id)) {
             CargarDatosTabla("");
             JOptionPane.showMessageDialog(null, "Inactivado");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Error al Inactivar");
         }
     }//GEN-LAST:event_btnInactivarActionPerformed
@@ -441,7 +463,7 @@ public class FormaDePago extends javax.swing.JInternalFrame {
         if (accion("Activo", id)) {
             CargarDatosTabla("");
             JOptionPane.showMessageDialog(null, "Activar");
-        }else{
+        } else {
             JOptionPane.showMessageDialog(null, "Error al Activar");
         }
     }//GEN-LAST:event_btnActivarActionPerformed

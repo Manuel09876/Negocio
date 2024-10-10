@@ -26,30 +26,214 @@ import java.util.Map;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 public class VentanaPrincipal extends javax.swing.JFrame {
 
+    public JMenu getMenuAdministration() {
+        return menuAdministration;
+    }
+
+    public JMenu getMenuAdmission() {
+        return menuAdmission;
+    }
+
+    public JMenuItem getMenuAsignacionPermisos() {
+        return menuAsignacionPermisos;
+    }
+
+    public JMenuItem getMenuAsignaciondeTrabajos() {
+        return menuAsignaciondeTrabajos;
+    }
+
+    public JMenuItem getMenuBusquedaConvenios() {
+        return menuBusquedaConvenios;
+    }
+
+    public JMenuItem getMenuCancelaciones() {
+        return menuCancelaciones;
+    }
+
+    public JMenuItem getMenuClientes() {
+        return menuClientes;
+    }
+
+    public JMenuItem getMenuCompraEquyVehi() {
+        return menuCompraEquyVehi;
+    }
+
+    public JMenuItem getMenuCompraProMat() {
+        return menuCompraProMat;
+    }
+
+    public JMenuItem getMenuConfiguracion() {
+        return menuConfiguracion;
+    }
+
+    public JMenuItem getMenuConvenios() {
+        return menuConvenios;
+    }
+
+    public JMenuItem getMenuCotizaciones() {
+        return menuCotizaciones;
+    }
+
+    public JMenuItem getMenuDeudasPorCobrar() {
+        return menuDeudasPorCobrar;
+    }
+
+    public JMenuItem getMenuDeudasPorPagar() {
+        return menuDeudasPorPagar;
+    }
+
+    public JMenuItem getMenuEmpresas() {
+        return menuEmpresas;
+    }
+
+    public JMenuItem getMenuEstadisticas() {
+        return menuEstadisticas;
+    }
+
+    public JMenuItem getMenuFormaDePago() {
+        return menuFormaDePago;
+    }
+
+    public JMenuItem getMenuFormularios() {
+        return menuFormularios;
+    }
+
+    public JMenuItem getMenuGastosGenerales() {
+        return menuGastosGenerales;
+    }
+
+    public JMenuItem getMenuHorasTrabajadas() {
+        return menuHorasTrabajadas;
+    }
+
+    public JMenuItem getMenuKardex() {
+        return menuKardex;
+    }
+
+    public JMenuItem getMenuLocalizacion() {
+        return menuLocalizacion;
+    }
+
+    public JMenuItem getMenuMarcas() {
+        return menuMarcas;
+    }
+
+    public JMenuItem getMenuMenusSubmenus() {
+        return menuMenusSubmenus;
+    }
+
+    public JMenuItem getMenuOrdenes() {
+        return menuOrdenes;
+    }
+
+    public JMenuItem getMenuPresupuesto() {
+        return menuPresupuesto;
+    }
+
+    public JMenuItem getMenuProductos() {
+        return menuProductos;
+    }
+
+    public JMenuItem getMenuProveedor() {
+        return menuProveedor;
+    }
+
+    public JMenuItem getMenuPuestoDeTrabajo() {
+        return menuPuestoDeTrabajo;
+    }
+
+    public JMenu getMenuRegisters() {
+        return menuRegisters;
+    }
+
+    public JMenu getMenuReports() {
+        return menuReports;
+    }
+
+    public JMenuItem getMenuStock() {
+        return menuStock;
+    }
+
+    public JMenuItem getMenuSueldos() {
+        return menuSueldos;
+    }
+
+    public JMenuItem getMenuTarifario() {
+        return menuTarifario;
+    }
+
+    public JMenuItem getMenuTipoMaqVe() {
+        return menuTipoMaqVe;
+    }
+
+    public JMenuItem getMenuTipoProMat() {
+        return menuTipoProMat;
+    }
+
+    public JMenuItem getMenuTipoUsuarios() {
+        return menuTipoUsuarios;
+    }
+
+    public JMenuItem getMenuTrabajadores() {
+        return menuTrabajadores;
+    }
+
+    public JMenuItem getMenuTrabajos() {
+        return menuTrabajos;
+    }
+
+    public JMenuItem getMenuTrabajosRealizados() {
+        return menuTrabajosRealizados;
+    }
+
+    public JMenuItem getMenuUnidades() {
+        return menuUnidades;
+    }
+
+    public JMenuItem getMenuUsuarios() {
+        return menuUsuarios;
+    }
+
+    public JMenuItem getMenuVentas() {
+        return menuVentas;
+    }
+
+    public JMenuItem getMenuVerOrdenes() {
+        return menuVerOrdenes;
+    }
+
+    public JMenuItem getMenutipo_pagosgenerales() {
+        return menutipo_pagosgenerales;
+    }
+
     private int tipUsu;
-    private Conectar conectar;
+
     private String usuario; // Variable para almacenar el usuario
-    private HorasTrabajadas ht; // Asegúrate de que esta instancia esté correctamente inicializada
+    private HorasTrabajadas horasTrabajadas; // Asegúrate de que esta instancia esté correctamente inicializada
     private PuestoDeTrabajo puestoDeTrabajo;
+    private Connection connection;
+
+    private Map<String, JMenuItem> menuMap = new HashMap<>();
 
     Loggin lg = new Loggin();
 
     public VentanaPrincipal(int tipUsu, String usuario) {
         initComponents();
-        this.conectar = new Conectar();
-        this.puestoDeTrabajo = new PuestoDeTrabajo(); // Inicializamos puestoDeTrabajo
-        this.ht = new HorasTrabajadas(this.puestoDeTrabajo); // Pasamos puestoDeTrabajo a HorasTrabajadas
+
         this.tipUsu = tipUsu;
-        this.usuario = usuario; // Almacena el usuario
+        this.usuario = usuario;
+
+        this.puestoDeTrabajo = new PuestoDeTrabajo(); // Inicializamos puestoDeTrabajo
+        this.horasTrabajadas = new HorasTrabajadas(); // Constructor sin parámetros
+        this.horasTrabajadas.setPuestoDeTrabajo(this.puestoDeTrabajo); // Establecer el puesto después
 
         this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
-        cargarPermisos();
-
-        System.out.println("Usuario en VentanaPrincipal: " + this.usuario); // Mensaje de depuración
+//        cargarPermisos();
         lbUsuario.setText(usuario); // Mostrar el nombre de usuario en la interfaz
 
         // Inhabilitar la "X" de cierre del JFrame
@@ -63,9 +247,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 if (JOptionPane.showConfirmDialog(null, "¿Desea salir del Sistema?", "Confirmar salida", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                     int trabajadorId = obtenerTrabajadorId(usuario);
                     if (trabajadorId != 0) {
-                        ht.registrarFinSesion(trabajadorId);
-                        if (ht.puestoDeTrabajo != null) {
-                            int idPDT = ht.puestoDeTrabajo.obtenerIdPuestoActivo(trabajadorId);
+                        horasTrabajadas.registrarFinSesion(trabajadorId);
+                        if (horasTrabajadas.puestoDeTrabajo != null) {
+                            int idPDT = horasTrabajadas.puestoDeTrabajo.obtenerIdPuestoActivo(trabajadorId);
                             if (idPDT != -1) {
 //                            ht.calcularPagos(trabajadorId);
                             } else {
@@ -81,15 +265,13 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 }
             }
         });
+
+        initializeMenuMap(); // Inicializamos el mapa con los menús
     }
 
     // Constructor vacío para evitar errores en la inicialización por defecto
     public VentanaPrincipal() {
         initComponents();
-        this.conectar = new Conectar();
-        this.puestoDeTrabajo = new PuestoDeTrabajo(); // Inicializamos puestoDeTrabajo
-        this.ht = new HorasTrabajadas(this.puestoDeTrabajo); // Pasamos puestoDeTrabajo a HorasTrabajadas
-        ht = new HorasTrabajadas();  // Inicializar ht aquí
 
         // Inhabilitar la "X" de cierre del JFrame
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -104,6 +286,125 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 }
             }
         });
+    }
+
+    // Método reutilizado para agregar el WindowListener
+    private void agregarWindowListener() {
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                manejarCierreSistema();
+            }
+        });
+    }
+
+    // Método para centralizar la lógica de cierre del sistema
+    private void manejarCierreSistema() {
+        if (JOptionPane.showConfirmDialog(null, "¿Desea salir del Sistema?", "Confirmar salida", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            if (registrarSalidaDelSistema()) {
+                System.exit(0);
+            }
+        }
+    }
+
+    private boolean registrarSalidaDelSistema() {
+        boolean ocurrioError = false;
+
+        try {
+            if (this.usuario == null) {
+                System.out.println("Error: usuario no está inicializado.");
+                return false;
+            }
+
+            int trabajadorId = obtenerTrabajadorId(this.usuario);
+
+            if (trabajadorId != 0) {
+                this.horasTrabajadas.registrarFinSesion(trabajadorId); // Registro de fin de sesión
+
+                if (this.horasTrabajadas.puestoDeTrabajo != null) {
+                    int idPDT = this.horasTrabajadas.puestoDeTrabajo.obtenerIdPuestoActivo(trabajadorId);
+
+                    if (idPDT != -1) {
+                        // Calcular y guardar horas trabajadas y período de pago
+                        double horasTrabajadasPorDia = this.horasTrabajadas.calcularHorasTrabajadasPorDia(trabajadorId);
+                        LocalDate fecha = LocalDate.now();
+                        LocalDate fechaInicioActividades = this.horasTrabajadas.obtenerFechaInicioActividadesDesdeBD();
+
+                        // Obtener el tipo de periodo (Semanal, Quincenal, Mensual)
+                        String tipoPeriodo = this.horasTrabajadas.puestoDeTrabajo.obtenerPeriodoPago(idPDT);
+                        if (tipoPeriodo != null) {
+                            LocalDate[] fechasPeriodo = this.horasTrabajadas.calcularInicioYFinPeriodo(tipoPeriodo, fechaInicioActividades, 1);
+                            LocalDate fechaInicio = fechasPeriodo[0];
+                            LocalDate fechaFin = fechasPeriodo[1];
+
+                            this.horasTrabajadas.guardarHorasTrabajadas(trabajadorId, horasTrabajadasPorDia, fecha, tipoPeriodo);
+                            this.horasTrabajadas.calcularSueldos(trabajadorId, fechaInicio, fechaFin);
+                        } else {
+                            System.out.println("Error: no se pudo determinar el tipo de periodo.");
+                            ocurrioError = true;
+                        }
+                    } else {
+                        System.out.println("No hay puesto activo para el trabajador ID: " + trabajadorId);
+                        ocurrioError = true;
+                    }
+                } else {
+                    System.out.println("Error: puestoDeTrabajo no está inicializado.");
+                    ocurrioError = true;
+                }
+            } else {
+                System.out.println("No se encontró el ID del trabajador.");
+                ocurrioError = true;
+            }
+        } catch (Exception ex) {
+            System.out.println("Ocurrió un error al registrar fin de sesión o calcular pagos: " + ex.getMessage());
+            ex.printStackTrace();
+            ocurrioError = true;  // Indicar que hubo un error
+        }
+
+        return !ocurrioError; // Retornar verdadero si no hubo errores
+    }
+
+    private void initializeMenuMap() {
+        menuMap.put("menuAdministration", menuAdministration);
+        menuMap.put("menuAdmission", menuAdmission);
+        menuMap.put("menuRegisters", menuRegisters);
+        menuMap.put("menuReports", menuReports);
+        menuMap.put("menuUsuarios", menuUsuarios);
+        menuMap.put("menuTipoUsuarios", menuTipoUsuarios);
+        // Añadir los demás menús y submenús aquí...
+    }
+
+    public void setMenuVisibility(String menuName, boolean visibility) {
+        JMenuItem menu = menuMap.get(menuName);
+        if (menu != null) {
+            menu.setVisible(visibility);
+        }
+    }
+
+    private int obtenerTrabajadorId(String usuario) {
+        Connection connection = null;
+
+        String sql = "SELECT ut.id_trabajador FROM usuario_trabajador ut INNER JOIN usuarios u ON ut.id_usuario = u.idUsuarios WHERE u.usuario = ?";
+
+        try {
+            Conectar.getInstancia().obtenerConexion();
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setString(1, usuario);
+                ResultSet rs = pst.executeQuery();
+                if (rs.next()) {
+                    int idTrabajador = rs.getInt("id_trabajador");
+                    System.out.println("ID del trabajador obtenido: " + idTrabajador);
+                    return idTrabajador;
+                } else {
+                    System.out.println("No se encontró el trabajador para el usuario: " + usuario);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(VentanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
+        }
+        return 0;
     }
 
     @SuppressWarnings("unchecked")
@@ -818,49 +1119,74 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         System.out.println("Botón de salida presionado");
 
         if (JOptionPane.showConfirmDialog(null, "¿Desea salir del Sistema?", "Acceso", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            boolean ocurrioError = false;
+            Connection connection = null; // Declaramos la conexión fuera del bloque try
+
             try {
+                if (this.usuario == null) {
+                    System.out.println("Error: usuario no está inicializado.");
+                    return;
+                }
+
+                // Obtener conexión desde el pool
+                connection = Conectar.getInstancia().obtenerConexion();
+
                 int trabajadorId = obtenerTrabajadorId(this.usuario);
 
                 if (trabajadorId != 0) {
-                    ht.registrarFinSesion(trabajadorId); // Registro de fin de sesión
+                    this.horasTrabajadas.registrarFinSesion(trabajadorId); // Registro de fin de sesión
 
-                    if (ht.puestoDeTrabajo != null) {
-                        int idPDT = ht.puestoDeTrabajo.obtenerIdPuestoActivo(trabajadorId);
+                    if (this.horasTrabajadas.puestoDeTrabajo != null) {
+                        int idPDT = this.horasTrabajadas.puestoDeTrabajo.obtenerIdPuestoActivo(trabajadorId);
 
                         if (idPDT != -1) {
                             // Calcular y guardar horas trabajadas y período de pago
-                            double horasTrabajadas = ht.calcularHorasTrabajadasPorDia(trabajadorId);
+                            double horasTrabajadasPorDia = this.horasTrabajadas.calcularHorasTrabajadasPorDia(trabajadorId);
                             LocalDate fecha = LocalDate.now();
-                            LocalDate fechaInicioActividades = ht.obtenerFechaInicioActividadesDesdeBD();
+                            LocalDate fechaInicioActividades = this.horasTrabajadas.obtenerFechaInicioActividadesDesdeBD();
 
                             // Obtener el tipo de periodo (Semanal, Quincenal, Mensual)
-                            String tipoPeriodo = ht.puestoDeTrabajo.obtenerPeriodoPago(idPDT);
+                            String tipoPeriodo = this.horasTrabajadas.puestoDeTrabajo.obtenerPeriodoPago(idPDT);
                             if (tipoPeriodo != null) {
-                                LocalDate[] fechasPeriodo = ht.calcularInicioYFinPeriodo(tipoPeriodo, fechaInicioActividades, 1);  // Obtener las fechas del periodo
-                                LocalDate fechaInicio = fechasPeriodo[0];  // Fecha de inicio del periodo
-                                LocalDate fechaFin = fechasPeriodo[1];  // Fecha de fin del periodo
+                                LocalDate[] fechasPeriodo = this.horasTrabajadas.calcularInicioYFinPeriodo(tipoPeriodo, fechaInicioActividades, 1);
+                                LocalDate fechaInicio = fechasPeriodo[0];
+                                LocalDate fechaFin = fechasPeriodo[1];
 
-                                ht.guardarHorasTrabajadas(trabajadorId, horasTrabajadas, fecha, tipoPeriodo);
+                                this.horasTrabajadas.guardarHorasTrabajadas(trabajadorId, horasTrabajadasPorDia, fecha, tipoPeriodo);
+                                this.horasTrabajadas.calcularSueldos(trabajadorId, fechaInicio, fechaFin);
 
-                                // Calcular y guardar pagos
-                                ht.calcularSueldos(trabajadorId, fechaInicio, fechaFin);
+                                try {
+                                    Conectar.getInstancia().cerrarTodasLasConexiones();
+                                } catch (Exception ex) {
+                                    System.out.println("Error al cerrar la aplicación: " + ex.getMessage());
+                                    ex.printStackTrace();
+                                    ocurrioError = true;
+                                }
+
                             } else {
                                 System.out.println("Error: no se pudo determinar el tipo de periodo.");
+                                ocurrioError = true;
                             }
                         } else {
                             System.out.println("No hay puesto activo para el trabajador ID: " + trabajadorId);
+                            ocurrioError = true;
                         }
                     } else {
                         System.out.println("Error: puestoDeTrabajo no está inicializado.");
+                        ocurrioError = true;
                     }
                 } else {
                     System.out.println("No se encontró el ID del trabajador.");
+                    ocurrioError = true;
                 }
             } catch (Exception ex) {
                 System.out.println("Ocurrió un error al registrar fin de sesión o calcular pagos: " + ex.getMessage());
-                ex.printStackTrace();  // Registrar cualquier error inesperado
-            } finally {
-                System.exit(0); // Cerrar el sistema independientemente de cualquier error
+                ex.printStackTrace();
+                ocurrioError = true;  // Indicar que hubo un error
+            }
+
+            if (!ocurrioError) {
+                System.exit(0); // Cerrar el sistema si no ocurrió ningún error
             }
         }
     }//GEN-LAST:event_btnSalirActionPerformed
@@ -1016,25 +1342,25 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     public javax.swing.JMenuItem menuBusquedaConvenios;
     public javax.swing.JMenuItem menuCancelaciones;
     public javax.swing.JMenuItem menuClientes;
-    private javax.swing.JMenuItem menuCompraEquyVehi;
+    public javax.swing.JMenuItem menuCompraEquyVehi;
     public javax.swing.JMenuItem menuCompraProMat;
-    private javax.swing.JMenuItem menuConfiguracion;
+    public javax.swing.JMenuItem menuConfiguracion;
     public javax.swing.JMenuItem menuConvenios;
     public javax.swing.JMenuItem menuCotizaciones;
     public javax.swing.JMenuItem menuDeudasPorCobrar;
     public javax.swing.JMenuItem menuDeudasPorPagar;
     public javax.swing.JMenuItem menuEmpresas;
     public javax.swing.JMenuItem menuEstadisticas;
-    private javax.swing.JMenuItem menuFormaDePago;
+    public javax.swing.JMenuItem menuFormaDePago;
     public javax.swing.JMenuItem menuFormularios;
-    private javax.swing.JMenuItem menuGastosGenerales;
+    public javax.swing.JMenuItem menuGastosGenerales;
     public javax.swing.JMenuItem menuHorasTrabajadas;
     public javax.swing.JMenuItem menuKardex;
-    private javax.swing.JMenuItem menuLocalizacion;
-    private javax.swing.JMenuItem menuMarcas;
-    private javax.swing.JMenuItem menuMenusSubmenus;
+    public javax.swing.JMenuItem menuLocalizacion;
+    public javax.swing.JMenuItem menuMarcas;
+    public javax.swing.JMenuItem menuMenusSubmenus;
     public javax.swing.JMenuItem menuOrdenes;
-    private javax.swing.JMenuItem menuPresupuesto;
+    public javax.swing.JMenuItem menuPresupuesto;
     public javax.swing.JMenuItem menuProductos;
     public javax.swing.JMenuItem menuProveedor;
     public javax.swing.JMenuItem menuPuestoDeTrabajo;
@@ -1043,198 +1369,46 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     public javax.swing.JMenuItem menuStock;
     public javax.swing.JMenuItem menuSueldos;
     public javax.swing.JMenuItem menuTarifario;
-    private javax.swing.JMenuItem menuTipoMaqVe;
-    private javax.swing.JMenuItem menuTipoProMat;
+    public javax.swing.JMenuItem menuTipoMaqVe;
+    public javax.swing.JMenuItem menuTipoProMat;
     public javax.swing.JMenuItem menuTipoUsuarios;
     public javax.swing.JMenuItem menuTrabajadores;
-    private javax.swing.JMenuItem menuTrabajos;
+    public javax.swing.JMenuItem menuTrabajos;
     public javax.swing.JMenuItem menuTrabajosRealizados;
-    private javax.swing.JMenuItem menuUnidades;
+    public javax.swing.JMenuItem menuUnidades;
     public javax.swing.JMenuItem menuUsuarios;
     public javax.swing.JMenuItem menuVentas;
     public javax.swing.JMenuItem menuVerOrdenes;
-    private javax.swing.JMenuItem menutipo_pagosgenerales;
+    public javax.swing.JMenuItem menutipo_pagosgenerales;
     // End of variables declaration//GEN-END:variables
 
     private void cargarPermisos() {
+        Connection connection = null;
+
         String sql = "SELECT nombre_menu AS menu_name, nombre_submenu AS submenu_name\n"
                 + "FROM roles_permisos rp\n"
                 + "JOIN menus m ON rp.menu_id = m.id_menu\n"
                 + "LEFT JOIN submenus s ON rp.submenu_id = s.id_submenu\n"
                 + "WHERE rp.rol_id =  ?";
-        try (PreparedStatement pst = conectar.getConexion().prepareStatement(sql)) {
-            pst.setInt(1, tipUsu);
-            ResultSet rs = pst.executeQuery();
-            while (rs.next()) {
-                String menuName = rs.getString("menu_name");
-                String submenuName = rs.getString("submenu_name");
-                setMenuVisibility(menuName, true);
-                if (submenuName != null) {
-                    setMenuVisibility(submenuName, true);
+        try {
+            Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, tipUsu);
+                ResultSet rs = pst.executeQuery();
+                while (rs.next()) {
+                    String menuName = rs.getString("menu_name");
+                    String submenuName = rs.getString("submenu_name");
+                    setMenuVisibility(menuName, true);
+                    if (submenuName != null) {
+                        setMenuVisibility(submenuName, true);
+                    }
                 }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Error al cargar permisos: " + e.getMessage());
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
         }
-    }
-
-    public void setMenuVisibility(String menuName, boolean visibility) {
-        switch (menuName) {
-            case "menuAdministration":
-                menuAdministration.setVisible(visibility);
-                break;
-            case "menuAdmission":
-                menuAdmission.setVisible(visibility);
-                break;
-            case "menuRegisters":
-                menuRegisters.setVisible(visibility);
-                break;
-            case "menuReports":
-                menuReports.setVisible(visibility);
-                break;
-            case "menuSubAdministration1":
-                menuUsuarios.setVisible(visibility);
-                break;
-            case "menuSubAdministration2":
-                menuTipoUsuarios.setVisible(visibility);
-                break;
-            case "menuSubAdministration3":
-                menuAsignacionPermisos.setVisible(visibility);
-                break;
-            case "menuSubAdministration4":
-                menuEmpresas.setVisible(visibility);
-                break;
-            case "menuSubAdministration5":
-                menuTrabajadores.setVisible(visibility);
-                break;
-            case "menuSubAdministration6":
-                menuTarifario.setVisible(visibility);
-                break;
-            case "menuSubAdministration7":
-                menuProductos.setVisible(visibility);
-                break;
-            case "menuSubAdministration8":
-                menuFormularios.setVisible(visibility);
-                break;
-            case "menuSubAdministration9":
-                menuProveedor.setVisible(visibility);
-                break;
-            case "menuSubAdministration10":
-                menuConvenios.setVisible(visibility);
-                break;
-            case "menuSubAdministration11":
-                menuBusquedaConvenios.setVisible(visibility);
-                break;
-            case "menuSubAdministration12":
-                menuAsignaciondeTrabajos.setVisible(visibility);
-                break;
-            case "menuSubAdministration13":
-                menuPuestoDeTrabajo.setVisible(visibility);
-                break;
-            case "menuSubAdministration14":
-                menuFormaDePago.setVisible(visibility);
-                break;
-
-            case "menuSubAdmission1":
-                menuClientes.setVisible(visibility);
-                break;
-            case "menuSubAdmission2":
-                menuMarcas.setVisible(visibility);
-                break;
-            case "menuSubAdmission3":
-                menuUnidades.setVisible(visibility);
-                break;
-            case "menuSubAdmission4":
-                menutipo_pagosgenerales.setVisible(visibility);
-                break;
-            case "menuSubAdmission5":
-                menuTipoProMat.setVisible(visibility);
-                break;
-            case "menuSubAdmission6":
-                menuTipoMaqVe.setVisible(visibility);
-                break;
-            case "menuSubAdmission7":
-                menuLocalizacion.setVisible(visibility);
-                break;
-            case "menuSubAdmission8":
-                menuConfiguracion.setVisible(visibility);
-                break;
-
-            case "menuSubRegister1":
-                menuOrdenes.setVisible(visibility);
-                break;
-            case "menuSubRegister2":
-                menuVerOrdenes.setVisible(visibility);
-                break;
-            case "menuSubRegister3":
-                menuVentas.setVisible(visibility);
-                break;
-            case "menuSubRegister4":
-                menuCompraProMat.setVisible(visibility);
-                break;
-            case "menuSubRegister5":
-                menuCompraEquyVehi.setVisible(visibility);
-                break;
-            case "menuSubRegister6":
-                menuGastosGenerales.setVisible(visibility);
-                break;
-            case "menuSubRegister7":
-                menuKardex.setVisible(visibility);
-                break;
-            case "menuSubRegister8":
-                menuCotizaciones.setVisible(visibility);
-                break;
-            case "menuSubRegister9":
-                menuCancelaciones.setVisible(visibility);
-                break;
-
-            case "menuSubReports1":
-                menuTrabajosRealizados.setVisible(visibility);
-                break;
-            case "menuSubReports2":
-                menuEstadisticas.setVisible(visibility);
-                break;
-            case "menuSubReports3":
-                menuDeudasPorPagar.setVisible(visibility);
-                break;
-            case "menuSubReports4":
-                menuDeudasPorCobrar.setVisible(visibility);
-                break;
-            case "menuSubReports5":
-                menuHorasTrabajadas.setVisible(visibility);
-                break;
-            case "menuSubReports6":
-                menuSueldos.setVisible(visibility);
-                break;
-            case "menuSubReports7":
-                menuStock.setVisible(visibility);
-                break;
-            case "menuSubReports8":
-                menuTrabajos.setVisible(visibility);
-                break;
-            case "menuSubReports9":
-                menuPresupuesto.setVisible(visibility);
-                break;
-
-        }
-    }
-
-    private int obtenerTrabajadorId(String usuario) {
-        String sql = "SELECT ut.id_trabajador FROM usuario_trabajador ut INNER JOIN usuarios u ON ut.id_usuario = u.idUsuarios WHERE u.usuario = ?";
-        try {
-            PreparedStatement pst = conectar.getConexion().prepareStatement(sql);
-            pst.setString(1, usuario);
-            ResultSet rs = pst.executeQuery();
-            if (rs.next()) {
-                int idTrabajador = rs.getInt("id_trabajador");
-                System.out.println("ID del trabajador obtenido: " + idTrabajador); // Mensaje de depuración
-                return idTrabajador;
-            } else {
-                System.out.println("No se encontró el trabajador para el usuario: " + usuario); // Mensaje de depuración
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(VentanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return 0;
     }
 }

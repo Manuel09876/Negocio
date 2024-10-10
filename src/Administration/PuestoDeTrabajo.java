@@ -147,8 +147,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         this.tiempoVacaciones = tiempoVacaciones;
     }
 
-    Conectar objConect = new Conectar();
-
     public PuestoDeTrabajo() {
         initComponents();
 
@@ -181,6 +179,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void Mostrar(JTable Tabla) {
+        Connection connection = null;
         DefaultTableModel modelo = (DefaultTableModel) Tabla.getModel();
 
         // Asegúrate de que el modelo tenga las columnas correctas
@@ -215,30 +214,40 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 + "INNER JOIN periodo p ON pdt.id_periodo=p.id "
                 + "INNER JOIN vacaciones v ON pdt.id_vacaciones=v.id";
 
-        try (Statement st = objConect.getConexion().createStatement(); ResultSet rs = st.executeQuery(sql)) {
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            // Recorrer los resultados y agregar las filas al modelo de la tabla
-            while (rs.next()) {
-                Object[] fila = new Object[12];
-                fila[0] = rs.getString("idPDT");
-                fila[1] = rs.getString("Trabajador");
-                fila[2] = rs.getString("Tipo de Trabajo");
-                fila[3] = rs.getString("Pago por Hora");
-                fila[4] = rs.getString("Sueldo");
-                fila[5] = rs.getString("Overtime");
-                fila[6] = rs.getString("Horario");
-                fila[7] = rs.getString("Periodo de Pagos");
-                fila[8] = rs.getString("Vacaciones");
-                fila[9] = rs.getString("Periodo de Vacaciones");
-                fila[10] = rs.getString("Fecha de Puesto");
-                fila[11] = rs.getString("Estado");
+            try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
 
-                // Agregar la fila al modelo
-                modelo.addRow(fila);
+                // Recorrer los resultados y agregar las filas al modelo de la tabla
+                while (rs.next()) {
+                    Object[] fila = new Object[12];
+                    fila[0] = rs.getString("idPDT");
+                    fila[1] = rs.getString("Trabajador");
+                    fila[2] = rs.getString("Tipo de Trabajo");
+                    fila[3] = rs.getString("Pago por Hora");
+                    fila[4] = rs.getString("Sueldo");
+                    fila[5] = rs.getString("Overtime");
+                    fila[6] = rs.getString("Horario");
+                    fila[7] = rs.getString("Periodo de Pagos");
+                    fila[8] = rs.getString("Vacaciones");
+                    fila[9] = rs.getString("Periodo de Vacaciones");
+                    fila[10] = rs.getString("Fecha de Puesto");
+                    fila[11] = rs.getString("Estado");
+
+                    // Agregar la fila al modelo
+                    modelo.addRow(fila);
+                }
+
             }
-
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar los registros: " + e.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            if (connection != null) {
+                Conectar.getInstancia().devolverConexion(connection);
+            }
         }
 
         // Actualizar la tabla con el nuevo modelo
@@ -246,13 +255,11 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void Insertar() {
-        Conectar con = new Conectar();
-        Connection connect = null;
+
+        Connection connection = null;
         CallableStatement cs = null;
 
         try {
-            connect = con.getConexion();
-
             // Validar y convertir los valores de IdTrabajador e IdTipoDeTrabajo
             int idTrabajador = Integer.parseInt(txtIdtrabajador.getText());
             int idTipoDeTrabajo = Integer.parseInt(txtIdTipoDeTrabajo.getText());
@@ -307,7 +314,10 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
             // Preparar la consulta SQL para insertar el registro
             String consulta = "INSERT INTO puestodetrabajo (idTrabajador, idTDT, pagoPorHora, sueldo, id_overtime, id_horario, id_periodo, id_vacaciones, tiempoVacaciones, fechaDePuesto, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Activo')";
 
-            cs = connect.prepareCall(consulta);
+            // Obtener la conexión desde el pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            cs = connection.prepareCall(consulta);
             cs.setInt(1, idTrabajador);
             cs.setInt(2, idTipoDeTrabajo);
 
@@ -340,12 +350,14 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se pudo insertar el registro. Error: " + e.toString(), "Error", JOptionPane.ERROR_MESSAGE);
         } finally {
+            // Cerrar recursos
             try {
                 if (cs != null) {
                     cs.close();
                 }
-                if (connect != null) {
-                    connect.close();
+                // Devolver la conexión al pool
+                if (connection != null) {
+                    Conectar.getInstancia().devolverConexion(connection);
                 }
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -355,18 +367,24 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
     //Metodo para seleccionar y que se muestre
     public void Eliminar(JTextField IdPDT) {
+        Connection connection = null;
         setIdPDT(Integer.parseInt(IdPDT.getText()));
 
-        Conectar con = new Conectar();
         String consulta = "DELETE FROM puestodetrabajo WHERE idPDT=?";
 
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            // Obtener la conexión desde el pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getIdPDT());
             cs.execute();
             JOptionPane.showMessageDialog(null, "Se eliminó correctamente.");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se pudo eliminar, error " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -413,31 +431,31 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void Modificar(JTextField idPDTField, JTextField idTrabajadorField, JTextField TipoDeTrabajoField, JTextField pagoPorHoraField, JTextField sueldoField, JTextField idOvertimeField, JTextField idHorarioField, JTextField idPeriodoField, JTextField idVacacionesField, JTextField tiempoVacacionesField, JDateChooser dateInicioPuesto) {
-        Connection conn = null;
+        Connection connection = null;
         PreparedStatement ps = null;
 
         try {
             // Verificar que los JTextField no estén vacíos antes de hacer la conversión
-            if (txtIdPDT.getText().trim().isEmpty() || txtIdtrabajador.getText().trim().isEmpty() || txtIdTipoDeTrabajo.getText().trim().isEmpty()) {
+            if (idPDTField.getText().trim().isEmpty() || idTrabajadorField.getText().trim().isEmpty() || TipoDeTrabajoField.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Por favor, complete todos los campos obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;  // Detener la ejecución si faltan datos
             }
 
             // Obtener los valores de los JTextFields y convertirlos a sus respectivos tipos
-            int idPDT = Integer.parseInt(txtIdPDT.getText().trim());
-            int idTrabajador = Integer.parseInt(txtIdtrabajador.getText().trim());
-            int idTDT = Integer.parseInt(txtIdTipoDeTrabajo.getText().trim());
+            int idPDT = Integer.parseInt(idPDTField.getText().trim());
+            int idTrabajador = Integer.parseInt(idTrabajadorField.getText().trim());
+            int idTDT = Integer.parseInt(TipoDeTrabajoField.getText().trim());
 
             // Validar si 'pagoPorHora' y 'sueldo' tienen valores válidos
             double pagoPorHora = 0.0;
             double sueldo = 0.0;
 
-            if (!txtPagoPorHora.getText().trim().isEmpty()) {
-                pagoPorHora = Double.parseDouble(txtPagoPorHora.getText().trim());
+            if (!pagoPorHoraField.getText().trim().isEmpty()) {
+                pagoPorHora = Double.parseDouble(pagoPorHoraField.getText().trim());
             }
 
-            if (!txtSueldo.getText().trim().isEmpty()) {
-                sueldo = Double.parseDouble(txtSueldo.getText().trim());
+            if (!sueldoField.getText().trim().isEmpty()) {
+                sueldo = Double.parseDouble(sueldoField.getText().trim());
             }
 
             // Asegurarse de que uno de los valores sea cero
@@ -447,11 +465,11 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 pagoPorHora = 0.0;
             }
 
-            int idOvertime = Integer.parseInt(txtIdOverTime.getText().trim());
-            int idHorario = Integer.parseInt(txtIdHorario.getText().trim());
-            int idPeriodo = Integer.parseInt(txtIdPeriodo.getText().trim());
-            int idVacaciones = Integer.parseInt(txtIdVacaciones.getText().trim());
-            int tiempoVacaciones = Integer.parseInt(txtVacaciones.getText().trim());
+            int idOvertime = Integer.parseInt(idOvertimeField.getText().trim());
+            int idHorario = Integer.parseInt(idHorarioField.getText().trim());
+            int idPeriodo = Integer.parseInt(idPeriodoField.getText().trim());
+            int idVacaciones = Integer.parseInt(idVacacionesField.getText().trim());
+            int tiempoVacaciones = Integer.parseInt(tiempoVacacionesField.getText().trim());
 
             // Obtener la fecha desde el JDateChooser
             java.util.Date ingreso = dateInicioPuesto.getDate();
@@ -461,13 +479,13 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
             }
             java.sql.Date fechaSQL = new java.sql.Date(ingreso.getTime());
 
-            // Conectar a la base de datos y realizar la modificación
-            Conectar con = new Conectar();
-            conn = con.getConexion();
-            conn.setAutoCommit(false);  // Desactivar auto-commit
+            // Obtener la conexión desde el pool
+            connection = Conectar.getInstancia().obtenerConexion();
+            connection.setAutoCommit(false);  // Desactivar auto-commit
 
             String consulta = "UPDATE puestodetrabajo SET idTrabajador = ?, idTDT = ?, pagoPorHora = ?, sueldo = ?, id_overtime = ?, id_horario = ?, id_periodo = ?, id_vacaciones = ?, tiempoVacaciones = ?, fechaDePuesto = ?, estado = 'Activo' WHERE idPDT = ?";
-            ps = conn.prepareStatement(consulta);
+
+            ps = connection.prepareStatement(consulta);
             ps.setInt(1, idTrabajador);
             ps.setInt(2, idTDT);
             ps.setDouble(3, pagoPorHora);
@@ -483,19 +501,19 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
             // Ejecutar la consulta
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {
-                conn.commit();
+                connection.commit();
                 JOptionPane.showMessageDialog(null, "Modificación exitosa.");
             } else {
-                conn.rollback();
+                connection.rollback();
                 JOptionPane.showMessageDialog(null, "No se encontraron registros para modificar.");
             }
 
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "Error en la conversión de datos: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } catch (SQLException e) {
-            if (conn != null) {
+            if (connection != null) {
                 try {
-                    conn.rollback();
+                    connection.rollback();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
@@ -506,9 +524,9 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 if (ps != null) {
                     ps.close();
                 }
-                if (conn != null) {
-                    conn.setAutoCommit(true);
-                    conn.close();
+                if (connection != null) {
+                    connection.setAutoCommit(true);
+                    Conectar.getInstancia().devolverConexion(connection);
                 }
             } catch (SQLException ex) {
                 ex.printStackTrace();
@@ -516,147 +534,92 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         }
     }
 
-//// Método para obtener el ID correcto desde un JComboBox
-//    private int obtenerIDFromComboBox(JComboBox comboBox) throws NumberFormatException {
-//        Object selectedItem = comboBox.getSelectedItem();
-//        if (selectedItem instanceof String) {
-//            try {
-//                return Integer.parseInt((String) selectedItem);
-//            } catch (NumberFormatException e) {
-//                throw new NumberFormatException("Error al convertir el valor del ComboBox: " + selectedItem);
-//            }
-//        } else {
-//            throw new NumberFormatException("Valor del ComboBox no es un número válido: " + selectedItem);
-//        }
-//    }
-//
-//// Método para obtener el ID correcto desde un JComboBox
-//    public String obtenerIdOverTime(String descripcion) {
-//        String idOverTime = "";
-//        String consulta = "SELECT id FROM overtime WHERE descripcion = ?";
-//        try (PreparedStatement ps = objConect.getConexion().prepareStatement(consulta)) {
-//            ps.setString(1, descripcion);
-//            try (ResultSet rs = ps.executeQuery()) {
-//                if (rs.next()) {
-//                    idOverTime = rs.getString("id");
-//                }
-//            }
-//        } catch (SQLException e) {
-//            JOptionPane.showMessageDialog(null, "Error al obtener ID de OverTime: " + e.toString(), "Error", JOptionPane.ERROR_MESSAGE);
-//        }
-//        return idOverTime;
-//    }
-//
     public boolean verificarRegistroExiste(int idPDT) {
+        Connection connection = null;
         String consulta = "SELECT COUNT(*) FROM puestodetrabajo WHERE idPDT = ?";
-        try (PreparedStatement ps = objConect.getConexion().prepareStatement(consulta)) {
-            ps.setInt(1, idPDT);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
+
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement ps = connection.prepareStatement(consulta)) {
+                ps.setInt(1, idPDT);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1) > 0;
+                    }
                 }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al verificar el registro: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return false;
     }
 
     public int obtenerIdPuestoActivo(int idTrabajador) {
+        Connection connection = null;
         int idPDT = -1;
         String sql = "SELECT idPDT FROM puestodetrabajo WHERE idTrabajador = ? AND estado = 'Activo'";
-        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
-            pst.setInt(1, idTrabajador);
-            ResultSet rs = pst.executeQuery();
-            if (rs.next()) {
-                idPDT = rs.getInt("idPDT");
+
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, idTrabajador);
+                try (ResultSet rs = pst.executeQuery()) {
+                    if (rs.next()) {
+                        idPDT = rs.getInt("idPDT");
+                    }
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return idPDT;
     }
-//
 
     public String obtenerPeriodoPago(int idPDT) {
+        Connection connection = null;
         String sql = "SELECT p.descripcion FROM periodo p JOIN puestodetrabajo pt ON p.id = pt.id_periodo WHERE pt.idPDT = ?";
-        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
-            pst.setInt(1, idPDT);
-            ResultSet rs = pst.executeQuery();
-            if (rs.next()) {
-                return rs.getString("descripcion");
+
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement pst = connection.prepareStatement(sql)) {
+                pst.setInt(1, idPDT);
+                try (ResultSet rs = pst.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getString("descripcion");
+                    }
+                }
             }
         } catch (SQLException ex) {
             System.out.println("Error al obtener el periodo de pago: " + ex.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
+
         return "Semanal"; // Valor predeterminado
     }
-//
-//    public boolean verificarOvertime(int idPDT) {
-//        String sql = "SELECT id_overtime FROM puestodetrabajo WHERE idPDT = ?";
-//        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
-//            pst.setInt(1, idPDT);
-//            ResultSet rs = pst.executeQuery();
-//            if (rs.next()) {
-//                return rs.getInt("id_overtime") > 0;
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return false;
-//    }
-//
-//    public double obtenerPagoPorHora(int idPDT) {
-//        double pagoPorHora = 0.0;
-//        String sql = "SELECT pagoPorHora FROM puestodetrabajo WHERE idPDT = ?";
-//        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
-//            pst.setInt(1, idPDT);
-//            ResultSet rs = pst.executeQuery();
-//            if (rs.next()) {
-//                pagoPorHora = rs.getDouble("pagoPorHora");
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return pagoPorHora;
-//    }
-//
-//    public double obtenerSueldo(int idPDT) {
-//        double sueldo = 0.0;
-//        String sql = "SELECT sueldo FROM puestodetrabajo WHERE idPDT = ?";
-//        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
-//            pst.setInt(1, idPDT);
-//            ResultSet rs = pst.executeQuery();
-//            if (rs.next()) {
-//                sueldo = rs.getDouble("sueldo");
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//        return sueldo;
-//    }
-//
-//    public int calcularDiasDeVacaciones(int idPDT) {
-//        String sql = "SELECT tiempoVacaciones FROM puestodetrabajo WHERE idPDT = ?";
-//        try (PreparedStatement pst = objConect.getConexion().prepareStatement(sql)) {
-//            pst.setInt(1, idPDT);
-//            ResultSet rs = pst.executeQuery();
-//            if (rs.next()) {
-//                return rs.getInt("tiempoVacaciones");
-//            }
-//        } catch (SQLException ex) {
-//            System.out.println("Error al obtener tiempo vacaciones: " + ex.getMessage());
-//        }
-//        return 0;
-//    }
 
     public boolean accion(String estado, int id) {
+        Connection connection = null;
         String sql = "UPDATE puestodetrabajo SET estado = ? WHERE idPDT = ?";
         try {
-            Conectar con = new Conectar();
-            Connection connect = con.getConexion();
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
             PreparedStatement ps;
-            ps = con.getConexion().prepareStatement(sql);
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, id);
             ps.execute();
@@ -664,6 +627,9 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -1105,27 +1071,41 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarTrabajador(JComboBox comboTrabajador) {
-        String sql = "select * from worker";
-        try (Statement st = objConect.getConexion().createStatement(); ResultSet rs = st.executeQuery(sql)) {
-            comboTrabajador.removeAllItems();
-            while (rs.next()) {
-                comboTrabajador.addItem(rs.getString("nombre"));
+        Connection connection = null;
+        String sql = "SELECT * FROM worker";
+
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+                comboTrabajador.removeAllItems();
+                while (rs.next()) {
+                    comboTrabajador.addItem(rs.getString("nombre"));
+                }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Trabajadores: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoTrabajador(JComboBox trabajador, JTextField IdTrabajador) {
+        Connection connection = null;
         if (trabajador.getSelectedItem() != null) {
             String consulta = "SELECT idWorker FROM worker WHERE nombre=?";
+
             try {
-                CallableStatement cs = objConect.getConexion().prepareCall(consulta);
+                // Obtener la conexión del pool
+                connection = Conectar.getInstancia().obtenerConexion();
+
+                CallableStatement cs = connection.prepareCall(consulta);
                 cs.setString(1, trabajador.getSelectedItem().toString());
                 cs.execute();
 
                 ResultSet rs = cs.executeQuery();
-
                 if (rs.next()) {
                     IdTrabajador.setText(rs.getString("idWorker"));
                 } else {
@@ -1134,7 +1114,10 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 rs.close(); // Asegurarse de cerrar el ResultSet
 
             } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+                JOptionPane.showMessageDialog(null, "Error al mostrar: " + e.toString());
+            } finally {
+                // Devolver la conexión al pool
+                Conectar.getInstancia().devolverConexion(connection);
             }
         } else {
             IdTrabajador.setText("");
@@ -1143,23 +1126,36 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarTipoDeTrabajo(JComboBox comboTipoDeTrabajo) {
-        String sql = "select * from tiposdetrabajos";
-        try (Statement st = objConect.getConexion().createStatement(); ResultSet rs = st.executeQuery(sql)) {
-            comboTipoDeTrabajo.removeAllItems();
-            while (rs.next()) {
-                comboTipoDeTrabajo.addItem(rs.getString("nombre"));
+        Connection connection = null;
+        String sql = "SELECT * FROM tiposdetrabajos";
+
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+                comboTipoDeTrabajo.removeAllItems();
+                while (rs.next()) {
+                    comboTipoDeTrabajo.addItem(rs.getString("nombre"));
+                }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tipos de Trabajo: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoTipodeTrabajo(JComboBox tipoDeTrabajo, JTextField IdTipoDeTrabajo) {
+        Connection connection = null;
         String consulta = "select tiposdetrabajos.id from tiposdetrabajos where tiposdetrabajos.nombre=?";
 
         if (tipoDeTrabajo.getSelectedItem() != null) {
             try {
-                CallableStatement cs = objConect.getConexion().prepareCall(consulta);
+                // Obtener la conexión del pool
+                connection = Conectar.getInstancia().obtenerConexion();
+                CallableStatement cs = connection.prepareCall(consulta);
                 cs.setString(1, tipoDeTrabajo.getSelectedItem().toString());
                 cs.execute();
 
@@ -1174,6 +1170,9 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+            } finally {
+                // Devolver la conexión al pool
+                Conectar.getInstancia().devolverConexion(connection);
             }
         } else {
             IdTipoDeTrabajo.setText("");
@@ -1182,53 +1181,84 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarOverTime(JComboBox<String> comboOverTime) {
+        Connection connection = null;
         String sql = "SELECT * FROM overtime";
-        try (Statement st = objConect.getConexion().createStatement(); ResultSet rs = st.executeQuery(sql)) {
-            comboOverTime.removeAllItems();
-            while (rs.next()) {
-                comboOverTime.addItem(rs.getString("descripcion"));
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+                comboOverTime.removeAllItems();
+                while (rs.next()) {
+                    comboOverTime.addItem(rs.getString("descripcion"));
+                }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Overtime: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoPorOverTime(JComboBox<String> overtimeCombo, JTextField idOvertime) {
+        Connection connection = null;
         if (overtimeCombo.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(null, "Por favor seleccione un valor de OverTime.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         String consulta = "SELECT id FROM overtime WHERE descripcion = ?";
-        try (PreparedStatement ps = objConect.getConexion().prepareStatement(consulta)) {
-            ps.setString(1, overtimeCombo.getSelectedItem().toString());
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    idOvertime.setText(rs.getString("id"));
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement ps = connection.prepareStatement(consulta)) {
+                ps.setString(1, overtimeCombo.getSelectedItem().toString());
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        idOvertime.setText(rs.getString("id"));
+                    }
                 }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarHorario(JComboBox comboHorario) {
+        Connection connection = null;
         String sql = "select * from horario";
-        try (Statement st = objConect.getConexion().createStatement(); ResultSet rs = st.executeQuery(sql)) {
-            comboHorario.removeAllItems();
-            while (rs.next()) {
-                comboHorario.addItem(rs.getString("descripcion"));
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+                comboHorario.removeAllItems();
+                while (rs.next()) {
+                    comboHorario.addItem(rs.getString("descripcion"));
+                }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Horario: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoHorario(JComboBox Horario, JTextField IdHorario) {
+        Connection connection = null;
         String consulta = "select id from horario where descripcion=?";
 
         if (Horario.getSelectedItem() != null) {
             try {
-                CallableStatement cs = objConect.getConexion().prepareCall(consulta);
+                // Obtener la conexión del pool
+                connection = Conectar.getInstancia().obtenerConexion();
+
+                CallableStatement cs = connection.prepareCall(consulta);
                 cs.setString(1, Horario.getSelectedItem().toString());
                 cs.execute();
 
@@ -1243,6 +1273,9 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+            } finally {
+                // Devolver la conexión al pool
+                Conectar.getInstancia().devolverConexion(connection);
             }
         } else {
             IdHorario.setText("");
@@ -1251,23 +1284,36 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarPeriodo(JComboBox comboPeriodo) {
+        Connection connection = null;
         String sql = "select * from periodo";
-        try (Statement st = objConect.getConexion().createStatement(); ResultSet rs = st.executeQuery(sql)) {
-            comboPeriodo.removeAllItems();
-            while (rs.next()) {
-                comboPeriodo.addItem(rs.getString("descripcion"));
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+                comboPeriodo.removeAllItems();
+                while (rs.next()) {
+                    comboPeriodo.addItem(rs.getString("descripcion"));
+                }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Periodo: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoPeriodo(JComboBox Periodo, JTextField IdPeriodo) {
+        Connection connection = null;
         String consulta = "select id from periodo where descripcion=?";
 
         if (Periodo.getSelectedItem() != null) {
             try {
-                CallableStatement cs = objConect.getConexion().prepareCall(consulta);
+                // Obtener la conexión del pool
+                connection = Conectar.getInstancia().obtenerConexion();
+
+                CallableStatement cs = connection.prepareCall(consulta);
                 cs.setString(1, Periodo.getSelectedItem().toString());
                 cs.execute();
 
@@ -1282,6 +1328,9 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+            } finally {
+                // Devolver la conexión al pool
+                Conectar.getInstancia().devolverConexion(connection);
             }
         } else {
             IdPeriodo.setText("");
@@ -1290,23 +1339,36 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarVacaciones(JComboBox comboVacaciones) {
+        Connection connection = null;
         String sql = "select * from vacaciones";
-        try (Statement st = objConect.getConexion().createStatement(); ResultSet rs = st.executeQuery(sql)) {
-            comboVacaciones.removeAllItems();
-            while (rs.next()) {
-                comboVacaciones.addItem(rs.getString("descripcion"));
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+                comboVacaciones.removeAllItems();
+                while (rs.next()) {
+                    comboVacaciones.addItem(rs.getString("descripcion"));
+                }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Periodo: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoVacaciones(JComboBox Vacaciones, JTextField IdVacaciones) {
+        Connection connection = null;
         String consulta = "select id from vacaciones where descripcion=?";
 
         if (Vacaciones.getSelectedItem() != null) {
             try {
-                CallableStatement cs = objConect.getConexion().prepareCall(consulta);
+                // Obtener la conexión del pool
+                connection = Conectar.getInstancia().obtenerConexion();
+
+                CallableStatement cs = connection.prepareCall(consulta);
                 cs.setString(1, Vacaciones.getSelectedItem().toString());
                 cs.execute();
 
@@ -1321,6 +1383,9 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+            } finally {
+                // Devolver la conexión al pool
+                Conectar.getInstancia().devolverConexion(connection);
             }
         } else {
             IdVacaciones.setText("");

@@ -173,8 +173,6 @@ public class Empresas extends javax.swing.JInternalFrame {
         this.estado = estado;
     }
 
-    Conectar objconexion = new Conectar();
-    Connection connect = objconexion.getConexion();
     PreparedStatement ps;
 
     //Constructores de Metodos que vamos a necesitar
@@ -246,7 +244,7 @@ public class Empresas extends javax.swing.JInternalFrame {
 
     //Es lo mismo que mostrar Tabla Clientes
     void CargarDatosTable(String Valores) {
-
+        Connection connection = null;
         try {
 
             String[] titulosTabla = {"Código", "Empresa", "Dirección", "ZipCode", "Ciudad", "Estado",
@@ -257,53 +255,60 @@ public class Empresas extends javax.swing.JInternalFrame {
 
             String ConsultaSQL = "select * from bussiness";
 
-            Statement st = connect.createStatement();
-            ResultSet result = st.executeQuery(ConsultaSQL);
+            
+                // Obtener la conexión del pool
+                connection = Conectar.getInstancia().obtenerConexion();
 
-            while (result.next()) {
-                RegistroBD[0] = result.getString("idBusiness");
-                RegistroBD[1] = result.getString("nameBusiness");
-                RegistroBD[2] = result.getString("addressBusiness");
-                RegistroBD[3] = result.getString("zipCode");
-                RegistroBD[4] = result.getString("city");
-                RegistroBD[5] = result.getString("state");
-                RegistroBD[6] = result.getString("nameOwner");
-                RegistroBD[7] = result.getString("cellPhoneOwner");
-                RegistroBD[8] = result.getString("emailOwner");
-                RegistroBD[9] = result.getString("nameContact");
-                RegistroBD[10] = result.getString("cellPhoneContact");
-                RegistroBD[11] = result.getString("emailContact");
-                RegistroBD[12] = result.getString("webpageBusiness");
-                RegistroBD[13] = result.getString("dateStart");
-                RegistroBD[14] = result.getString("estado");
+                Statement st = connection.createStatement();
+                ResultSet result = st.executeQuery(ConsultaSQL);
 
-                model.addRow(RegistroBD);
-            }
+                while (result.next()) {
+                    RegistroBD[0] = result.getString("idBusiness");
+                    RegistroBD[1] = result.getString("nameBusiness");
+                    RegistroBD[2] = result.getString("addressBusiness");
+                    RegistroBD[3] = result.getString("zipCode");
+                    RegistroBD[4] = result.getString("city");
+                    RegistroBD[5] = result.getString("state");
+                    RegistroBD[6] = result.getString("nameOwner");
+                    RegistroBD[7] = result.getString("cellPhoneOwner");
+                    RegistroBD[8] = result.getString("emailOwner");
+                    RegistroBD[9] = result.getString("nameContact");
+                    RegistroBD[10] = result.getString("cellPhoneContact");
+                    RegistroBD[11] = result.getString("emailContact");
+                    RegistroBD[12] = result.getString("webpageBusiness");
+                    RegistroBD[13] = result.getString("dateStart");
+                    RegistroBD[14] = result.getString("estado");
 
-            tbEmpresa.setModel(model);
-            tbEmpresa.getColumnModel().getColumn(0).setPreferredWidth(30);
-            tbEmpresa.getColumnModel().getColumn(1).setPreferredWidth(100);
-            tbEmpresa.getColumnModel().getColumn(2).setPreferredWidth(200);
-            tbEmpresa.getColumnModel().getColumn(3).setPreferredWidth(80);
-            tbEmpresa.getColumnModel().getColumn(4).setPreferredWidth(100);
-            tbEmpresa.getColumnModel().getColumn(5).setPreferredWidth(100);
-            tbEmpresa.getColumnModel().getColumn(6).setPreferredWidth(150);
-            tbEmpresa.getColumnModel().getColumn(7).setPreferredWidth(100);
-            tbEmpresa.getColumnModel().getColumn(8).setPreferredWidth(200);
-            tbEmpresa.getColumnModel().getColumn(9).setPreferredWidth(150);
-            tbEmpresa.getColumnModel().getColumn(10).setPreferredWidth(100);
-            tbEmpresa.getColumnModel().getColumn(11).setPreferredWidth(100);
-            tbEmpresa.getColumnModel().getColumn(12).setPreferredWidth(150);
-            tbEmpresa.getColumnModel().getColumn(13).setPreferredWidth(150);
+                    model.addRow(RegistroBD);
+                }
 
+                tbEmpresa.setModel(model);
+                tbEmpresa.getColumnModel().getColumn(0).setPreferredWidth(30);
+                tbEmpresa.getColumnModel().getColumn(1).setPreferredWidth(100);
+                tbEmpresa.getColumnModel().getColumn(2).setPreferredWidth(200);
+                tbEmpresa.getColumnModel().getColumn(3).setPreferredWidth(80);
+                tbEmpresa.getColumnModel().getColumn(4).setPreferredWidth(100);
+                tbEmpresa.getColumnModel().getColumn(5).setPreferredWidth(100);
+                tbEmpresa.getColumnModel().getColumn(6).setPreferredWidth(150);
+                tbEmpresa.getColumnModel().getColumn(7).setPreferredWidth(100);
+                tbEmpresa.getColumnModel().getColumn(8).setPreferredWidth(200);
+                tbEmpresa.getColumnModel().getColumn(9).setPreferredWidth(150);
+                tbEmpresa.getColumnModel().getColumn(10).setPreferredWidth(100);
+                tbEmpresa.getColumnModel().getColumn(11).setPreferredWidth(100);
+                tbEmpresa.getColumnModel().getColumn(12).setPreferredWidth(150);
+                tbEmpresa.getColumnModel().getColumn(13).setPreferredWidth(150);
+            
         } catch (SQLException e) {
 
             System.out.println(e.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     void Guardar() {
-
+        Connection connection = null;
         // Variables
         int idBusiness;
         String nameBusiness;
@@ -339,9 +344,10 @@ public class Empresas extends javax.swing.JInternalFrame {
 
         //Para almacenar los datos empleo un try cash
         try {
+            connection = Conectar.getInstancia().obtenerConexion();
 
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
-            PreparedStatement pst = connect.prepareStatement(sql);
+            PreparedStatement pst = connection.prepareStatement(sql);
 
             pst.setString(1, nameBusiness);
             pst.setString(2, addressBusiness);
@@ -373,18 +379,22 @@ public class Empresas extends javax.swing.JInternalFrame {
 
         } catch (SQLException ex) {
             Logger.getLogger(Productos.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Eliminar(JTextField codigo) {
-
+        Connection connection = null;
         setIdBusiness(Integer.parseInt(codigo.getText()));
 
         String consulta = "DELETE from bussiness where idBusiness=?";
 
         try {
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            CallableStatement cs = objconexion.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getIdBusiness());
             cs.executeUpdate();
 
@@ -394,8 +404,10 @@ public class Empresas extends javax.swing.JInternalFrame {
 
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
 
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
-
     }
 
     public void SeleccionarEmpresa(JTable TablaEmpresa, JTextField id, JTextField nameBusiness,
@@ -440,6 +452,7 @@ public class Empresas extends javax.swing.JInternalFrame {
             JTextField zipCode, JTextField ciudad, JTextField estado, JTextField duenio, JTextField telefonod,
             JTextField emaild, JTextField contacto, JTextField telefonoc, JTextField emailc, JTextField web, JDateChooser fecha) {
 
+        Connection connection = null;
         // Convertir las fechas a LocalDate
         // Por ejemplo, asumiendo que las fechas son almacenadas en formato dd-MM-yyyy
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -464,7 +477,9 @@ public class Empresas extends javax.swing.JInternalFrame {
                 + "cellPhoneContact=?, emailContact=?, webpageBusiness=?, dateStart=? Where idBusiness=?";
 
         try {
-            CallableStatement cs = objconexion.getConexion().prepareCall(consulta);
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            CallableStatement cs = connection.prepareCall(consulta);
 
             cs.setString(1, getNameBusiness());
             cs.setString(2, getAddressBusiness());
@@ -489,10 +504,14 @@ public class Empresas extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se ejecutó la Modificacion, Error " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public Empresas BuscarEmp(java.awt.event.KeyEvent evt) {
+        Connection connection = null;
         String[] titulosTabla = {"Código", "Empresa", "Dirección", "ZipCode", "Ciudad", "Estado",
             "Propietario", "Celular", "email", "Contacto", "celular", "email", "Website", "Fecha Inicio", "Estado"}; //Titulos de la Tabla
         String[] RegistroBD = new String[16];
@@ -501,9 +520,11 @@ public class Empresas extends javax.swing.JInternalFrame {
         String sql = "SELECT * FROM bussiness WHERE nameBusiness LIKE '%" + txtBuscarEmpresa.getText() + "%'";
         model = new DefaultTableModel(null, titulosTabla);
         try {
-            Statement st = objconexion.getConexion().createStatement();
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
-            connect = objconexion.getConexion();
+
             while (rs.next()) {
                 RegistroBD[0] = rs.getString("idBusiness");
                 RegistroBD[1] = rs.getString("nameBusiness");
@@ -539,17 +560,20 @@ public class Empresas extends javax.swing.JInternalFrame {
             tbEmpresa.getColumnModel().getColumn(13).setPreferredWidth(150);
         } catch (SQLException e) {
             System.out.println(e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return empresa;
     }
 
     public boolean accion(String estado, int idBusiness) {
+        Connection connection = null;
         String sql = "UPDATE bussiness SET estado = ? WHERE idBusiness = ?";
         try {
-            Conectar con = new Conectar();
-            Connection connect = con.getConexion();
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            ps = connect.prepareStatement(sql);
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, idBusiness);
             ps.execute();
@@ -557,6 +581,9 @@ public class Empresas extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

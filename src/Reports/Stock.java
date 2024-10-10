@@ -17,7 +17,7 @@ import javax.swing.table.DefaultTableModel;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class Stock extends javax.swing.JInternalFrame {
-
+    
     DefaultTableModel model;
     int idProduct;
     String nameProduct;
@@ -63,11 +63,11 @@ public class Stock extends javax.swing.JInternalFrame {
         this.estado = estado;
     }
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
+   
 
     public Stock() {
         initComponents();
+        
         AutoCompleteDecorator.decorate(cbxProducto);
         AutoCompleteDecorator.decorate(cbxTrabajador);
         MostrarProducto(cbxProducto);
@@ -87,6 +87,8 @@ public class Stock extends javax.swing.JInternalFrame {
     }
 
     void CargarDatosTable(String Valores) {
+        Connection connection = null;
+        
         try {
             String[] titulosTabla = {"Id", "Nombre", "Stock", "estado", "Stock Minimo"}; // Titulos de la Tabla
             String[] RegistroBD = new String[5]; // Registros de la Base de Datos
@@ -95,7 +97,9 @@ public class Stock extends javax.swing.JInternalFrame {
 
             String ConsultaSQL = "SELECT idProduct, nameProduct, stock, estado, stock_minimo FROM product";
 
-            Statement st = connect.createStatement();
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
             while (result.next()) {
@@ -120,10 +124,14 @@ public class Stock extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public DefaultTableModel buscarTabla(String buscar) {
+        Connection connection = null;
+        
         DefaultTableModel modelo = new DefaultTableModel();
 
         try {
@@ -135,7 +143,9 @@ public class Stock extends javax.swing.JInternalFrame {
             // Ajustar la consulta SQL para buscar por nombre exacto
             String ConsultaSQL = "SELECT * FROM product WHERE nameProduct LIKE ?";
 
-            PreparedStatement pst = connect.prepareStatement(ConsultaSQL);
+            Conectar.getInstancia().obtenerConexion();
+            
+            PreparedStatement pst = connection.prepareStatement(ConsultaSQL);
             pst.setString(1, "%" + buscar + "%"); // Usar el valor del comboBox para la búsqueda
             ResultSet result = pst.executeQuery();
 
@@ -160,11 +170,15 @@ public class Stock extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return modelo;
     }
 
     public boolean ActualizarStock() {
+        Connection connection = null;
+        
         String idProductoStr = txtIdProducto.getText();
         String cantidadStr = txtCantidad.getText();
 
@@ -188,7 +202,9 @@ public class Stock extends javax.swing.JInternalFrame {
         String sqlActualizar = "UPDATE product SET stock = stock - ? WHERE idProduct = ?";
 
         try {
-            PreparedStatement pstConsulta = connect.prepareStatement(consultaStock);
+            Conectar.getInstancia().obtenerConexion();
+            
+            PreparedStatement pstConsulta = connection.prepareStatement(consultaStock);
             pstConsulta.setInt(1, idProduct);
             ResultSet rs = pstConsulta.executeQuery();
 
@@ -199,7 +215,9 @@ public class Stock extends javax.swing.JInternalFrame {
                     JOptionPane.showMessageDialog(null, "Error: la cantidad a retirar excede el stock actual.");
                     return false;
                 } else {
-                    PreparedStatement pstActualizar = connect.prepareStatement(sqlActualizar);
+                    Conectar.getInstancia().obtenerConexion();
+                    
+                    PreparedStatement pstActualizar = connection.prepareStatement(sqlActualizar);
                     pstActualizar.setInt(1, cantidad);
                     pstActualizar.setInt(2, idProduct);
                     pstActualizar.executeUpdate();
@@ -214,10 +232,14 @@ public class Stock extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al actualizar el stock: " + e.getMessage());
             return false;
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void GuardarRetiro() {
+        Connection connection = null;
+        
         String idTrabajadorStr = txtIdTrabajador.getText();
         String idProductoStr = txtIdProducto.getText();
         String cantidadStr = txtCantidad.getText();
@@ -242,8 +264,10 @@ public class Stock extends javax.swing.JInternalFrame {
         }
 
         String sql = "INSERT INTO retiro (id_trabajador, id_producto, cantidad, fecha) VALUES (?, ?, ?, ?)";
+        
+        Conectar.getInstancia().obtenerConexion();
 
-        try (PreparedStatement pst = connect.prepareStatement(sql)) {
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, idTrabajador);
             pst.setInt(2, idProduct);
             pst.setInt(3, cantidad);
@@ -253,6 +277,8 @@ public class Stock extends javax.swing.JInternalFrame {
             ActualizarStock();
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al guardar el retiro: " + e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -539,12 +565,15 @@ public class Stock extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarProducto(JComboBox cbxProducto) {
+        Connection connection = null;
 
         String sql = "select * from product";
         Statement st;
 
         try {
-            st = con.getConexion().createStatement();
+            Conectar.getInstancia().obtenerConexion();
+            
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxProducto.removeAllItems();
 
@@ -555,10 +584,14 @@ public class Stock extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar en Combo " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoProducto(JComboBox cbxProducto, JTextField idProducto) {
+        Connection connection = null;
+        
         String consuta = "select product.idProduct from product where product.nameProduct=?";
         try {
             // Validar si hay un item seleccionado en el JComboBox
@@ -566,7 +599,9 @@ public class Stock extends javax.swing.JInternalFrame {
 
                 return;
             }
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
             Object selectedValue = cbxProducto.getSelectedItem();
             if (selectedValue != null) {
                 String valorSeleccionado = selectedValue.toString();
@@ -580,18 +615,22 @@ public class Stock extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarTrabajador(JComboBox comboTrabajador) {
+        Connection connection = null;
 
         String sql = "";
         sql = "select * from worker";
         Statement st;
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            st = con.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             comboTrabajador.removeAllItems();
 
@@ -602,17 +641,24 @@ public class Stock extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoTrabajador(JComboBox trabajador, JTextField IdTrabajador) {
+        Connection connection = null;
+        
         String consulta = "select worker.idWorker from worker where worker.nombre=?";
 
         try {
             // Verificar si el elemento seleccionado es null
             if (trabajador.getSelectedItem() != null) {
+                
                 // Obtener la conexión y preparar la consulta
-                CallableStatement cs = con.getConexion().prepareCall(consulta);
+                Conectar.getInstancia().obtenerConexion();
+                
+                CallableStatement cs = connection.prepareCall(consulta);
                 cs.setString(1, trabajador.getSelectedItem().toString());
                 cs.execute();
 
@@ -627,6 +673,8 @@ public class Stock extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

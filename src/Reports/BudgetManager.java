@@ -15,9 +15,6 @@ import javax.swing.table.DefaultTableModel;
 
 public class BudgetManager extends javax.swing.JInternalFrame {
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
-
     private JTable budgetTable;
     private DefaultTableModel budgetTableModel;
     private JTextField nameField, amountField;
@@ -26,7 +23,7 @@ public class BudgetManager extends javax.swing.JInternalFrame {
 
     public BudgetManager() {
         initComponents();
-
+        
       setTitle("Gestión de Presupuestos");
         setSize(800, 600);
         setClosable(true);
@@ -91,13 +88,18 @@ public class BudgetManager extends javax.swing.JInternalFrame {
         // Inicializar la tabla de presupuestos
         refreshBudgetTable();
     }
-
+    
     private void addBudget() {
+        Connection connection = null;
         String name = nameField.getText();
         String amount = amountField.getText();
         String type = (String) typeComboBox.getSelectedItem();
 
-        try (PreparedStatement stmt = connect.prepareStatement("INSERT INTO budgets (name, amount, type) VALUES (?, ?, ?)")) {
+        try{
+            Conectar.getInstancia().obtenerConexion();
+        
+        
+        try (PreparedStatement stmt = connection.prepareStatement("INSERT INTO budgets (name, amount, type) VALUES (?, ?, ?)")) {
 
             stmt.setString(1, name);
             stmt.setBigDecimal(2, new BigDecimal(amount));
@@ -105,12 +107,16 @@ public class BudgetManager extends javax.swing.JInternalFrame {
             stmt.executeUpdate();
 
             refreshBudgetTable();
+        }
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     private void editBudget() {
+        Connection connection = null;
         int selectedRow = budgetTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Seleccione un presupuesto para editar.");
@@ -122,7 +128,11 @@ public class BudgetManager extends javax.swing.JInternalFrame {
         String amount = amountField.getText();
         String type = (String) typeComboBox.getSelectedItem();
 
-        try (PreparedStatement stmt = connect.prepareStatement("UPDATE budgets SET name = ?, amount = ?, type = ? WHERE id = ?")) {
+        try{
+            Conectar.getInstancia().obtenerConexion();
+        
+        
+        try (PreparedStatement stmt = connection.prepareStatement("UPDATE budgets SET name = ?, amount = ?, type = ? WHERE id = ?")) {
 
             stmt.setString(1, name);
             stmt.setBigDecimal(2, new BigDecimal(amount));
@@ -131,12 +141,16 @@ public class BudgetManager extends javax.swing.JInternalFrame {
             stmt.executeUpdate();
 
             refreshBudgetTable();
+        }
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     private void deleteBudget() {
+        Connection connection = null;
         int selectedRow = budgetTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Seleccione un presupuesto para eliminar.");
@@ -145,19 +159,31 @@ public class BudgetManager extends javax.swing.JInternalFrame {
 
         int id = (int) budgetTableModel.getValueAt(selectedRow, 0);
 
-        try (PreparedStatement stmt = connect.prepareStatement("DELETE FROM budgets WHERE id = ?")) {
+        try{
+            Conectar.getInstancia().obtenerConexion();
+        
+        
+        try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM budgets WHERE id = ?")) {
 
             stmt.setInt(1, id);
             stmt.executeUpdate();
 
             refreshBudgetTable();
+        }
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     private void refreshBudgetTable() {
-        try (Statement stmt = connect.createStatement();
+        Connection connection = null;
+        
+        try{
+            Conectar.getInstancia().obtenerConexion();
+        
+        try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT * FROM budgets")) {
 
             budgetTableModel.setRowCount(0); // Limpiar la tabla
@@ -169,8 +195,11 @@ public class BudgetManager extends javax.swing.JInternalFrame {
                         rs.getString("type")
                 });
             }
+        }
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

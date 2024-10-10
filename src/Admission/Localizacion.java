@@ -16,7 +16,7 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 public class Localizacion extends javax.swing.JInternalFrame {
-
+    
     DefaultTableModel model;
     int id_localizacion;
     String nombre;
@@ -54,23 +54,28 @@ public class Localizacion extends javax.swing.JInternalFrame {
 
     public Localizacion() {
         initComponents();
+                
         CargarDatosTabla("");
         txtIdLocalizacion.setEnabled(false);
     }
 
-    //Conexión
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
+   
+    
     PreparedStatement ps;
     ResultSet rs;
 
-    void CargarDatosTabla(String Valores) {
+    public void CargarDatosTabla(String Valores) {
+        Connection connection = null;
+        
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
             String ConsultaSQL = "SELECT * FROM localizacion";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
             while (result.next()) {
                 RegistroBD[0] = result.getString("id_localizacion");
@@ -84,10 +89,14 @@ public class Localizacion extends javax.swing.JInternalFrame {
             tbLocalizacion.getColumnModel().getColumn(2).setPreferredWidth(100);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     void Guardar() {
+        Connection connection = null;
+        
         // Variables
         int id_localizacion;
         String nombre;
@@ -100,8 +109,10 @@ public class Localizacion extends javax.swing.JInternalFrame {
         sql = "INSERT INTO localizacion (nombre)VALUES (?)";
         //Para almacenar los datos empleo un try cash
         try {
+            Conectar.getInstancia().obtenerConexion();
+            
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
-            PreparedStatement pst = connect.prepareStatement(sql);
+            PreparedStatement pst = connection.prepareStatement(sql);
             pst.setString(1, nombre);
             //Declara otra variable para validar los registros
             int n = pst.executeUpdate();
@@ -114,14 +125,20 @@ public class Localizacion extends javax.swing.JInternalFrame {
             txtLocalizacion.setText("");
             txtLocalizacion.requestFocus();
         } catch (SQLException ex) {
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Eliminar(JTextField id) {
+        Connection connection = null;
+        
         setId_localizacion(Integer.parseInt(id.getText()));
         String consulta = "DELETE from localizacion where id_localizacion=?";
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId_localizacion());
             cs.executeUpdate();
             JOptionPane.showMessageDialog(null, "Se Elimino");
@@ -131,6 +148,8 @@ public class Localizacion extends javax.swing.JInternalFrame {
             txtLocalizacion.requestFocus();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
+        }finally{
+            conectar.Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -149,10 +168,12 @@ public class Localizacion extends javax.swing.JInternalFrame {
     }
 
     public boolean modificar(Localizacion lo) {
+        Connection connection = null;
         String sql = "UPDATE localizacion SET nombre = ?  WHERE id_localizacion = ?";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             ps.setString(1, lo.getNombre());
             ps.setInt(2, lo.getId_localizacion());
             ps.execute();
@@ -160,14 +181,19 @@ public class Localizacion extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public boolean accion(String estado, int IdLocalizacion) {
+        Connection connection = null;
+        
         String sql = "UPDATE localizacion SET estado = ? WHERE id_localizacion = ?";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, IdLocalizacion);
             ps.execute();
@@ -175,6 +201,8 @@ public class Localizacion extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

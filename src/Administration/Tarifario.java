@@ -97,6 +97,7 @@ public class Tarifario extends javax.swing.JInternalFrame {
     }
 
     public void Insertar() {
+        Connection connection = null;
         //Variables
         String service;
         int id_empresa;
@@ -113,8 +114,11 @@ public class Tarifario extends javax.swing.JInternalFrame {
 
         //Para almacenar los datos empleo un try cash
         try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
-            PreparedStatement pst = connect.prepareStatement(sql);
+            PreparedStatement pst = connection.prepareStatement(sql);
 
             pst.setInt(1, id_empresa);
             pst.setString(2, service);
@@ -135,6 +139,9 @@ public class Tarifario extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             Logger.getLogger(Tarifario.class.getName()).log(Level.SEVERE, null, e);
             JOptionPane.showMessageDialog(null, "El registro NO se guardo exitosamente, Error " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
@@ -160,7 +167,7 @@ public class Tarifario extends javax.swing.JInternalFrame {
     }
 
     public void Modificar(JTextField Id, JTextField Servicio, JTextField precio) {
-
+        Connection connection = null;
         setId(Integer.parseInt(Id.getText()));
 
         setService(Servicio.getText());
@@ -169,7 +176,10 @@ public class Tarifario extends javax.swing.JInternalFrame {
         String consulta = "UPDATE services SET servicio=?, precio=? WHERE id=?";
 
         try {
-            CallableStatement cs = objconexion.getConexion().prepareCall(consulta);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            CallableStatement cs = connection.prepareCall(consulta);
 
             cs.setString(1, getService());
             cs.setDouble(2, getPrecio());
@@ -181,19 +191,25 @@ public class Tarifario extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
 
             JOptionPane.showMessageDialog(null, "Error al modificar, error: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
 
     public void Eliminar(JTextField codigo) {
+        Connection connection = null;
 
         setId(Integer.parseInt(codigo.getText()));
 
         String consulta = "DELETE FROM services WHERE id=?";
 
         try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            CallableStatement cs = objconexion.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId());
             cs.execute();
 
@@ -202,12 +218,14 @@ public class Tarifario extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
 
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
-
     }
 
     public void MostrarServicios(String buscar) {
-
+        Connection connection = null;
         try {
 
             String[] tituloTabla = {"id", "Empresa", "Servicio", "Precio", "Estado"};
@@ -220,7 +238,10 @@ public class Tarifario extends javax.swing.JInternalFrame {
                     + "INNER JOIN bussiness "
                     + "WHERE services.id_empresa=bussiness.idBusiness";
 
-            Statement st = connect.createStatement();
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
 
             while (rs.next()) {
@@ -241,6 +262,9 @@ public class Tarifario extends javax.swing.JInternalFrame {
             tbServicios.getColumnModel().getColumn(3).setPreferredWidth(150);
 
         } catch (SQLException e) {
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -248,18 +272,29 @@ public class Tarifario extends javax.swing.JInternalFrame {
     public List<Tarifario> obtenerServiciosPorEmpresa(int idEmpresa) {
         List<Tarifario> listaServicios = new ArrayList<>();
         String sql = "SELECT servicio, precio FROM services WHERE id_empresa = ? AND estado = 'Activo'";
+        Connection connection = null;
 
-        try (PreparedStatement ps = connect.prepareStatement(sql)) {
-            ps.setInt(1, idEmpresa);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    String servicio = rs.getString("servicio");
-                    double precio = rs.getDouble("precio");
-                    listaServicios.add(new Tarifario(0, idEmpresa, servicio, precio, "Activo"));
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, idEmpresa);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        String servicio = rs.getString("servicio");
+                        double precio = rs.getDouble("precio");
+                        listaServicios.add(new Tarifario(0, idEmpresa, servicio, precio, "Activo"));
+                    }
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            // Devolver la conexión al pool
+            if (connection != null) {
+                Conectar.getInstancia().devolverConexion(connection);
+            }
         }
 
         return listaServicios;
@@ -593,35 +628,52 @@ public class Tarifario extends javax.swing.JInternalFrame {
     private void btnBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscarActionPerformed
         String ID = txtIdEmpresa.getText();
         String ID_buscar = "";
+        Connection connection = null;
+
         if (!(ID.equals(""))) {
             ID_buscar = "WHERE services.id_empresa= '" + ID + "'";
         }
+
         try {
+            // Obtener una conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
             DefaultTableModel modelo = new DefaultTableModel();
             String[] tituloTabla = {"id", "Empresa", "Servicio", "Precio", "Estado"};
             String[] RegistroBD = new String[5];
-            model = new DefaultTableModel(null, tituloTabla); //Le pasamos los titulos a la tabla
+            model = new DefaultTableModel(null, tituloTabla); //Le pasamos los títulos a la tabla
             tbServicios.setModel(model);
-            String sql = "SELECT services.id, bussiness.nameBusiness AS Empresa, services.servicio, services.precio, services.estado FROM services INNER JOIN bussiness ON services.id_empresa=bussiness.idBusiness " + ID_buscar;
-            Statement st = connect.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            while (rs.next()) {
-                RegistroBD[0] = rs.getString("id");
-                RegistroBD[1] = rs.getString("Empresa");
-                RegistroBD[2] = rs.getString("Servicio");
-                RegistroBD[3] = rs.getString("Precio");
-                RegistroBD[4] = rs.getString("Estado");
-                model.addRow(RegistroBD);
+
+            String sql = "SELECT services.id, bussiness.nameBusiness AS Empresa, services.servicio, services.precio, services.estado "
+                    + "FROM services INNER JOIN bussiness ON services.id_empresa = bussiness.idBusiness " + ID_buscar;
+
+            // Preparar y ejecutar la consulta
+            try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+
+                while (rs.next()) {
+                    RegistroBD[0] = rs.getString("id");
+                    RegistroBD[1] = rs.getString("Empresa");
+                    RegistroBD[2] = rs.getString("servicio");
+                    RegistroBD[3] = rs.getString("precio");
+                    RegistroBD[4] = rs.getString("estado");
+                    model.addRow(RegistroBD);
+                }
+
+                tbServicios.setModel(model);
+                tbServicios.getColumnModel().getColumn(0).setPreferredWidth(50);
+                tbServicios.getColumnModel().getColumn(1).setPreferredWidth(150);
+                tbServicios.getColumnModel().getColumn(2).setPreferredWidth(200);
+                tbServicios.getColumnModel().getColumn(3).setPreferredWidth(150);
             }
-            tbServicios.setModel(model);
-            tbServicios.getColumnModel().getColumn(0).setPreferredWidth(50);
-            tbServicios.getColumnModel().getColumn(1).setPreferredWidth(150);
-            tbServicios.getColumnModel().getColumn(2).setPreferredWidth(200);
-            tbServicios.getColumnModel().getColumn(3).setPreferredWidth(150);
+
         } catch (SQLException e) {
             System.out.println("Error: " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            if (connection != null) {
+                Conectar.getInstancia().devolverConexion(connection);
+            }
         }
-
     }//GEN-LAST:event_btnBuscarActionPerformed
 
     private void btnImprimirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImprimirActionPerformed
@@ -679,18 +731,17 @@ public class Tarifario extends javax.swing.JInternalFrame {
     private javax.swing.JTextField txtServicio;
     // End of variables declaration//GEN-END:variables
 
-    Conectar objconexion = new Conectar();
-    Connection connect = objconexion.getConexion();
-
     public void MostrarEmpresa(JComboBox cbxEmpresa) {
-
+        Connection connection = null;
         String sql = "";
         sql = "select * from bussiness";
         Statement st;
 
         try {
+            // Obtener una conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            st = objconexion.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxEmpresa.removeAllItems();
 
@@ -701,15 +752,21 @@ public class Tarifario extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar en Combo " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoEmpresa(JComboBox cbxEmpresa, JTextField idBusiness) {
-
+        Connection connection = null;
         String consuta = "select bussiness.idBusiness from bussiness where bussiness.nameBusiness=?";
 
         try {
-            CallableStatement cs = objconexion.getConexion().prepareCall(consuta);
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxEmpresa.getSelectedItem().toString());
             cs.execute();
 
@@ -721,6 +778,9 @@ public class Tarifario extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 }

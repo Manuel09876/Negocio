@@ -1,12 +1,21 @@
 
 package Register;
 
+import conectar.Conectar;
+import java.sql.Connection;
+import javax.swing.JOptionPane;
+
 
 public class Kardex extends javax.swing.JInternalFrame {
-
+    
+    
     public Kardex() {
         initComponents();
+        
+        
     }
+    
+
 
 
     @SuppressWarnings("unchecked")

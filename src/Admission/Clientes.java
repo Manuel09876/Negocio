@@ -20,7 +20,8 @@ import javax.swing.JTextArea;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class Clientes extends javax.swing.JInternalFrame {
-
+    
+    
     //Variable para la tabla
     DefaultTableModel model;
 
@@ -134,15 +135,18 @@ public class Clientes extends javax.swing.JInternalFrame {
 
     public Clientes() {
         initComponents();
-
+         
         MostrarClientes("");
         txtCodigo.setEnabled(false);
         AutoCompleteDecorator.decorate(cbxEmpresa);
         MostrarEmpresa(cbxEmpresa);
 
     }
+    
 
     public void InsertarCliente() {
+        Connection connection = null;
+        
         int id_empresa;
         String name;
         String address;
@@ -168,8 +172,10 @@ public class Clientes extends javax.swing.JInternalFrame {
         String consulta = "insert into customer (id_empresa,nameCustomer,address, "
                 + "zipCode,city,state,phoneNumber,email,area,nota_cliente)values(?,?,?,?,?,?,?,?,?,?)";
         try {
+            Conectar.getInstancia().obtenerConexion();
+            
 //prepara la coneccion para enviar al sql (Evita ataques al sql)
-            PreparedStatement pst = connect.prepareStatement(consulta);
+            PreparedStatement pst = connection.prepareStatement(consulta);
             pst.setInt(1, id_empresa);
             pst.setString(2, name);
             pst.setString(3, address);
@@ -202,10 +208,14 @@ public class Clientes extends javax.swing.JInternalFrame {
             Logger.getLogger(Clientes.class.getName()).log(Level.SEVERE, null, e);
 
             JOptionPane.showMessageDialog(null, "No se Inserto: error " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarClientes(String Valores) {
+        Connection connection = null;
+        
         try {
             String[] titulosTabla = {"Id", "Empresa", "Nombres", "Dirección", "ZipCode", "Ciudad", "Estado", "Telefono", "email", "area", "nota_cliente", "estatus"}; //Titulos de la Tabla
             String[] RegistroBD = new String[12];  //Registros de la Basede Datos
@@ -214,7 +224,10 @@ public class Clientes extends javax.swing.JInternalFrame {
                                  SELECT customer.idCustomer, bussiness.nameBusiness AS Empresa, customer.nameCustomer, customer.address, customer.zipCode, customer.city, customer.state, customer.phoneNumber, customer.email, customer.area, customer.nota_cliente, customer.estado
                                  FROM customer
                                  INNER JOIN bussiness on customer.id_empresa=bussiness.idBusiness""";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(ConsultaSQL);
 
             while (rs.next()) {
@@ -249,6 +262,8 @@ public class Clientes extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se puede Mostrar, Error " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -280,6 +295,8 @@ public class Clientes extends javax.swing.JInternalFrame {
     public void ModificarCliente(JTextField Codigo, JTextField IdE, JTextField NameCustomer, JTextField NameAddress,
             JTextField ZipCode, JTextField City, JTextField State, JTextField PhoneNumber, JTextField Email, JTextField Area,
             JTextArea nota_cliente) {
+        
+        Connection connection = null;
 
         Empresa = Integer.parseInt(txtIdBusiness.getText());
         setIdCustomer(Integer.parseInt(Codigo.getText()));
@@ -297,7 +314,9 @@ public class Clientes extends javax.swing.JInternalFrame {
         String consulta = "UPDATE customer set id_empresa=?, nameCustomer=?, address=?,zipCode=?, "
                 + "city=?, state=?, phoneNumber=?, email=?, area=?, nota_cliente=? where idCustomer=?";
         try {
-            CallableStatement cs = objconexion.getConexion().prepareCall(consulta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getEmpresa());
             cs.setString(2, getName());
             cs.setString(3, getAddress());
@@ -313,23 +332,33 @@ public class Clientes extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Modificacion Exitosa");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se Modifico, error: " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void EliminarClientes(JTextField codigo) {
+        Connection connection = null;
+        
         setIdCustomer(Integer.parseInt(codigo.getText()));
         String consulta = "DELETE from customer where idCustomer=?";
         try {
-            CallableStatement cs = objconexion.getConexion().prepareCall(consulta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getIdCustomer());
             cs.executeUpdate();
             JOptionPane.showMessageDialog(null, "Se Elimino");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public Clientes BuscarCli(java.awt.event.KeyEvent evt) {
+        Connection connection = null;
+        
         String[] titulosTabla = {"Id", "Empresa", "Nombres", "Dirección", "ZipCode",
             "Ciudad", "Estado", "Telefono", "email", "area", "nota_cliente", "estatus"}; //Titulos de la Tabla
         String[] RegistroBD = new String[11];  //Registros de la Basede Datos
@@ -341,9 +370,11 @@ public class Clientes extends javax.swing.JInternalFrame {
                      INNER JOIN bussiness on customer.id_empresa=bussiness.idBusiness WHERE nameCustomer LIKE '%""" + txtBuscarCliente.getText() + "%'";
         model = new DefaultTableModel(null, titulosTabla);
         try {
-            Statement st = objconexion.getConexion().createStatement();
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
-            connect = objconexion.getConexion();
+            
             while (rs.next()) {
                 RegistroBD[0] = rs.getString("idCustomer");
                 RegistroBD[1] = rs.getString(2);
@@ -375,6 +406,8 @@ public class Clientes extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             System.out.println(e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return cliente;
     }
@@ -429,11 +462,14 @@ public class Clientes extends javax.swing.JInternalFrame {
     }
 
     public boolean accion(String estado, int idCustomer) {
+        Connection connection = null;
+        
         String sql = "UPDATE customer SET estado = ? WHERE idCustomer = ?";
         try {
-            connect = objconexion.getConexion();
+            Conectar.getInstancia().obtenerConexion();
+            
             PreparedStatement ps;
-            ps = connect.prepareStatement(sql);
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, idCustomer);
             ps.execute();
@@ -441,6 +477,8 @@ public class Clientes extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -1083,15 +1121,16 @@ public class Clientes extends javax.swing.JInternalFrame {
     private javax.swing.JTextField txtZipCode;
     // End of variables declaration//GEN-END:variables
 
-    Conectar objconexion = new Conectar();
-    Connection connect = objconexion.getConexion();
-
+    
     public void MostrarCodigoEmpresa(JComboBox cbxEmpresa, JTextField idBusiness) {
+        Connection connection = null;
 
         String consuta = "select bussiness.idBusiness from bussiness where bussiness.nameBusiness=?";
 
         try {
-            CallableStatement cs = objconexion.getConexion().prepareCall(consuta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxEmpresa.getSelectedItem().toString());
             cs.execute();
 
@@ -1103,17 +1142,21 @@ public class Clientes extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarEmpresa(JComboBox cbxEmpresa) {
+        Connection connection = null;
 
         String sql = "select * from bussiness";
         Statement st;
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            st = objconexion.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxEmpresa.removeAllItems();
 
@@ -1124,6 +1167,8 @@ public class Clientes extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar en Combo " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

@@ -14,7 +14,8 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 public class TipoDeTrabajo extends javax.swing.JFrame {
-
+    
+   
     int id;
     String nombre, estado;
 
@@ -47,22 +48,23 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
     public void setEstado(String estado) {
         this.estado = estado;
     }
+    
+   
 
     public void Insertar(JTextField Nombre) {
+        Connection connection = null;
 
         //Obtengo los valores de las cajas de texto
         setNombre(Nombre.getText());
 
-        //Establezco Conexion
-        Conectar con = new Conectar();
-        Connection connect = con.getConexion();
-
+        
         //Hago la Consulta
         String consulta = "Insert into tiposdetrabajos (nombre) values (?);";
 
         try {
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
 
             //Los datos a enviar a la BD
             cs.setString(1, getNombre());
@@ -73,13 +75,14 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
         } catch (SQLException e) {
 
             JOptionPane.showMessageDialog(null, "No se Inserto. Error: " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
 
     public void Mostrar(JTable Tabla) {
-
-        Conectar con = new Conectar();
+        Connection connection = null;
 
         DefaultTableModel modelo = new DefaultTableModel();
 
@@ -101,8 +104,9 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
         Statement st;
 
         try {
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            st = con.getConexion().createStatement();
+            st = connection.createStatement();
 
             ResultSet rs = st.executeQuery(sql);
 
@@ -123,6 +127,8 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
         } catch (SQLException e) {
 
             JOptionPane.showMessageDialog(null, "No se pudo mostrar los registros, error: " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
@@ -151,18 +157,18 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
     }
 
     public void Modificar(JTextField Codigo, JTextField Nombres) {
+        Connection connection = null;
 
         //Obtengo el valor en Cadena(String) de las cajas de Texto
         setId(Integer.parseInt(Codigo.getText()));
         setNombre(Nombres.getText());
 
-        Conectar con = new Conectar();
-
         String consulta = "UPDATE tiposdetrabajos SET nombre = ? WHERE id=?";
 
         try {
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
 
             //
             cs.setString(1, getNombre());
@@ -174,31 +180,38 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se Modifico, error " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
 
     public void Eliminar(JTextField Id) {
+        Connection connection = null;
         setId(Integer.parseInt(Id.getText()));
-        Conectar con = new Conectar();
         String consulta = "DELETE FROM tiposdetrabajos WHERE id=?";
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            connection = Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId());
             cs.execute();
             JOptionPane.showMessageDialog(null, "Se Elimino correctamente ");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se pudo eliminar, error " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public boolean accion(String estado, int id) {
+        Connection connection = null;
         String sql = "UPDATE tiposdetrabajos SET estado = ? WHERE id = ?";
         try {
-            Conectar con = new Conectar();
-            Connection connect = con.getConexion();
+            connection = Conectar.getInstancia().obtenerConexion();
+            
             PreparedStatement ps;
-            ps = con.getConexion().prepareStatement(sql);
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, id);
             ps.execute();
@@ -206,12 +219,14 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public TipoDeTrabajo() {
         initComponents();
-
+        
         Mostrar(tbTT);
         txtId.setEnabled(false);
     }
@@ -221,7 +236,7 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
+        btnSalir = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         txtNombre = new javax.swing.JTextField();
@@ -238,11 +253,11 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
-        jButton1.setText("Salir");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnSalir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cerrar-sesion.png"))); // NOI18N
+        btnSalir.setText("Salir");
+        btnSalir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnSalirActionPerformed(evt);
             }
         });
 
@@ -315,7 +330,7 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(btnInactivar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGap(32, 32, 32)))
-                        .addComponent(jButton1))
+                        .addComponent(btnSalir))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jButton2)
@@ -333,7 +348,7 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(14, 14, 14)
-                        .addComponent(jButton1))
+                        .addComponent(btnSalir))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(txtId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -397,9 +412,9 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirActionPerformed
         dispose();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnSalirActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         Insertar(txtNombre);
@@ -506,7 +521,7 @@ public class TipoDeTrabajo extends javax.swing.JFrame {
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuia;
     private javax.swing.JButton btnInactivar;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnSalir;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

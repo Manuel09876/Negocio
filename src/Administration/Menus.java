@@ -15,8 +15,6 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class Menus extends javax.swing.JInternalFrame {
 
-    Conectar conexion = new Conectar();
-    Connection conect = conexion.getConexion();
     DefaultTableModel model = new DefaultTableModel();
     DefaultTableModel modelo = new DefaultTableModel();
 
@@ -29,12 +27,17 @@ public class Menus extends javax.swing.JInternalFrame {
     }
 
     void CargarDatosTableMenu(String Valores) {
+        Connection connection = null;
         try {
             String[] titulosTabla = {"Id", "Menu"}; //Titulos de la Tabla
             String[] RegistroBD = new String[2];                                   //Registros de la Basede Datos
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
             String ConsultaSQL = "select * from menus";
-            Statement st = conect.createStatement();
+
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
             while (result.next()) {
                 RegistroBD[0] = result.getString("id_menu");
@@ -48,10 +51,14 @@ public class Menus extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     void CargarDatosTableSubMenu(String Valores) {
+        Connection connection = null;
         try {
             String[] titulosTabla = {"Id", "Menu", "Submenu"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];                                   //Registros de la Basede Datos
@@ -60,7 +67,10 @@ public class Menus extends javax.swing.JInternalFrame {
                                  SELECT s.id_submenu AS Id, m.nombre_menu AS Menu, s.nombre_submenu AS Submenu 
                                  FROM submenus AS s
                                  INNER JOIN menus AS m ON s.menu_id = m.id_menu""";
-            Statement st = conect.createStatement();
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
             while (result.next()) {
                 RegistroBD[0] = result.getString(1);
@@ -77,67 +87,108 @@ public class Menus extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     private void insertarMenu(String nombreMenu) {
+        Connection connection = null;
         nombreMenu = txtMenu.getText();
         String sql = "INSERT INTO menus (nombre_menu) VALUES (?)";
-        try (PreparedStatement ps = conect.prepareStatement(sql)) {
-            ps.setString(1, nombreMenu);
-            ps.executeUpdate();
-            txtMenu.setText("");
-            CargarDatosTableMenu("");
-            JOptionPane.showMessageDialog(null, "Menú agregado exitosamente.");
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, nombreMenu);
+                ps.executeUpdate();
+                txtMenu.setText("");
+                CargarDatosTableMenu("");
+                JOptionPane.showMessageDialog(null, "Menú agregado exitosamente.");
+            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al agregar el menú.");
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     private void insertarSubmenu(String nombreSubmenu, int menuId) {
+        Connection connection = null;
         nombreSubmenu = txtSubmenu.getText();
 
         String sql = "INSERT INTO submenus (nombre_submenu, menu_id) VALUES (?, ?)";
-        try (PreparedStatement ps = conect.prepareStatement(sql)) {
-            ps.setString(1, nombreSubmenu);
-            ps.setInt(2, menuId);
-            ps.executeUpdate();
-            txtSubmenu.setText("");
-            CargarDatosTableSubMenu("");
-            JOptionPane.showMessageDialog(null, "Submenú agregado exitosamente.");
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, nombreSubmenu);
+                ps.setInt(2, menuId);
+                ps.executeUpdate();
+                txtSubmenu.setText("");
+                CargarDatosTableSubMenu("");
+                JOptionPane.showMessageDialog(null, "Submenú agregado exitosamente.");
+            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al agregar el submenú.");
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     private int obtenerMenuId(String menuName) {
+        Connection connection = null;
         String sql = "SELECT id_menu FROM menus WHERE nombre_menu = ?";
-        try (PreparedStatement ps = conect.prepareStatement(sql)) {
-            ps.setString(1, menuName);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("id_menu");
+
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, menuName);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    return rs.getInt("id_menu");
+                }
             }
             System.out.println(menuName);
         } catch (SQLException e) {
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return -1;
     }
 
     private void modificarSubmenu(int submenuId, String nuevoNombre) {
+        Connection connection = null;
         String sql = "UPDATE submenus SET nombre_submenu = ? WHERE id_submenu = ?";
-        try (PreparedStatement ps = conect.prepareStatement(sql)) {
-            ps.setString(1, nuevoNombre);  // Asignar el nuevo nombre del submenú
-            ps.setInt(2, submenuId);  // Especificar el ID del submenú a modificar
-            int rowsAffected = ps.executeUpdate();
-            if (rowsAffected > 0) {
-                JOptionPane.showMessageDialog(null, "Submenú modificado exitosamente.");
-                CargarDatosTableSubMenu("");  // Recargar la tabla de submenús
-            } else {
-                JOptionPane.showMessageDialog(null, "No se encontró el submenú a modificar.");
+
+        try {
+            // Obtener la conexión del pool
+            connection = Conectar.getInstancia().obtenerConexion();
+
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, nuevoNombre);  // Asignar el nuevo nombre del submenú
+                ps.setInt(2, submenuId);  // Especificar el ID del submenú a modificar
+                int rowsAffected = ps.executeUpdate();
+                if (rowsAffected > 0) {
+                    JOptionPane.showMessageDialog(null, "Submenú modificado exitosamente.");
+                    CargarDatosTableSubMenu("");  // Recargar la tabla de submenús
+                } else {
+                    JOptionPane.showMessageDialog(null, "No se encontró el submenú a modificar.");
+                }
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al modificar el submenú: " + e.getMessage());
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

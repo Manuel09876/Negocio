@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import conectar.Conectar;
 import java.awt.ComponentOrientation;
+import Bases.PermisoManager;
 
 public class Loggin extends javax.swing.JFrame {
 
@@ -18,22 +19,27 @@ public class Loggin extends javax.swing.JFrame {
     private int trabajadorId; // Variable de instancia para almacenar el ID del trabajador
     private HorasTrabajadas ht; // Asegúrate de que esta instancia esté correctamente inicializada
     private AsignacionPermisos ap;
-    private Conectar conexion;
-    private Connection conect;
+    private PermisoManager pm;
 
+   
     public Loggin() {
         initComponents();  // Asegúrate de que los componentes estén inicializados antes
-        conexion = new Conectar();
-        conect = conexion.getConexion();
+   
         ht = new HorasTrabajadas();
         txtUser.requestFocus();  // Ahora puedes llamar a requestFocus() aquí sin problemas
         btnTest.setVisible(false);
     }
 
+   
     public void IngresaSistema(String usuario, String contrasena) {
-        String sql = "SELECT idUsuarios, rol, password FROM usuarios WHERE usuario = ? AND estado = 'Activo'";
+        Connection connection = null;    
 
-        try (PreparedStatement pst = conect.prepareStatement(sql)) {
+        String sql = "SELECT idUsuarios, rol, password FROM usuarios WHERE usuario = ? AND estado = 'Activo'";
+        
+        try {
+            Conectar.getInstancia().obtenerConexion();
+        
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setString(1, usuario);
             System.out.println("Ejecutando consulta: " + sql);
 
@@ -49,9 +55,12 @@ public class Loggin extends javax.swing.JFrame {
                         if (idTrabajador != 0) {
                             ht.registrarInicioSesion(idTrabajador); // Registrar inicio de sesión del trabajador
 
-                            // Este código se ejecuta después de que el trabajador inicia sesión
-                            cargarPermisosDelUsuario(rolId); // Cargar y aplicar los permisos
-                            abrirVentanaPrincipal(rolId, usuario);
+//                            // Abrir la ventana principal y aplicar permisos
+//                            VentanaPrincipal ventanaPrincipal = new VentanaPrincipal(rolId, usuario);
+//                            pm = new PermisoManager(connection);
+//                            pm.aplicarPermisos(rolId, ventanaPrincipal);
+//                            ventanaPrincipal.setVisible(true);
+//                            this.dispose();
                         }
                     } else {
                         JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
@@ -60,16 +69,24 @@ public class Loggin extends javax.swing.JFrame {
                     JOptionPane.showMessageDialog(this, "Usuario no encontrado o inactivo");
                 }
             }
+        }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al ingresar al sistema", ex);
             JOptionPane.showMessageDialog(this, "Error al ingresar al sistema. Por favor, intente de nuevo.");
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
+        
     }
 
     private int obtenerTrabajadorId(int idUsuario) {
+        Connection connection = null;
+
         String sql = "SELECT id_trabajador FROM usuario_trabajador WHERE id_usuario = ?";
         try {
-            PreparedStatement pst = conect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            PreparedStatement pst = connection.prepareStatement(sql);
             pst.setInt(1, idUsuario);
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
@@ -81,24 +98,10 @@ public class Loggin extends javax.swing.JFrame {
             }
         } catch (SQLException ex) {
             Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return 0;
-    }
-
-    private void cargarPermisosDelUsuario(int rolId) {
-        try {
-            // Crea una nueva instancia de VentanaPrincipal con los datos necesarios
-            VentanaPrincipal ventanaPrincipal = new VentanaPrincipal(rolId, txtUser.getText());
-
-            // Pasar la instancia de VentanaPrincipal a AsignacionPermisos
-            AsignacionPermisos ap = new AsignacionPermisos(ventanaPrincipal);
-
-            // Cargar y aplicar los permisos para el rol
-//            ap.cargarPermisosDelUsuario(rolId); // Implementa este método en AsignacionPermisos
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error al cargar permisos del usuario.");
-        }
     }
 
     private void abrirVentanaPrincipal(int rolId, String usuario) {
@@ -273,8 +276,7 @@ public class Loggin extends javax.swing.JFrame {
     }//GEN-LAST:event_btnEnterActionPerformed
 
     private void btnTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTestActionPerformed
-        Conectar conecta = new Conectar();
-        Connection con = conecta.getConexion();
+
         JOptionPane.showMessageDialog(null, "Conexion establecida");
 
     }//GEN-LAST:event_btnTestActionPerformed
@@ -342,9 +344,13 @@ public class Loggin extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     private int obtenerTrabajadorId(String usuario) {
+        Connection connection = null;
+                
         String sql = "SELECT ut.id_trabajador FROM usuario_trabajador ut INNER JOIN usuarios u ON ut.id_usuario = u.idUsuarios WHERE u.usuario = ?";
         try {
-            PreparedStatement pst = conect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            PreparedStatement pst = connection.prepareStatement(sql);
             pst.setString(1, usuario);
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
@@ -356,14 +362,37 @@ public class Loggin extends javax.swing.JFrame {
             }
         } catch (SQLException ex) {
             Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return 0;
     }
 
     private int obtenerRolDeUsuario(String usuario) {
-        // Implementa este método para obtener el rol del usuario desde la base de datos
+        Connection connection = null;
+        
         int rolId = 0;
-        // Código para obtener rolId desde la base de datos basado en el usuario
+
+        try {
+            Conectar.getInstancia().obtenerConexion();
+
+        String sql = "SELECT rol FROM usuarios WHERE usuario = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, usuario);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    rolId = rs.getInt("rol"); // Obtener el ID del rol
+                } else {
+                    System.out.println("Usuario no encontrado: " + usuario);
+                }
+            }
+        }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
+        }
+
         return rolId;
     }
 

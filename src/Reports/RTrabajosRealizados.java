@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import javax.swing.JComboBox;
-import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
@@ -23,12 +22,9 @@ import javax.swing.JTextArea;
 
 public class RTrabajosRealizados extends javax.swing.JInternalFrame {
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
-
     public RTrabajosRealizados() {
-
         initComponents();
+        
         MostrarEmpresa(cbxEmpresa);
         AutoCompleteDecorator.decorate(cbxEmpresa);
         MostrarTabla();
@@ -57,6 +53,8 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
     }
 
     public void MostrarTabla() {
+        Connection connection = null;
+        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -73,7 +71,10 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + "WHERE o.estado = 'Realizado' "
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+    
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -110,11 +111,15 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
             tbVentas.getColumnModel().getColumn(11).setPreferredWidth(150);
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     //Codigo Para buscar dentro de la tabla por medio del txtField Busqueda
     public DefaultTableModel buscarTabla(String buscar) {
+        Connection connection = null;
+        
         DefaultTableModel modelo = new DefaultTableModel();
         try {
             String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio", "Status"};
@@ -130,7 +135,10 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + "WHERE o.estado = 'Realizado' AND customer.nameCustomer LIKE '%" + buscar + "%' OR customer.address LIKE '%" + buscar + "%'"
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -167,6 +175,8 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
             tbVentas.getColumnModel().getColumn(11).setPreferredWidth(150);
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return modelo;
     }
@@ -504,6 +514,8 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnSalirActionPerformed
 
     private void btnBusquedaEmpresaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBusquedaEmpresaActionPerformed
+        Connection connection = null;
+        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String ID = txtIdEmpresa.getText();
@@ -525,7 +537,10 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + ID_buscar + "AND o.estado = 'Realizado' "
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -562,6 +577,8 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
             tbVentas.getColumnModel().getColumn(11).setPreferredWidth(150);
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }//GEN-LAST:event_btnBusquedaEmpresaActionPerformed
 
@@ -585,6 +602,8 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbSeleccionaTodoActionPerformed
 
     private void btnBusquedaFechaEmpresaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBusquedaFechaEmpresaActionPerformed
+        Connection connection = null;
+        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String fechaInicio = dateFormat.format(dateInicio.getDate());
@@ -608,7 +627,10 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + ID_buscar + "AND o.fechaT BETWEEN '" + fechaInicio + "' AND '" + fechaFin + "' AND o.estado = 'Realizado' "
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -645,9 +667,9 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
             tbVentas.getColumnModel().getColumn(11).setPreferredWidth(150);
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
-        }
-
-
+        }finally{
+          Conectar.getInstancia().devolverConexion(connection);
+    }
     }//GEN-LAST:event_btnBusquedaFechaEmpresaActionPerformed
 
     private void btnMostrarTodoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMostrarTodoActionPerformed
@@ -764,11 +786,15 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarEmpresa(JComboBox cbxEmpresa) {
+        Connection connection = null;
+        
         String sql = "";
         sql = "select * from bussiness";
         Statement st;
         try {
-            st = con.getConexion().createStatement();
+            Conectar.getInstancia().obtenerConexion();
+            
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxEmpresa.removeAllItems();
             while (rs.next()) {
@@ -776,13 +802,19 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar en Combo " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoEmpresa(JComboBox cbxEmpresa, JTextField idBusiness) {
+        Connection connection = null;
+        
         String consuta = "select bussiness.idBusiness from bussiness where bussiness.nameBusiness=?";
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxEmpresa.getSelectedItem().toString());
             cs.execute();
             ResultSet rs = cs.executeQuery();
@@ -791,6 +823,8 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

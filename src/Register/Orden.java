@@ -30,12 +30,10 @@ import javax.swing.table.DefaultTableModel;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class Orden extends javax.swing.JInternalFrame {
-
+    
     DefaultTableModel modelo = new DefaultTableModel();
     DefaultTableModel tmp;
-
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
+    
     Venta v = new Venta();
     Detalle Dv = new Detalle();
     int item;
@@ -50,6 +48,7 @@ public class Orden extends javax.swing.JInternalFrame {
     public Orden() {
 
         initComponents();
+        
         AutoCompleteDecorator.decorate(cbxBusiness);
         AutoCompleteDecorator.decorate(cbxCustomer);
         AutoCompleteDecorator.decorate(cbxTrabajador);
@@ -62,6 +61,7 @@ public class Orden extends javax.swing.JInternalFrame {
         txtIdNC.setVisible(false);
 
     }
+    
 
 // Selecciona los datos a insertar a la Tabla
     public void Seleccionar(JTable tbPrecios, JComboBox Business, JTextField Servicio, JTextField PrecioPorServicio) {
@@ -470,6 +470,8 @@ public class Orden extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbxCustomerItemStateChanged
 //Mostrar Lista de Precios por Empresa
     private void btnListaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnListaActionPerformed
+        Connection connection = null;
+        
         String ID = txtIdBusiness.getText();
         String ID_buscar = "";
 
@@ -483,7 +485,10 @@ public class Orden extends javax.swing.JInternalFrame {
             modelo = new DefaultTableModel(null, tituloTabla);
             tbPrecios.setModel(modelo);
             String sql = "SELECT bussiness.nameBusiness AS Empresa, services.servicio, services.precio FROM services INNER JOIN bussiness ON services.id_empresa=bussiness.idBusiness " + ID_buscar;
-            Statement st = connect.createStatement();
+     
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[0] = rs.getString("Empresa");
@@ -497,6 +502,8 @@ public class Orden extends javax.swing.JInternalFrame {
             tbPrecios.getColumnModel().getColumn(2).setPreferredWidth(50);
         } catch (SQLException e) {
             System.out.println("Error" + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }//GEN-LAST:event_btnListaActionPerformed
 //Mostrar Numero de servicios por periodo
@@ -505,6 +512,7 @@ public class Orden extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnServiciosActionPerformed
 //Mostrar Tamaño de la Propiedad
     private void btnMTPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMTPActionPerformed
+        Connection connection = null;
         String ID = txtIdCustomer.getText();
         String ID_buscar = "";
 
@@ -514,7 +522,10 @@ public class Orden extends javax.swing.JInternalFrame {
         try {
             String sql = "SELECT * FROM customer " + ID_buscar;
             Statement st;
-            st = con.getConexion().createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
 
             while (rs.next()) {
@@ -522,6 +533,8 @@ public class Orden extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             System.out.println("Error al Ingresar Tamaño" + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }//GEN-LAST:event_btnMTPActionPerformed
 
@@ -700,14 +713,16 @@ public class Orden extends javax.swing.JInternalFrame {
 
 //LLenar el ComboBox de la Empresa
     public void MostrarEmpresa(JComboBox cbxEmpresa) {
+        Connection connection = null;
 
         String sql = "";
         sql = "select * from bussiness";
         Statement st;
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            st = con.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxEmpresa.removeAllItems();
 
@@ -718,15 +733,20 @@ public class Orden extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar en Combo " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoEmpresa(JComboBox cbxEmpresa, JTextField idBusiness) {
+        Connection connection = null;
 
         String consuta = "select bussiness.idBusiness from bussiness where bussiness.nameBusiness=?";
 
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxEmpresa.getSelectedItem().toString());
             cs.execute();
 
@@ -738,19 +758,23 @@ public class Orden extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
 //LLana el ComboBox Cliente
     public void MostrarCiente(JComboBox cbxCliente) {
+        Connection connection = null;
 
         String sql = "";
         sql = "SELECT nameCustomer AS nombre FROM customer;";
         Statement st;
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            st = con.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxCliente.removeAllItems();
 
@@ -762,15 +786,20 @@ public class Orden extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Combo " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoCliente(JComboBox cbxCliente, JTextField idCustomer) {
+        Connection connection = null;
 
         String consuta = "select customer.idCustomer from customer where customer.nameCustomer=?";
 
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxCliente.getSelectedItem().toString());
             cs.execute();
 
@@ -782,19 +811,23 @@ public class Orden extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
 //LLena el ComboBox Trabajador como vendedor para posterior comision
     public void MostrarTrabajador(JComboBox comboTrabajador) {
+        Connection connection = null;
 
         String sql = "";
         sql = "select * from worker";
         Statement st;
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            st = con.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             comboTrabajador.removeAllItems();
 
@@ -805,15 +838,20 @@ public class Orden extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoTrabajador(JComboBox trabajador, JTextField IdTrabajador) {
+        Connection connection = null;
 
         String consuta = "select worker.idWorker from worker where worker.nombre=?";
 
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, trabajador.getSelectedItem().toString());
             cs.execute();
 
@@ -825,6 +863,8 @@ public class Orden extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -904,12 +944,10 @@ public class Orden extends javax.swing.JInternalFrame {
     }
 
     private void registrarOrden() {
-    Conectar con = new Conectar();
-    Connection connect = null;
+        Connection connection = null;
     PreparedStatement stmt = null;
     try {
-        connect = con.getConexion();
-
+        
         // Obtenemos los datos de las cajas de texto
         String empresaStr = txtIdBusiness.getText().trim();
         String clienteStr = txtIdCustomer.getText().trim();
@@ -952,7 +990,9 @@ public class Orden extends javax.swing.JInternalFrame {
                 // Insertar la orden de servicio para cada fecha intermedia
                 String sql = "INSERT INTO orderservice (fechaT, id_empresa, id_cliente, servicio, precio, notaEmpresa, frecuencia, inicio, fin) VALUES (?,?,?,?,?,?,?,?,?)";
 
-                stmt = connect.prepareStatement(sql);
+                Conectar.getInstancia().obtenerConexion();
+                
+                stmt = connection.prepareStatement(sql);
                 stmt.setString(1, dateFormat.format(calendar.getTime()));
                 stmt.setInt(2, empresa);
                 stmt.setInt(3, cliente);
@@ -980,16 +1020,7 @@ public class Orden extends javax.swing.JInternalFrame {
     } catch (NumberFormatException ex) {
         JOptionPane.showMessageDialog(null, "Error en los datos ingresados: " + ex.getMessage());
     } finally {
-        try {
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (connect != null) {
-                connect.close();
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
+        Conectar.getInstancia().devolverConexion(connection);
     }
 }
 

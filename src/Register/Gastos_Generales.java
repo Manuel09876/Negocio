@@ -23,7 +23,7 @@ import javax.swing.table.DefaultTableModel;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class Gastos_Generales extends javax.swing.JInternalFrame {
-
+    
     private JDateChooser dateChooser;
     DefaultTableModel model = new DefaultTableModel();
     int id_PagosGenerales;
@@ -137,14 +137,13 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         this.estado = estado;
     }
 
-    //Conexión
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
+    
     PreparedStatement ps;
     ResultSet rs;
 
     public Gastos_Generales() {
         initComponents();
+        
         AutoCompleteDecorator.decorate(cbxTipodeGastGen);
         AutoCompleteDecorator.decorate(cbxPagarCon);
         AutoCompleteDecorator.decorate(cbxProveedor);
@@ -158,8 +157,9 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         txtIdTipodeGastGen.setVisible(false);
         
     }
-
+    
     public void MostrarDatos(String Valores) {
+        Connection connection = null;
         try {
             String[] TitulosTabla = {"id", "Tipo", "Recibo", "SubTotal", "Taxes", "Tip", "Total", "Proveedor", "Forma de Pago", "Fecha", "Estado"};
             String[] RegistroBD = new String[11];
@@ -173,7 +173,9 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                     + "INNER JOIN formadepago fp ON dpg.id_formadepago=fp.id_formadepago\n"
                     + "ORDER BY dpg.id_PagosGenerales ASC";
 
-            Statement st = connect.createStatement();
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
             while (result.next()) {
@@ -197,10 +199,13 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Guardar() {
+        Connection connection = null;
         int id_PagosGenerales;
         int tipodePago;
         String reciboNumero;
@@ -230,8 +235,10 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
 //Para almacenar los datos empleo un try cash
         try {
+            Conectar.getInstancia().obtenerConexion();
+            
 //Preparando la conexion a sql
-            PreparedStatement pst = connect.prepareStatement(sql);
+            PreparedStatement pst = connection.prepareStatement(sql);
 
             pst.setInt(1, tipodePago);
             pst.setString(2, reciboNumero);
@@ -261,11 +268,14 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al guardar registro " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
 
     public void GuardarCredito() {
+        Connection connection = null;
         int id_PagosGenerales;
         int tipodePago;
         String reciboNumero;
@@ -295,9 +305,10 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
 //Para almacenar los datos empleo un try cash
         try {
+            Conectar.getInstancia().obtenerConexion();
+            
 //Preparando la conexion a sql
-            PreparedStatement pst = connect.prepareStatement(sql);
-
+            PreparedStatement pst = connection.prepareStatement(sql);
             pst.setInt(1, tipodePago);
             pst.setString(2, reciboNumero);
             pst.setDouble(3, subTotal);
@@ -325,12 +336,15 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al guardar registro " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
 
     public void Modificar(JTextField id, JComboBox TipodePago, JTextField Recibo, JTextField SubTotal, JTextField Taxes, JTextField Tip,
             JTextField Total, JComboBox Proveedor, JComboBox FormaPago, JDateChooser fecha) {
+        Connection connection = null;
 
         try {
 
@@ -358,8 +372,9 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             String sql = "UPDATE detallepagosgenerales SET id_tipodePago=?, reciboNumero=?, subTotal=?, taxes=?, "
                     + "tip=?, total=?, id_proveedor=?, id_formadepago=?, fecha=? WHERE id_PagosGenerales=?";
 
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             ps.setInt(1, getTipodePago());
             ps.setString(2, getReciboNumero());
             ps.setDouble(3, getSubTotal());
@@ -379,18 +394,22 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             System.out.println("Error de formato de número: " + e.getMessage());
         } catch (SQLException e) {
             System.out.println("Error al Modificar: " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Borrar(JTextField id) {
+        Connection connection = null;
 
         setId_PagosGenerales(Integer.parseInt(id.getText()));
 
         String consulta = "DELETE FROM detallepagosgenerales WHERE id_PagosGenerales=?";
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId_PagosGenerales());
             cs.executeUpdate();
 
@@ -401,6 +420,8 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         } catch (HeadlessException | SQLException e) {
 
             JOptionPane.showMessageDialog(null, "No se Elimino registro " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
@@ -920,14 +941,16 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarTipoPagos(JComboBox cbxTipo) {
+        Connection connection = null;
 
         String sql = "";
         sql = "select * from tipos_pagosgenerales";
         Statement st;
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            st = con.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxTipo.removeAllItems();
 
@@ -938,10 +961,13 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoTipoPagos(JComboBox cbxTipo, JTextField idTipo) {
+        Connection connection = null;
 
         String consuta = "select tipos_pagosgenerales.id_pagos from tipos_pagosgenerales where tipos_pagosgenerales.nombre=?";
 
@@ -952,7 +978,9 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                 return;
             }
 
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
 
             Object selectedValue = cbxTipo.getSelectedItem();
             if (selectedValue != null) {
@@ -970,10 +998,13 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoFormaDePago(JComboBox cbxPagarCon, JTextField idPagarCon) {
+        Connection connection = null;
 
         String consuta = "select formadepago.id_formadepago from formadepago where formadepago.nombre=?";
 
@@ -984,7 +1015,9 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                 return;
             }
 
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
 
             Object selectedValue = cbxPagarCon.getSelectedItem();
             if (selectedValue != null) {
@@ -1024,18 +1057,22 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarFormaDePago(JComboBox cbxPagarCon) {
+        Connection connection = null;
 
         String sql = "";
         sql = "select * from formadepago";
         Statement st;
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            st = con.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxPagarCon.removeAllItems();
 
@@ -1046,18 +1083,22 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarProveedor(JComboBox cbxProveedorNC) {
+        Connection connection = null;
 
         String sql = "";
         sql = "select * from suplier";
         Statement st;
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            st = con.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxProveedorNC.removeAllItems();
 
@@ -1068,15 +1109,20 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoProveedor(JComboBox cbxProveedorNC, JTextField idSuplier) {
+        Connection connection = null;
 
         String consuta = "select suplier.idSuplier from suplier where suplier.nameSuplier=?";
 
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxProveedor.getSelectedItem().toString());
             cs.execute();
 
@@ -1088,20 +1134,22 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     // Método para hallar el id_venta que se está ejecutando en ese momento
     public int IdCompra() {
+        Connection connection = null;
         int id = 0;
         String sql = "SELECT MAX(id_pagosgenerales) FROM detallepagosgenerales";
-        Conectar con = new Conectar();
-        Connection connect = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             rs = ps.executeQuery();
             if (rs.next()) {
                 id = rs.getInt(1);
@@ -1109,29 +1157,16 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             System.out.println(e.toString());
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (ps != null) {
-                    ps.close();
-                }
-                if (connect != null) {
-                    connect.close();
-                }
-            } catch (SQLException e) {
-            }
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return id;
     }
 
     public void registrarPagosPendientes() {
-        Conectar con = new Conectar();
-        Connection connect = null;
         PreparedStatement stmt = null;
+        Connection connection = null;
         try {
-            connect = con.getConexion();
-
+            
             // Obtener los datos de las cajas de texto
             int id = IdCompra();
             int frecuencia = Integer.parseInt(txtFrecuencia.getText());
@@ -1152,7 +1187,10 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             // Preparar la inserción de pagos en la base de datos
             String sql = "INSERT INTO creditopg (id_compra, frecuencia, fechaPago, interes, Inicial, NumeroCuotas, cuota, Diferencia, estado) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
-            stmt = connect.prepareStatement(sql);
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            stmt = connection.prepareStatement(sql);
 
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(fechaInicio);
@@ -1193,16 +1231,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al conectar a la base de datos: " + ex.getMessage());
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (connect != null) {
-                    connect.close();
-                }
-            } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(null, "Error al cerrar la conexión: " + ex.getMessage());
-            }
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

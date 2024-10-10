@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -34,18 +35,21 @@ import org.jfree.data.xy.XYDataset;
 
 public class Estadisticas extends javax.swing.JInternalFrame {
 
-    Conectar con = new Conectar();
-
     public Estadisticas() {
         initComponents();
+        
     }
-
+    
     public void BuscarDatos() {
+        Connection connection = null;
+        
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String fechaInicio = dateFormat.format(dateInicio.getDate());
         String fechaFin = dateFormat.format(dateFin.getDate());
 
         try {
+            Conectar.getInstancia().obtenerConexion();
+            
             String Total = "SELECT SUM(precio) FROM orderservice";
             String Egresos = "SELECT (SELECT SUM(Total) FROM compraproductosmateriales) + (SELECT SUM(total) FROM detallepagosgenerales) +"
                     + "(SELECT SUM(Total) FROM detalle_compraproductosmateriales) AS TotalCombinado FROM dual";
@@ -91,14 +95,19 @@ public class Estadisticas extends javax.swing.JInternalFrame {
             String todasPorEmpresa = "SELECT SUM(precio) FROM orderservice WHERE id_empresa=3";
 
         } catch (Exception e) {
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     private TimeSeriesCollection crearDataset(String query, String label, String dateColumn, String valueColumn) {
+        Connection connection = null;
+        
         TimeSeries series = new TimeSeries(label);
         try {
-            Connection conn = con.getConexion();
-            PreparedStatement pst = conn.prepareStatement(query);
+            Conectar.getInstancia().obtenerConexion();
+            
+            PreparedStatement pst = connection.prepareStatement(query);
             ResultSet rs = pst.executeQuery();
 
             while (rs.next()) {
@@ -109,6 +118,8 @@ public class Estadisticas extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
         TimeSeriesCollection dataset = new TimeSeriesCollection();
@@ -241,13 +252,22 @@ public class Estadisticas extends javax.swing.JInternalFrame {
     }
 
     private double obtenerTotal(String query, String columnLabel) {
+        Connection connection = null;
+        
         double total = 0.0;
-        try (Connection conn = con.getConexion(); PreparedStatement pst = conn.prepareStatement(query); ResultSet rs = pst.executeQuery()) {
+        
+        try{
+            Conectar.getInstancia().obtenerConexion();
+            
+        try (PreparedStatement pst = connection.prepareStatement(query); ResultSet rs = pst.executeQuery()) {
             if (rs.next()) {
                 total = rs.getDouble(columnLabel);
             }
+        }
         } catch (SQLException e) {
             e.printStackTrace();
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return total;
     }

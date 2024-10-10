@@ -17,16 +17,14 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class Ventas extends javax.swing.JInternalFrame {
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
-
     public Ventas() {
         initComponents();
+        
         AutoCompleteDecorator.decorate(cbxClientes);
         MostrarCiente(cbxClientes);
         MostrarTabla();
     }
-
+    
     public void addCheckBox(int column, JTable table) {
         TableColumn tc = table.getColumnModel().getColumn(column);
         tc.setCellEditor(table.getDefaultEditor(Boolean.class));
@@ -39,6 +37,8 @@ public class Ventas extends javax.swing.JInternalFrame {
 
     
     public void MostrarTabla() {
+        Connection connection = null;
+        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -78,7 +78,10 @@ public class Ventas extends javax.swing.JInternalFrame {
                     + "WHERE o.estado = 'Programado' \n"
                     + "ORDER BY \n"
                     + "    o.fechaT ASC";
-            Statement st = connect.createStatement();
+     
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -128,6 +131,8 @@ public class Ventas extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
     
@@ -331,14 +336,16 @@ public class Ventas extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarCiente(JComboBox cbxCliente) {
+        Connection connection = null;
 
         String sql = "";
         sql = "select * from customer";
         Statement st;
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            st = con.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxCliente.removeAllItems();
 
@@ -349,15 +356,20 @@ public class Ventas extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Combo " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoCliente(JComboBox cbxCliente, JTextField idCustomer) {
+        Connection connection = null;
 
         String consuta = "select customer.idCustomer from customer where customer.nameCustomer=?";
 
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxCliente.getSelectedItem().toString());
             cs.execute();
 
@@ -369,6 +381,8 @@ public class Ventas extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 }

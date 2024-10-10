@@ -14,7 +14,8 @@ import javax.swing.JTextField;
 
 
 public class Empresa_Cliente extends javax.swing.JFrame {
-
+    
+   
    int idEmpresa_Cliente, idEmpresa, idCliente;
 
     public Empresa_Cliente(int idEmpresa_Cliente, int idEmpresa, int idCliente) {
@@ -63,19 +64,22 @@ public class Empresa_Cliente extends javax.swing.JFrame {
    
     public Empresa_Cliente() {
         initComponents();
-        MostrarEmpresa(cbxEmpresa);
         
+        MostrarEmpresa(cbxEmpresa);        
     }
    
-    Conectar objconexion = new Conectar();
-    Connection connect = objconexion.getConexion();
+    
     
     public void MostrarCodigoEmpresa(JComboBox cbxEmpresa, JTextField idBusiness) {
+        Connection connection = null;
 
         String consuta = "select bussiness.idBusiness from bussiness where bussiness.nameBusiness=?";
 
         try {
-            CallableStatement cs = objconexion.getConexion().prepareCall(consuta);
+            connection = Conectar.getInstancia().obtenerConexion();
+                    
+            
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxEmpresa.getSelectedItem().toString());
             cs.execute();
 
@@ -87,18 +91,22 @@ public class Empresa_Cliente extends javax.swing.JFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
-        }
+        }finally {
+        // Devolver la conexión al pool
+        Conectar.getInstancia().devolverConexion(connection);
+    }
     }
 
     public void MostrarEmpresa(JComboBox cbxEmpresa) {
-
+        Connection connection = null;
         String sql = "";
         sql = "select * from bussiness";
         Statement st;
 
         try {
+            connection = Conectar.getInstancia().obtenerConexion();
 
-            st = objconexion.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxEmpresa.removeAllItems();
 
@@ -109,17 +117,23 @@ public class Empresa_Cliente extends javax.swing.JFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar en Combo " + e.toString());
-        }
+        }finally {
+        // Devolver la conexión al pool
+        Conectar.getInstancia().devolverConexion(connection);
+    }
     }
 
     public void GuardarEmpresa_Usuario(JTextField idBusiness, JTextField idCustomer){
         
-        Conectar objeto = new Conectar();
+        Connection connection = null;
+                
         
         String consulta = "insert into empresa_cliente (id_empresa, id_cliente) values (?, ?)";
         
         try {
-            CallableStatement cs = objeto.getConexion().prepareCall(consulta);
+            connection = Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consulta);
             
             cs.setString(1, idBusiness.getText());
             cs.setString(2, idCustomer.getText());
@@ -129,27 +143,27 @@ public class Empresa_Cliente extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Se incertó el registro ");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al insertar " +e.toString());
-        }
+        }finally {
+        // Devolver la conexión al pool
+        Conectar.getInstancia().devolverConexion(connection);
+    }
     }
         
     public void ModificarEmpresa_Usuario(JTextField CodigoEmpresa_Usu, JTextField CodigoEmpresa, JTextField CodigoUsu){
-         
+         Connection connection = null;
           
         //Obtengo el valor en Cadena(String) de las cajas de Texto
         setIdEmpresa_Cliente(Integer.parseInt(CodigoEmpresa_Usu.getText()));
         setIdEmpresa(Integer.parseInt(CodigoEmpresa_Usu.getText()));
         setIdCliente(Integer.parseInt(CodigoEmpresa_Usu.getText()));
         
-        
-        Conectar objCConexion= new Conectar();
-        
         String consulta= "UPDATE empresa_cliente SET id_empresa = ?, id_cliente=? WHERE alumnos.id_EC=?";
         
         try {
+            connection = Conectar.getInstancia().obtenerConexion();
             
-            CallableStatement cs = objCConexion.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
             
-            //
             cs.setInt(1, getIdEmpresa());
             cs.setInt(2, getIdCliente());
             cs.setInt(3, getIdEmpresa_Cliente());
@@ -160,7 +174,10 @@ public class Empresa_Cliente extends javax.swing.JFrame {
             
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se Modifico, error "+e.toString());
-        }
+        }finally {
+        // Devolver la conexión al pool
+        Conectar.getInstancia().devolverConexion(connection);
+    }
         
     }
     

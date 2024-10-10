@@ -49,26 +49,30 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
         this.estado = estado;
     }
 
-    //Conexión
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
+   
+    
     PreparedStatement ps;
     ResultSet rs;
 
     public TipoProductosMateriales() {
         initComponents();
-
+        
         CargarDatosTabla("");
         txtIdProMat.setEnabled(false);
     }
 
+        
     void CargarDatosTabla(String Valores) {
+        Connection connection = null;
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
             String ConsultaSQL = "SELECT * FROM tipodeproductomateriales";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
             while (result.next()) {
                 RegistroBD[0] = result.getString("idProMat");
@@ -82,10 +86,13 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
             tbProMat.getColumnModel().getColumn(2).setPreferredWidth(100);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     void Guardar() {
+        Connection connection = null;
         // Variables
         int idProMat;
         String nombre;
@@ -98,8 +105,10 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
         sql = "INSERT INTO tipodeproductomateriales (nombre)VALUES (?)";
         //Para almacenar los datos empleo un try cash
         try {
+            Conectar.getInstancia().obtenerConexion();
+            
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
-            PreparedStatement pst = connect.prepareStatement(sql);
+            PreparedStatement pst = connection.prepareStatement(sql);
             pst.setString(1, nombre);
             //Declara otra variable para validar los registros
             int n = pst.executeUpdate();
@@ -113,14 +122,20 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
             txtProMat.requestFocus();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al guardar " + ex.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void Eliminar(JTextField id) {
+        Connection connection = null;
+        
         setIdProMat(Integer.parseInt(id.getText()));
         String consulta = "DELETE from tipodeproductomateriales where idProMat=?";
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getIdProMat());
             cs.executeUpdate();
             JOptionPane.showMessageDialog(null, "Se Elimino");
@@ -130,6 +145,8 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
             txtProMat.requestFocus();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -148,27 +165,34 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
     }
 
     public void ModificarTipo(JTextField paraId, JTextField paraNombre) {
+        Connection connection = null;
         //Obtengo el valor en Cadena(String) de las cajas de Texto
         setIdProMat(Integer.parseInt(paraId.getText()));
         setNombre(paraNombre.getText());
-        Conectar con = new Conectar();
+        
         String consulta = "UPDATE tipodeproductomateriales SET tiopodeproductomateriales.nombre = ? WHERE tipodeproductomateriales.idProMat=?";
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setString(1, getNombre());
             cs.setInt(2, getIdProMat());
             cs.execute();
             JOptionPane.showMessageDialog(null, "Modificacion Exitosa");
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se Modifico, error " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public boolean accion(String estado, int IdProMat) {
+        Connection connection = null;
         String sql = "UPDATE tipodeproductomateriales SET estado = ? WHERE idProMat = ?";
         try {
-            connect = con.getConexion(); // Reestablecer la conexión por si acaso
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, IdProMat); // Usar el parámetro pasado en lugar de la variable de clase
             ps.executeUpdate(); // Cambia a executeUpdate para claridad
@@ -176,6 +200,8 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

@@ -58,12 +58,11 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
     DefaultTableModel modelo = new DefaultTableModel();
 
     public DeudasPorCobrar() {
         initComponents();
+        
         AutoCompleteDecorator.decorate(cbxEmpresa);
         AutoCompleteDecorator.decorate(cbxPagarCon);
         MostrarEmpresa(cbxEmpresa);
@@ -75,7 +74,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         getNextInvoiceNumber();
 
     }
-
+    
     public void addCheckBox(int column, JTable table) {
         TableColumn tc = table.getColumnModel().getColumn(column);
         tc.setCellEditor(table.getDefaultEditor(Boolean.class));
@@ -87,6 +86,8 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }
 
     public void MostrarTablaDeuda() {
+        Connection connection = null;
+        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -104,7 +105,10 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                     + "LEFT JOIN facturas AS f ON o.id = f.id_ordenServicio " // Asegúrate de que tienes la relación correcta
                     + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'deuda' "
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+     
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -150,10 +154,14 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
             addButtonToTable(tbDeudasPorCobrar, 16); // Agregar el botón después de configurar el modelo
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarTablaPagadas() {
+        Connection connection = null;
+        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -171,7 +179,10 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                     + "LEFT JOIN facturas AS f ON o.id = f.id_ordenServicio " // Asegúrate de que tienes la relación correcta
                     + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'Cancelada' "
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -217,11 +228,15 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
             addButtonToTable(tbDeudasPorCobrar, 16); // Agregar el botón después de configurar el modelo
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     //Codigo Para buscar dentro de la tabla por medio del txtField Busqueda
     public DefaultTableModel buscarTabla(String buscar) {
+        Connection connection = null;
+        
         DefaultTableModel modelo = new DefaultTableModel();
         try {
             String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio", "Status", "Estado de Cuenta"};
@@ -237,7 +252,10 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'deuda' AND customer.nameCustomer LIKE '%" + buscar + "%' OR customer.address LIKE '%" + buscar + "%'"
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -277,6 +295,8 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
             tbDeudasPorCobrar.getColumnModel().getColumn(13).setPreferredWidth(150);
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return modelo;
     }
@@ -408,13 +428,17 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
         public void savePDFToDatabase(String filePath, int orderId, int paymentMethodId, int invoiceNumber) {
             Connection connection = null;
+            
             PreparedStatement pstmt = null;
             FileInputStream fis = null;
 
             try {
-                connection = con.getConexion(); // Obtener conexión a la base de datos
+                
                 String sql = "INSERT INTO facturas (pdf, id_ordenServicio, id_pagarcon, numeroFactura) VALUES (?, ?, ?, ?)";
-                pstmt = connection.prepareStatement(sql);
+                
+                Conectar.getInstancia().obtenerConexion();
+                
+                pstmt = connection.prepareCall(sql);
 
                 File pdfFile = new File(filePath);
                 fis = new FileInputStream(pdfFile);
@@ -429,32 +453,23 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
             } catch (SQLException | FileNotFoundException e) {
                 JOptionPane.showMessageDialog(null, "Error al guardar el PDF en la base de datos: " + e.getMessage());
             } finally {
-                try {
-                    if (fis != null) {
-                        fis.close();
-                    }
-                    if (pstmt != null) {
-                        pstmt.close();
-                    }
-                    if (connection != null) {
-                        connection.close();
-                    }
-                } catch (IOException | SQLException e) {
-                    JOptionPane.showMessageDialog(null, "Error al cerrar recursos: " + e.getMessage());
-                }
+               Conectar.getInstancia().devolverConexion(connection);
             }
         }
     }
 
     private int getNextInvoiceNumber() {
         Connection connection = null;
+        
         Statement stmt = null;
         ResultSet rs = null;
         int nextInvoiceNumber = 1;
 
         try {
-            connection = con.getConexion(); // Obtener conexión a la base de datos
             String sql = "SELECT MAX(numeroFactura) AS maxInvoiceNumber FROM facturas";
+            
+            Conectar.getInstancia().obtenerConexion();
+                    
             stmt = connection.createStatement();
             rs = stmt.executeQuery(sql);
 
@@ -465,19 +480,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al obtener el siguiente número de factura: " + e.getMessage());
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error al cerrar recursos: " + e.getMessage());
-            }
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
         txtProximoNumeroFactura.setText(String.valueOf(nextInvoiceNumber));
@@ -486,11 +489,14 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
     private void updateOrderStatus(int orderId, String status) {
         Connection connection = null;
+        
         PreparedStatement pstmt = null;
 
         try {
-            connection = con.getConexion(); // Obtener conexión a la base de datos
             String sql = "UPDATE orderservice SET eeCta = ? WHERE id = ?";
+            
+            Conectar.getInstancia().obtenerConexion();
+            
             pstmt = connection.prepareStatement(sql);
             pstmt.setString(1, status);
             pstmt.setInt(2, orderId);
@@ -501,28 +507,22 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al actualizar el estado de la orden: " + e.getMessage());
         } finally {
-            try {
-                if (pstmt != null) {
-                    pstmt.close();
-                }
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error al cerrar recursos: " + e.getMessage());
-            }
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     private int getPaymentMethodId(String paymentMethodName) {
         Connection connection = null;
+        
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         int paymentMethodId = -1;
 
         try {
-            connection = con.getConexion(); // Obtener conexión a la base de datos
             String sql = "SELECT id_formadepago FROM formadepago WHERE nombre = ?";
+            
+            Conectar.getInstancia().obtenerConexion();
+            
             pstmt = connection.prepareStatement(sql);
             pstmt.setString(1, paymentMethodName);
             rs = pstmt.executeQuery();
@@ -534,19 +534,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al obtener el ID del método de pago: " + e.getMessage());
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (pstmt != null) {
-                    pstmt.close();
-                }
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error al cerrar recursos: " + e.getMessage());
-            }
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
         return paymentMethodId;
@@ -554,13 +542,16 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
     private byte[] getPDFByInvoiceNumber(int invoiceNumber) {
         Connection connection = null;
+        
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         byte[] pdfData = null;
 
         try {
-            connection = con.getConexion(); // Obtener conexión a la base de datos
             String sql = "SELECT pdf FROM facturas WHERE numeroFactura = ?";
+            
+            Conectar.getInstancia().obtenerConexion();
+            
             pstmt = connection.prepareStatement(sql);
             pstmt.setInt(1, invoiceNumber);
             rs = pstmt.executeQuery();
@@ -572,19 +563,7 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al obtener el PDF de la base de datos: " + e.getMessage());
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (pstmt != null) {
-                    pstmt.close();
-                }
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException e) {
-                JOptionPane.showMessageDialog(null, "Error al cerrar recursos: " + e.getMessage());
-            }
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
         return pdfData;
@@ -898,6 +877,8 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_tbDeudasPorCobrarMouseClicked
 
     private void btnBusquedaEmpresaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBusquedaEmpresaActionPerformed
+        Connection connection = null;
+        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String ID = txtIdEmpresa.getText();
@@ -919,7 +900,10 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + ID_buscar + "AND o.estado != 'Inactivo' AND o.eeCta = 'deuda' "
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -959,6 +943,8 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
             tbDeudasPorCobrar.getColumnModel().getColumn(13).setPreferredWidth(150);
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }//GEN-LAST:event_btnBusquedaEmpresaActionPerformed
 
@@ -989,6 +975,8 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbSeleccionaTodoActionPerformed
 
     private void btnBusquedaFechaEmpresaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBusquedaFechaEmpresaActionPerformed
+        Connection connection = null;
+        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String fechaInicio = dateFormat.format(dateInicio.getDate());
@@ -1012,7 +1000,10 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + ID_buscar + "AND o.fechaT BETWEEN '" + fechaInicio + "' AND '" + fechaFin + "' AND o.estado != 'Inactivo' "
                     + "ORDER BY o.fechaT ASC";
-            Statement st = connect.createStatement();
+            
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 RegistroBD[1] = rs.getString("id");
@@ -1049,6 +1040,8 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
             tbDeudasPorCobrar.getColumnModel().getColumn(11).setPreferredWidth(150);
         } catch (SQLException e) {
             System.out.println("Error al mostrar la Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }//GEN-LAST:event_btnBusquedaFechaEmpresaActionPerformed
 
@@ -1242,11 +1235,14 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarEmpresa(JComboBox cbxEmpresa) {
+        Connection connection = null;
         String sql = "";
         sql = "select * from bussiness";
         Statement st;
         try {
-            st = con.getConexion().createStatement();
+            Conectar.getInstancia().obtenerConexion();
+            
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxEmpresa.removeAllItems();
             while (rs.next()) {
@@ -1254,13 +1250,18 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar en Combo " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoEmpresa(JComboBox cbxEmpresa, JTextField idBusiness) {
+        Connection connection = null;
         String consuta = "select bussiness.idBusiness from bussiness where bussiness.nameBusiness=?";
         try {
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            Conectar.getInstancia().obtenerConexion();
+            
+            CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxEmpresa.getSelectedItem().toString());
             cs.execute();
             ResultSet rs = cs.executeQuery();
@@ -1269,10 +1270,13 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarCodigoFormaDePago(JComboBox cbxPagarCon, JTextField idPagarCon) {
+        Connection connection = null;
 
         String consuta = "select formadepago.id_formadepago from formadepago where formadepago.nombre=?";
 
@@ -1282,8 +1286,9 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 //            JOptionPane.showMessageDialog(null, "Error: No se ha seleccionado ninguna forme de pago.");
                 return;
             }
+            Conectar.getInstancia().obtenerConexion();
 
-            CallableStatement cs = con.getConexion().prepareCall(consuta);
+            CallableStatement cs = connection.prepareCall(consuta);
 
             Object selectedValue = cbxPagarCon.getSelectedItem();
             if (selectedValue != null) {
@@ -1301,18 +1306,22 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public void MostrarFormaDePago(JComboBox cbxPagarCon) {
+        Connection connection = null;
 
         String sql = "";
         sql = "select * from formadepago";
         Statement st;
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            st = con.getConexion().createStatement();
+            st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxPagarCon.removeAllItems();
 
@@ -1323,6 +1332,8 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -1456,7 +1467,5 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         }
     }
 }
-    
-    
 
 }

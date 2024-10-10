@@ -7,6 +7,8 @@ public class Formularios extends javax.swing.JInternalFrame {
  
     public Formularios() {
         initComponents();
+        
+        
     }
 
  

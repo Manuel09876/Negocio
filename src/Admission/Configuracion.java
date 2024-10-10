@@ -18,8 +18,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Configuracion extends javax.swing.JInternalFrame {
 
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
+    
     PreparedStatement ps;
     ResultSet rs;
 
@@ -132,12 +131,16 @@ public class Configuracion extends javax.swing.JInternalFrame {
     public void setFechaInicioActividades(Date fechaInicioActividades) {
         this.fechaInicioActividades = fechaInicioActividades;
     }
-
+    
+    
     public Configuracion BuscarDatos() {
+        Connection connection = null;
+        
         String sql = "SELECT * FROM configuracion";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             rs = ps.executeQuery();
             if (rs.next()) {
                 setId(rs.getInt("id"));
@@ -157,28 +160,18 @@ public class Configuracion extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             System.out.println(e.toString());
         } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (ps != null) {
-                    ps.close();
-                }
-                if (connect != null) {
-                    connect.close();
-                }
-            } catch (SQLException e) {
-                System.out.println(e.toString());
-            }
+            Conectar.getInstancia().devolverConexion(connection);
         }
         return this;
     }
 
     public boolean GuardarConfig() {
+        Connection connection = null;
         String sql = "INSERT INTO configuracion(nombre, direccion, ciudad, zipcode, estado, telefono, email, webpage, mensaje, logo, email_password, fecha_inicio_actividades) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             ps.setString(1, getNombre());
             ps.setString(2, getDireccion());
             ps.setString(3, getCiudad());
@@ -206,21 +199,17 @@ public class Configuracion extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Error al guardar los datos: " + e.getMessage());
             return false;
         } finally {
-            try {
-                if (ps != null) {
-                    ps.close();
-                }
-                // No cierres la conexión aquí para mantenerla abierta
-            } catch (SQLException e) {
-            }
+           Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public boolean ModificarDatos() {
+        Connection connection = null;
         String sql = "UPDATE configuracion SET nombre=?, direccion=?, ciudad=?, zipcode=?, estado=?, telefono=?, email=?, webpage=?, mensaje=?, logo=?, email_password=?, fecha_inicio_actividades=? WHERE id=?";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             ps.setString(1, getNombre());
             ps.setString(2, getDireccion());
             ps.setString(3, getCiudad());
@@ -255,16 +244,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
             JOptionPane.showMessageDialog(null, "Error al actualizar los datos: " + e.getMessage());
             return false;
         } finally {
-            try {
-                if (ps != null) {
-                    ps.close();
-                }
-                if (connect != null) {
-                    connect.close(); // Cierra la conexión aquí al finalizar la operación
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
@@ -319,6 +299,7 @@ public class Configuracion extends javax.swing.JInternalFrame {
 
     public Configuracion() {
         initComponents();
+                
         ListarConfig();
         txtId.setVisible(false);
     }

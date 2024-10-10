@@ -16,7 +16,8 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 public class Unidades extends javax.swing.JInternalFrame {
-
+    
+    
     DefaultTableModel model;
     int id_unidades;
     String nombre;
@@ -52,18 +53,19 @@ public class Unidades extends javax.swing.JInternalFrame {
         this.estado = estado;
     }
 
-    //Conexión
-    Conectar con = new Conectar();
-    Connection connect = con.getConexion();
+    
     PreparedStatement ps;
     ResultSet rs;
 
     public Unidades() {
         initComponents();
+        
         CargarDatosTabla("");
     }
 
+    
     void CargarDatosTabla(String Valores) {
+        Connection connection = null;
 
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
@@ -73,7 +75,9 @@ public class Unidades extends javax.swing.JInternalFrame {
 
             String ConsultaSQL = "SELECT * FROM unidades";
 
-            Statement st = connect.createStatement();
+            Conectar.getInstancia().obtenerConexion();
+            
+            Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
             while (result.next()) {
@@ -91,10 +95,13 @@ public class Unidades extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     void Guardar() {
+        Connection connection = null;
 
         // Variables
         int id_unidades;
@@ -112,9 +119,10 @@ public class Unidades extends javax.swing.JInternalFrame {
 
         //Para almacenar los datos empleo un try cash
         try {
-
+            Conectar.getInstancia().obtenerConexion();
+            
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
-            PreparedStatement pst = connect.prepareStatement(sql);
+            PreparedStatement pst = connection.prepareStatement(sql);
 
             pst.setString(1, nombre);
 
@@ -133,19 +141,22 @@ public class Unidades extends javax.swing.JInternalFrame {
 
         } catch (SQLException ex) {
 
+        }finally{
+         Conectar.getInstancia().devolverConexion(connection);
         }
-
     }
 
     public void Eliminar(JTextField id) {
+        Connection connection = null;
 
         setId_unidades(Integer.parseInt(id.getText()));
 
         String consulta = "DELETE from unidades where id_unidades=?";
 
         try {
+            Conectar.getInstancia().obtenerConexion();
 
-            CallableStatement cs = con.getConexion().prepareCall(consulta);
+            CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId_unidades());
             cs.executeUpdate();
 
@@ -159,6 +170,8 @@ public class Unidades extends javax.swing.JInternalFrame {
 
             JOptionPane.showMessageDialog(null, "No se Elimino, error: " + e.toString());
 
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
 
     }
@@ -185,17 +198,19 @@ public class Unidades extends javax.swing.JInternalFrame {
     }
 
     public void Modificar(JTextField paraId, JTextField paraNombre) {
+        Connection connection = null;
 
         //Obtengo el valor en Cadena(String) de las cajas de Texto
         setId_unidades(Integer.parseInt(paraId.getText()));
         setNombre(paraNombre.getText());
 
-        Conectar con = new Conectar();
+        
 
         String sql = "UPDATE unidades SET nombre = ?  WHERE id_unidades = ?";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             ps.setString(1, getNombre());
             ps.setInt(2, getId_unidades());
             ps.execute();
@@ -205,14 +220,18 @@ public class Unidades extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "No se Modifico, error " + e.toString());
 
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     public boolean accion(String estado, int IdUnidades) {
+        Connection connection = null;
         String sql = "UPDATE unidades SET estado = ? WHERE id_unidades = ?";
         try {
-            connect = con.getConexion();
-            ps = connect.prepareStatement(sql);
+            Conectar.getInstancia().obtenerConexion();
+            
+            ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, IdUnidades);
             ps.execute();
@@ -220,6 +239,8 @@ public class Unidades extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, e.toString());
             return false;
+        }finally{
+            Conectar.getInstancia().devolverConexion(connection);
         }
     }
 

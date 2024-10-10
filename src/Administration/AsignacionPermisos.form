@@ -22,8 +22,8 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="1" attributes="0">
-              <Group type="103" groupAlignment="1" attributes="0">
+          <Group type="102" attributes="0">
+              <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="btnAdministracion" alignment="1" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
@@ -49,14 +49,19 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnAdmision" max="32767" attributes="0"/>
                   </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane2" max="32767" attributes="0"/>
-                  </Group>
-                  <Component id="jScrollPane1" alignment="1" max="32767" attributes="0"/>
                   <Component id="jScrollPane3" alignment="0" max="32767" attributes="0"/>
                   <Component id="btnReportes" alignment="0" max="32767" attributes="0"/>
                   <Component id="jScrollPane5" alignment="0" max="32767" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="0" attributes="0">
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="jScrollPane2" min="-2" pref="1067" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="jScrollPane1" alignment="0" min="-2" pref="1075" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -82,8 +87,8 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="btnAdministracion" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="jScrollPane1" min="-2" pref="313" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Component id="jScrollPane1" min="-2" pref="307" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="btnAdmision" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -501,48 +506,24 @@
         <Component class="javax.swing.JTable" name="tbAdministracion">
           <Properties>
             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-              <Table columnCount="7" rowCount="14">
-                <Column editable="true" title="N&#xb0;" type="java.lang.Object">
-                  <Data value="1"/>
-                  <Data value="2"/>
-                  <Data value="3"/>
-                  <Data value="4"/>
-                  <Data value="5"/>
-                  <Data value="6"/>
-                  <Data value="7"/>
-                  <Data value="8"/>
-                  <Data value="9"/>
-                  <Data value="10"/>
-                  <Data value="11"/>
-                  <Data value="12"/>
-                  <Data value="13"/>
-                  <Data value="14"/>
-                </Column>
-                <Column editable="true" title="Programa" type="java.lang.Object">
-                  <Data value="Usuarios"/>
-                  <Data value="Tipo de Usuarios"/>
-                  <Data value="Asisnaci&#xf3;n de Permisos"/>
-                  <Data value="Empresas"/>
-                  <Data value="Trabajadores"/>
-                  <Data value="Tarifario"/>
-                  <Data value="Productos"/>
-                  <Data value="Formularios"/>
-                  <Data value="Proveedor"/>
-                  <Data value="Convenios"/>
-                  <Data value="Busqueda de Convenios"/>
-                  <Data value="Asignaci&#xf3;n de Trabajos"/>
-                  <Data value="Puesto de Trabajos"/>
-                  <Data value="Formas de Pago"/>
-                </Column>
+              <Table columnCount="8" rowCount="0">
+                <Column editable="true" title="N&#xb0;" type="java.lang.Object"/>
+                <Column editable="true" title="Programa" type="java.lang.Object"/>
                 <Column editable="true" title="Visualizar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Agregar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Editar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Eliminar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Todo" type="java.lang.Boolean"/>
+                <Column editable="true" title="id" type="java.lang.Object"/>
               </Table>
             </Property>
             <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
               <TableColumnModel selectionModel="0">
+                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                  <Title/>
+                  <Editor/>
+                  <Renderer/>
+                </Column>
                 <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
                   <Title/>
                   <Editor/>
@@ -597,36 +578,24 @@
         <Component class="javax.swing.JTable" name="tbAdmision">
           <Properties>
             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-              <Table columnCount="7" rowCount="8">
-                <Column editable="true" title="N&#xb0;" type="java.lang.Object">
-                  <Data value="1"/>
-                  <Data value="2"/>
-                  <Data value="3"/>
-                  <Data value="4"/>
-                  <Data value="5"/>
-                  <Data value="6"/>
-                  <Data value="7"/>
-                  <Data value="8"/>
-                </Column>
-                <Column editable="true" title="Programa" type="java.lang.Object">
-                  <Data value="Clientes"/>
-                  <Data value="Marcas"/>
-                  <Data value="Unidades"/>
-                  <Data value="Tipo de Pagos"/>
-                  <Data value="Tipos de Productos y Materiales"/>
-                  <Data value="Tipo de Maquinarias y Vehiculos"/>
-                  <Data value="Localizaci&#xf3;n"/>
-                  <Data value="Configuraci&#xf3;n"/>
-                </Column>
+              <Table columnCount="8" rowCount="0">
+                <Column editable="true" title="N&#xb0;" type="java.lang.Object"/>
+                <Column editable="true" title="Programa" type="java.lang.Object"/>
                 <Column editable="true" title="Visualizar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Agregar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Editar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Eliminar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Todo" type="java.lang.Boolean"/>
+                <Column editable="true" title="id" type="java.lang.Object"/>
               </Table>
             </Property>
             <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
               <TableColumnModel selectionModel="0">
+                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                  <Title/>
+                  <Editor/>
+                  <Renderer/>
+                </Column>
                 <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
                   <Title/>
                   <Editor/>
@@ -678,38 +647,24 @@
         <Component class="javax.swing.JTable" name="tbRegistros">
           <Properties>
             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-              <Table columnCount="7" rowCount="9">
-                <Column editable="true" title="N&#xb0;" type="java.lang.Object">
-                  <Data value="1"/>
-                  <Data value="2"/>
-                  <Data value="3"/>
-                  <Data value="4"/>
-                  <Data value="5"/>
-                  <Data value="6"/>
-                  <Data value="7"/>
-                  <Data value="8"/>
-                  <Data value="9"/>
-                </Column>
-                <Column editable="true" title="Programa" type="java.lang.Object">
-                  <Data value="Orden de Servicio"/>
-                  <Data value="Ver Ordenes"/>
-                  <Data value="Ventas"/>
-                  <Data value="Compras de Productos y Materiales"/>
-                  <Data value="Compra Equipos y Vehiculos"/>
-                  <Data value="Gastos Generales"/>
-                  <Data value="Kardex"/>
-                  <Data value="Cotizaciones"/>
-                  <Data value="Cancelaciones"/>
-                </Column>
+              <Table columnCount="8" rowCount="0">
+                <Column editable="true" title="N&#xb0;" type="java.lang.Object"/>
+                <Column editable="true" title="Programa" type="java.lang.Object"/>
                 <Column editable="true" title="Visualizar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Agregar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Editar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Eliminar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Todo" type="java.lang.Boolean"/>
+                <Column editable="true" title="id" type="java.lang.Object"/>
               </Table>
             </Property>
             <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
               <TableColumnModel selectionModel="0">
+                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                  <Title/>
+                  <Editor/>
+                  <Renderer/>
+                </Column>
                 <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
                   <Title/>
                   <Editor/>
@@ -761,38 +716,24 @@
         <Component class="javax.swing.JTable" name="tbReportes">
           <Properties>
             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-              <Table columnCount="7" rowCount="9">
-                <Column editable="true" title="N&#xb0;" type="java.lang.Object">
-                  <Data value="1"/>
-                  <Data value="2"/>
-                  <Data value="3"/>
-                  <Data value="4"/>
-                  <Data value="5"/>
-                  <Data value="6"/>
-                  <Data value="7"/>
-                  <Data value="8"/>
-                  <Data value="9"/>
-                </Column>
-                <Column editable="true" title="Programa" type="java.lang.Object">
-                  <Data value="Trabajos Realizados"/>
-                  <Data value="Estadisticas"/>
-                  <Data value="Deudas por Pagar"/>
-                  <Data value="Deudas por Cobrar"/>
-                  <Data value="Horas Trabajadas"/>
-                  <Data value="Sueldos"/>
-                  <Data value="Stock"/>
-                  <Data value="Trabajos"/>
-                  <Data value="Presupuestos"/>
-                </Column>
+              <Table columnCount="8" rowCount="0">
+                <Column editable="true" title="N&#xb0;" type="java.lang.Object"/>
+                <Column editable="true" title="Programa" type="java.lang.Object"/>
                 <Column editable="true" title="Visualizar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Agregar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Editar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Eliminar" type="java.lang.Boolean"/>
                 <Column editable="true" title="Todo" type="java.lang.Boolean"/>
+                <Column editable="true" title="id" type="java.lang.Object"/>
               </Table>
             </Property>
             <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
               <TableColumnModel selectionModel="0">
+                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                  <Title/>
+                  <Editor/>
+                  <Renderer/>
+                </Column>
                 <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
                   <Title/>
                   <Editor/>
