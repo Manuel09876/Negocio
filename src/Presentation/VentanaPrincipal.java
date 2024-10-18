@@ -224,6 +224,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
     public VentanaPrincipal(int tipUsu, String usuario) {
         initComponents();
+        
+         // Cargar los permisos del usuario
+        cargarPermisos(tipUsu);
 
         this.tipUsu = tipUsu;
         this.usuario = usuario;
@@ -272,6 +275,8 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     // Constructor vacío para evitar errores en la inicialización por defecto
     public VentanaPrincipal() {
         initComponents();
+        
+        
 
         // Inhabilitar la "X" de cierre del JFrame
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -382,12 +387,15 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
     private int obtenerTrabajadorId(String usuario) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida aquí
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "SELECT ut.id_trabajador FROM usuario_trabajador ut INNER JOIN usuarios u ON ut.id_usuario = u.idUsuarios WHERE u.usuario = ?";
 
         try {
-            Conectar.getInstancia().obtenerConexion();
+
             try (PreparedStatement pst = connection.prepareStatement(sql)) {
                 pst.setString(1, usuario);
                 ResultSet rs = pst.executeQuery();
@@ -1120,16 +1128,16 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
         if (JOptionPane.showConfirmDialog(null, "¿Desea salir del Sistema?", "Acceso", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             boolean ocurrioError = false;
-            Connection connection = null; // Declaramos la conexión fuera del bloque try
+            Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida aquí
+            if (connection == null) {
+                throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+            }
 
             try {
                 if (this.usuario == null) {
                     System.out.println("Error: usuario no está inicializado.");
                     return;
                 }
-
-                // Obtener conexión desde el pool
-                connection = Conectar.getInstancia().obtenerConexion();
 
                 int trabajadorId = obtenerTrabajadorId(this.usuario);
 
@@ -1204,14 +1212,26 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuBusquedaConveniosActionPerformed
 
     private void menuAsignacionPermisosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAsignacionPermisosActionPerformed
-        AsignacionPermisos objAsignacionPermisos = null;
         try {
-            objAsignacionPermisos = new AsignacionPermisos(this);
-        } catch (SQLException ex) {
+            // Crear la instancia de la ventana de Asignación de Permisos
+            AsignacionPermisos objAsignacionPermisos = new AsignacionPermisos(this);
+
+            // Cargar permisos para el Rol actual después de mostrar la ventana
+            int rolId = objAsignacionPermisos.getRolId();  // Obtener el Rol Id actual
+            if (rolId != -1) {
+
+                System.out.println("Rol ID obtenido: " + rolId);
+
+                // Cargar las tablas de permisos con el rolId correcto
+                objAsignacionPermisos.cargarPermisosDesdePrincipal();
+
+                // Agregar y mostrar la ventana
+                jpEscritorio.add(objAsignacionPermisos);
+                objAsignacionPermisos.show();
+            }
+            }catch (SQLException ex) {
             Logger.getLogger(VentanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
         }
-        jpEscritorio.add(objAsignacionPermisos);
-        objAsignacionPermisos.show();
     }//GEN-LAST:event_menuAsignacionPermisosActionPerformed
 
     private void menuTrabajosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTrabajosActionPerformed
@@ -1382,27 +1402,27 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     public javax.swing.JMenuItem menutipo_pagosgenerales;
     // End of variables declaration//GEN-END:variables
 
-    private void cargarPermisos() {
-        Connection connection = null;
+    private void cargarPermisos(int tipUsu) {
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida aquí
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
-        String sql = "SELECT nombre_menu AS menu_name, nombre_submenu AS submenu_name\n"
-                + "FROM roles_permisos rp\n"
-                + "JOIN menus m ON rp.menu_id = m.id_menu\n"
-                + "LEFT JOIN submenus s ON rp.submenu_id = s.id_submenu\n"
-                + "WHERE rp.rol_id =  ?";
-        try {
-            Conectar.getInstancia().obtenerConexion();
+        String sql = "SELECT nombre_menu AS menu, nombre_submenu AS submenu\n"
+                + "FROM roles_menus_submenus rms\n"
+                + "JOIN menus m ON rms.id_menu = m.id_menu\n"
+                + "LEFT JOIN submenus s ON rms.id_submenu = s.id_submenu\n"
+                + "WHERE rms.id_rol =  ?";
 
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                pst.setInt(1, tipUsu);
-                ResultSet rs = pst.executeQuery();
-                while (rs.next()) {
-                    String menuName = rs.getString("menu_name");
-                    String submenuName = rs.getString("submenu_name");
-                    setMenuVisibility(menuName, true);
-                    if (submenuName != null) {
-                        setMenuVisibility(submenuName, true);
-                    }
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, tipUsu);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                String menuName = rs.getString("menu");
+                String submenuName = rs.getString("submenu");
+                setMenuVisibility(menuName, true);
+                if (submenuName != null) {
+                    setMenuVisibility(submenuName, true);
                 }
             }
         } catch (SQLException e) {

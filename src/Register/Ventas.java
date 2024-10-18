@@ -37,8 +37,10 @@ public class Ventas extends javax.swing.JInternalFrame {
 
     
     public void MostrarTabla() {
-        Connection connection = null;
-        
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -79,8 +81,6 @@ public class Ventas extends javax.swing.JInternalFrame {
                     + "ORDER BY \n"
                     + "    o.fechaT ASC";
      
-            Conectar.getInstancia().obtenerConexion();
-            
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
@@ -336,15 +336,15 @@ public class Ventas extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarCiente(JComboBox cbxCliente) {
-        Connection connection = null;
-
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "";
         sql = "select * from customer";
         Statement st;
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxCliente.removeAllItems();
@@ -362,13 +362,13 @@ public class Ventas extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoCliente(JComboBox cbxCliente, JTextField idCustomer) {
-        Connection connection = null;
-
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consuta = "select customer.idCustomer from customer where customer.nameCustomer=?";
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxCliente.getSelectedItem().toString());
             cs.execute();

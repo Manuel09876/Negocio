@@ -66,14 +66,15 @@ public class Marcas extends javax.swing.JInternalFrame {
     
 
     public void CargarDatosTabla(String Valores) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
             String ConsultaSQL = "SELECT * FROM marca";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
@@ -95,7 +96,10 @@ public class Marcas extends javax.swing.JInternalFrame {
     }
 
     public void Guardar() {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         // Variables
         int id_marca;
         String nombre;
@@ -108,8 +112,6 @@ public class Marcas extends javax.swing.JInternalFrame {
         sql = "INSERT INTO marca (nombre)VALUES (?)";
         //Para almacenar los datos empleo un try cash
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
             PreparedStatement pst = connection.prepareStatement(sql);
             pst.setString(1, nombre);
@@ -131,13 +133,14 @@ public class Marcas extends javax.swing.JInternalFrame {
     }
 
     public void Eliminar(JTextField id) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         
         setId_marca(Integer.parseInt(id.getText()));
         String consulta = "DELETE from marca where id_marca=?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId_marca());
             cs.executeUpdate();
@@ -168,15 +171,16 @@ public class Marcas extends javax.swing.JInternalFrame {
     }
 
     public void Modificar(JTextField paraId, JTextField paranombre) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         //Obtengo el valor en Cadena(String) de las cajas de Texto
         setId_marca(Integer.parseInt(paraId.getText()));
         setNombre(paranombre.getText());
 
         String sql = "UPDATE marca SET nombre = ?  WHERE id_marca = ?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             ps = connection.prepareStatement(sql);
             ps.setString(1, getNombre());
             ps.setInt(2, getId_marca());
@@ -190,12 +194,13 @@ public class Marcas extends javax.swing.JInternalFrame {
     }
 
     public boolean accion(String estado, int IdMarca) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         
         String sql = "UPDATE marca SET estado = ? WHERE id_marca = ?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, IdMarca);

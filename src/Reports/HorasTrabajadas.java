@@ -66,17 +66,9 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     private Timer cierreAutomatico;
     private LocalDate fechaInicioActividades;
 
-//    public HorasTrabajadas(PuestoDeTrabajo puestoDeTrabajo) {
-//        this.puestoDeTrabajo = puestoDeTrabajo;
-//        this.fechaInicioActividades = obtenerFechaInicioActividadesDesdeBD(); // Asegúrate de que `conect` esté inicializado antes de esta llamada.
-//    }
     public HorasTrabajadas() {
         initComponents();
 
-//        // Verifica si la conexión es nula
-//        if (connection == null) {
-//            throw new RuntimeException("No se pudo obtener la conexión a la base de datos.");
-//        }
         // Llama a otros métodos que dependan de la conexión
         this.fechaInicioActividades = obtenerFechaInicioActividadesDesdeBD();
 
@@ -116,43 +108,6 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         cierreAutomatico.start();
     }
 
-    // Método para enviar correos electrónicos
-//    public void enviarCorreoElectronico(String destinatario, String asunto, String cuerpo) {
-//        // Configurar propiedades para la conexión de correo
-//        Properties props = new Properties();
-//        props.put("mail.smtp.host", "smtp.tuServidorCorreo.com");  // Cambia al servidor SMTP correcto
-//        props.put("mail.smtp.port", "587");  // Cambia el puerto según el servidor
-//        props.put("mail.smtp.auth", "true");
-//        props.put("mail.smtp.starttls.enable", "true");
-//
-//        // Aquí usas las variables de entorno para manejar credenciales de manera segura
-//        final String username = System.getenv("EMAIL_USERNAME");  // Configura la variable de entorno EMAIL_USERNAME
-//        final String password = System.getenv("EMAIL_PASSWORD");  // Configura la variable de entorno EMAIL_PASSWORD
-//
-//        // Autenticación
-//        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
-//            @Override
-//            protected PasswordAuthentication getPasswordAuthentication() {
-//                return new PasswordAuthentication(username, password);  // Usa las variables de entorno
-//            }
-//        });
-//
-//        try {
-//            // Crear el mensaje de correo
-//            Message message = new MimeMessage(session);
-//            message.setFrom(new InternetAddress(username));  // Usa la variable de entorno para el correo
-//            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinatario));
-//            message.setSubject(asunto);
-//            message.setText(cuerpo);
-//
-//            // Enviar el correo
-//            Transport.send(message);
-//            System.out.println("Correo enviado exitosamente.");
-//
-//        } catch (MessagingException e) {
-//            e.printStackTrace();
-//        }
-//    }
     // Método para calcular milisegundos hasta la medianoche
     private long calcularMilisegundosHastaMedianoche() {
         LocalDateTime now = LocalDateTime.now();
@@ -162,18 +117,17 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
     // Cierre de sesiones pendientes
     public void cerrarSesionesPendientes() {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
-
-            String sql = "SELECT trabajador_id FROM horas_ingreso WHERE NOT EXISTS "
-                    + "(SELECT 1 FROM horas_salida WHERE horas_ingreso.id_ingreso = horas_salida.id_ingreso)";
-            try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
-                while (rs.next()) {
-                    int trabajadorId = rs.getInt("trabajador_id");
-                    registrarFinSesionForzada(trabajadorId);
-                }
+        String sql = "SELECT trabajador_id FROM horas_ingreso WHERE NOT EXISTS "
+                + "(SELECT 1 FROM horas_salida WHERE horas_ingreso.id_ingreso = horas_salida.id_ingreso)";
+        try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                int trabajadorId = rs.getInt("trabajador_id");
+                registrarFinSesionForzada(trabajadorId);
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -183,18 +137,15 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     public LocalDate obtenerFechaInicioActividadesDesdeBD() {
-        Connection connection = null;
-
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
         String sql = "SELECT fecha_inicio_actividades FROM configuracion";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
-
-            try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-
-                if (rs.next()) {
-                    return rs.getDate("fecha_inicio_actividades").toLocalDate();
-                }
+        try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getDate("fecha_inicio_actividades").toLocalDate();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -242,8 +193,10 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
     // Mostrar horas trabajadas
     public void Mostrar(JTable tabla, int trabajadorId) {
-        Connection connection = null;
-
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
         DefaultTableModel modelo = new DefaultTableModel();
         modelo.addColumn("ID Ingreso");
         modelo.addColumn("ID Salida");
@@ -256,46 +209,44 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
         tabla.setModel(modelo);
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
+        String sql = "SELECT hi.id_ingreso, hs.id_salida, hi.fInicio, hs.fSalida, "
+                + "TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida) / 60.0 AS horasTrabajadas, hs.forzado "
+                + "FROM horas_ingreso hi JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso "
+                + "WHERE hi.trabajador_id = ?";
 
-            String sql = "SELECT hi.id_ingreso, hs.id_salida, hi.fInicio, hs.fSalida, "
-                    + "TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida) / 60.0 AS horasTrabajadas, hs.forzado "
-                    + "FROM horas_ingreso hi JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso "
-                    + "WHERE hi.trabajador_id = ?";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
 
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                pst.setInt(1, trabajadorId);
-                ResultSet rs = pst.executeQuery();
-                while (rs.next()) {
-                    Timestamp fInicio = rs.getTimestamp("fInicio");
-                    Timestamp fSalida = rs.getTimestamp("fSalida");
+            while (rs.next()) {
+                Timestamp fInicio = rs.getTimestamp("fInicio");
+                Timestamp fSalida = rs.getTimestamp("fSalida");
 
-                    // Extraer fecha y hora por separado
-                    String fechaIngreso = fInicio.toLocalDateTime().toLocalDate().toString();
-                    String horaIngreso = fInicio.toLocalDateTime().toLocalTime().toString();
-                    String fechaSalida = fSalida != null ? fSalida.toLocalDateTime().toLocalDate().toString() : "Pendiente";
-                    String horaSalida = fSalida != null ? fSalida.toLocalDateTime().toLocalTime().toString() : "Pendiente";
+                // Extraer fecha y hora por separado
+                String fechaIngreso = fInicio.toLocalDateTime().toLocalDate().toString();
+                String horaIngreso = fInicio.toLocalDateTime().toLocalTime().toString();
+                String fechaSalida = fSalida != null ? fSalida.toLocalDateTime().toLocalDate().toString() : "Pendiente";
+                String horaSalida = fSalida != null ? fSalida.toLocalDateTime().toLocalTime().toString() : "Pendiente";
 
-                    modelo.addRow(new Object[]{
-                        rs.getInt("id_ingreso"),
-                        rs.getInt("id_salida"),
-                        fechaIngreso,
-                        horaIngreso,
-                        fechaSalida,
-                        horaSalida,
-                        rs.getDouble("horasTrabajadas"),
-                        rs.getBoolean("forzado")
-                    });
-                }
+                modelo.addRow(new Object[]{
+                    rs.getInt("id_ingreso"),
+                    rs.getInt("id_salida"),
+                    fechaIngreso,
+                    horaIngreso,
+                    fechaSalida,
+                    horaSalida,
+                    rs.getDouble("horasTrabajadas"),
+                    rs.getBoolean("forzado")
+                });
             }
             tabla.setModel(modelo);
-            // Aplicamos el renderer personalizado en la columna "Forzado"
+            // Aplicar el renderer personalizado en la columna "Forzado"
             tabla.getColumnModel().getColumn(modelo.getColumnCount() - 1).setCellRenderer(new SalidaForzadaRenderer());
+
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar los registros: " + e.getMessage());
         } finally {
-            Conectar.getInstancia().devolverConexion(connection);
+            Conectar.getInstancia().devolverConexion(connection); // Asegurarse de devolver la conexión
         }
     }
 
@@ -340,32 +291,31 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     public void eliminar(int idIngreso, int idSalida) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         // Eliminar registro de horas_ingreso
         String sqlDeleteHorasIngreso = "DELETE FROM horas_ingreso WHERE id_ingreso = ?";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
+        try (PreparedStatement pst = connection.prepareStatement(sqlDeleteHorasIngreso)) {
+            pst.setInt(1, idIngreso);
+            pst.executeUpdate();
+            System.out.println("Registro de horas_ingreso eliminado con éxito.");
+        } catch (SQLException e) {
+            System.out.println("Error al eliminar el registro de horas_ingreso: " + e.getMessage());
+        }
 
-            try (PreparedStatement pst = connection.prepareStatement(sqlDeleteHorasIngreso)) {
-                pst.setInt(1, idIngreso);
-                pst.executeUpdate();
-                System.out.println("Registro de horas_ingreso eliminado con éxito.");
-            } catch (SQLException e) {
-                System.out.println("Error al eliminar el registro de horas_ingreso: " + e.getMessage());
-            }
+        // Eliminar registro de horas_salida
+        String sqlDeleteHorasSalida = "DELETE FROM horas_salida WHERE id_salida = ?";
 
-            // Eliminar registro de horas_salida
-            String sqlDeleteHorasSalida = "DELETE FROM horas_salida WHERE id_salida = ?";
+        Conectar.getInstancia().obtenerConexion();
 
-            Conectar.getInstancia().obtenerConexion();
-
-            try (PreparedStatement pst = connection.prepareStatement(sqlDeleteHorasSalida)) {
-                pst.setInt(1, idSalida);
-                pst.executeUpdate();
-                System.out.println("Registro de horas_salida eliminado con éxito.");
-            }
+        try (PreparedStatement pst = connection.prepareStatement(sqlDeleteHorasSalida)) {
+            pst.setInt(1, idSalida);
+            pst.executeUpdate();
+            System.out.println("Registro de horas_salida eliminado con éxito.");
 
         } catch (SQLException e) {
             System.out.println("Error al eliminar el registro de horas_salida: " + e.getMessage());
@@ -375,11 +325,12 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     public void modificar(int idIngreso, int idSalida, LocalDateTime nuevaHoraIngreso, LocalDateTime nuevaHoraSalida, int trabajadorId) throws SQLException {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             // Modificar registro de horas_ingreso
             String sqlUpdateHorasIngreso = "UPDATE horas_ingreso SET fInicio = ? WHERE id_ingreso = ?";
             try (PreparedStatement pst = connection.prepareStatement(sqlUpdateHorasIngreso)) {
@@ -397,12 +348,13 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                     pst.setInt(2, idSalida);
                     int affectedRowsSalida = pst.executeUpdate();
                     System.out.println("Hora de salida actualizada con éxito en horas_salida. Filas afectadas: " + affectedRowsSalida);
+                }
 
-                    // Verificar si la salida era forzada y corregirla
-                    String sqlSelectForzado = "SELECT forzado FROM horas_salida WHERE id_salida = ?";
-                    try (PreparedStatement pstForzado = connection.prepareStatement(sqlSelectForzado)) {
-                        pstForzado.setInt(1, idSalida);
-                        ResultSet rs = pstForzado.executeQuery();
+                // Verificar si la salida era forzada y corregirla
+                String sqlSelectForzado = "SELECT forzado FROM horas_salida WHERE id_salida = ?";
+                try (PreparedStatement pstForzado = connection.prepareStatement(sqlSelectForzado)) {
+                    pstForzado.setInt(1, idSalida);
+                    try (ResultSet rs = pstForzado.executeQuery()) {
                         if (rs.next()) {
                             boolean esForzado = rs.getBoolean("forzado");
                             if (esForzado) {
@@ -418,29 +370,30 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("Error al modificar las horas: " + e.getMessage());
+            throw e; // Volver a lanzar la excepción para que sea manejada en un nivel superior si es necesario
         } finally {
-            Conectar.getInstancia().devolverConexion(connection);
+            Conectar.getInstancia().devolverConexion(connection); // Devolver la conexión
         }
     }
 
     // Guardar horas trabajadas
     public void guardarHorasTrabajadas(int trabajadorId, double horasTrabajadas, LocalDate fecha, String tipoPeriodo) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String periodoPago = determinarPeriodoPago(fecha, fechaInicioActividades, tipoPeriodo);
         String sql = "INSERT INTO horas_trabajadas (trabajador_id, horas, fecha, periodo_pago) VALUES (?, ?, ?, ?) "
                 + "ON DUPLICATE KEY UPDATE horas = VALUES(horas), periodo_pago = VALUES(periodo_pago)";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            pst.setDouble(2, horasTrabajadas);
+            pst.setDate(3, java.sql.Date.valueOf(fecha));
+            pst.setString(4, periodoPago);
+            pst.executeUpdate();
 
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                pst.setInt(1, trabajadorId);
-                pst.setDouble(2, horasTrabajadas);
-                pst.setDate(3, java.sql.Date.valueOf(fecha));
-                pst.setString(4, periodoPago);
-                pst.executeUpdate();
-            }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al guardar horas trabajadas: ", ex);
         } finally {
@@ -450,20 +403,20 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
     // Método para registrar el inicio de sesión
     public void registrarInicioSesion(int trabajadorId) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida aquí
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         //        revisarEstadoSesion(trabajadorId); // Revisa el estado de la sesión en intervalos
         // Registrar el inicio de sesión en horas_ingreso
         String sql = "INSERT INTO horas_ingreso (trabajador_id, fInicio) VALUES (?, ?)";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            pst.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            pst.executeUpdate();
 
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                pst.setInt(1, trabajadorId);
-                pst.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-                pst.executeUpdate();
-            }
 //            System.out.println("Inicio de sesión registrado para trabajador ID: " + trabajadorId);
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al registrar inicio de sesión: ", ex);
@@ -474,39 +427,39 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
     // Método para registrar el fin de sesión y calcular las horas de trabajo
     public void registrarFinSesion(int trabajadorId) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         //        System.out.println("Registrando fin de sesión para trabajador ID: " + trabajadorId);
         String obtenerIdIngresoSQL = "SELECT id_ingreso FROM horas_ingreso WHERE trabajador_id = ? ORDER BY fInicio DESC LIMIT 1";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
+        try (PreparedStatement pstIngreso = connection.prepareStatement(obtenerIdIngresoSQL)) {
+            pstIngreso.setInt(1, trabajadorId);
+            ResultSet rs = pstIngreso.executeQuery();
 
-            try (PreparedStatement pstIngreso = connection.prepareStatement(obtenerIdIngresoSQL)) {
-                pstIngreso.setInt(1, trabajadorId);
-                ResultSet rs = pstIngreso.executeQuery();
+            if (rs.next()) {
+                int idIngreso = rs.getInt("id_ingreso");
 
-                if (rs.next()) {
-                    int idIngreso = rs.getInt("id_ingreso");
+                String sql = "INSERT INTO horas_salida (trabajador_id, fSalida, id_ingreso) VALUES (?, ?, ?)";
+                Conectar.getInstancia().obtenerConexion();
+                try (PreparedStatement pstSalida = connection.prepareStatement(sql)) {
+                    pstSalida.setInt(1, trabajadorId);
+                    pstSalida.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+                    pstSalida.setInt(3, idIngreso);
 
-                    String sql = "INSERT INTO horas_salida (trabajador_id, fSalida, id_ingreso) VALUES (?, ?, ?)";
-                    Conectar.getInstancia().obtenerConexion();
-                    try (PreparedStatement pstSalida = connection.prepareStatement(sql)) {
-                        pstSalida.setInt(1, trabajadorId);
-                        pstSalida.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-                        pstSalida.setInt(3, idIngreso);
+                    int rowsAffected = pstSalida.executeUpdate();
+                    System.out.println("Filas afectadas: " + rowsAffected);
 
-                        int rowsAffected = pstSalida.executeUpdate();
-                        System.out.println("Filas afectadas: " + rowsAffected);
-
-                    } catch (SQLException ex) {
-                        LOGGER.log(Level.SEVERE, "Error al registrar fin de sesión: ", ex);
-                    }
-                } else {
-                    System.out.println("No se encontró una sesión de inicio para el trabajador ID: " + trabajadorId);
-                    JOptionPane.showMessageDialog(null, "No se encontró una sesión activa para el trabajador con ID: " + trabajadorId);
+                } catch (SQLException ex) {
+                    LOGGER.log(Level.SEVERE, "Error al registrar fin de sesión: ", ex);
                 }
+            } else {
+                System.out.println("No se encontró una sesión de inicio para el trabajador ID: " + trabajadorId);
+                JOptionPane.showMessageDialog(null, "No se encontró una sesión activa para el trabajador con ID: " + trabajadorId);
             }
+
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al obtener id_ingreso: ", ex);
         } finally {
@@ -516,37 +469,37 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
     // Registrar fin de sesión forzada
     public void registrarFinSesionForzada(int trabajadorId) throws SQLException {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "SELECT id_ingreso FROM horas_ingreso WHERE trabajador_id = ? ORDER BY fInicio DESC LIMIT 1";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
+            if (rs.next()) {
+                int idIngreso = rs.getInt("id_ingreso");
 
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                pst.setInt(1, trabajadorId);
-                ResultSet rs = pst.executeQuery();
-                if (rs.next()) {
-                    int idIngreso = rs.getInt("id_ingreso");
+                String sqlCheck = "SELECT id_salida FROM horas_salida WHERE id_ingreso = ?";
 
-                    String sqlCheck = "SELECT id_salida FROM horas_salida WHERE id_ingreso = ?";
+                try (PreparedStatement pstCheck = connection.prepareStatement(sqlCheck)) {
+                    pstCheck.setInt(1, idIngreso);
+                    ResultSet rsCheck = pstCheck.executeQuery();
+                    if (!rsCheck.next()) {
+                        String sqlInsert = "INSERT INTO horas_salida (trabajador_id, fSalida, id_ingreso, forzado) VALUES (?, ?, ?, 1)";
 
-                    try (PreparedStatement pstCheck = connection.prepareStatement(sqlCheck)) {
-                        pstCheck.setInt(1, idIngreso);
-                        ResultSet rsCheck = pstCheck.executeQuery();
-                        if (!rsCheck.next()) {
-                            String sqlInsert = "INSERT INTO horas_salida (trabajador_id, fSalida, id_ingreso, forzado) VALUES (?, ?, ?, 1)";
-
-                            try (PreparedStatement pstInsert = connection.prepareStatement(sqlInsert)) {
-                                pstInsert.setInt(1, trabajadorId);
-                                pstInsert.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-                                pstInsert.setInt(3, idIngreso);
-                                pstInsert.executeUpdate();
-                            }
+                        try (PreparedStatement pstInsert = connection.prepareStatement(sqlInsert)) {
+                            pstInsert.setInt(1, trabajadorId);
+                            pstInsert.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+                            pstInsert.setInt(3, idIngreso);
+                            pstInsert.executeUpdate();
                         }
                     }
                 }
             }
+
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al obtener id_ingreso: ", ex);
         } finally {
@@ -556,25 +509,25 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     public void corregirSalidaForzada(int idSalida, LocalDateTime nuevaHoraSalida, int trabajadorId) throws SQLException {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "UPDATE horas_salida SET fSalida = ?, forzado = 0 WHERE id_salida = ? AND forzado = 1";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
-
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                pst.setTimestamp(1, Timestamp.valueOf(nuevaHoraSalida));  // Nueva hora de salida
-                pst.setInt(2, idSalida);
-                int filasAfectadas = pst.executeUpdate();
-                if (filasAfectadas > 0) {
-                    System.out.println("Salida forzada corregida con éxito.");
-                    // Después de corregir, refrescar la tabla
-                    Mostrar(Tabla, trabajadorId);  // Ahora pasamos trabajadorId correctamente
-                } else {
-                    System.out.println("No se encontró una salida forzada con ese ID.");
-                }
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setTimestamp(1, Timestamp.valueOf(nuevaHoraSalida));  // Nueva hora de salida
+            pst.setInt(2, idSalida);
+            int filasAfectadas = pst.executeUpdate();
+            if (filasAfectadas > 0) {
+                System.out.println("Salida forzada corregida con éxito.");
+                // Después de corregir, refrescar la tabla
+                Mostrar(Tabla, trabajadorId);  // Ahora pasamos trabajadorId correctamente
+            } else {
+                System.out.println("No se encontró una salida forzada con ese ID.");
             }
+
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al obtener id_ingreso: ", ex);
         } finally {
@@ -603,20 +556,20 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     private void guardarPago(int trabajadorId, double salarioBruto, double salarioNeto) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "INSERT INTO pagos (trabajador_id, salario_bruto, salario_neto, fecha_pago) VALUES (?, ?, ?, ?)";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            pst.setDouble(2, salarioBruto);
+            pst.setDouble(3, salarioNeto);
+            pst.setDate(4, java.sql.Date.valueOf(LocalDate.now())); // Fecha del pago
+            pst.executeUpdate();
 
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                pst.setInt(1, trabajadorId);
-                pst.setDouble(2, salarioBruto);
-                pst.setDouble(3, salarioNeto);
-                pst.setDate(4, java.sql.Date.valueOf(LocalDate.now())); // Fecha del pago
-                pst.executeUpdate();
-            }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al guardar pagos: ", ex);
         } finally {
@@ -625,7 +578,10 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     public String obtenerTipoPeriodo(int idPuestoDeTrabajo) throws SQLException {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String tipoPeriodo = null;
 
@@ -633,17 +589,14 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                 + "INNER JOIN periodo p ON pt.id_periodo=p.id\n"
                 + "WHERE idPDT = ?";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
-
-            try (PreparedStatement ps = connection.prepareStatement(consulta)) {
-                ps.setInt(1, idPuestoDeTrabajo);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        tipoPeriodo = rs.getString("descripcion");
-                    }
+        try (PreparedStatement ps = connection.prepareStatement(consulta)) {
+            ps.setInt(1, idPuestoDeTrabajo);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    tipoPeriodo = rs.getString("descripcion");
                 }
             }
+
         } catch (SQLException e) {
             System.out.println("Error al obtener tipo de periodo: " + e.getMessage());
             throw e;
@@ -654,24 +607,24 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     public double calcularHorasTrabajadas(int trabajadorId, LocalDate fechaInicio, LocalDate fechaFin) throws SQLException {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         double totalHoras = 0.0;
         String sql = "SELECT SUM(TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida)) / 60.0 AS horasTrabajadas FROM horas_ingreso hi JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso WHERE hi.trabajador_id = ? AND hi.fInicio BETWEEN ? AND ?";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            pst.setDate(2, java.sql.Date.valueOf(fechaInicio));
+            pst.setDate(3, java.sql.Date.valueOf(fechaFin));
+            ResultSet rs = pst.executeQuery();
 
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                pst.setInt(1, trabajadorId);
-                pst.setDate(2, java.sql.Date.valueOf(fechaInicio));
-                pst.setDate(3, java.sql.Date.valueOf(fechaFin));
-                ResultSet rs = pst.executeQuery();
-
-                if (rs.next()) {
-                    totalHoras = rs.getDouble("horasTrabajadas");
-                }
+            if (rs.next()) {
+                totalHoras = rs.getDouble("horasTrabajadas");
             }
+
         } catch (SQLException e) {
             System.out.println("Error al obtener tipo de periodo: " + e.getMessage());
             throw e;
@@ -692,19 +645,19 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     public void acumularVacaciones(int trabajadorId, int diasTrabajados) throws SQLException {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "UPDATE vacaciones SET dias_acumulados = dias_acumulados + ? WHERE trabajador_id = ?";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            int diasAcumulados = diasTrabajados / 20;  // Ejemplo: Cada 20 días trabajados se acumula 1 día de vacaciones.
+            pst.setInt(1, diasAcumulados);
+            pst.setInt(2, trabajadorId);
+            pst.executeUpdate();
 
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                int diasAcumulados = diasTrabajados / 20;  // Ejemplo: Cada 20 días trabajados se acumula 1 día de vacaciones.
-                pst.setInt(1, diasAcumulados);
-                pst.setInt(2, trabajadorId);
-                pst.executeUpdate();
-            }
         } catch (SQLException e) {
             System.out.println("Error al obtener tipo de periodo: " + e.getMessage());
             throw e;
@@ -714,19 +667,18 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     public void registrarAuditoria(int trabajadorId, String accion, LocalDateTime fechaHora) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "INSERT INTO auditoria (trabajador_id, accion, fecha_hora) VALUES (?, ?, ?)";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
-
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                pst.setInt(1, trabajadorId);
-                pst.setString(2, accion);
-                pst.setTimestamp(3, Timestamp.valueOf(fechaHora));
-                pst.executeUpdate();
-            }
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            pst.setString(2, accion);
+            pst.setTimestamp(3, Timestamp.valueOf(fechaHora));
+            pst.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -735,7 +687,10 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     private double calcularHorasExtrasMensuales(int trabajadorId, LocalDate fechaInicio, LocalDate fechaFin) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         double totalHorasExtras = 0.0;
 
@@ -744,17 +699,14 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                 + "JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso "
                 + "WHERE hi.trabajador_id = ? AND hi.fInicio BETWEEN ? AND ?";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                pst.setInt(1, trabajadorId);
-                pst.setDate(2, java.sql.Date.valueOf(fechaInicio));
-                pst.setDate(3, java.sql.Date.valueOf(fechaFin));
-                ResultSet rs = pst.executeQuery();
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            pst.setDate(2, java.sql.Date.valueOf(fechaInicio));
+            pst.setDate(3, java.sql.Date.valueOf(fechaFin));
+            ResultSet rs = pst.executeQuery();
 
-                if (rs.next()) {
-                    totalHorasExtras = rs.getDouble("horasExtras");
-                }
+            if (rs.next()) {
+                totalHorasExtras = rs.getDouble("horasExtras");
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -766,23 +718,23 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     public boolean verificarOvertime(int trabajadorId) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "SELECT ot.descripcion FROM puestodetrabajo pt \n"
                 + "INNER JOIN overtime ot ON pt.id_overtime = ot.id \n"
                 + "WHERE pt.idTrabajador = ?";
-        try {
-            Conectar.getInstancia().obtenerConexion();
 
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                pst.setInt(1, trabajadorId);
-                ResultSet rs = pst.executeQuery();
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
 
-                if (rs.next()) {
-                    String descripcionOvertime = rs.getString("descripcion");  // Obtén la descripción de overtime
-                    // Retorna true si la descripción de overtime corresponde a un tipo válido de overtime
-                    return descripcionOvertime != null && !descripcionOvertime.isEmpty();
-                }
+            if (rs.next()) {
+                String descripcionOvertime = rs.getString("descripcion");  // Obtén la descripción de overtime
+                // Retorna true si la descripción de overtime corresponde a un tipo válido de overtime
+                return descripcionOvertime != null && !descripcionOvertime.isEmpty();
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al verificar overtime: " + e.getMessage());
@@ -793,20 +745,19 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     public double obtenerPagoPorHora(int trabajadorId) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "SELECT pagoPorHora FROM puestodetrabajo WHERE idTrabajador = ?";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
 
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                pst.setInt(1, trabajadorId);
-                ResultSet rs = pst.executeQuery();
-
-                if (rs.next()) {
-                    return rs.getDouble("pagoPorHora");  // Retorna el pago por hora.
-                }
+            if (rs.next()) {
+                return rs.getDouble("pagoPorHora");  // Retorna el pago por hora.
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al obtener el pago por hora: " + e.getMessage());
@@ -831,20 +782,19 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     private double obtenerSueldoMensual(int trabajadorId) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "SELECT sueldo FROM puestodetrabajo WHERE idTrabajador = ?";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, trabajadorId);
+            ResultSet rs = pst.executeQuery();
 
-            try (PreparedStatement pst = connection.prepareStatement(sql)) {
-                pst.setInt(1, trabajadorId);
-                ResultSet rs = pst.executeQuery();
-
-                if (rs.next()) {
-                    return rs.getDouble("sueldo");  // Retorna el pago por hora.
-                }
+            if (rs.next()) {
+                return rs.getDouble("sueldo");  // Retorna el pago por hora.
             }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al obtener el sueldo: " + e.getMessage());
@@ -855,24 +805,23 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     private String obtenerTipoPago(int trabajadorId) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "SELECT p.descripcion FROM puestodetrabajo pt\n"
                 + "INNER JOIN periodo p ON pt.id_periodo= p.id WHERE pt.idTrabajador = ?";
-        
-        try{
-            Conectar.getInstancia().obtenerConexion();
-        
+
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, trabajadorId);
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
                 return rs.getString("periodo");
             }
-        }
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally{
+        } finally {
             Conectar.getInstancia().devolverConexion(connection);
         }
         return "Semanal"; // Por defecto semanal
@@ -915,16 +864,16 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     private double obtenerHorasTrabajadas(int trabajadorId, LocalDate fechaInicio, LocalDate fechaFin) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         double horasTrabajadas = 0.0;
 
         // Consulta a la base de datos o cálculo de horas trabajadas en el periodo (ejemplo)
         String sql = "SELECT SUM(horas) AS total_horas FROM horas_trabajadas WHERE trabajador_id = ? AND fecha BETWEEN ? AND ?";
-        
-        try{
-            Conectar.getInstancia().obtenerConexion();
-        
+
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, trabajadorId);
             ps.setDate(2, java.sql.Date.valueOf(fechaInicio));
@@ -934,10 +883,9 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             if (rs.next()) {
                 horasTrabajadas = rs.getDouble("total_horas");
             }
-        }
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally{
+        } finally {
             Conectar.getInstancia().devolverConexion(connection);
         }
 
@@ -977,17 +925,17 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     }
 
     private void consolidarHorasTrabajadas(int trabajadorId, LocalDate fecha) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         double totalHoras = 0.0;
         String sql = "SELECT SUM(TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida)) / 60.0 AS horasTrabajadas "
                 + "FROM horas_ingreso hi "
                 + "JOIN horas_salida hs ON hi.id_ingreso = hs.id_ingreso "
                 + "WHERE hi.trabajador_id = ? AND DATE(hi.fInicio) = ?";
-        
-        try{
-            Conectar.getInstancia().obtenerConexion();
-        
+
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, trabajadorId);
             pst.setDate(2, java.sql.Date.valueOf(fecha));
@@ -996,10 +944,9 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             if (rs.next()) {
                 totalHoras = rs.getDouble("horasTrabajadas");
             }
-        }
         } catch (SQLException ex) {
             ex.printStackTrace();
-        }finally{
+        } finally {
             Conectar.getInstancia().devolverConexion(connection);
         }
 
@@ -1074,7 +1021,10 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
     // Método para calcular las horas trabajadas después de registrar la salida
     public double calcularHorasTrabajadasPorDia(int trabajadorId) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "SELECT DATE(hi.fInicio) as fecha, SUM(TIMESTAMPDIFF(MINUTE, hi.fInicio, hs.fSalida)) / 60.0 AS horasTrabajadas "
                 + "FROM horas_ingreso hi "
@@ -1082,10 +1032,7 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                 + "WHERE hi.trabajador_id = ? AND DATE(hi.fInicio) = CURDATE() "
                 + "GROUP BY DATE(hi.fInicio)";
         double totalHorasTrabajadas = 0.0;
-        
-        try{
-            Conectar.getInstancia().obtenerConexion();
-        
+
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, trabajadorId);
             ResultSet rs = pst.executeQuery();
@@ -1093,23 +1040,22 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
             if (rs.next()) {
                 totalHorasTrabajadas = rs.getDouble("horasTrabajadas");
             }
-        }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al calcular horas trabajadas por día: ", ex);
-        }finally{
+        } finally {
             Conectar.getInstancia().devolverConexion(connection);
         }
         return totalHorasTrabajadas;
     }
 
     public void generarReporte(int trabajadorId, java.util.Date fechaInicio, java.util.Date fechaFin) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "SELECT * FROM deducciones WHERE trabajador_id = ? AND fecha BETWEEN ? AND ?";
-        
-        try{
-            Conectar.getInstancia().obtenerConexion();
-        
+
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             // Asegúrate de establecer todos los parámetros necesarios en la consulta SQL
             pst.setInt(1, trabajadorId); // Establece el parámetro para trabajador_id
@@ -1135,23 +1081,22 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                 };
                 model.addRow(row);
             }
-        }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al generar el reporte: " + ex.getMessage());
-        }finally{
+        } finally {
             Conectar.getInstancia().devolverConexion(connection);
         }
     }
 
     // Implementar métodos para generar el reporte
     public void generarReporte() {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "SELECT * FROM deducciones WHERE trabajador_id = ? AND fecha BETWEEN ? AND ?";
-        
-        try{
-            Conectar.getInstancia().obtenerConexion();
-        
+
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             // Verificar si los JDateChoosers están inicializados
             if (jDateChooser1 == null || jDateChooser2 == null) {
@@ -1185,10 +1130,9 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                 };
                 model.addRow(row);
             }
-        }
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(null, "Error al generar el reporte: " + ex.getMessage());
-        }finally{
+        } finally {
             Conectar.getInstancia().devolverConexion(connection);
         }
     }
@@ -1540,14 +1484,14 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarTrabajador(JComboBox<String> comboTrabajador) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         System.out.println("Método MostrarTrabajador llamado en: " + new java.util.Date());
         String sql = "SELECT * FROM worker";
-        
-        try{
-            Conectar.getInstancia().obtenerConexion();
-        
+
         try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             comboTrabajador.removeAllItems(); // Limpiar los elementos existentes en el comboBox
 
@@ -1555,16 +1499,20 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
                 comboTrabajador.addItem(rs.getString("nombre")); // Agregar cada trabajador al comboBox
                 System.out.println("Añadiendo trabajador al ComboBox: " + rs.getString("nombre"));
             }
-        }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Trabajadores: " + e.toString());
-        }finally{
-            Conectar.getInstancia().devolverConexion(connection);
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection); // Asegurarse de devolver la conexión
         }
     }
 
     public void MostrarCodigoTrabajador(JComboBox<String> trabajador, JTextField IdTrabajador) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
+
+        // Asegurarse de que el ComboBox no esté vacío
         if (trabajador.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(null, "Seleccione un trabajador válido.");
             return;
@@ -1572,28 +1520,28 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
         String consulta = "SELECT worker.idWorker FROM worker WHERE worker.nombre = ?";
 
-        try {
-            Conectar.getInstancia().obtenerConexion();
-
-            CallableStatement cs = connection.prepareCall(consulta);
-            cs.setString(1, trabajador.getSelectedItem().toString());
-            ResultSet rs = cs.executeQuery();
+        // Preparar la consulta SQL
+        try (PreparedStatement ps = connection.prepareCall(consulta)) {
+            ps.setString(1, trabajador.getSelectedItem().toString());
+            ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
                 IdTrabajador.setText(rs.getString("idWorker"));
             }
-
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar código del trabajador: " + e.toString());
-        }finally{
-            Conectar.getInstancia().devolverConexion(connection);
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection); // Devolver la conexión
         }
     }
 
     // Método para guardar las horas trabajadas en la base de datos
     private void guardarHorasTrabajadas(int trabajadorId, double horasTrabajadas, LocalDate fecha) {
-        Connection connection = null;
-        
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
+
         // Asegúrate de que la fecha sea válida
         if (fecha == null || fecha.equals(LocalDate.EPOCH)) {
             fecha = LocalDate.now(); // Usa la fecha actual si la fecha es nula o no válida
@@ -1601,21 +1549,16 @@ public class HorasTrabajadas extends javax.swing.JInternalFrame {
 
         String sql = "INSERT INTO horas_trabajadas (trabajador_id, horas, fecha) VALUES (?, ?, ?) "
                 + "ON DUPLICATE KEY UPDATE horas = VALUES(horas)";
-        
-        
-        try{
-            Conectar.getInstancia().obtenerConexion();
-            
+
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, trabajadorId);
             pst.setDouble(2, horasTrabajadas);
             pst.setDate(3, java.sql.Date.valueOf(fecha));
             pst.executeUpdate();
             System.out.println("Horas trabajadas registradas para trabajador ID: " + trabajadorId + " en la fecha: " + fecha);
-        }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al guardar horas trabajadas: ", ex);
-        }finally{
+        } finally {
             Conectar.getInstancia().devolverConexion(connection);
         }
     }

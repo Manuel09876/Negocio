@@ -1,4 +1,3 @@
-
 package Admission;
 
 import conectar.Conectar;
@@ -68,14 +67,15 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
     
     
     void CargarDatosTabla(String Valores) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
             String ConsultaSQL = "SELECT * FROM tipos_pagosgenerales";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
@@ -97,8 +97,11 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
     }
 
     void Guardar() {
-        Connection connection = null;
-        // Variables
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
+    // Variables
         int id_pagos;
         String nombre;
         String sql = "";
@@ -110,8 +113,6 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
         sql = "INSERT INTO tipos_pagosgenerales (nombre)VALUES (?)";
         //Para almacenar los datos empleo un try cash
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
             PreparedStatement pst = connection.prepareStatement(sql);
             pst.setString(1, nombre);
@@ -132,12 +133,13 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
     }
 
     public void Eliminar(JTextField id) {
-        Connection connection = null;
+    Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }   
         setId_pagos(Integer.parseInt(id.getText()));
         String consulta = "DELETE from tipos_pagosgenerales where id_pagos=?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId_pagos());
             cs.executeUpdate();
@@ -168,13 +170,14 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
     }
 
     public void modificar(JTextField id, JTextField nombre) {  
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         try {        
             setId_pagos(Integer.parseInt(txtId.getText()));
             setNombre(txtDescripcion.getText());            
         String sql = "UPDATE tipos_pagosgenerales SET nombre = ?  WHERE id_pagos = ?";        
-        
-        Conectar.getInstancia().obtenerConexion();
         
             ps = connection.prepareStatement(sql);
             ps.setString(1, getNombre());
@@ -189,11 +192,12 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
     }
     
     public boolean accion(String estado, int IdPagos) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "UPDATE tipos_pagosgenerales SET estado = ? WHERE id_pagos = ?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, IdPagos);

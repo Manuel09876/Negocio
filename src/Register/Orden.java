@@ -470,8 +470,10 @@ public class Orden extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbxCustomerItemStateChanged
 //Mostrar Lista de Precios por Empresa
     private void btnListaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnListaActionPerformed
-        Connection connection = null;
-        
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         String ID = txtIdBusiness.getText();
         String ID_buscar = "";
 
@@ -486,8 +488,6 @@ public class Orden extends javax.swing.JInternalFrame {
             tbPrecios.setModel(modelo);
             String sql = "SELECT bussiness.nameBusiness AS Empresa, services.servicio, services.precio FROM services INNER JOIN bussiness ON services.id_empresa=bussiness.idBusiness " + ID_buscar;
      
-            Conectar.getInstancia().obtenerConexion();
-            
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
@@ -512,7 +512,10 @@ public class Orden extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnServiciosActionPerformed
 //Mostrar Tamaño de la Propiedad
     private void btnMTPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMTPActionPerformed
-        Connection connection = null;
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String ID = txtIdCustomer.getText();
         String ID_buscar = "";
 
@@ -522,8 +525,6 @@ public class Orden extends javax.swing.JInternalFrame {
         try {
             String sql = "SELECT * FROM customer " + ID_buscar;
             Statement st;
-            
-            Conectar.getInstancia().obtenerConexion();
             
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -713,15 +714,15 @@ public class Orden extends javax.swing.JInternalFrame {
 
 //LLenar el ComboBox de la Empresa
     public void MostrarEmpresa(JComboBox cbxEmpresa) {
-        Connection connection = null;
-
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "";
         sql = "select * from bussiness";
         Statement st;
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxEmpresa.removeAllItems();
@@ -739,13 +740,13 @@ public class Orden extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoEmpresa(JComboBox cbxEmpresa, JTextField idBusiness) {
-        Connection connection = null;
-
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consuta = "select bussiness.idBusiness from bussiness where bussiness.nameBusiness=?";
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxEmpresa.getSelectedItem().toString());
             cs.execute();
@@ -765,15 +766,15 @@ public class Orden extends javax.swing.JInternalFrame {
 
 //LLana el ComboBox Cliente
     public void MostrarCiente(JComboBox cbxCliente) {
-        Connection connection = null;
-
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "";
         sql = "SELECT nameCustomer AS nombre FROM customer;";
         Statement st;
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxCliente.removeAllItems();
@@ -792,13 +793,13 @@ public class Orden extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoCliente(JComboBox cbxCliente, JTextField idCustomer) {
-        Connection connection = null;
-
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consuta = "select customer.idCustomer from customer where customer.nameCustomer=?";
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxCliente.getSelectedItem().toString());
             cs.execute();
@@ -818,15 +819,15 @@ public class Orden extends javax.swing.JInternalFrame {
 
 //LLena el ComboBox Trabajador como vendedor para posterior comision
     public void MostrarTrabajador(JComboBox comboTrabajador) {
-        Connection connection = null;
-
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "";
         sql = "select * from worker";
         Statement st;
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             comboTrabajador.removeAllItems();
@@ -844,13 +845,13 @@ public class Orden extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoTrabajador(JComboBox trabajador, JTextField IdTrabajador) {
-        Connection connection = null;
-
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consuta = "select worker.idWorker from worker where worker.nombre=?";
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, trabajador.getSelectedItem().toString());
             cs.execute();
@@ -944,7 +945,10 @@ public class Orden extends javax.swing.JInternalFrame {
     }
 
     private void registrarOrden() {
-        Connection connection = null;
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
     PreparedStatement stmt = null;
     try {
         
@@ -990,8 +994,6 @@ public class Orden extends javax.swing.JInternalFrame {
                 // Insertar la orden de servicio para cada fecha intermedia
                 String sql = "INSERT INTO orderservice (fechaT, id_empresa, id_cliente, servicio, precio, notaEmpresa, frecuencia, inicio, fin) VALUES (?,?,?,?,?,?,?,?,?)";
 
-                Conectar.getInstancia().obtenerConexion();
-                
                 stmt = connection.prepareStatement(sql);
                 stmt.setString(1, dateFormat.format(calendar.getTime()));
                 stmt.setInt(2, empresa);

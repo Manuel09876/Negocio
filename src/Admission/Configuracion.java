@@ -134,12 +134,12 @@ public class Configuracion extends javax.swing.JInternalFrame {
     
     
     public Configuracion BuscarDatos() {
-        Connection connection = null;
-        
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         String sql = "SELECT * FROM configuracion";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             ps = connection.prepareStatement(sql);
             rs = ps.executeQuery();
             if (rs.next()) {
@@ -166,11 +166,12 @@ public class Configuracion extends javax.swing.JInternalFrame {
     }
 
     public boolean GuardarConfig() {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "INSERT INTO configuracion(nombre, direccion, ciudad, zipcode, estado, telefono, email, webpage, mensaje, logo, email_password, fecha_inicio_actividades) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             ps = connection.prepareStatement(sql);
             ps.setString(1, getNombre());
             ps.setString(2, getDireccion());
@@ -204,11 +205,12 @@ public class Configuracion extends javax.swing.JInternalFrame {
     }
 
     public boolean ModificarDatos() {
-        Connection connection = null;
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "UPDATE configuracion SET nombre=?, direccion=?, ciudad=?, zipcode=?, estado=?, telefono=?, email=?, webpage=?, mensaje=?, logo=?, email_password=?, fecha_inicio_actividades=? WHERE id=?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             ps = connection.prepareStatement(sql);
             ps.setString(1, getNombre());
             ps.setString(2, getDireccion());

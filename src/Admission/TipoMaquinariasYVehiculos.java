@@ -66,8 +66,10 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
 
     
     void CargarDatosTabla(String Valores) {
-        Connection connection = null;
-
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];
@@ -76,8 +78,6 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
 
             String ConsultaSQL = "SELECT * FROM tipomaquinariasvehiculos";
 
-            Conectar.getInstancia().obtenerConexion();
-            
             Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
@@ -102,8 +102,10 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
     }
 
     void Guardar() {
-        Connection connection = null;
-
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         // Variables
         int idMaqVe;
         String nombre;
@@ -120,8 +122,6 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
 
         //Para almacenar los datos empleo un try cash
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
             PreparedStatement pst = connection.prepareStatement(sql);
 
@@ -150,15 +150,15 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
     }
 
     public void Eliminar(JTextField id) {
-        Connection connection = null;
-
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         setIdMaqVe(Integer.parseInt(id.getText()));
 
         String consulta = "DELETE from tipomaquinariasvehiculos where idMaqVe=?";
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getIdMaqVe());
             cs.executeUpdate();
@@ -182,14 +182,10 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
     public void SeleccionarTipo(JTable Tabla, JTextField IdMaqVe, JTextField tipo) {
 
         try {
-
             int fila = tbMaqVe.getSelectedRow();
-
             if (fila >= 0) {
-
                 IdMaqVe.setText(tbMaqVe.getValueAt(fila, 0).toString());
                 tipo.setText(tbMaqVe.getValueAt(fila, 1).toString());
-
             } else {
                 JOptionPane.showMessageDialog(null, "Fila No seleccionada");
             }
@@ -201,22 +197,18 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
     }
 
     public void ModificarTipo(JTextField paraId, JTextField paraNombre){
-        Connection connection = null;
-        
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         //Obtengo el valor en Cadena(String) de las cajas de Texto
         setIdMaqVe(Integer.parseInt(paraId.getText()));
         setNombre(paraNombre.getText());
-        
-       
-        
+            
         String consulta= "UPDATE tipomaquinariasvehiculos SET tiopomaquinariasvehiculos.nombre = ? WHERE tipomaquinariasvehiculos.idMaqVe=?";
         
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consulta);
-            
-            //
             cs.setString(1, getNombre());
             cs.setInt(2, getIdMaqVe());
             
@@ -233,11 +225,12 @@ public class TipoMaquinariasYVehiculos extends javax.swing.JInternalFrame {
     }
     
     public boolean accion(String estado, int IdMaqVe) {
-        Connection connection = null;
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "UPDATE tipomaquinariasvehiculos SET estado = ? WHERE idMaqVe = ?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, IdMaqVe);

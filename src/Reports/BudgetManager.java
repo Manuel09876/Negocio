@@ -90,15 +90,14 @@ public class BudgetManager extends javax.swing.JInternalFrame {
     }
     
     private void addBudget() {
-        Connection connection = null;
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String name = nameField.getText();
         String amount = amountField.getText();
         String type = (String) typeComboBox.getSelectedItem();
 
-        try{
-            Conectar.getInstancia().obtenerConexion();
-        
-        
         try (PreparedStatement stmt = connection.prepareStatement("INSERT INTO budgets (name, amount, type) VALUES (?, ?, ?)")) {
 
             stmt.setString(1, name);
@@ -107,7 +106,6 @@ public class BudgetManager extends javax.swing.JInternalFrame {
             stmt.executeUpdate();
 
             refreshBudgetTable();
-        }
         } catch (SQLException e) {
             e.printStackTrace();
         }finally{
@@ -116,7 +114,10 @@ public class BudgetManager extends javax.swing.JInternalFrame {
     }
 
     private void editBudget() {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         int selectedRow = budgetTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Seleccione un presupuesto para editar.");
@@ -128,10 +129,6 @@ public class BudgetManager extends javax.swing.JInternalFrame {
         String amount = amountField.getText();
         String type = (String) typeComboBox.getSelectedItem();
 
-        try{
-            Conectar.getInstancia().obtenerConexion();
-        
-        
         try (PreparedStatement stmt = connection.prepareStatement("UPDATE budgets SET name = ?, amount = ?, type = ? WHERE id = ?")) {
 
             stmt.setString(1, name);
@@ -141,7 +138,6 @@ public class BudgetManager extends javax.swing.JInternalFrame {
             stmt.executeUpdate();
 
             refreshBudgetTable();
-        }
         } catch (SQLException e) {
             e.printStackTrace();
         }finally{
@@ -150,7 +146,10 @@ public class BudgetManager extends javax.swing.JInternalFrame {
     }
 
     private void deleteBudget() {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         int selectedRow = budgetTable.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Seleccione un presupuesto para eliminar.");
@@ -159,17 +158,12 @@ public class BudgetManager extends javax.swing.JInternalFrame {
 
         int id = (int) budgetTableModel.getValueAt(selectedRow, 0);
 
-        try{
-            Conectar.getInstancia().obtenerConexion();
-        
-        
         try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM budgets WHERE id = ?")) {
 
             stmt.setInt(1, id);
             stmt.executeUpdate();
 
             refreshBudgetTable();
-        }
         } catch (SQLException e) {
             e.printStackTrace();
         }finally{
@@ -178,11 +172,10 @@ public class BudgetManager extends javax.swing.JInternalFrame {
     }
 
     private void refreshBudgetTable() {
-        Connection connection = null;
-        
-        try{
-            Conectar.getInstancia().obtenerConexion();
-        
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT * FROM budgets")) {
 
@@ -195,7 +188,6 @@ public class BudgetManager extends javax.swing.JInternalFrame {
                         rs.getString("type")
                 });
             }
-        }
         } catch (SQLException e) {
             e.printStackTrace();
         }finally{

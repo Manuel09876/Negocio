@@ -244,7 +244,11 @@ public class Empresas extends javax.swing.JInternalFrame {
 
     //Es lo mismo que mostrar Tabla Clientes
     void CargarDatosTable(String Valores) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida aquí
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
+    
         try {
 
             String[] titulosTabla = {"Código", "Empresa", "Dirección", "ZipCode", "Ciudad", "Estado",
@@ -254,10 +258,6 @@ public class Empresas extends javax.swing.JInternalFrame {
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
 
             String ConsultaSQL = "select * from bussiness";
-
-            
-                // Obtener la conexión del pool
-                connection = Conectar.getInstancia().obtenerConexion();
 
                 Statement st = connection.createStatement();
                 ResultSet result = st.executeQuery(ConsultaSQL);

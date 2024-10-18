@@ -137,16 +137,16 @@ public class Proveedor extends javax.swing.JInternalFrame {
     DefaultTableModel modelo = new DefaultTableModel();
 
     public void MostrarProveedor(String Valores) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         try {
             String[] tituloTabla = {"idSuplier", "Proveedor", "Dirección", "ZipCode", "Ciudad", "Estado", "Telefono", "Website", "Email", "Estatus"};
             String[] RegistroBD = new String[10];
             model = new DefaultTableModel(null, tituloTabla);
 
             String sql = "SELECT * FROM suplier";
-
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
 
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -187,7 +187,10 @@ public class Proveedor extends javax.swing.JInternalFrame {
     }
 
     public void Insertar() {
-        Connection connection = null;
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         //Variables
         String nameSuplier, address;
         int zipCode;
@@ -208,9 +211,6 @@ public class Proveedor extends javax.swing.JInternalFrame {
 
         //Para almacenar los datos empleo un try cash
         try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
             PreparedStatement pst = connection.prepareStatement(sql);
 
@@ -277,7 +277,10 @@ public class Proveedor extends javax.swing.JInternalFrame {
 
     public void Modificar(JTextField IdSuplier, JTextField NameSuplier, JTextField Addres, JTextField ZipCode, JTextField City, JTextField State, JTextField PhoneNumber, JTextField Website, JTextField Email) {
 
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         setIdSuplier(Integer.parseInt(IdSuplier.getText()));
         setNameSuplier(NameSuplier.getText());
         setAddress(Addres.getText());
@@ -291,9 +294,6 @@ public class Proveedor extends javax.swing.JInternalFrame {
         String consulta = "UPDATE suplier SET nameSuplier=?, address=?, zipCode=?, city=?, state=?, phoneNumber=?, website=?,email=? WHERE idSuplier=?";
 
         try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
             CallableStatement cs = connection.prepareCall(consulta);
 
             cs.setString(1, getNameSuplier());
@@ -320,15 +320,15 @@ public class Proveedor extends javax.swing.JInternalFrame {
     }
 
     public void Eliminar(JTextField codigo) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         setIdSuplier(Integer.parseInt(codigo.getText()));
 
         String consulta = "DELETE FROM suplier WHERE idSuplier=?";
 
         try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
             CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getIdSuplier());
             cs.execute();
@@ -346,7 +346,10 @@ public class Proveedor extends javax.swing.JInternalFrame {
     }
 
     public Proveedor BuscarProveedor(java.awt.event.KeyEvent evt) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String[] tituloTabla = {"idSuplier", "Proveedor", "Dirección", "ZipCode", "Ciudad", "Estado", "Telefono", "Website", "email", "Estatus"};
         String[] RegistroBD = new String[10];
 
@@ -355,9 +358,6 @@ public class Proveedor extends javax.swing.JInternalFrame {
         model = new DefaultTableModel(null, tituloTabla); //Le pasamos los titulos a la tabla
 
         try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
             // Usar PreparedStatement para evitar inyección SQL
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, "%" + txtBuscar.getText().trim() + "%");
@@ -404,12 +404,12 @@ public class Proveedor extends javax.swing.JInternalFrame {
 
     // Posiblemente para usarlos despues para Busqueda
     public boolean accion(String estado, int idSuplier) {
-        Connection connection = null;
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "UPDATE suplier SET estado = ? WHERE idSuplier = ?";
         try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
             PreparedStatement pst = connection.prepareStatement(sql);
             pst = connection.prepareStatement(sql);
             pst.setString(1, estado);
@@ -428,13 +428,13 @@ public class Proveedor extends javax.swing.JInternalFrame {
     }
 
     public Proveedor buscarProv(int id) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "SELECT * FROM suplier WHERE idSuplier = ?";
         Proveedor prov = new Proveedor();
         try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
             PreparedStatement pst = connection.prepareStatement(sql);
             pst = connection.prepareStatement(sql);
             pst.setInt(1, id);
@@ -462,13 +462,13 @@ public class Proveedor extends javax.swing.JInternalFrame {
     }
 
     public Proveedor buscarCodigo(String codigo) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "SELECT * FROM suplier WHERE nameSuplier = ? AND estado = 'Activo'";
         Proveedor prov = new Proveedor();
         try {
-            // Obtener la conexión del pool
-        connection = Conectar.getInstancia().obtenerConexion();
-
             PreparedStatement pst = connection.prepareStatement(sql);
             pst.setString(1, codigo);
             rs = pst.executeQuery();

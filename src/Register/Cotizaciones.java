@@ -130,11 +130,8 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
 
         public void setLogo(byte[] logo) {
             this.logo = logo;
-        }
-    
+        }  
 }
-
-
     DefaultTableModel modelo = new DefaultTableModel();
     DefaultTableModel tmp;
 
@@ -168,9 +165,6 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
         // Agregar el botón en la columna "PDF"
         tbCotizaciones.getColumnModel().getColumn(12).setCellRenderer(new ButtonRenderer());
         tbCotizaciones.getColumnModel().getColumn(12).setCellEditor(new ButtonEditor(new JCheckBox(), tbCotizaciones));
-        
-        
-
     }
 
     //Definición de las clases ButtonRenderer y ButtonEditor
@@ -235,15 +229,15 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
         }
 
         private void abrirPDF() {
-            Connection connection = null;
+            Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
                 int cotizacionId = (int) table.getValueAt(selectedRow, 0);
                 try {
                     String sql = "SELECT pdf FROM cotizaciones WHERE id = ?";
-                    
-                    Conectar.getInstancia().obtenerConexion();
-                    
                     PreparedStatement pst = connection.prepareStatement(sql);
                     pst.setInt(1, cotizacionId);
                     ResultSet rs = pst.executeQuery();
@@ -275,7 +269,10 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
     }
 
     public void MostrarListaPrecios() {
-        Connection connection = null;
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         try {
             DefaultTableModel modelo = new DefaultTableModel();
             String[] tituloTabla = {"Servicio", "Precio"};
@@ -283,8 +280,6 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
             modelo = new DefaultTableModel(null, tituloTabla);
             tbPreciosCot.setModel(modelo);
             String sql = "SELECT services.servicio, services.precio FROM services INNER JOIN bussiness ON services.id_empresa=bussiness.idBusiness WHERE id_empresa=1";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -416,11 +411,12 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
     }
 
     private void guardarDetalle(int cotizacionId) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         try {
             String sql = "INSERT INTO detalle_cotizacion (cotizacion_id, descripcion, cantidad, precio, total) VALUES (?, ?, ?, ?, ?)";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             PreparedStatement pst = connection.prepareStatement(sql);
             for (int i = 0; i < TableOrdenDeServiciosCot.getRowCount(); i++) {
@@ -440,7 +436,10 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
     }
 
     private void GuardarCotizacion() {
-        Connection connection = null;
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
     String nombre = txtNombreCot.getText().trim();
     String direccion = txtDireccionCot.getText().trim();
     String tamaño = txtTamañoCot.getText().trim();
@@ -460,8 +459,6 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
 
     try {
         String sql = "INSERT INTO cotizaciones (nombre, direccion, tamaño, ciudad, estado, zip_code, telefono, fecha_inicio, fecha_fin, total, fecha) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        Conectar.getInstancia().obtenerConexion();
         
         PreparedStatement pst = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         pst.setString(1, nombre);
@@ -495,11 +492,6 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
         Conectar.getInstancia().devolverConexion(connection);
     }
 }
-
-
-
-
-
                    
     private void limpiarTablaOrdenDeServicios() {
         DefaultTableModel modelo = (DefaultTableModel) TableOrdenDeServiciosCot.getModel();
@@ -509,11 +501,13 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
     
     //Obtener los datos de la Empresa para los PDF
     private Configuracion obtenerConfiguracion() {
-        Connection connection = null;
+ Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
     Configuracion config = new Configuracion();
     String sql = "SELECT nombre, direccion, ciudad, estado, zipcode, telefono, email, webpage, logo FROM configuracion WHERE id = 1";
     try {
-        Conectar.getInstancia().obtenerConexion();
         
         Statement st = connection.createStatement();
         ResultSet rs = st.executeQuery(sql);
@@ -620,11 +614,12 @@ public class Cotizaciones extends javax.swing.JInternalFrame {
 }
 
 private void guardarPDFEnBaseDeDatos(int cotizacionId, String filePath) {
-    Connection connection = null;
+    Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
     try {
         String sql = "UPDATE cotizaciones SET pdf = ? WHERE id = ?";
-        
-        Conectar.getInstancia().obtenerConexion();
         
         PreparedStatement pst = connection.prepareStatement(sql);
 
@@ -648,15 +643,16 @@ private void guardarPDFEnBaseDeDatos(int cotizacionId, String filePath) {
 }
    
     private void actualizarTablaCotizaciones() {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         try {
             DefaultTableModel modelo = (DefaultTableModel) tbCotizaciones.getModel();
             modelo.setRowCount(0); // Limpiar la tabla
 
             String sql = "SELECT id, nombre, direccion, tamaño, ciudad, estado, zip_code, telefono, fecha_inicio, fecha_fin, total, fecha FROM cotizaciones";
         
-            Conectar.getInstancia().obtenerConexion();
-            
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {

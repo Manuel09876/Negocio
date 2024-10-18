@@ -87,8 +87,10 @@ public class Stock extends javax.swing.JInternalFrame {
     }
 
     void CargarDatosTable(String Valores) {
-        Connection connection = null;
-        
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         try {
             String[] titulosTabla = {"Id", "Nombre", "Stock", "estado", "Stock Minimo"}; // Titulos de la Tabla
             String[] RegistroBD = new String[5]; // Registros de la Base de Datos
@@ -97,8 +99,6 @@ public class Stock extends javax.swing.JInternalFrame {
 
             String ConsultaSQL = "SELECT idProduct, nameProduct, stock, estado, stock_minimo FROM product";
 
-            Conectar.getInstancia().obtenerConexion();
-            
             Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
@@ -130,8 +130,10 @@ public class Stock extends javax.swing.JInternalFrame {
     }
 
     public DefaultTableModel buscarTabla(String buscar) {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }   
         DefaultTableModel modelo = new DefaultTableModel();
 
         try {
@@ -143,8 +145,6 @@ public class Stock extends javax.swing.JInternalFrame {
             // Ajustar la consulta SQL para buscar por nombre exacto
             String ConsultaSQL = "SELECT * FROM product WHERE nameProduct LIKE ?";
 
-            Conectar.getInstancia().obtenerConexion();
-            
             PreparedStatement pst = connection.prepareStatement(ConsultaSQL);
             pst.setString(1, "%" + buscar + "%"); // Usar el valor del comboBox para la búsqueda
             ResultSet result = pst.executeQuery();
@@ -177,8 +177,10 @@ public class Stock extends javax.swing.JInternalFrame {
     }
 
     public boolean ActualizarStock() {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         String idProductoStr = txtIdProducto.getText();
         String cantidadStr = txtCantidad.getText();
 
@@ -202,8 +204,6 @@ public class Stock extends javax.swing.JInternalFrame {
         String sqlActualizar = "UPDATE product SET stock = stock - ? WHERE idProduct = ?";
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             PreparedStatement pstConsulta = connection.prepareStatement(consultaStock);
             pstConsulta.setInt(1, idProduct);
             ResultSet rs = pstConsulta.executeQuery();
@@ -238,8 +238,10 @@ public class Stock extends javax.swing.JInternalFrame {
     }
 
     public void GuardarRetiro() {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         String idTrabajadorStr = txtIdTrabajador.getText();
         String idProductoStr = txtIdProducto.getText();
         String cantidadStr = txtCantidad.getText();
@@ -265,8 +267,6 @@ public class Stock extends javax.swing.JInternalFrame {
 
         String sql = "INSERT INTO retiro (id_trabajador, id_producto, cantidad, fecha) VALUES (?, ?, ?, ?)";
         
-        Conectar.getInstancia().obtenerConexion();
-
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, idTrabajador);
             pst.setInt(2, idProduct);
@@ -565,14 +565,14 @@ public class Stock extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarProducto(JComboBox cbxProducto) {
-        Connection connection = null;
-
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "select * from product";
         Statement st;
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxProducto.removeAllItems();
@@ -590,8 +590,10 @@ public class Stock extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoProducto(JComboBox cbxProducto, JTextField idProducto) {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         String consuta = "select product.idProduct from product where product.nameProduct=?";
         try {
             // Validar si hay un item seleccionado en el JComboBox
@@ -599,8 +601,6 @@ public class Stock extends javax.swing.JInternalFrame {
 
                 return;
             }
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consuta);
             Object selectedValue = cbxProducto.getSelectedItem();
             if (selectedValue != null) {
@@ -612,7 +612,6 @@ public class Stock extends javax.swing.JInternalFrame {
                     idProducto.setText(rs.getString("idProduct"));
                 }
             }
-
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
         }finally{
@@ -621,15 +620,15 @@ public class Stock extends javax.swing.JInternalFrame {
     }
 
     public void MostrarTrabajador(JComboBox comboTrabajador) {
-        Connection connection = null;
-
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "";
         sql = "select * from worker";
         Statement st;
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             comboTrabajador.removeAllItems();
@@ -647,16 +646,15 @@ public class Stock extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoTrabajador(JComboBox trabajador, JTextField IdTrabajador) {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         String consulta = "select worker.idWorker from worker where worker.nombre=?";
 
         try {
             // Verificar si el elemento seleccionado es null
             if (trabajador.getSelectedItem() != null) {
-                
-                // Obtener la conexión y preparar la consulta
-                Conectar.getInstancia().obtenerConexion();
                 
                 CallableStatement cs = connection.prepareCall(consulta);
                 cs.setString(1, trabajador.getSelectedItem().toString());

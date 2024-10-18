@@ -159,7 +159,10 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     }
     
     public void MostrarDatos(String Valores) {
-        Connection connection = null;
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         try {
             String[] TitulosTabla = {"id", "Tipo", "Recibo", "SubTotal", "Taxes", "Tip", "Total", "Proveedor", "Forma de Pago", "Fecha", "Estado"};
             String[] RegistroBD = new String[11];
@@ -173,8 +176,6 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                     + "INNER JOIN formadepago fp ON dpg.id_formadepago=fp.id_formadepago\n"
                     + "ORDER BY dpg.id_PagosGenerales ASC";
 
-            Conectar.getInstancia().obtenerConexion();
-            
             Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
 
@@ -205,7 +206,10 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     }
 
     public void Guardar() {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         int id_PagosGenerales;
         int tipodePago;
         String reciboNumero;
@@ -235,11 +239,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
 //Para almacenar los datos empleo un try cash
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
-//Preparando la conexion a sql
             PreparedStatement pst = connection.prepareStatement(sql);
-
             pst.setInt(1, tipodePago);
             pst.setString(2, reciboNumero);
             pst.setDouble(3, subTotal);
@@ -275,7 +275,10 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     }
 
     public void GuardarCredito() {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         int id_PagosGenerales;
         int tipodePago;
         String reciboNumero;
@@ -304,9 +307,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                 + "subTotal,taxes,tip,total,id_proveedor,id_formadepago,fecha, estado)VALUES(?,?,?,?,?,?,?,?,?,'Pendiente')";
 
 //Para almacenar los datos empleo un try cash
-        try {
-            Conectar.getInstancia().obtenerConexion();
-            
+        try {       
 //Preparando la conexion a sql
             PreparedStatement pst = connection.prepareStatement(sql);
             pst.setInt(1, tipodePago);
@@ -339,15 +340,15 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         }finally{
             Conectar.getInstancia().devolverConexion(connection);
         }
-
     }
 
     public void Modificar(JTextField id, JComboBox TipodePago, JTextField Recibo, JTextField SubTotal, JTextField Taxes, JTextField Tip,
             JTextField Total, JComboBox Proveedor, JComboBox FormaPago, JDateChooser fecha) {
-        Connection connection = null;
-
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         try {
-
             setId_PagosGenerales(Integer.parseInt(id.getText()));
             setTipodePago(Integer.parseInt(txtIdTipodeGastGen.getText()));
             setReciboNumero(Recibo.getText());
@@ -372,8 +373,6 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             String sql = "UPDATE detallepagosgenerales SET id_tipodePago=?, reciboNumero=?, subTotal=?, taxes=?, "
                     + "tip=?, total=?, id_proveedor=?, id_formadepago=?, fecha=? WHERE id_PagosGenerales=?";
 
-            Conectar.getInstancia().obtenerConexion();
-            
             ps = connection.prepareStatement(sql);
             ps.setInt(1, getTipodePago());
             ps.setString(2, getReciboNumero());
@@ -400,15 +399,15 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     }
 
     public void Borrar(JTextField id) {
-        Connection connection = null;
-
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         setId_PagosGenerales(Integer.parseInt(id.getText()));
 
         String consulta = "DELETE FROM detallepagosgenerales WHERE id_PagosGenerales=?";
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId_PagosGenerales());
             cs.executeUpdate();
@@ -423,7 +422,6 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
         }finally{
             Conectar.getInstancia().devolverConexion(connection);
         }
-
     }
 
     public void Seleccionar(JTable Tabla, JTextField id, JComboBox Tipo, JTextField Recibo, JTextField SubTotal, JTextField Taxes, JTextField Tip, JTextField Total, JComboBox Proveedor, JComboBox FormaPago, JDateChooser fecha) {
@@ -450,9 +448,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                 } else {
                     // Manejo de caso en el que el elemento seleccionado es null
                 }
-
             }
-
         } catch (Exception e) {
         }
     }
@@ -941,15 +937,15 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarTipoPagos(JComboBox cbxTipo) {
-        Connection connection = null;
-
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "";
         sql = "select * from tipos_pagosgenerales";
         Statement st;
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxTipo.removeAllItems();
@@ -967,8 +963,10 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoTipoPagos(JComboBox cbxTipo, JTextField idTipo) {
-        Connection connection = null;
-
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consuta = "select tipos_pagosgenerales.id_pagos from tipos_pagosgenerales where tipos_pagosgenerales.nombre=?";
 
         try {
@@ -977,25 +975,18 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 //            JOptionPane.showMessageDialog(null, "Error: No se ha seleccionado ningún proveedor.");
                 return;
             }
-
-            Conectar.getInstancia().obtenerConexion();
-            
-            CallableStatement cs = connection.prepareCall(consuta);
-
+           CallableStatement cs = connection.prepareCall(consuta);
             Object selectedValue = cbxTipo.getSelectedItem();
             if (selectedValue != null) {
                 String valorSeleccionado = selectedValue.toString();
                 cs.setString(1, valorSeleccionado);
-
                 cs.execute();
-
                 ResultSet rs = cs.executeQuery();
 
                 if (rs.next()) {
                     idTipo.setText(rs.getString("id_pagos"));
                 }
             }
-
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
         }finally{
@@ -1004,29 +995,24 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoFormaDePago(JComboBox cbxPagarCon, JTextField idPagarCon) {
-        Connection connection = null;
-
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consuta = "select formadepago.id_formadepago from formadepago where formadepago.nombre=?";
-
         try {
             // Validar si hay un item seleccionado en el JComboBox
             if (cbxPagarCon.getSelectedIndex() == -1) {
 //            JOptionPane.showMessageDialog(null, "Error: No se ha seleccionado ninguna forme de pago.");
                 return;
             }
-
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consuta);
-
             Object selectedValue = cbxPagarCon.getSelectedItem();
             if (selectedValue != null) {
                 String valorSeleccionado = selectedValue.toString();
                 cs.setString(1, valorSeleccionado);
                 cs.execute();
-
                 ResultSet rs = cs.executeQuery();
-
                 if (rs.next()) {
                     idPagarCon.setText(rs.getString("id_formadepago"));
 
@@ -1054,7 +1040,6 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                     }
                 }
             }
-
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
         }finally{
@@ -1063,15 +1048,15 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     }
 
     public void MostrarFormaDePago(JComboBox cbxPagarCon) {
-        Connection connection = null;
-
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "";
         sql = "select * from formadepago";
         Statement st;
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxPagarCon.removeAllItems();
@@ -1089,15 +1074,15 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     }
 
     public void MostrarProveedor(JComboBox cbxProveedorNC) {
-        Connection connection = null;
-
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "";
         sql = "select * from suplier";
         Statement st;
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxProveedorNC.removeAllItems();
@@ -1106,7 +1091,6 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
                 cbxProveedorNC.addItem(rs.getString("nameSuplier"));
             }
-
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
         }finally{
@@ -1115,13 +1099,13 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoProveedor(JComboBox cbxProveedorNC, JTextField idSuplier) {
-        Connection connection = null;
-
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consuta = "select suplier.idSuplier from suplier where suplier.nameSuplier=?";
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxProveedor.getSelectedItem().toString());
             cs.execute();
@@ -1141,14 +1125,15 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
 
     // Método para hallar el id_venta que se está ejecutando en ese momento
     public int IdCompra() {
-        Connection connection = null;
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         int id = 0;
         String sql = "SELECT MAX(id_pagosgenerales) FROM detallepagosgenerales";
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             ps = connection.prepareStatement(sql);
             rs = ps.executeQuery();
             if (rs.next()) {
@@ -1163,10 +1148,12 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
     }
 
     public void registrarPagosPendientes() {
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         PreparedStatement stmt = null;
-        Connection connection = null;
-        try {
-            
+        try {            
             // Obtener los datos de las cajas de texto
             int id = IdCompra();
             int frecuencia = Integer.parseInt(txtFrecuencia.getText());
@@ -1188,10 +1175,7 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
             String sql = "INSERT INTO creditopg (id_compra, frecuencia, fechaPago, interes, Inicial, NumeroCuotas, cuota, Diferencia, estado) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pendiente')";
             
-            Conectar.getInstancia().obtenerConexion();
-            
             stmt = connection.prepareStatement(sql);
-
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(fechaInicio);
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -1217,14 +1201,9 @@ public class Gastos_Generales extends javax.swing.JInternalFrame {
                 stmt.setInt(6, i); // Número de la cuota actual
                 stmt.setDouble(7, cuotaActual);
                 stmt.setDouble(8, diferencia); // Diferencia actualizada
-
                 stmt.executeUpdate();
-
-
             }
-
             JOptionPane.showMessageDialog(null, "Crédito registrado correctamente con todas las fechas de pago.");
-
         } catch (NumberFormatException ex) {
             System.out.println("Error " + ex);
             JOptionPane.showMessageDialog(null, "Error al parsear un valor numérico: " + ex.getMessage());

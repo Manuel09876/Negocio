@@ -19,7 +19,10 @@ public class Cancelaciones extends javax.swing.JInternalFrame {
     
    
     public void MostrarTabla() {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         DefaultTableModel modelo = new DefaultTableModel();
         try {
             String[] tituloTabla = {"id", "Empresa", "Fecha", "Nombre", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Email", "Servicio", "Precio", "Status"};
@@ -34,8 +37,6 @@ public class Cancelaciones extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer WHERE o.estado = 'Inactivo'\n"
                     + "ORDER BY o.fechaT ASC";
 
-            Conectar.getInstancia().obtenerConexion();
-            
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {

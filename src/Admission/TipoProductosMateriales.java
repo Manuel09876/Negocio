@@ -50,7 +50,6 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
     }
 
    
-    
     PreparedStatement ps;
     ResultSet rs;
 
@@ -63,14 +62,15 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
 
         
     void CargarDatosTabla(String Valores) {
-        Connection connection = null;
-        try {
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
+    try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
             String ConsultaSQL = "SELECT * FROM tipodeproductomateriales";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
@@ -92,8 +92,11 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
     }
 
     void Guardar() {
-        Connection connection = null;
-        // Variables
+    Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
+    // Variables
         int idProMat;
         String nombre;
         String sql = "";
@@ -105,8 +108,6 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
         sql = "INSERT INTO tipodeproductomateriales (nombre)VALUES (?)";
         //Para almacenar los datos empleo un try cash
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
             PreparedStatement pst = connection.prepareStatement(sql);
             pst.setString(1, nombre);
@@ -128,13 +129,13 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
     }
 
     public void Eliminar(JTextField id) {
-        Connection connection = null;
-        
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         setIdProMat(Integer.parseInt(id.getText()));
         String consulta = "DELETE from tipodeproductomateriales where idProMat=?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getIdProMat());
             cs.executeUpdate();
@@ -165,15 +166,16 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
     }
 
     public void ModificarTipo(JTextField paraId, JTextField paraNombre) {
-        Connection connection = null;
-        //Obtengo el valor en Cadena(String) de las cajas de Texto
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
+    //Obtengo el valor en Cadena(String) de las cajas de Texto
         setIdProMat(Integer.parseInt(paraId.getText()));
         setNombre(paraNombre.getText());
         
         String consulta = "UPDATE tipodeproductomateriales SET tiopodeproductomateriales.nombre = ? WHERE tipodeproductomateriales.idProMat=?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consulta);
             cs.setString(1, getNombre());
             cs.setInt(2, getIdProMat());
@@ -187,11 +189,12 @@ public class TipoProductosMateriales extends javax.swing.JInternalFrame {
     }
 
     public boolean accion(String estado, int IdProMat) {
-        Connection connection = null;
+    Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "UPDATE tipodeproductomateriales SET estado = ? WHERE idProMat = ?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, IdProMat); // Usar el parámetro pasado en lugar de la variable de clase

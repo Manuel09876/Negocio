@@ -43,7 +43,10 @@ public class Trabajos extends javax.swing.JInternalFrame {
 
 //Muestra la tabla con los datos completos
     public void MostrarTabla() {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -81,8 +84,6 @@ public class Trabajos extends javax.swing.JInternalFrame {
                     + "ORDER BY \n"
                     + "    o.fechaT ASC";
     
-            Conectar.getInstancia().obtenerConexion();
-            
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
@@ -139,7 +140,10 @@ public class Trabajos extends javax.swing.JInternalFrame {
 
     //Filtrar por Trabajador
     public void FiltrarTabla() {
-        Connection connection = null;
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String ID = txtIdTrabajador.getText();
@@ -183,8 +187,6 @@ public class Trabajos extends javax.swing.JInternalFrame {
                     + ID_buscar + " AND o.estado = 'Programado' \n"
                     + "ORDER BY \n"
                     + "    o.fechaT ASC";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -243,15 +245,15 @@ public class Trabajos extends javax.swing.JInternalFrame {
 
     //Asignar Trabajo a otro Trabajador
     public void modificarIdST(int nuevoId, int idST) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         DefaultTableModel modelo = new DefaultTableModel();
         
 
         String sql = "UPDATE servicio_trabajador SET id_Trabajador = ? WHERE id_ST= ?";
         
-        try{
-        Conectar.getInstancia().obtenerConexion();
-            
         try (PreparedStatement declaracion = connection.prepareStatement(sql)) {
             declaracion.setInt(1, nuevoId);
             declaracion.setInt(2, idST); // Aquí asumo que tienes una columna id_fila que identifica cada fila en tu tabla
@@ -262,7 +264,7 @@ public class Trabajos extends javax.swing.JInternalFrame {
             } else {
                 System.out.println("No se ha actualizado ningún registro en la base de datos.");
             }
-        }
+        
         } catch (SQLException e) {
             System.err.println("Error al conectar a la base de datos: " + e.getMessage());
         }finally{
@@ -489,7 +491,10 @@ public class Trabajos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnMostrarTodoActionPerformed
 
     private void btnReprogramarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReprogramarActionPerformed
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         try {
             // Recorremos todas las filas de la tabla
             for (int i = 0; i < tbTrabajos.getRowCount(); i++) {
@@ -503,8 +508,6 @@ public class Trabajos extends javax.swing.JInternalFrame {
                     // Actualizar el estado del registro a "Activo" en la tabla orderservice
                     String sqlUpdate = "UPDATE orderservice SET estado = 'Activo' WHERE id = ?";
                     
-                    Conectar.getInstancia().obtenerConexion();
-                    
                     try (PreparedStatement pstmtUpdate = connection.prepareStatement(sqlUpdate)) {
                         pstmtUpdate.setInt(1, id);
                         pstmtUpdate.executeUpdate();
@@ -514,7 +517,6 @@ public class Trabajos extends javax.swing.JInternalFrame {
                     System.out.println(idST);
                     // Borrar el registro correspondiente de la tabla servicio_trabajador
                     String deleteQuery = "DELETE FROM servicio_trabajador WHERE id_ST = ?";
-                    Conectar.getInstancia().obtenerConexion();
                     
                     try (PreparedStatement pstmtDelete = connection.prepareStatement(deleteQuery)) {
                         pstmtDelete.setInt(1, idST);
@@ -534,7 +536,10 @@ public class Trabajos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnReprogramarActionPerformed
 
     private void btnReasignarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReasignarActionPerformed
-Connection connection = null;
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         try {
             cambiarIdTrabajador(tbTrabajos, txtIdTrabajador);
             // Recorremos todas las filas de la tabla
@@ -551,8 +556,6 @@ Connection connection = null;
 //                    System.out.println("idST "+idST+ " id_Trabajador "+id_Trabajador);
 // Actualizar el estado del registro a "Activo"                    
                     String sqlUpdate = "UPDATE servicio_trabajador SET id_Trabajador = ? WHERE id_ST = ?";
-                    
-                    Conectar.getInstancia().obtenerConexion();
                     
                     PreparedStatement pstmtUpdate = connection.prepareStatement(sqlUpdate);
                     pstmtUpdate.setInt(1, id_Trabajador);
@@ -586,7 +589,10 @@ Connection connection = null;
     }//GEN-LAST:event_cbSeleccionActionPerformed
 
     private void btnTrabajoRealizadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTrabajoRealizadoActionPerformed
-        Connection connection = null;
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         try {
             // Recorremos todas las filas de la tabla
             for (int i = 0; i < tbTrabajos.getRowCount(); i++) {
@@ -600,8 +606,6 @@ Connection connection = null;
                     // Actualizar el estado del registro a "Realizado" en la tabla orderservice
                     String sqlUpdate = "UPDATE orderservice SET estado = 'Realizado' WHERE id = ?";
                     
-                    Conectar.getInstancia().obtenerConexion();
-                    
                     try (PreparedStatement pstmtUpdate = connection.prepareStatement(sqlUpdate)) {
                         pstmtUpdate.setInt(1, id);
                         pstmtUpdate.executeUpdate();
@@ -611,8 +615,6 @@ Connection connection = null;
                     System.out.println(idST);
                     // Borrar el registro correspondiente de la tabla servicio_trabajador
                     String deleteQuery = "DELETE FROM servicio_trabajador WHERE id_ST = ?";
-                    
-                    Conectar.getInstancia().obtenerConexion();
                     
                     try (PreparedStatement pstmtDelete = connection.prepareStatement(deleteQuery)) {
                         pstmtDelete.setInt(1, idST);
@@ -649,15 +651,15 @@ Connection connection = null;
     // End of variables declaration//GEN-END:variables
 //Muestra los Trabajadores en el ComboBox
     public void MostrarTrabajador(JComboBox comboTrabajador) {
-        Connection connection = null;
-
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "";
         sql = "select * from worker";
         Statement st;
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             comboTrabajador.removeAllItems();
@@ -675,13 +677,13 @@ Connection connection = null;
     }
 
     public void MostrarCodigoTrabajador(JComboBox trabajador, JTextField IdTrabajador) {
-        Connection connection = null;
-
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consuta = "select worker.idWorker from worker where worker.nombre=?";
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, trabajador.getSelectedItem().toString());
             cs.execute();

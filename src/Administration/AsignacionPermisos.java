@@ -31,6 +31,7 @@ import javax.swing.table.DefaultTableModel;
 public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
     private int rolId;
+    private boolean isUpdatingTable = false; // Declaración de la bandera a nivel de clase
 
     private VentanaPrincipal vp;
     private PermisoManager permisoManager;
@@ -81,7 +82,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     // Tablas de permisos
     JTable tbUsuTrab = null;
 
-    // Método actualizado para configurar los oyentes del modelo de tabla
     private void setupTableModelListener(JTable table, String tableName) {
         TableModelListener listener = new TableModelListener() {
             @Override
@@ -90,14 +90,25 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                     int row = e.getFirstRow();
                     int column = e.getColumn();
 
+                    // Validar que la fila y la columna son válidas
+                    if (row < 0 || column < 0 || row >= table.getRowCount() || column >= table.getColumnCount()) {
+                        return;
+                    }
+
                     // Validar que el valor obtenido no sea nulo
                     Object value = table.getValueAt(row, column);
                     if (value == null) {
                         return; // Si el valor es nulo, no hacemos nada para evitar el NullPointerException
                     }
 
-                    DefaultTableModel model = (DefaultTableModel) table.getModel();
+                    // Verificar si el valor puede ser casteado a Boolean antes de hacer el cast
+                    if (!(value instanceof Boolean)) {
+                        System.out.println("Error: El valor en la celda no es un Boolean en la fila " + row + ", columna " + column);
+                        return;
+                    }
+
                     // Remover el oyente para evitar ciclos infinitos
+                    DefaultTableModel model = (DefaultTableModel) table.getModel();
                     model.removeTableModelListener(this);
 
                     try {
@@ -119,22 +130,19 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                             boolean allSelected = true;
                             for (int i = 2; i <= 5; i++) {
                                 Object cellValue = table.getValueAt(row, i);
-                                if (cellValue == null || !(Boolean) cellValue) {
+                                if (cellValue == null || !(cellValue instanceof Boolean) || !(Boolean) cellValue) {
                                     allSelected = false;
                                     break;
                                 }
                             }
                             table.setValueAt(allSelected, row, 6); // Actualizar la columna "Todo"
 
-                            // Obtener nombres de menú y submenú
+                            // Guardar permisos en la base de datos
                             String menuName = getMenuNameByRow(tableName, row);
                             String submenuName = getSubmenuNameByRow(tableName, row);
 
                             // Validar que los nombres no estén vacíos
                             if (!menuName.isEmpty() && !submenuName.isEmpty()) {
-                                // Guardar permisos en la base de datos
-                                guardarPermisoEnBaseDeDatos(menuName, submenuName, column, selected, true);
-
                                 // Llamar a los métodos específicos basados en el nombre del submenú y la acción
                                 handlePermission(menuName, submenuName, column, selected);
                             } else {
@@ -154,6 +162,11 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
     // Método para inicializar las tablas con valores booleanos predeterminados
     private void inicializarTablas() {
+        limpiarTabla(tbAdministracion);
+        limpiarTabla(tbAdmision);
+        limpiarTabla(tbRegistros);
+        limpiarTabla(tbReportes);
+
         for (int i = 0; i < tbAdministracion.getRowCount(); i++) {
             for (int j = 2; j <= 6; j++) {
                 tbAdministracion.setValueAt(false, i, j);
@@ -242,11 +255,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         AutoCompleteDecorator.decorate(cbxTPU);
         MostrarTipodeUsuarioCombo(cbxTPU);
 
-        jScrollPane1.setVisible(false);
-        jScrollPane2.setVisible(false);
-        jScrollPane3.setVisible(false);
-        jScrollPane5.setVisible(false);
-
         // Configurar checkboxes en las tablas
         setupTableCheckBoxes(tbAdministracion);
         setupTableCheckBoxes(tbAdmision);
@@ -268,6 +276,36 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         btnRegistros.setEnabled(false);
         btnReportes.setEnabled(false);
 
+        // Forzamos que los botones permanezcan habilitados
+        btnGrabar.setEnabled(true);
+        btnModificar.setEnabled(true);
+        btnCancelar.setEnabled(true);
+        btnSalir.setEnabled(true);
+
+// También aseguramos su visibilidad si en algún momento se ocultan
+        btnGrabar.setVisible(true);
+        btnModificar.setVisible(true);
+        btnCancelar.setVisible(true);
+        btnSalir.setVisible(true);
+        
+        cbxTPU.addItemListener(new ItemListener() {
+    @Override
+    public void itemStateChanged(ItemEvent e) {
+        if (e.getStateChange() == ItemEvent.SELECTED) {
+            int rolId = obtenerRolIdActual(); // Método que devuelve el ID del rol seleccionado
+            cargarPermisosSubmenus(rolId);  // Cargar los permisos del rol seleccionado
+        }
+    }
+});
+
+
+//        DefaultTableModel model = (DefaultTableModel) table.getModel();
+//        model.addTableModelListener(new TableModelListener() {
+//            @Override
+//            public void tableChanged(TableModelEvent e) {
+//                // Aquí puedes colocar tu implementación del listener
+//            }
+//        });
     }
 
     private void setupMenuCheckboxListeners() {
@@ -279,23 +317,32 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     }
 
     private void handleCheckboxChange(ItemEvent e, JScrollPane scrollPane, JButton button, String menuName, JTable table) {
-        boolean isSelected = e.getStateChange() == ItemEvent.SELECTED;
-        button.setEnabled(isSelected);
-        scrollPane.setVisible(isSelected);
+        boolean isSelected = e.getStateChange() == ItemEvent.SELECTED; // Verificar si el checkbox fue seleccionado o no
+        button.setEnabled(isSelected); // Habilitar o deshabilitar el botón asociado al menú
+        scrollPane.setVisible(isSelected); // Mostrar u ocultar la tabla correspondiente
 
         if (isSelected) {
             // Llenar la tabla con los datos del submenú correspondiente al menú seleccionado
-            int menuId = obtenerMenuId(menuName);
+            int menuId = obtenerMenuId(menuName); // Obtener el ID del menú basado en el nombre
             if (menuId != -1) {
-                llenarTablaConSubmenu(table, menuId);
+                llenarTablaConSubmenu(table, menuId); // Llenar la tabla con los submenús
             } else {
                 JOptionPane.showMessageDialog(null, "No se pudo encontrar el menú especificado.");
             }
         } else {
             // Limpiar la tabla si se deselecciona el checkbox
-            limpiarTabla(table);
+            limpiarTabla(table); // Método para vaciar la tabla
         }
-        updateLayout();
+        updateLayout(); // Método para refrescar la interfaz
+    }
+
+    private void limpiarCheckboxesDeTabla(JTable table) {
+        // Iterar sobre todas las filas y columnas que tienen checkboxes (asumimos que están en las columnas 2 a 5)
+        for (int i = 0; i < table.getRowCount(); i++) {
+            for (int j = 2; j <= 5; j++) {
+                table.setValueAt(false, i, j); // Desmarcar todas las casillas de permisos
+            }
+        }
     }
 
     private void limpiarTabla(JTable table) {
@@ -303,50 +350,183 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         model.setRowCount(0); // Esto eliminará todas las filas de la tabla
     }
 
+    // Método para limpiar las tablas antes de cargar nuevos datos
+    private void limpiarTablas() {
+        limpiarTabla(tbAdministracion);
+        limpiarTabla(tbAdmision);
+        limpiarTabla(tbRegistros);
+        limpiarTabla(tbReportes);
+    }
+
     private void setupTableCheckBoxes(JTable table) {
-        for (int i = 2; i <= 6; i++) {
+        for (int i = 2; i <= 6; i++) {  // Columnas que contienen booleanos
             TableColumn tc = table.getColumnModel().getColumn(i);
-            tc.setCellEditor(table.getDefaultEditor(Boolean.class));
-            tc.setCellRenderer(table.getDefaultRenderer(Boolean.class));
+            tc.setCellEditor(table.getDefaultEditor(Boolean.class));   // Editor de celdas para booleans
+            tc.setCellRenderer(table.getDefaultRenderer(Boolean.class)); // Renderizador de celdas para booleans
         }
     }
 
-    //Llenar las Tablas
-    private void llenarTablaConSubmenu(JTable tabla, int menuId) {
-        Connection connection = null;
+    private void prepararPantallaParaNuevoRol() {
+        // Limpiar todas las tablas
+        limpiarTablas();
 
-        String sql = "SELECT id_submenu, nombre_submenu FROM submenus WHERE menu_id = ?";
+        // Limpiar los checkboxes principales (si los tienes como chAdministracion, etc.)
+        chAdministracion.setSelected(false);
+        chAdmision.setSelected(false);
+        chRegistros.setSelected(false);
+        chReportes.setSelected(false);
+
+    }
+
+    // Método adicional para limpiar los checkboxes en las tablas
+    private void limpiarCheckboxesEnTablas() {
+        // Limpiar checkboxes en la tabla de Administración
+        for (int i = 0; i < tbAdministracion.getRowCount(); i++) {
+            for (int j = 2; j <= 6; j++) { // Columnas de Visualizar, Agregar, Editar, Eliminar, Todo
+                tbAdministracion.setValueAt(false, i, j); // Asignar false a todas las celdas
+            }
+        }
+
+        // Limpiar checkboxes en la tabla de Admisión
+        for (int i = 0; i < tbAdmision.getRowCount(); i++) {
+            for (int j = 2; j <= 6; j++) { // Columnas de Visualizar, Agregar, Editar, Eliminar, Todo
+                tbAdmision.setValueAt(false, i, j);
+            }
+        }
+
+        // Limpiar checkboxes en la tabla de Registros
+        for (int i = 0; i < tbRegistros.getRowCount(); i++) {
+            for (int j = 2; j <= 6; j++) { // Columnas de Visualizar, Agregar, Editar, Eliminar, Todo
+                tbRegistros.setValueAt(false, i, j);
+            }
+        }
+
+        // Limpiar checkboxes en la tabla de Reportes
+        for (int i = 0; i < tbReportes.getRowCount(); i++) {
+            for (int j = 2; j <= 6; j++) { // Columnas de Visualizar, Agregar, Editar, Eliminar, Todo
+                tbReportes.setValueAt(false, i, j);
+            }
+        }
+
+        // Notificar a las tablas que los datos han cambiado, forzar la actualización
+        ((DefaultTableModel) tbAdministracion.getModel()).fireTableDataChanged();
+        ((DefaultTableModel) tbAdmision.getModel()).fireTableDataChanged();
+        ((DefaultTableModel) tbRegistros.getModel()).fireTableDataChanged();
+        ((DefaultTableModel) tbReportes.getModel()).fireTableDataChanged();
+    }
+
+// Método para limpiar los checkboxes principales
+    public void limpiarCheckboxesPrincipales() {
+        chAdministracion.setSelected(false);
+        chAdmision.setSelected(false);
+        chRegistros.setSelected(false);
+        chReportes.setSelected(false);
+
+    }
+
+    //Llenar las Tablas
+//    private void llenarTablaConSubmenu(JTable table, int menuId) {
+//        Connection connection = null;
+//        try {
+//            connection = Conectar.getInstancia().obtenerConexion();
+//            if (connection == null) {
+//                throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+//            }
+//            // Consulta para obtener los submenús asociados al menú
+//            String sql = "SELECT rms.id_submenu, s.nombre_submenu, rms.visualizar, rms.agregar, rms.editar, rms.eliminar \n"
+//                    + "FROM roles_menus_submenus rms \n"
+//                    + "JOIN submenus s ON rms.id_submenu = s.id_submenu \n"
+//                    + "WHERE rms.id_menu = ? AND rms.id_rol = ? ";
+//
+//            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+//                ps.setInt(1, menuId);
+//                ResultSet rs = ps.executeQuery();
+//
+//                DefaultTableModel model = (DefaultTableModel) table.getModel();
+//                model.setRowCount(0); // Limpiar la tabla antes de llenarla
+//                int rowNumber = 1;
+//                while (rs.next()) {
+//                    int idSubmenu = rs.getInt("id_submenu");
+//                    String nombreSubmenu = rs.getString("nombre_submenu");
+//
+//                    // Agregar los submenús a la tabla
+//                    model.addRow(new Object[]{rowNumber++, nombreSubmenu, false, false, false, false, false, idSubmenu});
+//                }
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        } finally {
+//            // Devolver la conexión al pool
+//            Conectar.getInstancia().devolverConexion(connection);
+//        }
+//    }
+    private void llenarTablaConSubmenu(JTable table, int menuId) {
+        // Limpiar la tabla antes de llenarla con nuevos datos
+        limpiarTabla(table);
+
+        Connection connection = null;
         try {
-            // Obtener la conexión del pool
             connection = Conectar.getInstancia().obtenerConexion();
+            if (connection == null) {
+                throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+            }
+
+            String sql = """
+            SELECT rms.id_submenu, s.nombre_submenu, rms.visualizar, rms.agregar, rms.editar, rms.eliminar 
+            FROM roles_menus_submenus rms 
+            JOIN submenus s ON rms.id_submenu = s.id_submenu 
+            WHERE rms.id_menu = ? AND rms.id_rol = ?
+        """;
+
+            System.out.println("Ejecutando consulta para menuId: " + menuId + " y rolId: " + rolId);
 
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
                 ps.setInt(1, menuId);
+                ps.setInt(2, rolId);  // Usamos rolId en lugar de dejarlo fijo en 1
                 ResultSet rs = ps.executeQuery();
-                DefaultTableModel model = (DefaultTableModel) tabla.getModel();
 
-                // Limpiar las filas existentes en la tabla antes de llenarla
-                model.setRowCount(0);
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
 
                 int rowNumber = 1;
                 while (rs.next()) {
-                    int submenuId = rs.getInt("id_submenu");
-                    String submenuName = rs.getString("nombre_submenu");
-                    model.addRow(new Object[]{rowNumber++, submenuName, false, false, false, false, false, submenuId});
+                    int idSubmenu = rs.getInt("id_submenu");
+                    String nombreSubmenu = rs.getString("nombre_submenu");
+
+                    // Obtener los valores de permisos como enteros
+                    int visualizar = rs.getInt("visualizar");
+                    int agregar = rs.getInt("agregar");
+                    int editar = rs.getInt("editar");
+                    int eliminar = rs.getInt("eliminar");
+
+                    // Convertir a Boolean para que la tabla maneje correctamente los checkboxes
+                    Boolean visualizarBoolean = visualizar == 1; // true si es 1, false si es 0
+                    Boolean agregarBoolean = agregar == 1;
+                    Boolean editarBoolean = editar == 1;
+                    Boolean eliminarBoolean = eliminar == 1;
+
+                    System.out.println("Visualizar: " + visualizarBoolean + ", Agregar: " + agregarBoolean
+                            + ", Editar: " + editarBoolean + ", Eliminar: " + eliminarBoolean);
+
+                    // Agregar la fila a la tabla
+                    model.addRow(new Object[]{rowNumber++, nombreSubmenu, visualizarBoolean, agregarBoolean, editarBoolean, eliminarBoolean, false, idSubmenu});
                 }
+
+                // Notificar que los datos en la tabla han cambiado
+                model.fireTableDataChanged();
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Error al llenar la tabla con submenús: " + e.getMessage());
         } finally {
             // Devolver la conexión al pool
-            Conectar.getInstancia().devolverConexion(connection);
+            if (connection != null) {
+                Conectar.getInstancia().devolverConexion(connection);
+            }
         }
     }
 
     private void handlePermission(String menuName, String submenuName, int column, Boolean selected) {
         // Aquí iría el código existente para manejar cada submenú
-        if (menuName.equals("menuAdministration")) {
+        if (menuName.equals("Administracion")) {
             switch (submenuName) {
                 case "Usuarios":
                     handleUsuarios(column, selected);
@@ -395,7 +575,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                     break;
                 // Añadir más casos según sea necesario...
             }
-        } else if (menuName.equals("menuAdmission")) {
+        } else if (menuName.equals("Admision")) {
             switch (submenuName) {
                 case "Clientes":
                     handleClientes(column, selected);
@@ -423,7 +603,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                     break;
                 // Añadir más casos según sea necesario...
             }
-        } else if (menuName.equals("menuRegisters")) {
+        } else if (menuName.equals("Registros")) {
             switch (submenuName) {
                 case "Orden de Servicio":
                     handleOrdenDeServicio(column, selected);
@@ -454,7 +634,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                     break;
                 // Añadir más casos según sea necesario...
             }
-        } else if (menuName.equals("menuReports")) {
+        } else if (menuName.equals("Reportes")) {
             switch (submenuName) {
                 case "Trabajos Realizados":
                     handleTrabajosRealizados(column, selected);
@@ -487,65 +667,34 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         }
     }
 
-    // Métodos auxiliares para obtener nombres de menú y submenú basado en la tabla y la fila
+    /// Método para obtener el nombre del menú basado en la fila
     private String getMenuNameByRow(String tableName, int row) {
+        // Asocia los nombres de los menús a las tablas correspondientes
         switch (tableName) {
             case "Administracion":
-                return "menuAdministration";
+                return "Administracion";
             case "Admision":
-                return "menuAdmission";
+                return "Admision";
             case "Registros":
-                return "menuRegisters";
+                return "Registros";
             case "Reportes":
-                return "menuReports";
+                return "Reportes";
             default:
                 return "";
         }
     }
 
-    // Método para guardar el permiso en la base de datos
-    private void guardarPermisoEnBaseDeDatos(String menuName, String submenuName, int column, Boolean selected, boolean activo) {
-        Connection connection = null;
-        int menuId = obtenerMenuId(menuName);
-        int submenuId = obtenerSubmenuId(submenuName);
-        int permisoId = obtenerPermisoIdPorColumna(column);
-
-        if (menuId == -1 || submenuId == -1 || permisoId == -1) {
-            System.out.println("Error: No se pudo obtener el ID del menú, submenú o permiso.");
-            return;
-        }
-
-        String sql = "INSERT INTO roles_permisos (menu_id, submenu_id, permiso_id, estado, activo) VALUES (?, ?, ?, ?, ?) "
-                + "ON DUPLICATE KEY UPDATE estado = ?, activo = ?";
-
+    public int obtenerRolIdActual() {
         try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setInt(1, menuId);
-                ps.setInt(2, submenuId);
-                ps.setInt(3, permisoId);
-                ps.setBoolean(4, selected);
-                ps.setBoolean(5, activo);
-                ps.setBoolean(6, selected);
-                ps.setBoolean(7, activo);
-                ps.executeUpdate();
+            String textoRolId = txtIdTPU.getText();
+            if (textoRolId == null || textoRolId.trim().isEmpty()) {
+                System.out.println("Error: El texto del rol ID es nulo o vacío.");
+                return -1; // Maneja el error devolviendo un valor incorrecto si no hay rol ID válido.
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            // Devolver la conexión al pool
-            Conectar.getInstancia().devolverConexion(connection);
-        }
-    }
-
-    private int obtenerRolIdActual() {
-        try {
-            return Integer.parseInt(txtIdTPU.getText().trim());
+            return Integer.parseInt(textoRolId.trim());
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Error: ID del rol no válido.", "Error", JOptionPane.ERROR_MESSAGE);
-            return -1; // Retorna -1 si el ID no es válido
+            System.out.println("Error al convertir txtIdTPU a número: " + e.getMessage());
+            return -1; // Devuelve -1 si hay un error al convertir.
         }
     }
 
@@ -553,7 +702,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         Connection connection = null;
 
         String sql = """
-        UPDATE roles_permisos_submenus
+        UPDATE roles_menus_submenus
         SET activo = 0
         WHERE id_rol = ? AND id_menu = ? AND id_submenu = ?;
     """;
@@ -1861,26 +2010,28 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     // Método para obtener el ID del menú
     private int obtenerMenuId(String nombremenu) {
         Connection connection = null;
-        String sql = "SELECT id_menu FROM menus WHERE nombre_menu = ?";
-        
         try {
-        // Obtener la conexión del pool
-        connection = Conectar.getInstancia().obtenerConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, nombremenu);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("id_menu");
+            connection = Conectar.getInstancia().obtenerConexion();
+            String sql = "SELECT id_menu FROM menus WHERE LOWER(nombre_menu) = LOWER(?)";
+
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, nombremenu);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    int id = rs.getInt("id_menu");
+                    System.out.println("ID del menú encontrado para " + nombremenu + ": " + id);
+                    return id;
+                } else {
+                    System.out.println("Error: El nombre del menú '" + nombremenu + "' no existe en la tabla menus.");
+                }
             }
-        }
         } catch (SQLException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Error al obtener el ID del menú: " + e.getMessage());
-        }finally {
-        // Devolver la conexión al pool
-        Conectar.getInstancia().devolverConexion(connection);
-    }
-        return -1;
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
+        }
+        return -1;  // Devuelve -1 si no se encuentra un resultado válido
     }
 
     // Método para obtener el ID del permiso basado en la columna
@@ -1902,23 +2053,42 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     // Método para guardar permisos desde una tabla específica
     // Modificación del método en la clase AsignacionPermisos para que coincida
     private void guardarPermisosDeTabla(JTable tabla, int rolId) {
+        // Itera sobre todas las filas de la tabla
         for (int i = 0; i < tabla.getRowCount(); i++) {
-            int submenuId = (int) tabla.getValueAt(i, 0); // Obtener el ID del submenú desde la columna 0
-            obtenerMenuId("");
+            // Obtener el ID del submenú desde la columna 7, asegurando que no sea nulo
+            Object submenuIdObj = tabla.getValueAt(i, 7);
+            if (submenuIdObj == null) {
+                System.out.println("Error: ID del submenú es nulo en la fila " + i);
+                continue; // Saltar esta fila si el ID del submenú es nulo
+            }
+            int submenuId = (int) submenuIdObj;
 
-            // Obtener permisos
-            boolean visualizar = (boolean) tabla.getValueAt(i, 2);
-            boolean agregar = (boolean) tabla.getValueAt(i, 3);
-            boolean editar = (boolean) tabla.getValueAt(i, 4);
-            boolean eliminar = (boolean) tabla.getValueAt(i, 5);
-            int menuId = 0;
+            int menuId = obtenerMenuIdPorSubmenu(submenuId); // Obtener el ID del menú basado en el submenú
 
-            // Asegúrate de que el método tenga la misma cantidad y tipo de parámetros
+            // Obtener permisos, validando que no sean nulos antes de procesarlos
+            Object visualizarObj = tabla.getValueAt(i, 2);
+            Object agregarObj = tabla.getValueAt(i, 3);
+            Object editarObj = tabla.getValueAt(i, 4);
+            Object eliminarObj = tabla.getValueAt(i, 5);
+
+            // Validar que todos los permisos no sean nulos
+            if (visualizarObj == null || agregarObj == null || editarObj == null || eliminarObj == null) {
+                System.out.println("Error: Valores de permisos nulos en la fila " + i);
+                continue; // Saltar esta fila si alguno de los permisos es nulo
+            }
+
+            boolean visualizar = (boolean) visualizarObj;
+            boolean agregar = (boolean) agregarObj;
+            boolean editar = (boolean) editarObj;
+            boolean eliminar = (boolean) eliminarObj;
+
+            // Guardar permisos en la base de datos
+            System.out.println("Guardando permisos para menú ID: " + menuId + ", submenú ID: " + submenuId);
             permisoManager.guardarPermiso(rolId, menuId, submenuId, visualizar, agregar, editar, eliminar, true);
         }
     }
 
-    // Método para limpiar los checkboxes en una tabla específica
+//    // Método para limpiar los checkboxes en una tabla específica
     private void limpiarTablaPermisos(JTable tabla) {
         for (int i = 0; i < tabla.getRowCount(); i++) {
             tabla.setValueAt(false, i, 2); // Limpiar columna "Visualizar"
@@ -1928,45 +2098,18 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         }
     }
 
-    private void cargarPermisosDelUsuario(int rolId) {
-        Connection connection = null;
-
-        String sql = "SELECT * FROM roles_permisos_submenus WHERE id_rol = ? AND activo = 1";
-        
-        try {
-        // Obtener la conexión del pool
-        connection = Conectar.getInstancia().obtenerConexion();
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, rolId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                int menuId = rs.getInt("id_menu");
-                boolean visualizar = rs.getBoolean("visualizar");
-                boolean agregar = rs.getBoolean("agregar");
-                boolean editar = rs.getBoolean("editar");
-                boolean eliminar = rs.getBoolean("eliminar");
-
-                actualizarTablaConPermisos(menuId, visualizar, agregar, editar, eliminar);
-            }
-        }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-        // Devolver la conexión al pool
-        Conectar.getInstancia().devolverConexion(connection);
-    }
-    }
-
-    private void actualizarTablaConPermisos(int menuId, boolean visualizar, boolean agregar, boolean editar, boolean eliminar) {
+    private void actualizarTablaConPermisos(int menuId, int submenuId, boolean visualizar, boolean agregar, boolean editar, boolean eliminar) {
         JTable tabla = obtenerTablaPorMenuId(menuId);
         if (tabla != null) {
-            for (int i = 0; i < tabla.getRowCount(); i++) {
-                int idMenu = obtenerMenuId(tabla.getValueAt(i, 1).toString());
-                if (idMenu == menuId) {
-                    tabla.setValueAt(visualizar, i, 2);
-                    tabla.setValueAt(agregar, i, 3);
-                    tabla.setValueAt(editar, i, 4);
-                    tabla.setValueAt(eliminar, i, 5);
+            DefaultTableModel model = (DefaultTableModel) tabla.getModel();
+            for (int i = 0; i < model.getRowCount(); i++) {
+                int idSubmenu = (int) model.getValueAt(i, 7); // Asume que la columna 7 contiene el ID del submenú
+                if (idSubmenu == submenuId) {
+                    model.setValueAt(visualizar, i, 2);
+                    model.setValueAt(agregar, i, 3);
+                    model.setValueAt(editar, i, 4);
+                    model.setValueAt(eliminar, i, 5);
+                    break;
                 }
             }
         }
@@ -1993,6 +2136,199 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         repaint(); // Repinta la interfaz para mostrar los cambios
     }
 
+    public void cargarPermisosMenuPrincipal(int rolId) {
+        Connection connection = null;
+        try {
+            connection = Conectar.getInstancia().obtenerConexion();
+            if (connection == null) {
+                throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+            }
+            String sql = """
+    SELECT m.nombre_menu, rm.visualizar
+    FROM roles_menus rm
+    JOIN menus m ON rm.id_menu = m.id_menu
+    WHERE rm.id_rol = ? AND rm.activo = true;
+    """;
+
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, rolId);
+                ResultSet rs = ps.executeQuery();
+
+                // Limpiar tablas antes de cargar datos
+                limpiarTabla(tbAdministracion);
+                limpiarTabla(tbAdmision);
+                limpiarTabla(tbRegistros);
+                limpiarTabla(tbReportes);
+
+                while (rs.next()) {
+                    String nombreMenu = rs.getString("nombre_menu");
+                    boolean visualizar = rs.getBoolean("visualizar");
+
+                    // Llamar al método handleCheckboxChange para reflejar el estado del checkbox en la interfaz
+                    actualizarCheckboxMenu(nombreMenu, visualizar);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+// Método para actualizar los checkboxes de los menús principales usando handleCheckboxChange()
+    private void actualizarCheckboxMenu(String nombreMenu, boolean visualizar) {
+        switch (nombreMenu.toLowerCase()) {
+            case "administracion":
+                chAdministracion.setSelected(visualizar);
+                handleCheckboxChange(new ItemEvent(chAdministracion, ItemEvent.ITEM_STATE_CHANGED, chAdministracion, visualizar ? ItemEvent.SELECTED : ItemEvent.DESELECTED),
+                        jScrollPane1, btnAdministracion, "Administracion", tbAdministracion);
+                break;
+            case "admision":
+                chAdmision.setSelected(visualizar);
+                handleCheckboxChange(new ItemEvent(chAdmision, ItemEvent.ITEM_STATE_CHANGED, chAdmision, visualizar ? ItemEvent.SELECTED : ItemEvent.DESELECTED),
+                        jScrollPane2, btnAdmision, "Admision", tbAdmision);
+                break;
+            case "registros":
+                chRegistros.setSelected(visualizar);
+                handleCheckboxChange(new ItemEvent(chRegistros, ItemEvent.ITEM_STATE_CHANGED, chRegistros, visualizar ? ItemEvent.SELECTED : ItemEvent.DESELECTED),
+                        jScrollPane3, btnRegistros, "Registros", tbRegistros);
+                break;
+            case "reportes":
+                chReportes.setSelected(visualizar);
+                handleCheckboxChange(new ItemEvent(chReportes, ItemEvent.ITEM_STATE_CHANGED, chReportes, visualizar ? ItemEvent.SELECTED : ItemEvent.DESELECTED),
+                        jScrollPane5, btnReportes, "Reportes", tbReportes);
+                break;
+            // Añadir más menús si es necesario
+        }
+    }
+
+    public void cargarPermisosSubmenus(int rolId) {
+        Connection connection = null;
+        try {
+            connection = Conectar.getInstancia().obtenerConexion();
+            if (connection == null) {
+                throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+            }
+
+            String sql = """
+        SELECT rs.id_menu, rs.id_submenu, rs.visualizar, rs.agregar, rs.editar, rs.eliminar, sm.nombre_submenu
+        FROM roles_menus_submenus rs
+        JOIN submenus sm ON rs.id_submenu = sm.id_submenu
+        WHERE rs.id_rol = ? AND rs.activo = true;
+        """;
+
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, rolId);
+                ResultSet rs = ps.executeQuery();
+
+                // Limpiar las tablas antes de actualizar los permisos
+                limpiarTabla(tbAdministracion);
+                limpiarTabla(tbAdmision);
+                limpiarTabla(tbRegistros);
+                limpiarTabla(tbReportes);
+
+                while (rs.next()) {
+                    int menuId = rs.getInt("id_menu");
+                    int submenuId = rs.getInt("id_submenu");
+                    boolean visualizar = rs.getBoolean("visualizar");
+                    boolean agregar = rs.getBoolean("agregar");
+                    boolean editar = rs.getBoolean("editar");
+                    boolean eliminar = rs.getBoolean("eliminar");
+                    String nombreSubmenu = rs.getString("nombre_submenu");
+
+                    // Dependiendo del menú al que pertenezca el submenú, llenar la tabla correspondiente
+                    switch (menuId) {
+                        case 1: // Administración
+                            llenarFilaSubmenu(tbAdministracion, submenuId, nombreSubmenu, visualizar, agregar, editar, eliminar);
+                            break;
+                        case 2: // Admisión
+                            llenarFilaSubmenu(tbAdmision, submenuId, nombreSubmenu, visualizar, agregar, editar, eliminar);
+                            break;
+                        case 3: // Registros
+                            llenarFilaSubmenu(tbRegistros, submenuId, nombreSubmenu, visualizar, agregar, editar, eliminar);
+                            break;
+                        case 4: // Reportes
+                            llenarFilaSubmenu(tbReportes, submenuId, nombreSubmenu, visualizar, agregar, editar, eliminar);
+                            break;
+                        // Agregar más casos según sea necesario
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
+        }
+    }
+
+    private void llenarFilaSubmenu(JTable tabla, int submenuId, String nombreSubmenu, boolean visualizar, boolean agregar, boolean editar, boolean eliminar) {
+        DefaultTableModel model = (DefaultTableModel) tabla.getModel();
+
+        Object[] fila = new Object[]{
+            submenuId, // Columna de ID del submenú
+            nombreSubmenu, // Columna del nombre del submenú
+            Boolean.valueOf(visualizar), // Asegúrate de que el valor sea Boolean
+            Boolean.valueOf(agregar), // Asegúrate de que el valor sea Boolean
+            Boolean.valueOf(editar), // Asegúrate de que el valor sea Boolean
+            Boolean.valueOf(eliminar), // Asegúrate de que el valor sea Boolean
+            Boolean.FALSE // Columna "Todo" inicialmente en false
+        };
+        model.addRow(fila);
+    }
+
+    public void cargarPermisos(int rolId) {
+        // Limpiar todas las tablas antes de cargar nuevos datos
+        limpiarTablas();
+
+        this.rolId = obtenerRolIdActual(); // Forzar la actualización del rolId.
+        if (this.rolId == -1) {
+            System.out.println("Error: No se pudo obtener un rol válido.");
+            return;
+        }
+
+        System.out.println("Rol ID obtenido: " + rolId);
+
+        // Cargar permisos de menús principales
+        cargarPermisosMenuPrincipal(rolId);
+
+        // Cargar permisos de submenús
+        cargarPermisosSubmenus(rolId);
+    }
+
+    public void cargarTablasPermisos() {
+        // Cargar los submenús y permisos en cada tabla según el ID del menú
+        llenarTablaConSubmenu(tbAdministracion, 1);  // Menú Administración
+        llenarTablaConSubmenu(tbAdmision, 2);        // Menú Admisión
+        llenarTablaConSubmenu(tbRegistros, 3);       // Menú Registros
+        llenarTablaConSubmenu(tbReportes, 4);        // Menú Reportes
+    }
+
+    public int getRolId() {
+        try {
+            String textoRolId = txtIdTPU.getText();
+            System.out.println("Texto obtenido de txtIdTPU: " + textoRolId);
+            return Integer.parseInt(textoRolId);
+        } catch (NumberFormatException e) {
+            System.out.println("Error al convertir txtIdTPU a número: " + e.getMessage());
+            return -1;  // Valor por defecto si hay un error
+        }
+    }
+
+    // Método getter para acceder a txtIdTPU
+    public JTextField getTxtIdTPU() { // Si es JLabel, cámbialo a JLabel
+        return txtIdTPU;
+    }
+
+    public void cargarPermisosDesdePrincipal() {
+        // Obtener el Rol ID del campo txtIdTPU antes de cargar cualquier permiso
+        int rolId = getRolId();
+
+        if (rolId != -1) {
+            cargarPermisos(rolId);  // Cargar los permisos asociados a ese Rol ID
+        } else {
+            JOptionPane.showMessageDialog(null, "Rol ID no válido.");
+        }
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -2005,6 +2341,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         btnCancelar = new javax.swing.JButton();
         txtIdTPU = new javax.swing.JTextField();
         btnModificar = new javax.swing.JButton();
+        btnNuevo = new javax.swing.JButton();
         btnAdministracion = new javax.swing.JButton();
         btnAdmision = new javax.swing.JButton();
         btnRegistros = new javax.swing.JButton();
@@ -2052,11 +2389,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 cbxTPUItemStateChanged(evt);
             }
         });
-        cbxTPU.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbxTPUActionPerformed(evt);
-            }
-        });
 
         btnGrabar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/guardar.png"))); // NOI18N
         btnGrabar.setText("Grabar");
@@ -2082,29 +2414,37 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
             }
         });
 
+        btnNuevo.setText("Nuevo");
+        btnNuevo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnNuevoActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(49, 49, 49)
-                        .addComponent(jLabel1)
-                        .addGap(38, 38, 38)
-                        .addComponent(cbxTPU, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(txtIdTPU, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(49, 49, 49)
+                .addComponent(jLabel1)
+                .addGap(38, 38, 38)
+                .addComponent(cbxTPU, javax.swing.GroupLayout.PREFERRED_SIZE, 275, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(26, 26, 26)
                 .addComponent(btnGrabar)
                 .addGap(71, 71, 71)
                 .addComponent(btnModificar)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 89, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 95, Short.MAX_VALUE)
                 .addComponent(btnCancelar)
                 .addGap(58, 58, 58)
                 .addComponent(btnSalir)
                 .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(txtIdTPU, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(171, 171, 171)
+                .addComponent(btnNuevo)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2117,9 +2457,14 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                     .addComponent(btnSalir)
                     .addComponent(btnCancelar)
                     .addComponent(btnModificar))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtIdTPU, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(48, Short.MAX_VALUE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtIdTPU, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(24, 24, 24)
+                        .addComponent(btnNuevo)))
+                .addContainerGap(35, Short.MAX_VALUE))
         );
 
         btnAdministracion.setBackground(new java.awt.Color(204, 204, 255));
@@ -2300,7 +2645,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.Object.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Object.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Integer.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -2318,7 +2663,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.Object.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Object.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Integer.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -2336,7 +2681,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.Object.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Object.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Integer.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -2354,7 +2699,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Object.class, java.lang.Object.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Object.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Integer.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -2368,37 +2713,34 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(chAdministracion)
+                .addGap(112, 112, 112)
+                .addComponent(chAdmision)
+                .addGap(118, 118, 118)
+                .addComponent(chRegistros)
+                .addGap(101, 101, 101)
+                .addComponent(chReportes)
+                .addContainerGap(429, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnAdministracion, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addComponent(chAdministracion)
-                                .addGap(112, 112, 112)
-                                .addComponent(chAdmision)
-                                .addGap(118, 118, 118)
-                                .addComponent(chRegistros)
-                                .addGap(101, 101, 101)
-                                .addComponent(chReportes))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(btnRegistros, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(btnAdmision, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jScrollPane3)
-                    .addComponent(btnReportes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane5)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addContainerGap()
                                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 1067, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1075, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(btnAdministracion, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3)
+                    .addComponent(btnReportes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane5)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnRegistros, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnAdmision, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
@@ -2549,14 +2891,10 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     private void cbxTPUItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxTPUItemStateChanged
         MostrarCodigoPorTPU(cbxTPU, txtIdTPU);
         // Ahora cargamos los permisos del usuario seleccionado
-        int rolId = Integer.parseInt(txtIdTPU.getText());
-        cargarPermisosDelUsuario(rolId);
+//        int rolId = Integer.parseInt(txtIdTPU.getText());
+//        cargarPermisosDelUsuario(rolId);
 
     }//GEN-LAST:event_cbxTPUItemStateChanged
-
-    private void cbxTPUActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxTPUActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cbxTPUActionPerformed
 
     private void chAdministracionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chAdministracionActionPerformed
 //        
@@ -2589,13 +2927,13 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
             if (rolId > 0) {
                 // Recolectar los permisos de cada tabla (Administración, Admisión, Registros, Reportes)
-                System.out.println("Guardando permisos para Administración...");
+                System.out.println("Guardando permisos para Administracion...");
                 guardarPermisosDeTabla(tbAdministracion, rolId);
-                System.out.println("Permisos de Administración guardados.");
+                System.out.println("Permisos de Administracion guardados.");
 
-                System.out.println("Guardando permisos para Admisión...");
+                System.out.println("Guardando permisos para Admision...");
                 guardarPermisosDeTabla(tbAdmision, rolId);
-                System.out.println("Permisos de Admisión guardados.");
+                System.out.println("Permisos de Admision guardados.");
 
                 System.out.println("Guardando permisos para Registros...");
                 guardarPermisosDeTabla(tbRegistros, rolId);
@@ -2661,6 +2999,22 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
     }//GEN-LAST:event_btnCancelarActionPerformed
 
+    private void btnNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNuevoActionPerformed
+        limpiarCheckboxesEnTablas();
+
+        // Asegúrate de que los botones permanezcan habilitados
+        btnGrabar.setVisible(true);
+        btnModificar.setVisible(true);
+        btnCancelar.setVisible(true);
+        btnSalir.setVisible(true);
+
+        // Si el estado de los botones depende de alguna otra lógica, asegúrate de actualizar ese estado aquí.
+        // Por ejemplo, si los botones dependen de una selección en las tablas o algún otro campo, asegúrate de que no se deshabiliten.
+        // Refresca la interfaz si es necesario
+        updateLayout();
+
+    }//GEN-LAST:event_btnNuevoActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdministracion;
@@ -2668,6 +3022,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     public javax.swing.JButton btnCancelar;
     public javax.swing.JButton btnGrabar;
     public javax.swing.JButton btnModificar;
+    private javax.swing.JButton btnNuevo;
     private javax.swing.JButton btnRegistros;
     private javax.swing.JButton btnReportes;
     public javax.swing.JButton btnSalir;
@@ -2696,7 +3051,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     private javax.swing.JTable tbAdmision;
     private javax.swing.JTable tbRegistros;
     private javax.swing.JTable tbReportes;
-    private javax.swing.JTextField txtIdTPU;
+    public javax.swing.JTextField txtIdTPU;
     // End of variables declaration//GEN-END:variables
 
     public void MostrarTipodeUsuarioCombo(JComboBox cbxTPU) {
@@ -2717,10 +3072,10 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tabla " + e.toString());
-        }finally {
-        // Devolver la conexión al pool
-        Conectar.getInstancia().devolverConexion(connection);
-    }
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
+        }
     }
 
     public void MostrarCodigoPorTPU(JComboBox cbxTPU, JTextField idTPU) {
@@ -2742,9 +3097,62 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
-        }finally {
-        // Devolver la conexión al pool
-        Conectar.getInstancia().devolverConexion(connection);
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
+        }
     }
+
+    private int obtenerMenuIdPorSubmenu(int submenuId) {
+        Connection connection = null;
+        int menuId = -1;
+
+        try {
+            // Obtener la conexión
+            connection = Conectar.getInstancia().obtenerConexion();
+            if (connection == null) {
+                throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+            }
+
+            // Consulta para obtener el menu_id a partir del submenu_id
+            String sql = "SELECT menu_id FROM submenus WHERE id_submenu = ?";
+
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, submenuId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        menuId = rs.getInt("menu_id");
+                    } else {
+                        System.out.println("Error: No se encontró un menú para el submenú ID: " + submenuId);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // Devolver la conexión al pool
+            Conectar.getInstancia().devolverConexion(connection);
+        }
+
+        return menuId;  // Devuelve -1 si no se encontró el menuId
     }
+
+//setupMenuCheckboxListeners() Configura los listeners de los checkboxes de los menús principales.
+//handleCheckboxChange(): Maneja el evento cuando un checkbox es seleccionado o deseleccionado, mostrando 
+//        u ocultando componentes y cargando los submenús en la tabla correspondiente.
+//llenarTablaConSubmenu(): Llena la tabla con los submenús asociados a un menú cuando el checkbox de ese menú es seleccionado.
+//limpiarTabla(): Limpia la tabla cuando el checkbox de un menú es deseleccionado.
+//obtenerMenuId(): Obtiene el ID del menú a partir de su nombre para usarlo en las consultas de submenús.
+//updateLayout(): Actualiza la interfaz gráfica para reflejar los cambios en los componentes.
+//    Flujo del código:
+//cargarPermisos(int rolId): Llama a los métodos de cargar permisos de menús principales y submenús.
+//cargarPermisosMenuPrincipal(int rolId): Marca los checkboxes de los menús principales basándose en los permisos almacenados. 
+//actualizarCheckboxMenu() que llama internamente a handleCheckboxChange() para gestionar la lógica de activación de componentes.
+//cargarPermisosSubmenus(int rolId): Llena las tablas de submenús con los permisos almacenados, utilizando el método llenarFilaSubmenu().
+//llenarFilaSubmenu(): Agrega las filas correspondientes a los submenús con los permisos de visualización, agregar, editar, y eliminar.
+//limpiarTabla(): Asegura que las tablas estén vacías antes de volver a cargar los datos.
+//Ventajas:
+//Consistencia: El uso de handleCheckboxChange() permite mantener la consistencia en cómo se actualiza la interfaz cuando se cargan los permisos.
+//Simplicidad: Los métodos centralizan la lógica de cargar y manejar permisos, lo que facilita su mantenimiento.
+//Flexibilidad: Puedes añadir nuevos menús y submenús de manera sencilla al sistema sin necesidad de cambiar grandes partes del código.
 }

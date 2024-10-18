@@ -53,8 +53,10 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
     }
 
     public void MostrarTabla() {
-        Connection connection = null;
-        
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -72,8 +74,6 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
                     + "WHERE o.estado = 'Realizado' "
                     + "ORDER BY o.fechaT ASC";
     
-            Conectar.getInstancia().obtenerConexion();
-            
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
@@ -118,8 +118,10 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
 
     //Codigo Para buscar dentro de la tabla por medio del txtField Busqueda
     public DefaultTableModel buscarTabla(String buscar) {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         DefaultTableModel modelo = new DefaultTableModel();
         try {
             String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio", "Status"};
@@ -135,8 +137,6 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + "WHERE o.estado = 'Realizado' AND customer.nameCustomer LIKE '%" + buscar + "%' OR customer.address LIKE '%" + buscar + "%'"
                     + "ORDER BY o.fechaT ASC";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -514,8 +514,10 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnSalirActionPerformed
 
     private void btnBusquedaEmpresaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBusquedaEmpresaActionPerformed
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String ID = txtIdEmpresa.getText();
@@ -537,8 +539,6 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + ID_buscar + "AND o.estado = 'Realizado' "
                     + "ORDER BY o.fechaT ASC";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -602,8 +602,10 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbSeleccionaTodoActionPerformed
 
     private void btnBusquedaFechaEmpresaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBusquedaFechaEmpresaActionPerformed
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String fechaInicio = dateFormat.format(dateInicio.getDate());
@@ -627,8 +629,6 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + ID_buscar + "AND o.fechaT BETWEEN '" + fechaInicio + "' AND '" + fechaFin + "' AND o.estado = 'Realizado' "
                     + "ORDER BY o.fechaT ASC";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -786,14 +786,14 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarEmpresa(JComboBox cbxEmpresa) {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         String sql = "";
         sql = "select * from bussiness";
         Statement st;
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxEmpresa.removeAllItems();
@@ -808,12 +808,12 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoEmpresa(JComboBox cbxEmpresa, JTextField idBusiness) {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         String consuta = "select bussiness.idBusiness from bussiness where bussiness.nameBusiness=?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxEmpresa.getSelectedItem().toString());
             cs.execute();
@@ -838,7 +838,6 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
                 if (seleccion) {
                     contador++;
                 }
-
             }
         }
         if (contador == 0) {
@@ -846,5 +845,4 @@ public class RTrabajosRealizados extends javax.swing.JInternalFrame {
         }
         return bandera;
     }
-
 }

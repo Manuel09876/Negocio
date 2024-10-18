@@ -155,62 +155,96 @@ private Connection connection; // Declaración del atributo 'connection'
         }
     }
 
-    private void aplicarPermisosSubmenu(JPanel menuPanel, String nombreSubmenu, boolean visualizar, boolean agregar, boolean editar, boolean eliminar) {
-        // Encuentra el submenú y aplica los permisos correspondientes
-        for (Component component : menuPanel.getComponents()) {
-            if (component instanceof JPanel) {
-                JPanel submenuPanel = (JPanel) component;
-                String submenuName = submenuPanel.getName(); // Asegúrate de establecer el nombre del panel adecuadamente
+//    private void aplicarPermisosSubmenu(JPanel menuPanel, String nombreSubmenu, boolean visualizar, boolean agregar, boolean editar, boolean eliminar) {
+//        // Encuentra el submenú y aplica los permisos correspondientes
+//        for (Component component : menuPanel.getComponents()) {
+//            if (component instanceof JPanel) {
+//                JPanel submenuPanel = (JPanel) component;
+//                String submenuName = submenuPanel.getName(); // Asegúrate de establecer el nombre del panel adecuadamente
+//
+//                if (submenuName != null && submenuName.equals(nombreSubmenu)) {
+//                    submenuPanel.setVisible(visualizar);
+//
+//                    // Aplicar permisos a botones
+//                    for (Component subComponent : submenuPanel.getComponents()) {
+//                        if (subComponent instanceof JButton) {
+//                            JButton button = (JButton) subComponent;
+//                            String buttonName = button.getName();
+//
+//                            switch (buttonName) {
+//                                case "btnGuardar":
+//                                    button.setEnabled(agregar);
+//                                    break;
+//                                case "btnModificar":
+//                                    button.setEnabled(editar);
+//                                    break;
+//                                case "btnEliminar":
+//                                    button.setEnabled(eliminar);
+//                                    break;
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
-                if (submenuName != null && submenuName.equals(nombreSubmenu)) {
-                    submenuPanel.setVisible(visualizar);
-
-                    // Aplicar permisos a botones
-                    for (Component subComponent : submenuPanel.getComponents()) {
-                        if (subComponent instanceof JButton) {
-                            JButton button = (JButton) subComponent;
-                            String buttonName = button.getName();
-
-                            switch (buttonName) {
-                                case "btnGuardar":
-                                    button.setEnabled(agregar);
-                                    break;
-                                case "btnModificar":
-                                    button.setEnabled(editar);
-                                    break;
-                                case "btnEliminar":
-                                    button.setEnabled(eliminar);
-                                    break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
+    //Para que no se vean los Menus en la Ventana Principal
     public void ocultarSubMenus(String menuPrincipal, VentanaPrincipal ventanaPrincipal) {
         // Lógica para ocultar todos los submenús bajo el menú principal proporcionado.
         switch (menuPrincipal) {
             case "Administracion":
                 ventanaPrincipal.getMenuUsuarios().setVisible(false);
                 ventanaPrincipal.getMenuTipoUsuarios().setVisible(false);
+                ventanaPrincipal.getMenuAsignacionPermisos().setVisible(false);
+                ventanaPrincipal.getMenuEmpresas().setVisible(false);
+                ventanaPrincipal.getMenuTrabajadores().setVisible(false);
+                ventanaPrincipal.getMenuTarifario().setVisible(false);
+                ventanaPrincipal.getMenuProductos().setVisible(false);
+                ventanaPrincipal.getMenuFormularios().setVisible(false);
+                ventanaPrincipal.getMenuProveedor().setVisible(false);
+                ventanaPrincipal.getMenuConvenios().setVisible(false);
+                ventanaPrincipal.getMenuBusquedaConvenios().setVisible(false);
+                ventanaPrincipal.getMenuAsignaciondeTrabajos().setVisible(false);
+                ventanaPrincipal.getMenuPuestoDeTrabajo().setVisible(false);
+                ventanaPrincipal.getMenuFormaDePago().setVisible(false);
+                ventanaPrincipal.getMenuMenusSubmenus().setVisible(false);
                 // Oculta todos los submenús del menú "Administracion"
                 break;
             // Repite para otros menús principales
             case "Admision":
-                ventanaPrincipal.getMenuUsuarios().setVisible(false);
-                ventanaPrincipal.getMenuTipoUsuarios().setVisible(false);
+                ventanaPrincipal.getMenuClientes().setVisible(false);
+                ventanaPrincipal.getMenuMarcas().setVisible(false);
+                ventanaPrincipal.getMenuUnidades().setVisible(false);
+                ventanaPrincipal.getMenutipo_pagosgenerales().setVisible(false);
+                ventanaPrincipal.getMenuTipoProMat().setVisible(false);
+                ventanaPrincipal.getMenuTipoMaqVe().setVisible(false);
+                ventanaPrincipal.getMenuLocalizacion().setVisible(false);
+                ventanaPrincipal.getMenuConfiguracion().setVisible(false);
                 // Oculta todos los submenús del menú "Administracion"
                 break;
             case "Registros":
-                ventanaPrincipal.getMenuUsuarios().setVisible(false);
-                ventanaPrincipal.getMenuTipoUsuarios().setVisible(false);
+                ventanaPrincipal.getMenuOrdenes().setVisible(false);
+                ventanaPrincipal.getMenuVerOrdenes().setVisible(false);
+                ventanaPrincipal.getMenuVentas().setVisible(false);
+                ventanaPrincipal.getMenuCompraProMat().setVisible(false);
+                ventanaPrincipal.getMenuCompraEquyVehi().setVisible(false);
+                ventanaPrincipal.getMenuGastosGenerales().setVisible(false);
+                ventanaPrincipal.getMenuKardex().setVisible(false);
+                ventanaPrincipal.getMenuCotizaciones().setVisible(false);
+                ventanaPrincipal.getMenuCancelaciones().setVisible(false);
                 // Oculta todos los submenús del menú "Administracion"
                 break;
             case "Reportes":
-                ventanaPrincipal.getMenuUsuarios().setVisible(false);
-                ventanaPrincipal.getMenuTipoUsuarios().setVisible(false);
+                ventanaPrincipal.getMenuTrabajosRealizados().setVisible(false);
+                ventanaPrincipal.getMenuEstadisticas().setVisible(false);
+                ventanaPrincipal.getMenuDeudasPorPagar().setVisible(false);
+                ventanaPrincipal.getMenuDeudasPorCobrar().setVisible(false);
+                ventanaPrincipal.getMenuHorasTrabajadas().setVisible(false);
+                ventanaPrincipal.getMenuSueldos().setVisible(false);
+                ventanaPrincipal.getMenuStock().setVisible(false);
+                ventanaPrincipal.getMenuTrabajos().setVisible(false);
+                ventanaPrincipal.getMenuPresupuesto().setVisible(false);
                 // Oculta todos los submenús del menú "Administracion"
                 break;
         }

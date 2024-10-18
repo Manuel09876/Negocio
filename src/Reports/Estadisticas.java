@@ -41,15 +41,15 @@ public class Estadisticas extends javax.swing.JInternalFrame {
     }
     
     public void BuscarDatos() {
-        Connection connection = null;
-        
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String fechaInicio = dateFormat.format(dateInicio.getDate());
         String fechaFin = dateFormat.format(dateFin.getDate());
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             String Total = "SELECT SUM(precio) FROM orderservice";
             String Egresos = "SELECT (SELECT SUM(Total) FROM compraproductosmateriales) + (SELECT SUM(total) FROM detallepagosgenerales) +"
                     + "(SELECT SUM(Total) FROM detalle_compraproductosmateriales) AS TotalCombinado FROM dual";
@@ -101,12 +101,12 @@ public class Estadisticas extends javax.swing.JInternalFrame {
     }
 
     private TimeSeriesCollection crearDataset(String query, String label, String dateColumn, String valueColumn) {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         TimeSeries series = new TimeSeries(label);
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             PreparedStatement pst = connection.prepareStatement(query);
             ResultSet rs = pst.executeQuery();
 
@@ -252,18 +252,16 @@ public class Estadisticas extends javax.swing.JInternalFrame {
     }
 
     private double obtenerTotal(String query, String columnLabel) {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         double total = 0.0;
         
-        try{
-            Conectar.getInstancia().obtenerConexion();
-            
         try (PreparedStatement pst = connection.prepareStatement(query); ResultSet rs = pst.executeQuery()) {
             if (rs.next()) {
                 total = rs.getDouble(columnLabel);
             }
-        }
         } catch (SQLException e) {
             e.printStackTrace();
         }finally{

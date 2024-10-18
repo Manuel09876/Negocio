@@ -163,8 +163,10 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
     // Método para mostrar la tabla combinada y verificar los avisos
     private void MostrarTablaCombinada(String Valores) throws SQLException {
-        Connection connection = null;
-        
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         try {
             // Configurar las columnas del modelo de la tabla
             String[] titulosTabla = {"Seleccion", "id", "Descripcion", "Fecha de Pago", "Numero de Cuota", "Cuota", "Deuda", "Estado"};
@@ -209,8 +211,6 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
                      INNER JOIN equipos AS e ON c.id_compra = e.id_equipos 
                      WHERE c.estado = 'Pendiente'
                      ORDER BY `Fecha de Pago` ASC""";
-
-            Conectar.getInstancia().obtenerConexion();
 
             Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(sql);
@@ -264,8 +264,10 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
     //Muestra la Relación de Canceladas
     private void MostrarPagadas(String Valores) {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         try {
             // Configurar las columnas del modelo de la tabla
             String[] titulosTabla = {"Seleccion", "id", "Descripcion", "Fecha de Pago", "Cuota Numero", "Monto a Pagar", "Deuda", "Estado"};
@@ -280,8 +282,6 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
                      FROM credito AS c
                      INNER JOIN equipos AS e ON c.id_compra=e.id_equipos WHERE c.estado = 'Cancelado'""";
 
-            Conectar.getInstancia().obtenerConexion();
-            
             Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(sql);
 
@@ -317,8 +317,10 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 
     //Guardar selección y modificar estado, eliminando fila
     public void guardarSeleccion() {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         try {
 // Obtener el modelo de la tabla
             DefaultTableModel modelo = (DefaultTableModel) tbDeudasCombinadas.getModel();
@@ -336,8 +338,6 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 // Actualizar el estado del registro a "Cancelado"
                     String sqlUpdate = "UPDATE credito SET estado = 'Cancelado' WHERE id = ?";
                     
-                    Conectar.getInstancia().obtenerConexion();
-                    
                     PreparedStatement pstmtUpdate = connection.prepareStatement(sqlUpdate);
                     pstmtUpdate.setInt(1, id);
                     pstmtUpdate.executeUpdate();
@@ -346,9 +346,7 @@ public class DeudasPorPagar extends javax.swing.JInternalFrame {
 //                    modelo.removeRow(i);
 //                    i--; //Decrmentar el indice ya que se eliminó una fila
                 }
-
             }
-           
             // Mensaje de éxito
             JOptionPane.showMessageDialog(null, "Registros guardados correctamente");
         } catch (SQLException e) {

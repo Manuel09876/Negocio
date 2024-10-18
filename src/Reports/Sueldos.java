@@ -59,15 +59,15 @@ public class Sueldos extends javax.swing.JInternalFrame {
     }
 
     private void cargarPeriodoTrabajador(int trabajadorId) {
-        Connection connection = null;
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = """
                      SELECT p.descripcion FROM puestodetrabajo pt 
                      INNER JOIN periodo p ON pt.id_periodo=p.id
                      WHERE  pt.idTrabajador = ?""";
 
-        try{
-        Conectar.getInstancia().obtenerConexion();
-            
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, trabajadorId);
             ResultSet rs = pst.executeQuery();
@@ -79,7 +79,6 @@ public class Sueldos extends javax.swing.JInternalFrame {
             } else {
                 JOptionPane.showMessageDialog(null, "No se encontró el periodo de pago del trabajador.");
             }
-        }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al obtener el periodo de pago del trabajador: " + e.getMessage());
         }finally{
@@ -106,7 +105,10 @@ public class Sueldos extends javax.swing.JInternalFrame {
 
     // Método para mostrar sueldos basado en el rango de fechas y tipo de período
     public void mostrarSueldos(int trabajadorId, java.sql.Date fechaInicio, java.sql.Date fechaFin) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         // Definir el modelo de tabla
         DefaultTableModel modelo = new DefaultTableModel();
         modelo.addColumn("ID Trabajador");
@@ -134,8 +136,6 @@ public class Sueldos extends javax.swing.JInternalFrame {
                 + "GROUP BY t.idWorker, t.nombre, DATE(hi.fInicio)\n"
                 + "ORDER BY DATE(hi.fInicio) ASC";
 
-        Conectar.getInstancia().obtenerConexion();
-        
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             // Establecer los parámetros en el PreparedStatement
             pst.setInt(1, trabajadorId);  // Parámetro 1
@@ -222,19 +222,18 @@ public class Sueldos extends javax.swing.JInternalFrame {
     }
 
     private LocalDate obtenerFechaInicioActividadesGlobal() {
-        Connection connection = null;
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "SELECT fecha_inicio_actividades FROM configuracion"; // Tabla de configuración
 
-        try{
-        Conectar.getInstancia().obtenerConexion();
-            
         try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             if (rs.next()) {
                 return rs.getDate("fecha_inicio_actividades").toLocalDate();
             } else {
                 throw new SQLException("No se encontró la fecha de inicio de actividades.");
             }
-        }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al obtener la fecha de inicio de actividades: " + e.getMessage());
             return LocalDate.now(); // Por defecto, devolver la fecha actual si falla
@@ -244,12 +243,12 @@ public class Sueldos extends javax.swing.JInternalFrame {
     }
 
     private LocalDate obtenerFechaInicioActividades(int trabajadorId) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "SELECT fechaDePuesto FROM puestodetrabajo WHERE idTrabajador = ? ORDER BY fechaDePuesto ASC LIMIT 1";
 
-        try{
-        Conectar.getInstancia().obtenerConexion();
-            
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, trabajadorId);
             ResultSet rs = pst.executeQuery();
@@ -259,7 +258,6 @@ public class Sueldos extends javax.swing.JInternalFrame {
             } else {
                 throw new SQLException("No se encontró la fecha de inicio de actividades para el trabajador con ID: " + trabajadorId);
             }
-        }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al obtener la fecha de inicio de actividades: " + e.getMessage());
             return LocalDate.now();
@@ -356,23 +354,21 @@ public class Sueldos extends javax.swing.JInternalFrame {
     }
 
     private String obtenerTipoPeriodoAsignado(int trabajadorId) {
-        Connection connection = null;
-        
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         String sql = "SELECT p.descripcion FROM puestodetrabajo pt\n"
                 + "INNER JOIN periodo p ON pt.id_periodo=p.id\n"
                 + "INNER JOIN worker w ON pt.idTrabajador=w.idWorker\n"
                 + "WHERE idTrabajador=? LIMIT 1";
         
-        try{
-        Conectar.getInstancia().obtenerConexion();
-            
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, trabajadorId);
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
                 return rs.getString("descripcion"); // Retorna "Semanal", "Quincenal" o "Mensual"
             }
-        }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al obtener el periodo del trabajador: " + e.getMessage());
         }finally{
@@ -719,19 +715,17 @@ public class Sueldos extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarTrabajador(JComboBox comboTrabajador) {
-        Connection connection = null;
-        
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         String sql = "SELECT * FROM worker";
         
-        try{
-        Conectar.getInstancia().obtenerConexion();
-            
         try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             comboTrabajador.removeAllItems();
             while (rs.next()) {
                 comboTrabajador.addItem(rs.getString("nombre"));
             }
-        }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Trabajadores: " + e.toString());
         }finally{
@@ -740,14 +734,12 @@ public class Sueldos extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoTrabajador(JComboBox trabajador, JTextField IdTrabajador) {
-        Connection connection = null;
-        
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         String consulta = "SELECT worker.idWorker FROM worker WHERE worker.nombre=?";
 
-        try{
-        Conectar.getInstancia().obtenerConexion();
-        
-        
         try (PreparedStatement ps = connection.prepareStatement(consulta)) {
             ps.setString(1, trabajador.getSelectedItem().toString()); // Asegúrate de que estás proporcionando el parámetro
             ResultSet rs = ps.executeQuery();
@@ -755,7 +747,6 @@ public class Sueldos extends javax.swing.JInternalFrame {
             if (rs.next()) {
                 IdTrabajador.setText(rs.getString("idWorker"));
             }
-        }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar " + e.toString());
         }finally{
@@ -764,8 +755,10 @@ public class Sueldos extends javax.swing.JInternalFrame {
     }
 
     public void mostrarPlanillaYResumen(int trabajadorId, java.sql.Date fechaInicio, java.sql.Date fechaFin) {
-        Connection connection = null;
-        
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         // Tabla 1: Relación de Trabajadores
         DefaultTableModel modeloTrabajadores = new DefaultTableModel();
         modeloTrabajadores.addColumn("ID Trabajador");
@@ -822,9 +815,6 @@ public class Sueldos extends javax.swing.JInternalFrame {
                 + "ORDER BY t.nombre ASC";
 
         
-        try{
-        Conectar.getInstancia().obtenerConexion();
-            
         try (Statement st = connection.createStatement(); PreparedStatement pstResumen = connection.prepareStatement(sqlResumen)) {
 
             // Obtener los trabajadores
@@ -863,7 +853,6 @@ public class Sueldos extends javax.swing.JInternalFrame {
                     rsResumen.getDouble("totalPagar")
                 });
             }
-        }
             // Asignar los modelos a las tablas
             tablaTrabajadores.setModel(modeloTrabajadores);
 //            tablaPlanillaMensual.setModel(modeloPlanilla);
@@ -878,8 +867,10 @@ public class Sueldos extends javax.swing.JInternalFrame {
     }
 
     public void mostrarPlanillaSemanal(int trabajadorId, java.sql.Date fechaInicio, java.sql.Date fechaFin) {
-        Connection connection = null;
-        
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         DefaultTableModel modeloSemanal = new DefaultTableModel();
         modeloSemanal.addColumn("ID Trabajador");
         modeloSemanal.addColumn("Fecha");
@@ -903,9 +894,6 @@ public class Sueldos extends javax.swing.JInternalFrame {
                 + "GROUP BY t.idWorker, DATE(hi.fInicio) "
                 + "ORDER BY DATE(hi.fInicio) ASC";
 
-        try{
-        Conectar.getInstancia().obtenerConexion();
-            
         try (PreparedStatement pst = connection.prepareStatement(sqlSemanal)) {
             pst.setInt(1, trabajadorId);
             pst.setDate(2, fechaInicio);
@@ -922,7 +910,6 @@ public class Sueldos extends javax.swing.JInternalFrame {
                     rs.getDouble("sueldoNeto")
                 });
             }
-        }
             tablaPlanillaSemanal.setModel(modeloSemanal);
 
         } catch (SQLException e) {
@@ -933,8 +920,10 @@ public class Sueldos extends javax.swing.JInternalFrame {
     }
 
     public void mostrarPlanillaQuincenal(int trabajadorId, java.sql.Date fechaInicio, java.sql.Date fechaFin) {
-        Connection connection = null;
-        
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         DefaultTableModel modeloQuincenal = new DefaultTableModel();
         modeloQuincenal.addColumn("ID Trabajador");
         modeloQuincenal.addColumn("Fecha");
@@ -958,9 +947,6 @@ public class Sueldos extends javax.swing.JInternalFrame {
                 + "GROUP BY t.idWorker, DATE(hi.fInicio) "
                 + "ORDER BY DATE(hi.fInicio) ASC";
 
-        try{
-        Conectar.getInstancia().obtenerConexion();
-            
         try (PreparedStatement pst = connection.prepareStatement(sqlQuincenal)) {
             pst.setInt(1, trabajadorId);
             pst.setDate(2, fechaInicio);
@@ -977,20 +963,20 @@ public class Sueldos extends javax.swing.JInternalFrame {
                     rs.getDouble("sueldoNeto")
                 });
             }
-        }
             tablaPlanillaQuincenal.setModel(modeloQuincenal);
 
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar la planilla quincenal: " + e.getMessage());
         }finally{
             Conectar.getInstancia().devolverConexion(connection);
-        }
-                
+        }                
     }
 
     public void mostrarPlanillaMensual(int trabajadorId, java.sql.Date fechaInicio, java.sql.Date fechaFin) {
-        Connection connection = null;
-        
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         DefaultTableModel modeloMensual = new DefaultTableModel();
         modeloMensual.addColumn("ID Trabajador");
         modeloMensual.addColumn("Fecha");
@@ -1014,9 +1000,6 @@ public class Sueldos extends javax.swing.JInternalFrame {
                 + "GROUP BY t.idWorker, DATE(hi.fInicio) "
                 + "ORDER BY DATE(hi.fInicio) ASC";
 
-        try{
-        Conectar.getInstancia().obtenerConexion();        
-        
         try (PreparedStatement pst = connection.prepareStatement(sqlMensual)) {
             pst.setInt(1, trabajadorId);
             pst.setDate(2, fechaInicio);
@@ -1033,7 +1016,6 @@ public class Sueldos extends javax.swing.JInternalFrame {
                     rs.getDouble("sueldoNeto")
                 });
             }
-        }
             tablaPlanillaMensual.setModel(modeloMensual);
 
         } catch (SQLException e) {

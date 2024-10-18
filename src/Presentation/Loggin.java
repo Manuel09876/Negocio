@@ -21,24 +21,22 @@ public class Loggin extends javax.swing.JFrame {
     private AsignacionPermisos ap;
     private PermisoManager pm;
 
-   
     public Loggin() {
         initComponents();  // Asegúrate de que los componentes estén inicializados antes
-   
+
         ht = new HorasTrabajadas();
         txtUser.requestFocus();  // Ahora puedes llamar a requestFocus() aquí sin problemas
         btnTest.setVisible(false);
     }
 
-   
     public void IngresaSistema(String usuario, String contrasena) {
-        Connection connection = null;    
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "SELECT idUsuarios, rol, password FROM usuarios WHERE usuario = ? AND estado = 'Activo'";
-        
-        try {
-            Conectar.getInstancia().obtenerConexion();
-        
+
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setString(1, usuario);
             System.out.println("Ejecutando consulta: " + sql);
@@ -54,13 +52,12 @@ public class Loggin extends javax.swing.JFrame {
                         int idTrabajador = obtenerTrabajadorId(usuario);
                         if (idTrabajador != 0) {
                             ht.registrarInicioSesion(idTrabajador); // Registrar inicio de sesión del trabajador
-
-//                            // Abrir la ventana principal y aplicar permisos
-//                            VentanaPrincipal ventanaPrincipal = new VentanaPrincipal(rolId, usuario);
-//                            pm = new PermisoManager(connection);
-//                            pm.aplicarPermisos(rolId, ventanaPrincipal);
-//                            ventanaPrincipal.setVisible(true);
-//                            this.dispose();
+                            // Lógica para abrir la ventana principal
+                            
+                            // Cargar los permisos en la VentanaPrincipal
+                            
+                        abrirVentanaPrincipal(rolId, usuario); // Abrir ventana principal pasando el rolId
+                            
                         }
                     } else {
                         JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
@@ -69,23 +66,22 @@ public class Loggin extends javax.swing.JFrame {
                     JOptionPane.showMessageDialog(this, "Usuario no encontrado o inactivo");
                 }
             }
-        }
         } catch (SQLException ex) {
             LOGGER.log(Level.SEVERE, "Error al ingresar al sistema", ex);
             JOptionPane.showMessageDialog(this, "Error al ingresar al sistema. Por favor, intente de nuevo.");
-        }finally{
-            Conectar.getInstancia().devolverConexion(connection);
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection); // Devolver la conexión al pool
         }
-        
     }
 
     private int obtenerTrabajadorId(int idUsuario) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida aquí
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "SELECT id_trabajador FROM usuario_trabajador WHERE id_usuario = ?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             PreparedStatement pst = connection.prepareStatement(sql);
             pst.setInt(1, idUsuario);
             ResultSet rs = pst.executeQuery();
@@ -98,7 +94,7 @@ public class Loggin extends javax.swing.JFrame {
             }
         } catch (SQLException ex) {
             Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
+        } finally {
             Conectar.getInstancia().devolverConexion(connection);
         }
         return 0;
@@ -270,9 +266,9 @@ public class Loggin extends javax.swing.JFrame {
         String usuario = txtUser.getText();
         int tipUsu = obtenerRolDeUsuario(usuario); // Implementa este método para obtener el rol del usuario
 
-        VentanaPrincipal objVP = new VentanaPrincipal(tipUsu, usuario); // Pasar los valores correctos
-        objVP.setVisible(true);
-        this.dispose();
+//        VentanaPrincipal objVP = new VentanaPrincipal(tipUsu, usuario); // Pasar los valores correctos
+//        objVP.setVisible(true);
+//        this.dispose();
     }//GEN-LAST:event_btnEnterActionPerformed
 
     private void btnTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTestActionPerformed
@@ -344,39 +340,40 @@ public class Loggin extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     private int obtenerTrabajadorId(String usuario) {
-        Connection connection = null;
-                
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida aquí
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
+
         String sql = "SELECT ut.id_trabajador FROM usuario_trabajador ut INNER JOIN usuarios u ON ut.id_usuario = u.idUsuarios WHERE u.usuario = ?";
-        try {
-            Conectar.getInstancia().obtenerConexion();
-            
-            PreparedStatement pst = connection.prepareStatement(sql);
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setString(1, usuario);
-            ResultSet rs = pst.executeQuery();
-            if (rs.next()) {
-                int idTrabajador = rs.getInt("id_trabajador");
-                System.out.println("ID del trabajador obtenido: " + idTrabajador); // Mensaje de depuración
-                return idTrabajador;
-            } else {
-                System.out.println("No se encontró el trabajador para el usuario: " + usuario); // Mensaje de depuración
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    int idTrabajador = rs.getInt("id_trabajador");
+                    System.out.println("ID del trabajador obtenido: " + idTrabajador);
+                    return idTrabajador;
+                } else {
+                    System.out.println("No se encontró el trabajador para el usuario: " + usuario);
+                }
             }
         } catch (SQLException ex) {
             Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
-        }finally{
-            Conectar.getInstancia().devolverConexion(connection);
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection); // Devolver la conexión al pool
         }
         return 0;
     }
 
     private int obtenerRolDeUsuario(String usuario) {
-        Connection connection = null;
-        
-        int rolId = 0;
-
-        try {
-            Conectar.getInstancia().obtenerConexion();
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida aquí
+        if (connection == null) {
+            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+        }
 
         String sql = "SELECT rol FROM usuarios WHERE usuario = ?";
+        int rolId = 0;
+
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, usuario);
             try (ResultSet rs = ps.executeQuery()) {
@@ -386,11 +383,10 @@ public class Loggin extends javax.swing.JFrame {
                     System.out.println("Usuario no encontrado: " + usuario);
                 }
             }
-        }
         } catch (SQLException e) {
             e.printStackTrace();
-        }finally{
-            Conectar.getInstancia().devolverConexion(connection);
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection); // Devolver la conexión
         }
 
         return rolId;

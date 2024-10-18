@@ -86,8 +86,10 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }
 
     public void MostrarTablaDeuda() {
-        Connection connection = null;
-        
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -106,8 +108,6 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                     + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'deuda' "
                     + "ORDER BY o.fechaT ASC";
      
-            Conectar.getInstancia().obtenerConexion();
-            
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
@@ -160,8 +160,10 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }
 
     public void MostrarTablaPagadas() {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -179,8 +181,6 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                     + "LEFT JOIN facturas AS f ON o.id = f.id_ordenServicio " // Asegúrate de que tienes la relación correcta
                     + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'Cancelada' "
                     + "ORDER BY o.fechaT ASC";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -235,8 +235,10 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 
     //Codigo Para buscar dentro de la tabla por medio del txtField Busqueda
     public DefaultTableModel buscarTabla(String buscar) {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         DefaultTableModel modelo = new DefaultTableModel();
         try {
             String[] tituloTabla = {"Selección", "id", "Empresa", "Fecha", "Nombre", "Tamaño", "Direccion", "Ciudad", "Estado", "Zip Code", "Celular", "Servicio", "Precio", "Status", "Estado de Cuenta"};
@@ -252,8 +254,6 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + "WHERE o.estado != 'Inactivo' AND o.eeCta = 'deuda' AND customer.nameCustomer LIKE '%" + buscar + "%' OR customer.address LIKE '%" + buscar + "%'"
                     + "ORDER BY o.fechaT ASC";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -427,16 +427,16 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         }
 
         public void savePDFToDatabase(String filePath, int orderId, int paymentMethodId, int invoiceNumber) {
-            Connection connection = null;
-            
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }            
             PreparedStatement pstmt = null;
             FileInputStream fis = null;
 
             try {
                 
                 String sql = "INSERT INTO facturas (pdf, id_ordenServicio, id_pagarcon, numeroFactura) VALUES (?, ?, ?, ?)";
-                
-                Conectar.getInstancia().obtenerConexion();
                 
                 pstmt = connection.prepareCall(sql);
 
@@ -459,8 +459,10 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }
 
     private int getNextInvoiceNumber() {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         Statement stmt = null;
         ResultSet rs = null;
         int nextInvoiceNumber = 1;
@@ -468,8 +470,6 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         try {
             String sql = "SELECT MAX(numeroFactura) AS maxInvoiceNumber FROM facturas";
             
-            Conectar.getInstancia().obtenerConexion();
-                    
             stmt = connection.createStatement();
             rs = stmt.executeQuery(sql);
 
@@ -488,14 +488,14 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }
 
     private void updateOrderStatus(int orderId, String status) {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         PreparedStatement pstmt = null;
 
         try {
             String sql = "UPDATE orderservice SET eeCta = ? WHERE id = ?";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             pstmt = connection.prepareStatement(sql);
             pstmt.setString(1, status);
@@ -512,16 +512,16 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }
 
     private int getPaymentMethodId(String paymentMethodName) {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         int paymentMethodId = -1;
 
         try {
             String sql = "SELECT id_formadepago FROM formadepago WHERE nombre = ?";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             pstmt = connection.prepareStatement(sql);
             pstmt.setString(1, paymentMethodName);
@@ -541,16 +541,16 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }
 
     private byte[] getPDFByInvoiceNumber(int invoiceNumber) {
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         byte[] pdfData = null;
 
         try {
             String sql = "SELECT pdf FROM facturas WHERE numeroFactura = ?";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             pstmt = connection.prepareStatement(sql);
             pstmt.setInt(1, invoiceNumber);
@@ -877,8 +877,10 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_tbDeudasPorCobrarMouseClicked
 
     private void btnBusquedaEmpresaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBusquedaEmpresaActionPerformed
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String ID = txtIdEmpresa.getText();
@@ -900,8 +902,6 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + ID_buscar + "AND o.estado != 'Inactivo' AND o.eeCta = 'deuda' "
                     + "ORDER BY o.fechaT ASC";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -975,8 +975,10 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_cbSeleccionaTodoActionPerformed
 
     private void btnBusquedaFechaEmpresaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBusquedaFechaEmpresaActionPerformed
-        Connection connection = null;
-        
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         DefaultTableModel modelo = new DefaultTableModel();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String fechaInicio = dateFormat.format(dateInicio.getDate());
@@ -1000,8 +1002,6 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
                     + "INNER JOIN customer ON o.id_cliente = customer.idCustomer "
                     + ID_buscar + "AND o.fechaT BETWEEN '" + fechaInicio + "' AND '" + fechaFin + "' AND o.estado != 'Inactivo' "
                     + "ORDER BY o.fechaT ASC";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             Statement st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -1235,13 +1235,14 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarEmpresa(JComboBox cbxEmpresa) {
-        Connection connection = null;
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "";
         sql = "select * from bussiness";
         Statement st;
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxEmpresa.removeAllItems();
@@ -1256,11 +1257,12 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoEmpresa(JComboBox cbxEmpresa, JTextField idBusiness) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consuta = "select bussiness.idBusiness from bussiness where bussiness.nameBusiness=?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consuta);
             cs.setString(1, cbxEmpresa.getSelectedItem().toString());
             cs.execute();
@@ -1276,8 +1278,10 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoFormaDePago(JComboBox cbxPagarCon, JTextField idPagarCon) {
-        Connection connection = null;
-
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consuta = "select formadepago.id_formadepago from formadepago where formadepago.nombre=?";
 
         try {
@@ -1286,8 +1290,6 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
 //            JOptionPane.showMessageDialog(null, "Error: No se ha seleccionado ninguna forme de pago.");
                 return;
             }
-            Conectar.getInstancia().obtenerConexion();
-
             CallableStatement cs = connection.prepareCall(consuta);
 
             Object selectedValue = cbxPagarCon.getSelectedItem();
@@ -1312,15 +1314,15 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
     }
 
     public void MostrarFormaDePago(JComboBox cbxPagarCon) {
-        Connection connection = null;
-
+     Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "";
         sql = "select * from formadepago";
         Statement st;
 
         try {
-            Conectar.getInstancia().obtenerConexion();
-
             st = connection.createStatement();
             ResultSet rs = st.executeQuery(sql);
             cbxPagarCon.removeAllItems();

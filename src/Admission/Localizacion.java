@@ -65,15 +65,15 @@ public class Localizacion extends javax.swing.JInternalFrame {
     ResultSet rs;
 
     public void CargarDatosTabla(String Valores) {
-        Connection connection = null;
-        
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         try {
             String[] titulosTabla = {"Código", "Descripción", "Estado"}; //Titulos de la Tabla
             String[] RegistroBD = new String[3];
             model = new DefaultTableModel(null, titulosTabla); //Le pasamos los titulos a la tabla
             String ConsultaSQL = "SELECT * FROM localizacion";
-            
-            Conectar.getInstancia().obtenerConexion();
             
             Statement st = connection.createStatement();
             ResultSet result = st.executeQuery(ConsultaSQL);
@@ -95,8 +95,10 @@ public class Localizacion extends javax.swing.JInternalFrame {
     }
 
     void Guardar() {
-        Connection connection = null;
-        
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         // Variables
         int id_localizacion;
         String nombre;
@@ -109,8 +111,6 @@ public class Localizacion extends javax.swing.JInternalFrame {
         sql = "INSERT INTO localizacion (nombre)VALUES (?)";
         //Para almacenar los datos empleo un try cash
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             //prepara la coneccion para enviar al sql (Evita ataques al sql)
             PreparedStatement pst = connection.prepareStatement(sql);
             pst.setString(1, nombre);
@@ -131,13 +131,13 @@ public class Localizacion extends javax.swing.JInternalFrame {
     }
 
     public void Eliminar(JTextField id) {
-        Connection connection = null;
-        
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         setId_localizacion(Integer.parseInt(id.getText()));
         String consulta = "DELETE from localizacion where id_localizacion=?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getId_localizacion());
             cs.executeUpdate();
@@ -168,11 +168,11 @@ public class Localizacion extends javax.swing.JInternalFrame {
     }
 
     public boolean modificar(Localizacion lo) {
-        Connection connection = null;
-        String sql = "UPDATE localizacion SET nombre = ?  WHERE id_localizacion = ?";
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        String sql = "UPDATE localizacion SET nombre = ?  WHERE id_localizacion = ?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             ps = connection.prepareStatement(sql);
             ps.setString(1, lo.getNombre());
             ps.setInt(2, lo.getId_localizacion());
@@ -187,12 +187,12 @@ public class Localizacion extends javax.swing.JInternalFrame {
     }
 
     public boolean accion(String estado, int IdLocalizacion) {
-        Connection connection = null;
-        
+Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }        
         String sql = "UPDATE localizacion SET estado = ? WHERE id_localizacion = ?";
         try {
-            Conectar.getInstancia().obtenerConexion();
-            
             ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
             ps.setInt(2, IdLocalizacion);
