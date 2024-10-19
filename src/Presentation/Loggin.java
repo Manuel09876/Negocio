@@ -25,17 +25,22 @@ public class Loggin extends javax.swing.JFrame {
         initComponents();  // Asegúrate de que los componentes estén inicializados antes
 
         ht = new HorasTrabajadas();
+        LOGGER.info("Componentes inicializados y listos para la autenticación del usuario.");
         txtUser.requestFocus();  // Ahora puedes llamar a requestFocus() aquí sin problemas
         btnTest.setVisible(false);
     }
 
     public void IngresaSistema(String usuario, String contrasena) {
+        LOGGER.info("Intentando acceder con el usuario: " + usuario);
         Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión
+        LOGGER.fine("Conexión obtenida: " + connection);
         if (connection == null) {
+            LOGGER.severe("Error: La conexión a la base de datos es nula.");
             throw new RuntimeException("Error: La conexión a la base de datos es nula.");
         }
 
         String sql = "SELECT idUsuarios, rol, password FROM usuarios WHERE usuario = ? AND estado = 'Activo'";
+        LOGGER.fine("Ejecutando consulta: " + sql);
 
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setString(1, usuario);
@@ -46,6 +51,7 @@ public class Loggin extends javax.swing.JFrame {
                     String passwordBD = result.getString("password");
                     if (passwordBD.equals(contrasena)) {  // Asegúrate de que la comparación sea segura si usas hash
                         int rolId = result.getInt("rol");
+                        System.out.println("Rol ID capturado: " + rolId);  // Agregar esta línea para depurar el rolId
                         int idUsuarios = result.getInt("idUsuarios");
 
                         // Obtener el idTrabajador relacionado con el idUsuarios
@@ -53,11 +59,10 @@ public class Loggin extends javax.swing.JFrame {
                         if (idTrabajador != 0) {
                             ht.registrarInicioSesion(idTrabajador); // Registrar inicio de sesión del trabajador
                             // Lógica para abrir la ventana principal
-                            
-                            // Cargar los permisos en la VentanaPrincipal
-                            
-                        abrirVentanaPrincipal(rolId, usuario); // Abrir ventana principal pasando el rolId
-                            
+
+                            // Abrir la ventana principal pasando rolId y usuario
+                            abrirVentanaPrincipal(rolId, usuario);
+
                         }
                     } else {
                         JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos");
@@ -74,38 +79,116 @@ public class Loggin extends javax.swing.JFrame {
         }
     }
 
-    private int obtenerTrabajadorId(int idUsuario) {
-        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida aquí
-        if (connection == null) {
-            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
-        }
-
-        String sql = "SELECT id_trabajador FROM usuario_trabajador WHERE id_usuario = ?";
-        try {
-            PreparedStatement pst = connection.prepareStatement(sql);
-            pst.setInt(1, idUsuario);
-            ResultSet rs = pst.executeQuery();
-            if (rs.next()) {
-                int idTrabajador = rs.getInt("id_trabajador");
-                System.out.println("ID del trabajador obtenido: " + idTrabajador); // Mensaje de depuración
-                return idTrabajador;
-            } else {
-                System.out.println("No se encontró el trabajador para el usuario con ID: " + idUsuario); // Mensaje de depuración
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            Conectar.getInstancia().devolverConexion(connection);
-        }
-        return 0;
-    }
-
-    private void abrirVentanaPrincipal(int rolId, String usuario) {
+    private void abrirVentanaPrincipal(int rolId, String usuario) throws SQLException {
         VentanaPrincipal objVP = new VentanaPrincipal(rolId, usuario);
         objVP.setVisible(true);
+
+        // Llamar al nuevo método para cargar permisos de login
+        cargarPermisosDesdeLogin(rolId, objVP);
+
+        System.out.println(rolId);
+
         this.dispose();
     }
 
+    //Metodos para cargar la interfaz
+    public void cargarPermisosDesdeLogin(int rolId, VentanaPrincipal objVP) {
+        if (rolId != -1) {
+            String usuario = null;
+
+//        rolId = obtenerRolDeUsuario(usuario); // Forzar la actualización del rolId.
+            if (rolId == -1) {
+                System.out.println("Error: No se pudo obtener un rol válido.");
+                return;
+            }
+
+            // Cargar permisos de menús principales
+            cargarPermisosMenuPrincipal(rolId, objVP);
+
+            // Cargar permisos de submenús
+            cargarPermisosSubmenus(rolId, objVP);
+        } else {
+            JOptionPane.showMessageDialog(null, "Rol ID no válido.");
+        }
+    }
+
+    public void cargarPermisosMenuPrincipal(int rolId, VentanaPrincipal objVP) {
+        Connection connection = null;
+        try {
+            connection = Conectar.getInstancia().obtenerConexion();
+            if (connection == null) {
+                throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+            }
+
+            String sql = """
+            SELECT m.nombre_menu, rm.visualizar
+            FROM roles_menus rm
+            JOIN menus m ON rm.id_menu = m.id_menu
+            WHERE rm.id_rol = ? AND rm.activo = true;
+        """;
+
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, rolId);
+                ResultSet rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    String nombreMenu = rs.getString("nombre_menu");
+                    boolean visualizar = rs.getBoolean("visualizar");
+
+                    // Agrega depuración
+                    System.out.println("Nombre del menú recuperado: " + nombreMenu + ", Visualizar: " + visualizar);
+
+                    // Aquí estamos actualizando la visibilidad del menú en VentanaPrincipal
+                    objVP.actualizarMenuPrincipal(nombreMenu, visualizar);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
+        }
+    }
+
+    public void cargarPermisosSubmenus(int rolId, VentanaPrincipal objVP) {
+        Connection connection = null;
+        try {
+            connection = Conectar.getInstancia().obtenerConexion();
+            if (connection == null) {
+                throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+            }
+
+            String sql = """
+                SELECT rs.id_menu, rs.id_submenu, rs.visualizar, rs.agregar, rs.editar, rs.eliminar, sm.nombre_submenu
+                FROM roles_menus_submenus rs
+                JOIN submenus sm ON rs.id_submenu = sm.id_submenu
+                WHERE rs.id_rol = ? AND rs.activo = true;
+            """;
+
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, rolId);
+                ResultSet rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    int menuId = rs.getInt("id_menu");
+                    String nombreSubmenu = rs.getString("nombre_submenu");
+                    boolean visualizar = rs.getBoolean("visualizar");
+                    boolean agregar = rs.getBoolean("agregar");
+                    boolean editar = rs.getBoolean("editar");
+                    boolean eliminar = rs.getBoolean("eliminar");
+
+                    // Llamar un método para actualizar la interfaz con los permisos
+                    objVP.aplicarPermisos(menuId, nombreSubmenu, visualizar, agregar, editar, eliminar);
+
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            Conectar.getInstancia().devolverConexion(connection);
+        }
+    }
+
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -265,10 +348,11 @@ public class Loggin extends javax.swing.JFrame {
         // Código para obtener tipUsu y usuario
         String usuario = txtUser.getText();
         int tipUsu = obtenerRolDeUsuario(usuario); // Implementa este método para obtener el rol del usuario
-
-//        VentanaPrincipal objVP = new VentanaPrincipal(tipUsu, usuario); // Pasar los valores correctos
-//        objVP.setVisible(true);
-//        this.dispose();
+//        try {
+//            abrirVentanaPrincipal(tipUsu, usuario);
+//        } catch (SQLException ex) {
+//            Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }//GEN-LAST:event_btnEnterActionPerformed
 
     private void btnTestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTestActionPerformed
@@ -392,4 +476,58 @@ public class Loggin extends javax.swing.JFrame {
         return rolId;
     }
 
+    //    // Este nuevo método cargará los permisos al inicio de sesión usando el rolId del usuario
+//    public void cargarPermisosLogin(int rolId, VentanaPrincipal objVP) {
+//        Connection connection = Conectar.getInstancia().obtenerConexion();
+//        if (connection == null) {
+//            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+//        }
+//
+//        String sql = "SELECT nombre_menu AS menu, nombre_submenu AS submenu FROM roles_menus_submenus rms "
+//                   + "JOIN menus m ON rms.id_menu = m.id_menu "
+//                   + "LEFT JOIN submenus s ON rms.id_submenu = s.id_submenu "
+//                   + "WHERE rms.id_rol = ?";
+//
+//        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+//            pst.setInt(1, rolId);
+//            ResultSet rs = pst.executeQuery();
+//            while (rs.next()) {
+//                String menuName = rs.getString("menu");
+//                String submenuName = rs.getString("submenu");
+//                objVP.setMenuVisibility(menuName, true);
+//                if (submenuName != null) {
+//                    objVP.setMenuVisibility(submenuName, true);
+//                }
+//            }
+//        } catch (SQLException e) {
+//            JOptionPane.showMessageDialog(this, "Error al cargar permisos del usuario: " + e.getMessage());
+//        } finally {
+//            Conectar.getInstancia().devolverConexion(connection);
+//        }
+//    }
+    //    private int obtenerTrabajadorId(int idUsuario) {
+//        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida aquí
+//        if (connection == null) {
+//            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+//        }
+//
+//        String sql = "SELECT id_trabajador FROM usuario_trabajador WHERE id_usuario = ?";
+//        try {
+//            PreparedStatement pst = connection.prepareStatement(sql);
+//            pst.setInt(1, idUsuario);
+//            ResultSet rs = pst.executeQuery();
+//            if (rs.next()) {
+//                int idTrabajador = rs.getInt("id_trabajador");
+//                System.out.println("ID del trabajador obtenido: " + idTrabajador); // Mensaje de depuración
+//                return idTrabajador;
+//            } else {
+//                System.out.println("No se encontró el trabajador para el usuario con ID: " + idUsuario); // Mensaje de depuración
+//            }
+//        } catch (SQLException ex) {
+//            Logger.getLogger(Loggin.class.getName()).log(Level.SEVERE, null, ex);
+//        } finally {
+//            Conectar.getInstancia().devolverConexion(connection);
+//        }
+//        return 0;
+//    }
 }

@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.sql.*;
 import javax.swing.table.DefaultTableModel;
 
-public class BudgetManager extends javax.swing.JInternalFrame {
+public class Presupuesto extends javax.swing.JInternalFrame {
 
     private JTable budgetTable;
     private DefaultTableModel budgetTableModel;
@@ -21,7 +21,7 @@ public class BudgetManager extends javax.swing.JInternalFrame {
     private JComboBox<String> typeComboBox;
     public JButton addButton, editButton, deleteButton, exportButton;
 
-    public BudgetManager() {
+    public Presupuesto() {
         initComponents();
         
       setTitle("Gestión de Presupuestos");

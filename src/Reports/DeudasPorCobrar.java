@@ -68,8 +68,8 @@ public class DeudasPorCobrar extends javax.swing.JInternalFrame {
         MostrarEmpresa(cbxEmpresa);
         MostrarFormaDePago(cbxPagarCon);
         MostrarTablaDeuda();
-        txtId.setEnabled(false);
-        txtIdEmpresa.setEnabled(false);
+        txtId.setVisible(false);
+        txtIdEmpresa.setVisible(false);
 
         getNextInvoiceNumber();
 

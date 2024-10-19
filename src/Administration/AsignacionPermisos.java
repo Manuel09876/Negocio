@@ -77,7 +77,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     private Sueldos sd;
     private Stock st;
     private Trabajos tbs;
-    private BudgetManager b;
+    private Presupuesto b;
 
     // Tablas de permisos
     JTable tbUsuTrab = null;
@@ -249,7 +249,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         this.sd = new Sueldos();
         this.st = new Stock();
         this.tbs = new Trabajos();
-        this.b = new BudgetManager();
+        this.b = new Presupuesto();
 
         // Configuración adicional de componentes
         AutoCompleteDecorator.decorate(cbxTPU);
@@ -287,25 +287,17 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         btnModificar.setVisible(true);
         btnCancelar.setVisible(true);
         btnSalir.setVisible(true);
-        
+
         cbxTPU.addItemListener(new ItemListener() {
-    @Override
-    public void itemStateChanged(ItemEvent e) {
-        if (e.getStateChange() == ItemEvent.SELECTED) {
-            int rolId = obtenerRolIdActual(); // Método que devuelve el ID del rol seleccionado
-            cargarPermisosSubmenus(rolId);  // Cargar los permisos del rol seleccionado
-        }
-    }
-});
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    int rolId = obtenerRolIdActual(); // Método que devuelve el ID del rol seleccionado
+                    cargarPermisosSubmenus(rolId);  // Cargar los permisos del rol seleccionado
+                }
+            }
+        });
 
-
-//        DefaultTableModel model = (DefaultTableModel) table.getModel();
-//        model.addTableModelListener(new TableModelListener() {
-//            @Override
-//            public void tableChanged(TableModelEvent e) {
-//                // Aquí puedes colocar tu implementación del listener
-//            }
-//        });
     }
 
     private void setupMenuCheckboxListeners() {
@@ -336,11 +328,66 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         updateLayout(); // Método para refrescar la interfaz
     }
 
-    private void limpiarCheckboxesDeTabla(JTable table) {
-        // Iterar sobre todas las filas y columnas que tienen checkboxes (asumimos que están en las columnas 2 a 5)
-        for (int i = 0; i < table.getRowCount(); i++) {
-            for (int j = 2; j <= 5; j++) {
-                table.setValueAt(false, i, j); // Desmarcar todas las casillas de permisos
+    private void llenarTablaConSubmenu(JTable table, int menuId) {
+        // Limpiar la tabla antes de llenarla con nuevos datos
+        limpiarTabla(table);
+
+        Connection connection = null;
+        try {
+            connection = Conectar.getInstancia().obtenerConexion();
+            if (connection == null) {
+                throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+            }
+
+            String sql = """
+            SELECT rms.id_submenu, s.nombre_submenu, rms.visualizar, rms.agregar, rms.editar, rms.eliminar 
+            FROM roles_menus_submenus rms 
+            JOIN submenus s ON rms.id_submenu = s.id_submenu 
+            WHERE rms.id_menu = ? AND rms.id_rol = ?
+        """;
+
+            System.out.println("Ejecutando consulta para menuId: " + menuId + " y rolId: " + rolId);
+
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, menuId);
+                ps.setInt(2, rolId);  // Usamos rolId en lugar de dejarlo fijo en 1
+                ResultSet rs = ps.executeQuery();
+
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
+
+                int rowNumber = 1;
+                while (rs.next()) {
+                    int idSubmenu = rs.getInt("id_submenu");
+                    String nombreSubmenu = rs.getString("nombre_submenu");
+
+                    // Obtener los valores de permisos como enteros
+                    int visualizar = rs.getInt("visualizar");
+                    int agregar = rs.getInt("agregar");
+                    int editar = rs.getInt("editar");
+                    int eliminar = rs.getInt("eliminar");
+
+                    // Convertir a Boolean para que la tabla maneje correctamente los checkboxes
+                    Boolean visualizarBoolean = visualizar == 1; // true si es 1, false si es 0
+                    Boolean agregarBoolean = agregar == 1;
+                    Boolean editarBoolean = editar == 1;
+                    Boolean eliminarBoolean = eliminar == 1;
+
+                    System.out.println("Visualizar: " + visualizarBoolean + ", Agregar: " + agregarBoolean
+                            + ", Editar: " + editarBoolean + ", Eliminar: " + eliminarBoolean);
+
+                    // Agregar la fila a la tabla
+                    model.addRow(new Object[]{rowNumber++, nombreSubmenu, visualizarBoolean, agregarBoolean, editarBoolean, eliminarBoolean, false, idSubmenu});
+                }
+
+                // Notificar que los datos en la tabla han cambiado
+                model.fireTableDataChanged();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            // Devolver la conexión al pool
+            if (connection != null) {
+                Conectar.getInstancia().devolverConexion(connection);
             }
         }
     }
@@ -349,6 +396,15 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0); // Esto eliminará todas las filas de la tabla
     }
+
+//    private void limpiarCheckboxesDeTabla(JTable table) {
+//        // Iterar sobre todas las filas y columnas que tienen checkboxes (asumimos que están en las columnas 2 a 5)
+//        for (int i = 0; i < table.getRowCount(); i++) {
+//            for (int j = 2; j <= 5; j++) {
+//                table.setValueAt(false, i, j); // Desmarcar todas las casillas de permisos
+//            }
+//        }
+//    }
 
     // Método para limpiar las tablas antes de cargar nuevos datos
     private void limpiarTablas() {
@@ -424,248 +480,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
 
     }
 
-    //Llenar las Tablas
-//    private void llenarTablaConSubmenu(JTable table, int menuId) {
-//        Connection connection = null;
-//        try {
-//            connection = Conectar.getInstancia().obtenerConexion();
-//            if (connection == null) {
-//                throw new RuntimeException("Error: La conexión a la base de datos es nula.");
-//            }
-//            // Consulta para obtener los submenús asociados al menú
-//            String sql = "SELECT rms.id_submenu, s.nombre_submenu, rms.visualizar, rms.agregar, rms.editar, rms.eliminar \n"
-//                    + "FROM roles_menus_submenus rms \n"
-//                    + "JOIN submenus s ON rms.id_submenu = s.id_submenu \n"
-//                    + "WHERE rms.id_menu = ? AND rms.id_rol = ? ";
-//
-//            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-//                ps.setInt(1, menuId);
-//                ResultSet rs = ps.executeQuery();
-//
-//                DefaultTableModel model = (DefaultTableModel) table.getModel();
-//                model.setRowCount(0); // Limpiar la tabla antes de llenarla
-//                int rowNumber = 1;
-//                while (rs.next()) {
-//                    int idSubmenu = rs.getInt("id_submenu");
-//                    String nombreSubmenu = rs.getString("nombre_submenu");
-//
-//                    // Agregar los submenús a la tabla
-//                    model.addRow(new Object[]{rowNumber++, nombreSubmenu, false, false, false, false, false, idSubmenu});
-//                }
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        } finally {
-//            // Devolver la conexión al pool
-//            Conectar.getInstancia().devolverConexion(connection);
-//        }
-//    }
-    private void llenarTablaConSubmenu(JTable table, int menuId) {
-        // Limpiar la tabla antes de llenarla con nuevos datos
-        limpiarTabla(table);
-
-        Connection connection = null;
-        try {
-            connection = Conectar.getInstancia().obtenerConexion();
-            if (connection == null) {
-                throw new RuntimeException("Error: La conexión a la base de datos es nula.");
-            }
-
-            String sql = """
-            SELECT rms.id_submenu, s.nombre_submenu, rms.visualizar, rms.agregar, rms.editar, rms.eliminar 
-            FROM roles_menus_submenus rms 
-            JOIN submenus s ON rms.id_submenu = s.id_submenu 
-            WHERE rms.id_menu = ? AND rms.id_rol = ?
-        """;
-
-            System.out.println("Ejecutando consulta para menuId: " + menuId + " y rolId: " + rolId);
-
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setInt(1, menuId);
-                ps.setInt(2, rolId);  // Usamos rolId en lugar de dejarlo fijo en 1
-                ResultSet rs = ps.executeQuery();
-
-                DefaultTableModel model = (DefaultTableModel) table.getModel();
-
-                int rowNumber = 1;
-                while (rs.next()) {
-                    int idSubmenu = rs.getInt("id_submenu");
-                    String nombreSubmenu = rs.getString("nombre_submenu");
-
-                    // Obtener los valores de permisos como enteros
-                    int visualizar = rs.getInt("visualizar");
-                    int agregar = rs.getInt("agregar");
-                    int editar = rs.getInt("editar");
-                    int eliminar = rs.getInt("eliminar");
-
-                    // Convertir a Boolean para que la tabla maneje correctamente los checkboxes
-                    Boolean visualizarBoolean = visualizar == 1; // true si es 1, false si es 0
-                    Boolean agregarBoolean = agregar == 1;
-                    Boolean editarBoolean = editar == 1;
-                    Boolean eliminarBoolean = eliminar == 1;
-
-                    System.out.println("Visualizar: " + visualizarBoolean + ", Agregar: " + agregarBoolean
-                            + ", Editar: " + editarBoolean + ", Eliminar: " + eliminarBoolean);
-
-                    // Agregar la fila a la tabla
-                    model.addRow(new Object[]{rowNumber++, nombreSubmenu, visualizarBoolean, agregarBoolean, editarBoolean, eliminarBoolean, false, idSubmenu});
-                }
-
-                // Notificar que los datos en la tabla han cambiado
-                model.fireTableDataChanged();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            // Devolver la conexión al pool
-            if (connection != null) {
-                Conectar.getInstancia().devolverConexion(connection);
-            }
-        }
-    }
-
-    private void handlePermission(String menuName, String submenuName, int column, Boolean selected) {
-        // Aquí iría el código existente para manejar cada submenú
-        if (menuName.equals("Administracion")) {
-            switch (submenuName) {
-                case "Usuarios":
-                    handleUsuarios(column, selected);
-                    break;
-                case "Roles":
-                    handleRoles(column, selected);
-                    break;
-                case "Asignación de Permisos":
-                    handleAsignacionPermisos(column, selected);
-                    break;
-                case "Empresas":
-                    handleEmpresas(column, selected);
-                    break;
-                case "Trabajadores":
-                    handleTrabajadores(column, selected);
-                    break;
-                case "Tarifario":
-                    handleTarifario(column, selected);
-                    break;
-                case "Productos":
-                    handleProductos(column, selected);
-                    break;
-                case "Formularios":
-                    handleFormularios(column, selected);
-                    break;
-                case "Proveedor":
-                    handleProveedor(column, selected);
-                    break;
-                case "Convenios":
-                    handleConvenios(column, selected);
-                    break;
-                case "Búsqueda de Convenios":
-                    handleBusquedaConvenios(column, selected);
-                    break;
-                case "Asignación de Trabajos":
-                    handleAsignacionTrabajos(column, selected);
-                    break;
-                case "Puesto de Trabajos":
-                    handlePuestosDeTrabajo(column, selected);
-                    break;
-                case "Formas de Pago":
-                    handleFormasDePago(column, selected);
-                    break;
-                case "Menus - Submenus":
-                    handleMenus(column, selected);
-                    break;
-                // Añadir más casos según sea necesario...
-            }
-        } else if (menuName.equals("Admision")) {
-            switch (submenuName) {
-                case "Clientes":
-                    handleClientes(column, selected);
-                    break;
-                case "Marcas":
-                    handleMarcas(column, selected);
-                    break;
-                case "Unidades":
-                    handleUnidades(column, selected);
-                    break;
-                case "Tipo de Pagos Generales":
-                    handleTipoDePagosGenerales(column, selected);
-                    break;
-                case "Tipo de Productos y Materiales":
-                    handleTipoDeProductosMateriales(column, selected);
-                    break;
-                case "Tipo de Maquinarias y Vehiculos":
-                    handleTipoDeMaquinariasVehiculos(column, selected);
-                    break;
-                case "Localización":
-                    handleLocalizacion(column, selected);
-                    break;
-                case "Configuración":
-                    handleconfiguracion(column, selected);
-                    break;
-                // Añadir más casos según sea necesario...
-            }
-        } else if (menuName.equals("Registros")) {
-            switch (submenuName) {
-                case "Orden de Servicio":
-                    handleOrdenDeServicio(column, selected);
-                    break;
-                case "Ver Ordenes":
-                    handleVerOrdenes(column, selected);
-                    break;
-                case "Ventas":
-                    handleVentas(column, selected);
-                    break;
-                case "Compras de Productos y Materiales":
-                    handleCompraProductosMateriales(column, selected);
-                    break;
-                case "Compra Equipos y Vehiculos":
-                    handleCompraEquiposVehiculos(column, selected);
-                    break;
-                case "Gastos Generales":
-                    handleGastosGenerales(column, selected);
-                    break;
-                case "Kardex":
-                    handleKardex(column, selected);
-                    break;
-                case "Cotizaciones":
-                    handleCotizaciones(column, selected);
-                    break;
-                case "Cancelaciones":
-                    handleCancelaciones(column, selected);
-                    break;
-                // Añadir más casos según sea necesario...
-            }
-        } else if (menuName.equals("Reportes")) {
-            switch (submenuName) {
-                case "Trabajos Realizados":
-                    handleTrabajosRealizados(column, selected);
-                    break;
-                case "Estadísticas":
-                    handleEstadisticas(column, selected);
-                    break;
-                case "Deudas Por Pagar":
-                    handleDeudaPorPagar(column, selected);
-                    break;
-                case "Deudas Por Cobrar":
-                    handleDeudasPorCobrar(column, selected);
-                    break;
-                case "Horas Trabajadas":
-                    handleHorasTrabajadas(column, selected);
-                    break;
-                case "Sueldos":
-                    handleSueldos(column, selected);
-                    break;
-                case "Stock":
-                    handleStock(column, selected);
-                    break;
-                case "Trabajos":
-                    handleTrabajos(column, selected);
-                    break;
-                case "Presupuesto":
-                    handlePresupuestos(column, selected);
-                    break;
-            }
-        }
-    }
+    
 
     /// Método para obtener el nombre del menú basado en la fila
     private String getMenuNameByRow(String tableName, int row) {
@@ -756,21 +571,164 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         String[] submenuNames;
         switch (tableName) {
             case "Administracion":
-                submenuNames = new String[]{"Usuarios", "Roles", "Asignación de Permisos", "Empresas", "Trabajadores", "Tarifario", "Productos", "Formularios", "Proveedor", "Convenios", "Búsqueda de Convenios", "Asignación de Trabajos", "Puesto de Trabajos", "Formas de Pago"};
+                submenuNames = new String[]{"Usuarios", "Roles", "Asignacion de Permisos", "Empresas", "Trabajadores", "Tarifario", "Productos", "Formularios", "Proveedor", "Convenios", "Búsqueda de Convenios", "Asignación de Trabajos", "Puesto de Trabajos", "Formas de Pago"};
                 break;
             case "Admision":
-                submenuNames = new String[]{"Clientes", "Marcas", "Unidades", "Tipo de Pagos", "Tipos de Productos y Materiales", "Tipo de Maquinarias y Vehículos", "Localización", "Configuración"};
+                submenuNames = new String[]{"Clientes", "Marcas", "Unidades", "Tipo de Pagos", "Tipos de Productos y Materiales", "Tipo de Maquinarias y Vehiculos", "Localizacion", "Configuracion"};
                 break;
             case "Registros":
-                submenuNames = new String[]{"Orden de Servicio", "Ver Ordenes", "Ventas", "Compras de Productos y Materiales", "Compra Equipos y Vehículos", "Gastos Generales", "Kardex", "Cotizaciones", "Cancelaciones"};
+                submenuNames = new String[]{"Orden de Servicio", "Ver Ordenes", "Ventas", "Compra de Productos y Materiales", "Compra Equipos y Vehículos", "Gastos Generales", "Kardex", "Cotizaciones", "Cancelaciones"};
                 break;
             case "Reportes":
-                submenuNames = new String[]{"Trabajos Realizados", "Estadísticas", "Deudas por Pagar", "Deudas por Cobrar", "Horas Trabajadas", "Sueldos", "Stock", "Trabajos", "Presupuestos"};
+                submenuNames = new String[]{"Trabajos Realizados", "Estadísticas", "Deudas por Pagar", "Deudas por Cobrar", "Horas Trabajadas", "Sueldos", "Stock", "Trabajos", "Presupuesto"};
                 break;
             default:
                 return "";
         }
         return submenuNames.length > row ? submenuNames[row] : "";
+    }
+    
+    private void handlePermission(String menuName, String submenuName, int column, Boolean selected) {
+        // código existente para manejar cada submenú
+        if (menuName.equals("Administracion")) {
+            switch (submenuName) {
+                case "Usuarios":
+                    handleUsuarios(column, selected);
+                    break;
+                case "Roles":
+                    handleRoles(column, selected);
+                    break;
+                case "Asignacion de Permisos":
+                    handleAsignacionPermisos(column, selected);
+                    break;
+                case "Empresas":
+                    handleEmpresas(column, selected);
+                    break;
+                case "Trabajadores":
+                    handleTrabajadores(column, selected);
+                    break;
+                case "Tarifario":
+                    handleTarifario(column, selected);
+                    break;
+                case "Productos":
+                    handleProductos(column, selected);
+                    break;
+                case "Formularios":
+                    handleFormularios(column, selected);
+                    break;
+                case "Proveedor":
+                    handleProveedor(column, selected);
+                    break;
+                case "Convenios":
+                    handleConvenios(column, selected);
+                    break;
+                case "Búsqueda de Convenios":
+                    handleBusquedaConvenios(column, selected);
+                    break;
+                case "Asignación de Trabajos":
+                    handleAsignacionTrabajos(column, selected);
+                    break;
+                case "Puesto de Trabajos":
+                    handlePuestosDeTrabajo(column, selected);
+                    break;
+                case "Formas de Pago":
+                    handleFormasDePago(column, selected);
+                    break;
+                case "Menus - Submenus":
+                    handleMenus(column, selected);
+                    break;
+                // Añadir más casos según sea necesario...
+            }
+        } else if (menuName.equals("Admision")) {
+            switch (submenuName) {
+                case "Clientes":
+                    handleClientes(column, selected);
+                    break;
+                case "Marcas":
+                    handleMarcas(column, selected);
+                    break;
+                case "Unidades":
+                    handleUnidades(column, selected);
+                    break;
+                case "Tipo de Pagos Generales":
+                    handleTipoDePagosGenerales(column, selected);
+                    break;
+                case "Tipo de Productos y Materiales":
+                    handleTipoDeProductosMateriales(column, selected);
+                    break;
+                case "Tipo de Maquinarias y Vehiculos":
+                    handleTipoDeMaquinariasYVehiculos(column, selected);
+                    break;
+                case "Localización":
+                    handleLocalizacion(column, selected);
+                    break;
+                case "Configuración":
+                    handleconfiguracion(column, selected);
+                    break;
+                // Añadir más casos según sea necesario...
+            }
+        } else if (menuName.equals("Registros")) {
+            switch (submenuName) {
+                case "Orden de Servicio":
+                    handleOrdenDeServicio(column, selected);
+                    break;
+                case "Ver Ordenes":
+                    handleVerOrdenes(column, selected);
+                    break;
+                case "Ventas":
+                    handleVentas(column, selected);
+                    break;
+                case "Compra de Productos y Materiales":
+                    handleCompraProductosMateriales(column, selected);
+                    break;
+                case "Compra Equipos y Vehiculos":
+                    handleCompraEquiposVehiculos(column, selected);
+                    break;
+                case "Gastos Generales":
+                    handleGastosGenerales(column, selected);
+                    break;
+                case "Kardex":
+                    handleKardex(column, selected);
+                    break;
+                case "Cotizaciones":
+                    handleCotizaciones(column, selected);
+                    break;
+                case "Cancelaciones":
+                    handleCancelaciones(column, selected);
+                    break;
+                // Añadir más casos según sea necesario...
+            }
+        } else if (menuName.equals("Reportes")) {
+            switch (submenuName) {
+                case "Trabajos Realizados":
+                    handleTrabajosRealizados(column, selected);
+                    break;
+                case "Estadísticas":
+                    handleEstadisticas(column, selected);
+                    break;
+                case "Deudas Por Pagar":
+                    handleDeudaPorPagar(column, selected);
+                    break;
+                case "Deudas Por Cobrar":
+                    handleDeudasPorCobrar(column, selected);
+                    break;
+                case "Horas Trabajadas":
+                    handleHorasTrabajadas(column, selected);
+                    break;
+                case "Sueldos":
+                    handleSueldos(column, selected);
+                    break;
+                case "Stock":
+                    handleStock(column, selected);
+                    break;
+                case "Trabajos":
+                    handleTrabajos(column, selected);
+                    break;
+                case "Presupuesto":
+                    handlePresupuesto(column, selected);
+                    break;
+            }
+        }
     }
 
     private void handleUsuarios(int column, Boolean selected) {
@@ -1417,7 +1375,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         }
     }
 
-    private void handleTipoDeMaquinariasVehiculos(int column, Boolean selected) {
+    private void handleTipoDeMaquinariasYVehiculos(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
@@ -1982,7 +1940,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         }
     }
 
-    private void handlePresupuestos(int column, Boolean selected) {
+    private void handlePresupuesto(int column, Boolean selected) {
         switch (column) {
             case 2: // Visualizar
                 if (selected) {
@@ -2136,6 +2094,102 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         repaint(); // Repinta la interfaz para mostrar los cambios
     }
 
+// Método para actualizar los checkboxes de los menús principales usando handleCheckboxChange()
+    private void actualizarCheckboxMenu(String nombreMenu, boolean visualizar) {
+        switch (nombreMenu.toLowerCase()) {
+            case "administracion":
+                chAdministracion.setSelected(visualizar);
+                handleCheckboxChange(new ItemEvent(chAdministracion, ItemEvent.ITEM_STATE_CHANGED, chAdministracion, visualizar ? ItemEvent.SELECTED : ItemEvent.DESELECTED),
+                        jScrollPane1, btnAdministracion, "Administracion", tbAdministracion);
+                break;
+            case "admision":
+                chAdmision.setSelected(visualizar);
+                handleCheckboxChange(new ItemEvent(chAdmision, ItemEvent.ITEM_STATE_CHANGED, chAdmision, visualizar ? ItemEvent.SELECTED : ItemEvent.DESELECTED),
+                        jScrollPane2, btnAdmision, "Admision", tbAdmision);
+                break;
+            case "registros":
+                chRegistros.setSelected(visualizar);
+                handleCheckboxChange(new ItemEvent(chRegistros, ItemEvent.ITEM_STATE_CHANGED, chRegistros, visualizar ? ItemEvent.SELECTED : ItemEvent.DESELECTED),
+                        jScrollPane3, btnRegistros, "Registros", tbRegistros);
+                break;
+            case "reportes":
+                chReportes.setSelected(visualizar);
+                handleCheckboxChange(new ItemEvent(chReportes, ItemEvent.ITEM_STATE_CHANGED, chReportes, visualizar ? ItemEvent.SELECTED : ItemEvent.DESELECTED),
+                        jScrollPane5, btnReportes, "Reportes", tbReportes);
+                break;
+            // Añadir más menús si es necesario
+        }
+    }
+
+    private void llenarFilaSubmenu(JTable tabla, int submenuId, String nombreSubmenu, boolean visualizar, boolean agregar, boolean editar, boolean eliminar) {
+        DefaultTableModel model = (DefaultTableModel) tabla.getModel();
+
+        Object[] fila = new Object[]{
+            submenuId, // Columna de ID del submenú
+            nombreSubmenu, // Columna del nombre del submenú
+            Boolean.valueOf(visualizar), // Asegúrate de que el valor sea Boolean
+            Boolean.valueOf(agregar), // Asegúrate de que el valor sea Boolean
+            Boolean.valueOf(editar), // Asegúrate de que el valor sea Boolean
+            Boolean.valueOf(eliminar), // Asegúrate de que el valor sea Boolean
+            Boolean.FALSE // Columna "Todo" inicialmente en false
+        };
+        model.addRow(fila);
+    }
+
+    public void cargarTablasPermisos() {
+        // Cargar los submenús y permisos en cada tabla según el ID del menú
+        llenarTablaConSubmenu(tbAdministracion, 1);  // Menú Administración
+        llenarTablaConSubmenu(tbAdmision, 2);        // Menú Admisión
+        llenarTablaConSubmenu(tbRegistros, 3);       // Menú Registros
+        llenarTablaConSubmenu(tbReportes, 4);        // Menú Reportes
+    }
+
+    public int getRolId() {
+        try {
+            String textoRolId = txtIdTPU.getText();
+            System.out.println("Texto obtenido de txtIdTPU: " + textoRolId);
+            return Integer.parseInt(textoRolId);
+        } catch (NumberFormatException e) {
+            System.out.println("Error al convertir txtIdTPU a número: " + e.getMessage());
+            return -1;  // Valor por defecto si hay un error
+        }
+    }
+
+    // Método getter para acceder a txtIdTPU
+    public JTextField getTxtIdTPU() { // Si es JLabel, cámbialo a JLabel
+        return txtIdTPU;
+    }
+
+    public void cargarPermisosDesdePrincipal() {
+        // Obtener el Rol ID del campo txtIdTPU antes de cargar cualquier permiso
+        int rolId = getRolId();
+
+        if (rolId != -1) {
+            cargarPermisos(rolId);  // Cargar los permisos asociados a ese Rol ID
+        } else {
+            JOptionPane.showMessageDialog(null, "Rol ID no válido.");
+        }
+    }
+
+    public void cargarPermisos(int rolId) {
+        // Limpiar todas las tablas antes de cargar nuevos datos
+        limpiarTablas();
+
+        this.rolId = obtenerRolIdActual(); // Forzar la actualización del rolId.
+        if (this.rolId == -1) {
+            System.out.println("Error: No se pudo obtener un rol válido.");
+            return;
+        }
+
+        System.out.println("Rol ID obtenido: " + rolId);
+
+        // Cargar permisos de menús principales
+        cargarPermisosMenuPrincipal(rolId);
+
+        // Cargar permisos de submenús
+        cargarPermisosSubmenus(rolId);
+    }
+
     public void cargarPermisosMenuPrincipal(int rolId) {
         Connection connection = null;
         try {
@@ -2170,33 +2224,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-    }
-
-// Método para actualizar los checkboxes de los menús principales usando handleCheckboxChange()
-    private void actualizarCheckboxMenu(String nombreMenu, boolean visualizar) {
-        switch (nombreMenu.toLowerCase()) {
-            case "administracion":
-                chAdministracion.setSelected(visualizar);
-                handleCheckboxChange(new ItemEvent(chAdministracion, ItemEvent.ITEM_STATE_CHANGED, chAdministracion, visualizar ? ItemEvent.SELECTED : ItemEvent.DESELECTED),
-                        jScrollPane1, btnAdministracion, "Administracion", tbAdministracion);
-                break;
-            case "admision":
-                chAdmision.setSelected(visualizar);
-                handleCheckboxChange(new ItemEvent(chAdmision, ItemEvent.ITEM_STATE_CHANGED, chAdmision, visualizar ? ItemEvent.SELECTED : ItemEvent.DESELECTED),
-                        jScrollPane2, btnAdmision, "Admision", tbAdmision);
-                break;
-            case "registros":
-                chRegistros.setSelected(visualizar);
-                handleCheckboxChange(new ItemEvent(chRegistros, ItemEvent.ITEM_STATE_CHANGED, chRegistros, visualizar ? ItemEvent.SELECTED : ItemEvent.DESELECTED),
-                        jScrollPane3, btnRegistros, "Registros", tbRegistros);
-                break;
-            case "reportes":
-                chReportes.setSelected(visualizar);
-                handleCheckboxChange(new ItemEvent(chReportes, ItemEvent.ITEM_STATE_CHANGED, chReportes, visualizar ? ItemEvent.SELECTED : ItemEvent.DESELECTED),
-                        jScrollPane5, btnReportes, "Reportes", tbReportes);
-                break;
-            // Añadir más menús si es necesario
         }
     }
 
@@ -2257,75 +2284,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         } finally {
             // Devolver la conexión al pool
             Conectar.getInstancia().devolverConexion(connection);
-        }
-    }
-
-    private void llenarFilaSubmenu(JTable tabla, int submenuId, String nombreSubmenu, boolean visualizar, boolean agregar, boolean editar, boolean eliminar) {
-        DefaultTableModel model = (DefaultTableModel) tabla.getModel();
-
-        Object[] fila = new Object[]{
-            submenuId, // Columna de ID del submenú
-            nombreSubmenu, // Columna del nombre del submenú
-            Boolean.valueOf(visualizar), // Asegúrate de que el valor sea Boolean
-            Boolean.valueOf(agregar), // Asegúrate de que el valor sea Boolean
-            Boolean.valueOf(editar), // Asegúrate de que el valor sea Boolean
-            Boolean.valueOf(eliminar), // Asegúrate de que el valor sea Boolean
-            Boolean.FALSE // Columna "Todo" inicialmente en false
-        };
-        model.addRow(fila);
-    }
-
-    public void cargarPermisos(int rolId) {
-        // Limpiar todas las tablas antes de cargar nuevos datos
-        limpiarTablas();
-
-        this.rolId = obtenerRolIdActual(); // Forzar la actualización del rolId.
-        if (this.rolId == -1) {
-            System.out.println("Error: No se pudo obtener un rol válido.");
-            return;
-        }
-
-        System.out.println("Rol ID obtenido: " + rolId);
-
-        // Cargar permisos de menús principales
-        cargarPermisosMenuPrincipal(rolId);
-
-        // Cargar permisos de submenús
-        cargarPermisosSubmenus(rolId);
-    }
-
-    public void cargarTablasPermisos() {
-        // Cargar los submenús y permisos en cada tabla según el ID del menú
-        llenarTablaConSubmenu(tbAdministracion, 1);  // Menú Administración
-        llenarTablaConSubmenu(tbAdmision, 2);        // Menú Admisión
-        llenarTablaConSubmenu(tbRegistros, 3);       // Menú Registros
-        llenarTablaConSubmenu(tbReportes, 4);        // Menú Reportes
-    }
-
-    public int getRolId() {
-        try {
-            String textoRolId = txtIdTPU.getText();
-            System.out.println("Texto obtenido de txtIdTPU: " + textoRolId);
-            return Integer.parseInt(textoRolId);
-        } catch (NumberFormatException e) {
-            System.out.println("Error al convertir txtIdTPU a número: " + e.getMessage());
-            return -1;  // Valor por defecto si hay un error
-        }
-    }
-
-    // Método getter para acceder a txtIdTPU
-    public JTextField getTxtIdTPU() { // Si es JLabel, cámbialo a JLabel
-        return txtIdTPU;
-    }
-
-    public void cargarPermisosDesdePrincipal() {
-        // Obtener el Rol ID del campo txtIdTPU antes de cargar cualquier permiso
-        int rolId = getRolId();
-
-        if (rolId != -1) {
-            cargarPermisos(rolId);  // Cargar los permisos asociados a ese Rol ID
-        } else {
-            JOptionPane.showMessageDialog(null, "Rol ID no válido.");
         }
     }
 

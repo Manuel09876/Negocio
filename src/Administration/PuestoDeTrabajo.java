@@ -179,7 +179,10 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void Mostrar(JTable Tabla) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         DefaultTableModel modelo = (DefaultTableModel) Tabla.getModel();
 
         // Asegúrate de que el modelo tenga las columnas correctas
@@ -214,10 +217,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                 + "INNER JOIN periodo p ON pdt.id_periodo=p.id "
                 + "INNER JOIN vacaciones v ON pdt.id_vacaciones=v.id";
 
-        try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
             try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
 
                 // Recorrer los resultados y agregar las filas al modelo de la tabla
@@ -239,8 +238,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                     // Agregar la fila al modelo
                     modelo.addRow(fila);
                 }
-
-            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar los registros: " + e.getMessage());
         } finally {
@@ -256,7 +253,10 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
     public void Insertar() {
 
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         CallableStatement cs = null;
 
         try {
@@ -314,9 +314,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
             // Preparar la consulta SQL para insertar el registro
             String consulta = "INSERT INTO puestodetrabajo (idTrabajador, idTDT, pagoPorHora, sueldo, id_overtime, id_horario, id_periodo, id_vacaciones, tiempoVacaciones, fechaDePuesto, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Activo')";
 
-            // Obtener la conexión desde el pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
+     
             cs = connection.prepareCall(consulta);
             cs.setInt(1, idTrabajador);
             cs.setInt(2, idTipoDeTrabajo);
@@ -367,15 +365,16 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
 
     //Metodo para seleccionar y que se muestre
     public void Eliminar(JTextField IdPDT) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         setIdPDT(Integer.parseInt(IdPDT.getText()));
 
         String consulta = "DELETE FROM puestodetrabajo WHERE idPDT=?";
 
         try {
-            // Obtener la conexión desde el pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
+     
             CallableStatement cs = connection.prepareCall(consulta);
             cs.setInt(1, getIdPDT());
             cs.execute();
@@ -431,7 +430,10 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void Modificar(JTextField idPDTField, JTextField idTrabajadorField, JTextField TipoDeTrabajoField, JTextField pagoPorHoraField, JTextField sueldoField, JTextField idOvertimeField, JTextField idHorarioField, JTextField idPeriodoField, JTextField idVacacionesField, JTextField tiempoVacacionesField, JDateChooser dateInicioPuesto) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         PreparedStatement ps = null;
 
         try {
@@ -480,7 +482,7 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
             java.sql.Date fechaSQL = new java.sql.Date(ingreso.getTime());
 
             // Obtener la conexión desde el pool
-            connection = Conectar.getInstancia().obtenerConexion();
+            
             connection.setAutoCommit(false);  // Desactivar auto-commit
 
             String consulta = "UPDATE puestodetrabajo SET idTrabajador = ?, idTDT = ?, pagoPorHora = ?, sueldo = ?, id_overtime = ?, id_horario = ?, id_periodo = ?, id_vacaciones = ?, tiempoVacaciones = ?, fechaDePuesto = ?, estado = 'Activo' WHERE idPDT = ?";
@@ -535,13 +537,14 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public boolean verificarRegistroExiste(int idPDT) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
+        
         String consulta = "SELECT COUNT(*) FROM puestodetrabajo WHERE idPDT = ?";
 
-        try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
+        
             try (PreparedStatement ps = connection.prepareStatement(consulta)) {
                 ps.setInt(1, idPDT);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -549,7 +552,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                         return rs.getInt(1) > 0;
                     }
                 }
-            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al verificar el registro: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         } finally {
@@ -560,13 +562,12 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public int obtenerIdPuestoActivo(int idTrabajador) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         int idPDT = -1;
         String sql = "SELECT idPDT FROM puestodetrabajo WHERE idTrabajador = ? AND estado = 'Activo'";
-
-        try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
 
             try (PreparedStatement pst = connection.prepareStatement(sql)) {
                 pst.setInt(1, idTrabajador);
@@ -575,7 +576,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                         idPDT = rs.getInt("idPDT");
                     }
                 }
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -586,12 +586,11 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public String obtenerPeriodoPago(int idPDT) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "SELECT p.descripcion FROM periodo p JOIN puestodetrabajo pt ON p.id = pt.id_periodo WHERE pt.idPDT = ?";
-
-        try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
 
             try (PreparedStatement pst = connection.prepareStatement(sql)) {
                 pst.setInt(1, idPDT);
@@ -600,7 +599,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                         return rs.getString("descripcion");
                     }
                 }
-            }
         } catch (SQLException ex) {
             System.out.println("Error al obtener el periodo de pago: " + ex.getMessage());
         } finally {
@@ -612,12 +610,12 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public boolean accion(String estado, int id) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "UPDATE puestodetrabajo SET estado = ? WHERE idPDT = ?";
         try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
             PreparedStatement ps;
             ps = connection.prepareStatement(sql);
             ps.setString(1, estado);
@@ -1071,19 +1069,17 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     // End of variables declaration//GEN-END:variables
 
     public void MostrarTrabajador(JComboBox comboTrabajador) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "SELECT * FROM worker";
-
-        try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
 
             try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
                 comboTrabajador.removeAllItems();
                 while (rs.next()) {
                     comboTrabajador.addItem(rs.getString("nombre"));
                 }
-            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Trabajadores: " + e.toString());
         } finally {
@@ -1093,14 +1089,14 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoTrabajador(JComboBox trabajador, JTextField IdTrabajador) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         if (trabajador.getSelectedItem() != null) {
             String consulta = "SELECT idWorker FROM worker WHERE nombre=?";
 
             try {
-                // Obtener la conexión del pool
-                connection = Conectar.getInstancia().obtenerConexion();
-
                 CallableStatement cs = connection.prepareCall(consulta);
                 cs.setString(1, trabajador.getSelectedItem().toString());
                 cs.execute();
@@ -1126,19 +1122,17 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarTipoDeTrabajo(JComboBox comboTipoDeTrabajo) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "SELECT * FROM tiposdetrabajos";
-
-        try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
 
             try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
                 comboTipoDeTrabajo.removeAllItems();
                 while (rs.next()) {
                     comboTipoDeTrabajo.addItem(rs.getString("nombre"));
                 }
-            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Tipos de Trabajo: " + e.toString());
         } finally {
@@ -1148,13 +1142,14 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoTipodeTrabajo(JComboBox tipoDeTrabajo, JTextField IdTipoDeTrabajo) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consulta = "select tiposdetrabajos.id from tiposdetrabajos where tiposdetrabajos.nombre=?";
 
         if (tipoDeTrabajo.getSelectedItem() != null) {
             try {
-                // Obtener la conexión del pool
-                connection = Conectar.getInstancia().obtenerConexion();
                 CallableStatement cs = connection.prepareCall(consulta);
                 cs.setString(1, tipoDeTrabajo.getSelectedItem().toString());
                 cs.execute();
@@ -1181,18 +1176,17 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarOverTime(JComboBox<String> comboOverTime) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "SELECT * FROM overtime";
-        try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
-            try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+     
+try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
                 comboOverTime.removeAllItems();
                 while (rs.next()) {
                     comboOverTime.addItem(rs.getString("descripcion"));
                 }
-            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Overtime: " + e.toString());
         } finally {
@@ -1202,16 +1196,15 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoPorOverTime(JComboBox<String> overtimeCombo, JTextField idOvertime) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         if (overtimeCombo.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(null, "Por favor seleccione un valor de OverTime.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         String consulta = "SELECT id FROM overtime WHERE descripcion = ?";
-        try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
             try (PreparedStatement ps = connection.prepareStatement(consulta)) {
                 ps.setString(1, overtimeCombo.getSelectedItem().toString());
                 try (ResultSet rs = ps.executeQuery()) {
@@ -1219,7 +1212,6 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
                         idOvertime.setText(rs.getString("id"));
                     }
                 }
-            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al mostrar: " + e.toString());
         } finally {
@@ -1229,18 +1221,16 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarHorario(JComboBox comboHorario) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "select * from horario";
-        try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
             try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
                 comboHorario.removeAllItems();
                 while (rs.next()) {
                     comboHorario.addItem(rs.getString("descripcion"));
                 }
-            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Horario: " + e.toString());
         } finally {
@@ -1250,14 +1240,14 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoHorario(JComboBox Horario, JTextField IdHorario) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consulta = "select id from horario where descripcion=?";
 
         if (Horario.getSelectedItem() != null) {
             try {
-                // Obtener la conexión del pool
-                connection = Conectar.getInstancia().obtenerConexion();
-
                 CallableStatement cs = connection.prepareCall(consulta);
                 cs.setString(1, Horario.getSelectedItem().toString());
                 cs.execute();
@@ -1284,18 +1274,16 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarPeriodo(JComboBox comboPeriodo) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "select * from periodo";
-        try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
             try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
                 comboPeriodo.removeAllItems();
                 while (rs.next()) {
                     comboPeriodo.addItem(rs.getString("descripcion"));
                 }
-            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Periodo: " + e.toString());
         } finally {
@@ -1305,14 +1293,14 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoPeriodo(JComboBox Periodo, JTextField IdPeriodo) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consulta = "select id from periodo where descripcion=?";
 
         if (Periodo.getSelectedItem() != null) {
             try {
-                // Obtener la conexión del pool
-                connection = Conectar.getInstancia().obtenerConexion();
-
                 CallableStatement cs = connection.prepareCall(consulta);
                 cs.setString(1, Periodo.getSelectedItem().toString());
                 cs.execute();
@@ -1339,18 +1327,17 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarVacaciones(JComboBox comboVacaciones) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String sql = "select * from vacaciones";
-        try {
-            // Obtener la conexión del pool
-            connection = Conectar.getInstancia().obtenerConexion();
-
-            try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+     
+        try (Statement st = connection.createStatement(); ResultSet rs = st.executeQuery(sql)) {
                 comboVacaciones.removeAllItems();
                 while (rs.next()) {
                     comboVacaciones.addItem(rs.getString("descripcion"));
                 }
-            }
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al Mostrar Periodo: " + e.toString());
         } finally {
@@ -1360,14 +1347,14 @@ public class PuestoDeTrabajo extends javax.swing.JInternalFrame {
     }
 
     public void MostrarCodigoVacaciones(JComboBox Vacaciones, JTextField IdVacaciones) {
-        Connection connection = null;
+        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida
+    if (connection == null) {
+        throw new RuntimeException("Error: La conexión a la base de datos es nula.");
+    }
         String consulta = "select id from vacaciones where descripcion=?";
 
         if (Vacaciones.getSelectedItem() != null) {
             try {
-                // Obtener la conexión del pool
-                connection = Conectar.getInstancia().obtenerConexion();
-
                 CallableStatement cs = connection.prepareCall(consulta);
                 cs.setString(1, Vacaciones.getSelectedItem().toString());
                 cs.execute();

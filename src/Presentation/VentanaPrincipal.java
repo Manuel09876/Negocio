@@ -30,13 +30,15 @@ import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 public class VentanaPrincipal extends javax.swing.JFrame {
+    
+    
 
     public JMenu getMenuAdministration() {
-        return menuAdministration;
+        return menuAdministracion;
     }
 
     public JMenu getMenuAdmission() {
-        return menuAdmission;
+        return menuAdmision;
     }
 
     public JMenuItem getMenuAsignacionPermisos() {
@@ -148,11 +150,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
     public JMenu getMenuRegisters() {
-        return menuRegisters;
+        return menuRegistros;
     }
 
     public JMenu getMenuReports() {
-        return menuReports;
+        return menuReportes;
     }
 
     public JMenuItem getMenuStock() {
@@ -172,11 +174,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
     public JMenuItem getMenuTipoProMat() {
-        return menuTipoProMat;
+        return menuTipoProductosYMateriales;
     }
 
     public JMenuItem getMenuTipoUsuarios() {
-        return menuTipoUsuarios;
+        return menuRoles;
     }
 
     public JMenuItem getMenuTrabajadores() {
@@ -221,13 +223,88 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     private Map<String, JMenuItem> menuMap = new HashMap<>();
 
     Loggin lg = new Loggin();
+    
+    private Usuarios objUsuarios; // Mantener una única instancia
+////    private Roles objRoles;
+////    private AsignacionPermisos objAsignacionPermisos;
+////    private Empresas objEmpresas;
+////    private Trabajadores objTrabajadores;
+////    private Tarifario objTarifario;
+////    private Productos objProductos;
+////    private Formularios objFormularios;
+////    private Proveedor objProveedor;
+////    private Convenios objConvenios;
+////    private BusquedaDeConvenios objBusquedaDeConvenios;
+////    private AsignacionTrabajos asignacionTrabajos;
+////    private PuestoDeTrabajo puestoDeTrabajo1;
+////    private FormaDePago objFormaDePago;
+////    private Menus objMenus;
+////    private Clientes objClientes;
+////    private Marcas objMarcas;
+////    private Unidades objUnidades;
+////    private tipos_pagosgenerales objtipos_pagosgenerales;
+////    private TipoProductosMateriales objTipoProductosMateriales;
+////    private TipoMaquinariasYVehiculos objMaquinariasYVehiculos;
+////    private Localizacion objLocalizacion;
+////    private Configuracion objConfiguracion;
+////    private Orden objOrden;
+////    private VerOrdenes objVerOrdenes;
+////    private Ventas objVentas;
+////    private ComprasProductosMateriales objComprasProductosMateriales;
+////    private CompraEquiposVehiculos objCompraEquiposVehiculos;
+////    private Gastos_Generales objGastos_Generales;
+////    private Kardex objKardex;
+////    private Cotizaciones objCotizaciones;
+////    private Cancelaciones objCancelaciones;
+////    private RTrabajosRealizados objRTrabajosRealizados;
+////    private Estadisticas objEstadisticas;
+////    private DeudasPorPagar objDeudasPorPagar;
+    private DeudasPorCobrar objDeudasPorCobrar;
+////    private HorasTrabajadas horasTrabajadas1;
+////    private Sueldos objSueldos;
+////    private Stock objStock;
+////    private Trabajos objTrabajos;
+    private Presupuesto objPresupuesto;
 
     public VentanaPrincipal(int tipUsu, String usuario) {
         initComponents();
         
-         // Cargar los permisos del usuario
-        cargarPermisos(tipUsu);
+        objUsuarios = new Usuarios();
+//        objRoles = new Roles();
+//        
+//        objBusquedaDeConvenios = new BusquedaDeConvenios();
+//        objCancelaciones = new Cancelaciones();
+//        objClientes = new Clientes();
+//        objCompraEquiposVehiculos = new CompraEquiposVehiculos();
+//        objComprasProductosMateriales = new ComprasProductosMateriales();
+//        objConfiguracion = new Configuracion();
+//        objConvenios = new Convenios();
+//        objCotizaciones = new Cotizaciones();
+        objDeudasPorCobrar = new DeudasPorCobrar();
+////        objDeudasPorPagar = new DeudasPorPagar();
+//        objEmpresas = new Empresas();
+//        objEstadisticas = new Estadisticas();
+//        objFormaDePago = new FormaDePago();
+//        objFormularios = new Formularios();
+//        objGastos_Generales = new Gastos_Generales();
+//        objKardex = new Kardex();
+//        objLocalizacion = new Localizacion();
+//        objMaquinariasYVehiculos = new TipoMaquinariasYVehiculos();
+//        objMarcas = new Marcas();
+//        objMenus = new Menus();
+//        objOrden = new Orden();
+        objPresupuesto = new Presupuesto();
+//        objProductos = new Productos();
+//        objProveedor = new Proveedor();
+//        objRTrabajosRealizados = new RTrabajosRealizados();
+//        objRoles = new Roles();
+//        objStock = new Stock();
+//        objSueldos = new Sueldos();
+//        objTarifario = new Tarifario();
+        
 
+//         // Cargar los permisos del usuario
+//        cargarPermisosMenusSubmenus(tipUsu);
         this.tipUsu = tipUsu;
         this.usuario = usuario;
 
@@ -275,8 +352,6 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     // Constructor vacío para evitar errores en la inicialización por defecto
     public VentanaPrincipal() {
         initComponents();
-        
-        
 
         // Inhabilitar la "X" de cierre del JFrame
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -370,12 +445,12 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }
 
     private void initializeMenuMap() {
-        menuMap.put("menuAdministration", menuAdministration);
-        menuMap.put("menuAdmission", menuAdmission);
-        menuMap.put("menuRegisters", menuRegisters);
-        menuMap.put("menuReports", menuReports);
+        menuMap.put("menuAdministration", menuAdministracion);
+        menuMap.put("menuAdmission", menuAdmision);
+        menuMap.put("menuRegisters", menuRegistros);
+        menuMap.put("menuReports", menuReportes);
         menuMap.put("menuUsuarios", menuUsuarios);
-        menuMap.put("menuTipoUsuarios", menuTipoUsuarios);
+        menuMap.put("menuTipoUsuarios", menuRoles);
         // Añadir los demás menús y submenús aquí...
     }
 
@@ -424,9 +499,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         btnSalir = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
-        menuAdministration = new javax.swing.JMenu();
+        menuAdministracion = new javax.swing.JMenu();
         menuUsuarios = new javax.swing.JMenuItem();
-        menuTipoUsuarios = new javax.swing.JMenuItem();
+        menuRoles = new javax.swing.JMenuItem();
         menuAsignacionPermisos = new javax.swing.JMenuItem();
         menuEmpresas = new javax.swing.JMenuItem();
         menuTrabajadores = new javax.swing.JMenuItem();
@@ -440,16 +515,16 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         menuPuestoDeTrabajo = new javax.swing.JMenuItem();
         menuFormaDePago = new javax.swing.JMenuItem();
         menuMenusSubmenus = new javax.swing.JMenuItem();
-        menuAdmission = new javax.swing.JMenu();
+        menuAdmision = new javax.swing.JMenu();
         menuClientes = new javax.swing.JMenuItem();
         menuMarcas = new javax.swing.JMenuItem();
         menuUnidades = new javax.swing.JMenuItem();
         menutipo_pagosgenerales = new javax.swing.JMenuItem();
-        menuTipoProMat = new javax.swing.JMenuItem();
+        menuTipoProductosYMateriales = new javax.swing.JMenuItem();
         menuTipoMaqVe = new javax.swing.JMenuItem();
         menuLocalizacion = new javax.swing.JMenuItem();
         menuConfiguracion = new javax.swing.JMenuItem();
-        menuRegisters = new javax.swing.JMenu();
+        menuRegistros = new javax.swing.JMenu();
         menuOrdenes = new javax.swing.JMenuItem();
         menuVerOrdenes = new javax.swing.JMenuItem();
         menuVentas = new javax.swing.JMenuItem();
@@ -459,7 +534,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         menuKardex = new javax.swing.JMenuItem();
         menuCotizaciones = new javax.swing.JMenuItem();
         menuCancelaciones = new javax.swing.JMenuItem();
-        menuReports = new javax.swing.JMenu();
+        menuReportes = new javax.swing.JMenu();
         menuTrabajosRealizados = new javax.swing.JMenuItem();
         menuEstadisticas = new javax.swing.JMenuItem();
         menuDeudasPorPagar = new javax.swing.JMenuItem();
@@ -527,9 +602,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         jMenuBar1.setBackground(new java.awt.Color(102, 102, 255));
         jMenuBar1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        menuAdministration.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 153), 3));
-        menuAdministration.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/config.png"))); // NOI18N
-        menuAdministration.setText("Administración          ");
+        menuAdministracion.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 153), 3));
+        menuAdministracion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/config.png"))); // NOI18N
+        menuAdministracion.setText("Administración          ");
 
         menuUsuarios.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/users.png"))); // NOI18N
         menuUsuarios.setLabel("Usuarios");
@@ -538,25 +613,25 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuUsuariosActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuUsuarios);
+        menuAdministracion.add(menuUsuarios);
 
-        menuTipoUsuarios.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/nuevo-cliente.png"))); // NOI18N
-        menuTipoUsuarios.setText("Tipo de Usuario");
-        menuTipoUsuarios.addActionListener(new java.awt.event.ActionListener() {
+        menuRoles.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/nuevo-cliente.png"))); // NOI18N
+        menuRoles.setText("Roles");
+        menuRoles.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuTipoUsuariosActionPerformed(evt);
+                menuRolesActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuTipoUsuarios);
+        menuAdministracion.add(menuRoles);
 
         menuAsignacionPermisos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/configuraciones.png"))); // NOI18N
-        menuAsignacionPermisos.setText("Asignación de Permisos");
+        menuAsignacionPermisos.setText("Asignacion de Permisos");
         menuAsignacionPermisos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 menuAsignacionPermisosActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuAsignacionPermisos);
+        menuAdministracion.add(menuAsignacionPermisos);
 
         menuEmpresas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/box.png"))); // NOI18N
         menuEmpresas.setLabel("Empresas");
@@ -565,7 +640,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuEmpresasActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuEmpresas);
+        menuAdministracion.add(menuEmpresas);
 
         menuTrabajadores.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/usuario.png"))); // NOI18N
         menuTrabajadores.setLabel("Trabajadores");
@@ -574,7 +649,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuTrabajadoresActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuTrabajadores);
+        menuAdministracion.add(menuTrabajadores);
 
         menuTarifario.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
         menuTarifario.setText("Tarifario");
@@ -583,7 +658,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuTarifarioActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuTarifario);
+        menuAdministracion.add(menuTarifario);
 
         menuProductos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/producto.png"))); // NOI18N
         menuProductos.setLabel("Productos");
@@ -592,7 +667,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuProductosActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuProductos);
+        menuAdministracion.add(menuProductos);
 
         menuFormularios.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/place order.png"))); // NOI18N
         menuFormularios.setLabel("Formularios");
@@ -601,7 +676,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuFormulariosActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuFormularios);
+        menuAdministracion.add(menuFormularios);
 
         menuProveedor.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/proveedor.png"))); // NOI18N
         menuProveedor.setLabel("Proveedor");
@@ -610,7 +685,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuProveedorActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuProveedor);
+        menuAdministracion.add(menuProveedor);
 
         menuConvenios.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/anadir.png"))); // NOI18N
         menuConvenios.setText("Convenios");
@@ -619,7 +694,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuConveniosActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuConvenios);
+        menuAdministracion.add(menuConvenios);
 
         menuBusquedaConvenios.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/lupa.png"))); // NOI18N
         menuBusquedaConvenios.setText("Busqueda de Convenios");
@@ -628,7 +703,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuBusquedaConveniosActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuBusquedaConvenios);
+        menuAdministracion.add(menuBusquedaConvenios);
 
         menuAsignaciondeTrabajos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cliente.png"))); // NOI18N
         menuAsignaciondeTrabajos.setText("Asignación de Trabajos");
@@ -637,7 +712,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuAsignaciondeTrabajosActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuAsignaciondeTrabajos);
+        menuAdministracion.add(menuAsignaciondeTrabajos);
 
         menuPuestoDeTrabajo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/detallista.png"))); // NOI18N
         menuPuestoDeTrabajo.setLabel("Puesto de Trabajo");
@@ -646,7 +721,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuPuestoDeTrabajoActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuPuestoDeTrabajo);
+        menuAdministracion.add(menuPuestoDeTrabajo);
 
         menuFormaDePago.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
         menuFormaDePago.setText("Formas de Pago");
@@ -655,7 +730,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuFormaDePagoActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuFormaDePago);
+        menuAdministracion.add(menuFormaDePago);
 
         menuMenusSubmenus.setText("Menus - Submenus");
         menuMenusSubmenus.addActionListener(new java.awt.event.ActionListener() {
@@ -663,14 +738,14 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuMenusSubmenusActionPerformed(evt);
             }
         });
-        menuAdministration.add(menuMenusSubmenus);
+        menuAdministracion.add(menuMenusSubmenus);
 
-        jMenuBar1.add(menuAdministration);
+        jMenuBar1.add(menuAdministracion);
 
-        menuAdmission.setBackground(new java.awt.Color(0, 0, 153));
-        menuAdmission.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 153), 3));
-        menuAdmission.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/anadir.png"))); // NOI18N
-        menuAdmission.setText("Admisión                    ");
+        menuAdmision.setBackground(new java.awt.Color(0, 0, 153));
+        menuAdmision.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 153), 3));
+        menuAdmision.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/anadir.png"))); // NOI18N
+        menuAdmision.setText("Admisión                    ");
 
         menuClientes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cliente.png"))); // NOI18N
         menuClientes.setLabel("Clientes");
@@ -679,7 +754,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuClientesActionPerformed(evt);
             }
         });
-        menuAdmission.add(menuClientes);
+        menuAdmision.add(menuClientes);
 
         menuMarcas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/box.png"))); // NOI18N
         menuMarcas.setText("Marcas");
@@ -688,7 +763,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuMarcasActionPerformed(evt);
             }
         });
-        menuAdmission.add(menuMarcas);
+        menuAdmision.add(menuMarcas);
 
         menuUnidades.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/medida.png"))); // NOI18N
         menuUnidades.setText("Unidades");
@@ -697,24 +772,29 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuUnidadesActionPerformed(evt);
             }
         });
-        menuAdmission.add(menuUnidades);
+        menuAdmision.add(menuUnidades);
 
         menutipo_pagosgenerales.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/generate bill & print.png"))); // NOI18N
         menutipo_pagosgenerales.setText("Tipo de Pagos Generales");
+        menutipo_pagosgenerales.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                menutipo_pagosgeneralesStateChanged(evt);
+            }
+        });
         menutipo_pagosgenerales.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 menutipo_pagosgeneralesActionPerformed(evt);
             }
         });
-        menuAdmission.add(menutipo_pagosgenerales);
+        menuAdmision.add(menutipo_pagosgenerales);
 
-        menuTipoProMat.setText("Tipo de Productos y Materiales");
-        menuTipoProMat.addActionListener(new java.awt.event.ActionListener() {
+        menuTipoProductosYMateriales.setText("Tipo de Productos y Materiales");
+        menuTipoProductosYMateriales.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                menuTipoProMatActionPerformed(evt);
+                menuTipoProductosYMaterialesActionPerformed(evt);
             }
         });
-        menuAdmission.add(menuTipoProMat);
+        menuAdmision.add(menuTipoProductosYMateriales);
 
         menuTipoMaqVe.setText("Tipo de Maquinarias y Vehiculos");
         menuTipoMaqVe.addActionListener(new java.awt.event.ActionListener() {
@@ -722,7 +802,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuTipoMaqVeActionPerformed(evt);
             }
         });
-        menuAdmission.add(menuTipoMaqVe);
+        menuAdmision.add(menuTipoMaqVe);
 
         menuLocalizacion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/edificio.png"))); // NOI18N
         menuLocalizacion.setText("Localizacion");
@@ -731,7 +811,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuLocalizacionActionPerformed(evt);
             }
         });
-        menuAdmission.add(menuLocalizacion);
+        menuAdmision.add(menuLocalizacion);
 
         menuConfiguracion.setText("Configuracion");
         menuConfiguracion.addActionListener(new java.awt.event.ActionListener() {
@@ -739,13 +819,13 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuConfiguracionActionPerformed(evt);
             }
         });
-        menuAdmission.add(menuConfiguracion);
+        menuAdmision.add(menuConfiguracion);
 
-        jMenuBar1.add(menuAdmission);
+        jMenuBar1.add(menuAdmision);
 
-        menuRegisters.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 153), 3));
-        menuRegisters.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/view edit delete product.png"))); // NOI18N
-        menuRegisters.setText("Registros                     ");
+        menuRegistros.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 153), 3));
+        menuRegistros.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/view edit delete product.png"))); // NOI18N
+        menuRegistros.setText("Registros                     ");
 
         menuOrdenes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/view edit delete product.png"))); // NOI18N
         menuOrdenes.setText("Orden de Servicio");
@@ -754,7 +834,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuOrdenesActionPerformed(evt);
             }
         });
-        menuRegisters.add(menuOrdenes);
+        menuRegistros.add(menuOrdenes);
 
         menuVerOrdenes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/edit.png"))); // NOI18N
         menuVerOrdenes.setLabel("Ver Ordenes");
@@ -763,7 +843,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuVerOrdenesActionPerformed(evt);
             }
         });
-        menuRegisters.add(menuVerOrdenes);
+        menuRegistros.add(menuVerOrdenes);
 
         menuVentas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
         menuVentas.setText("Ventas");
@@ -772,16 +852,16 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuVentasActionPerformed(evt);
             }
         });
-        menuRegisters.add(menuVentas);
+        menuRegistros.add(menuVentas);
 
         menuCompraProMat.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/compras.png"))); // NOI18N
-        menuCompraProMat.setText("Compras Productos y Materiales");
+        menuCompraProMat.setText("Compra de Productos y Materiales");
         menuCompraProMat.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 menuCompraProMatActionPerformed(evt);
             }
         });
-        menuRegisters.add(menuCompraProMat);
+        menuRegistros.add(menuCompraProMat);
 
         menuCompraEquyVehi.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/config.png"))); // NOI18N
         menuCompraEquyVehi.setText("Compra Equipos, Vehiculos");
@@ -790,7 +870,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuCompraEquyVehiActionPerformed(evt);
             }
         });
-        menuRegisters.add(menuCompraEquyVehi);
+        menuRegistros.add(menuCompraEquyVehi);
 
         menuGastosGenerales.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/place order.png"))); // NOI18N
         menuGastosGenerales.setText("Gastos Generales");
@@ -799,7 +879,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuGastosGeneralesActionPerformed(evt);
             }
         });
-        menuRegisters.add(menuGastosGenerales);
+        menuRegistros.add(menuGastosGenerales);
 
         menuKardex.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/historial1.png"))); // NOI18N
         menuKardex.setText("Kardex");
@@ -808,7 +888,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuKardexActionPerformed(evt);
             }
         });
-        menuRegisters.add(menuKardex);
+        menuRegistros.add(menuKardex);
 
         menuCotizaciones.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/anadir.png"))); // NOI18N
         menuCotizaciones.setText("Cotizaciones");
@@ -817,7 +897,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuCotizacionesActionPerformed(evt);
             }
         });
-        menuRegisters.add(menuCotizaciones);
+        menuRegistros.add(menuCotizaciones);
 
         menuCancelaciones.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/eliminar.png"))); // NOI18N
         menuCancelaciones.setLabel("Cancelaciones");
@@ -826,13 +906,13 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuCancelacionesActionPerformed(evt);
             }
         });
-        menuRegisters.add(menuCancelaciones);
+        menuRegistros.add(menuCancelaciones);
 
-        jMenuBar1.add(menuRegisters);
+        jMenuBar1.add(menuRegistros);
 
-        menuReports.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 153), 3));
-        menuReports.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/pdf.png"))); // NOI18N
-        menuReports.setText("Reportes                     ");
+        menuReportes.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 153), 3));
+        menuReportes.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/pdf.png"))); // NOI18N
+        menuReportes.setText("Reportes                     ");
 
         menuTrabajosRealizados.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/producto_1.png"))); // NOI18N
         menuTrabajosRealizados.setText("Trabajos Realizados");
@@ -841,7 +921,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuTrabajosRealizadosActionPerformed(evt);
             }
         });
-        menuReports.add(menuTrabajosRealizados);
+        menuReportes.add(menuTrabajosRealizados);
 
         menuEstadisticas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/historial1.png"))); // NOI18N
         menuEstadisticas.setText("Estadisticas");
@@ -850,7 +930,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuEstadisticasActionPerformed(evt);
             }
         });
-        menuReports.add(menuEstadisticas);
+        menuReportes.add(menuEstadisticas);
 
         menuDeudasPorPagar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/View Bills & Order Placed Details.png"))); // NOI18N
         menuDeudasPorPagar.setLabel("Deudas por Pagar");
@@ -859,7 +939,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuDeudasPorPagarActionPerformed(evt);
             }
         });
-        menuReports.add(menuDeudasPorPagar);
+        menuReportes.add(menuDeudasPorPagar);
 
         menuDeudasPorCobrar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/generate bill & print.png"))); // NOI18N
         menuDeudasPorCobrar.setLabel("Deudas por Cobrar");
@@ -868,7 +948,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuDeudasPorCobrarActionPerformed(evt);
             }
         });
-        menuReports.add(menuDeudasPorCobrar);
+        menuReportes.add(menuDeudasPorCobrar);
 
         menuHorasTrabajadas.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/ayuda.png"))); // NOI18N
         menuHorasTrabajadas.setLabel("Horas Trabajadas");
@@ -877,7 +957,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuHorasTrabajadasActionPerformed(evt);
             }
         });
-        menuReports.add(menuHorasTrabajadas);
+        menuReportes.add(menuHorasTrabajadas);
 
         menuSueldos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/money.png"))); // NOI18N
         menuSueldos.setLabel("Sueldos");
@@ -886,7 +966,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuSueldosActionPerformed(evt);
             }
         });
-        menuReports.add(menuSueldos);
+        menuReportes.add(menuSueldos);
 
         menuStock.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/categorias.png"))); // NOI18N
         menuStock.setText("Stock");
@@ -895,7 +975,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuStockActionPerformed(evt);
             }
         });
-        menuReports.add(menuStock);
+        menuReportes.add(menuStock);
 
         menuTrabajos.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/cajero.png"))); // NOI18N
         menuTrabajos.setText("Trabajos");
@@ -904,7 +984,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuTrabajosActionPerformed(evt);
             }
         });
-        menuReports.add(menuTrabajos);
+        menuReportes.add(menuTrabajos);
 
         menuPresupuesto.setText("Presupuesto");
         menuPresupuesto.addActionListener(new java.awt.event.ActionListener() {
@@ -912,9 +992,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 menuPresupuestoActionPerformed(evt);
             }
         });
-        menuReports.add(menuPresupuesto);
+        menuReportes.add(menuPresupuesto);
 
-        jMenuBar1.add(menuReports);
+        jMenuBar1.add(menuReportes);
 
         setJMenuBar(jMenuBar1);
 
@@ -942,17 +1022,19 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
     private void menuSueldosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuSueldosActionPerformed
 
-        Sueldos objPagosPersonal = new Sueldos();
-        jpEscritorio.add(objPagosPersonal);
-        objPagosPersonal.show();
+        Sueldos objSueldos = new Sueldos();
+        jpEscritorio.add(objSueldos);
+        objSueldos.show();
 
     }//GEN-LAST:event_menuSueldosActionPerformed
 
     private void menuUsuariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUsuariosActionPerformed
-        Usuarios objUsuarios = new Usuarios();
+        if (!objUsuarios.isShowing()) {
         jpEscritorio.add(objUsuarios);
         objUsuarios.show();
-
+        }
+        //Aquí aplicar los permisos al abrir la ventana
+    actualizarPermisosAccion("Usuarios", true, true, true); // Cambia según los permisos correctos
     }//GEN-LAST:event_menuUsuariosActionPerformed
 
 
@@ -971,9 +1053,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuTrabajadoresActionPerformed
 
     private void menuTarifarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTarifarioActionPerformed
-        Tarifario objServicios = new Tarifario();
-        jpEscritorio.add(objServicios);
-        objServicios.show();
+        Tarifario objTarifario = new Tarifario();
+        jpEscritorio.add(objTarifario);
+        objTarifario.show();
 
     }//GEN-LAST:event_menuTarifarioActionPerformed
 
@@ -986,9 +1068,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 
     private void menuFormulariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFormulariosActionPerformed
 
-        Formularios objForms = new Formularios();
-        jpEscritorio.add(objForms);
-        objForms.show();
+        Formularios objFormularios = new Formularios();
+        jpEscritorio.add(objFormularios);
+        objFormularios.show();
 
     }//GEN-LAST:event_menuFormulariosActionPerformed
 
@@ -1035,9 +1117,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuOrdenesActionPerformed
 
     private void menuCotizacionesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCotizacionesActionPerformed
-        Cotizaciones objCargosPendientes = new Cotizaciones();
-        jpEscritorio.add(objCargosPendientes);
-        objCargosPendientes.show();
+        Cotizaciones objCotizaciones = new Cotizaciones();
+        jpEscritorio.add(objCotizaciones);
+        objCotizaciones.show();
 
     }//GEN-LAST:event_menuCotizacionesActionPerformed
 
@@ -1049,9 +1131,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuVentasActionPerformed
 
     private void menuCompraProMatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCompraProMatActionPerformed
-        ComprasProductosMateriales objGastos = new ComprasProductosMateriales();
-        jpEscritorio.add(objGastos);
-        objGastos.show();
+        ComprasProductosMateriales objComprasProductosMateriales = new ComprasProductosMateriales();
+        jpEscritorio.add(objComprasProductosMateriales);
+        objComprasProductosMateriales.show();
 
     }//GEN-LAST:event_menuCompraProMatActionPerformed
 
@@ -1077,16 +1159,16 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuCancelacionesActionPerformed
 
     private void menuTrabajosRealizadosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTrabajosRealizadosActionPerformed
-        RTrabajosRealizados objRVentas = new RTrabajosRealizados();
-        jpEscritorio.add(objRVentas);
-        objRVentas.show();
+        RTrabajosRealizados objRTrabajosRealizados = new RTrabajosRealizados();
+        jpEscritorio.add(objRTrabajosRealizados);
+        objRTrabajosRealizados.show();
 
     }//GEN-LAST:event_menuTrabajosRealizadosActionPerformed
 
     private void menuEstadisticasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEstadisticasActionPerformed
-        Estadisticas objCompras = new Estadisticas();
-        jpEscritorio.add(objCompras);
-        objCompras.show();
+        Estadisticas objEstadisticas = new Estadisticas();
+        jpEscritorio.add(objEstadisticas);
+        objEstadisticas.show();
 
     }//GEN-LAST:event_menuEstadisticasActionPerformed
 
@@ -1103,10 +1185,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuDeudasPorPagarActionPerformed
 
     private void menuDeudasPorCobrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDeudasPorCobrarActionPerformed
-        DeudasPorCobrar objDeudasPorCobrar = new DeudasPorCobrar();
+        if (!objDeudasPorCobrar.isShowing()) {
         jpEscritorio.add(objDeudasPorCobrar);
         objDeudasPorCobrar.show();
-
+        }
+        actualizarPermisosAccion("Deudas Por Cobrar", true, true, true);
     }//GEN-LAST:event_menuDeudasPorCobrarActionPerformed
 
     private void menuHorasTrabajadasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuHorasTrabajadasActionPerformed
@@ -1199,11 +1282,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnSalirActionPerformed
 
-    private void menuTipoUsuariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTipoUsuariosActionPerformed
-        Roles objTipoDeUsuario = new Roles();
-        jpEscritorio.add(objTipoDeUsuario);
-        objTipoDeUsuario.show();
-    }//GEN-LAST:event_menuTipoUsuariosActionPerformed
+    private void menuRolesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuRolesActionPerformed
+        Roles objRoles = new Roles();
+        jpEscritorio.add(objRoles);
+        objRoles.show();
+    }//GEN-LAST:event_menuRolesActionPerformed
 
     private void menuBusquedaConveniosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuBusquedaConveniosActionPerformed
         BusquedaDeConvenios objBusquedaDeConvenios = new BusquedaDeConvenios();
@@ -1229,7 +1312,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 jpEscritorio.add(objAsignacionPermisos);
                 objAsignacionPermisos.show();
             }
-            }catch (SQLException ex) {
+        } catch (SQLException ex) {
             Logger.getLogger(VentanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_menuAsignacionPermisosActionPerformed
@@ -1241,9 +1324,9 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuTrabajosActionPerformed
 
     private void menuCompraEquyVehiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCompraEquyVehiActionPerformed
-        CompraEquiposVehiculos objEquipos = new CompraEquiposVehiculos();
-        jpEscritorio.add(objEquipos);
-        objEquipos.show();
+        CompraEquiposVehiculos objCompraEquiposVehiculos = new CompraEquiposVehiculos();
+        jpEscritorio.add(objCompraEquiposVehiculos);
+        objCompraEquiposVehiculos.show();
     }//GEN-LAST:event_menuCompraEquyVehiActionPerformed
 
     private void menuMarcasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMarcasActionPerformed
@@ -1253,15 +1336,15 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuMarcasActionPerformed
 
     private void menuGastosGeneralesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGastosGeneralesActionPerformed
-        Gastos_Generales objPagosRecibos = new Gastos_Generales();
-        jpEscritorio.add(objPagosRecibos);
-        objPagosRecibos.show();
+        Gastos_Generales objGastos_Generales = new Gastos_Generales();
+        jpEscritorio.add(objGastos_Generales);
+        objGastos_Generales.show();
     }//GEN-LAST:event_menuGastosGeneralesActionPerformed
 
     private void menutipo_pagosgeneralesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menutipo_pagosgeneralesActionPerformed
-        tipos_pagosgenerales objConceptoPagos = new tipos_pagosgenerales();
-        jpEscritorio.add(objConceptoPagos);
-        objConceptoPagos.show();
+        tipos_pagosgenerales objtipo_pagosgenerales = new tipos_pagosgenerales();
+        jpEscritorio.add(objtipo_pagosgenerales);
+        objtipo_pagosgenerales.show();
     }//GEN-LAST:event_menutipo_pagosgeneralesActionPerformed
 
     private void menuUnidadesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUnidadesActionPerformed
@@ -1283,27 +1366,30 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuFormaDePagoActionPerformed
 
     private void menuTipoMaqVeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTipoMaqVeActionPerformed
-        TipoMaquinariasYVehiculos objTipoMaqVe = new TipoMaquinariasYVehiculos();
-        jpEscritorio.add(objTipoMaqVe);
-        objTipoMaqVe.show();
+        TipoMaquinariasYVehiculos objTipoMaquinariasYVehiculos = new TipoMaquinariasYVehiculos();
+        jpEscritorio.add(objTipoMaquinariasYVehiculos);
+        objTipoMaquinariasYVehiculos.show();
     }//GEN-LAST:event_menuTipoMaqVeActionPerformed
 
-    private void menuTipoProMatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTipoProMatActionPerformed
-        TipoProductosMateriales objTipoProMat = new TipoProductosMateriales();
-        jpEscritorio.add(objTipoProMat);
-        objTipoProMat.show();
-    }//GEN-LAST:event_menuTipoProMatActionPerformed
+    private void menuTipoProductosYMaterialesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTipoProductosYMaterialesActionPerformed
+        TipoProductosMateriales objTipoProductosMateriales = new TipoProductosMateriales();
+        jpEscritorio.add(objTipoProductosMateriales);
+        objTipoProductosMateriales.show();
+    }//GEN-LAST:event_menuTipoProductosYMaterialesActionPerformed
 
     private void menuConfiguracionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuConfiguracionActionPerformed
-        Configuracion objConfig = new Configuracion();
-        jpEscritorio.add(objConfig);
-        objConfig.show();
+        Configuracion objConfiguracion = new Configuracion();
+        jpEscritorio.add(objConfiguracion);
+        objConfiguracion.show();
     }//GEN-LAST:event_menuConfiguracionActionPerformed
 
     private void menuPresupuestoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuPresupuestoActionPerformed
-        BudgetManager objBudget = new BudgetManager();
-        jpEscritorio.add(objBudget);
-        objBudget.show();
+        if (!objPresupuesto.isShowing()) {
+        jpEscritorio.add(objPresupuesto);
+        objPresupuesto.show();
+        }
+        //Aquí aplicar los permisos al abrir la ventana
+    actualizarPermisosAccion("Usuarios", true, true, true); // Cambia según los permisos correctos
     }//GEN-LAST:event_menuPresupuestoActionPerformed
 
     private void menuMenusSubmenusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMenusSubmenusActionPerformed
@@ -1311,6 +1397,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         jpEscritorio.add(objMenus);
         objMenus.show();
     }//GEN-LAST:event_menuMenusSubmenusActionPerformed
+
+    private void menutipo_pagosgeneralesStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_menutipo_pagosgeneralesStateChanged
+        // TODO add your handling code here:
+    }//GEN-LAST:event_menutipo_pagosgeneralesStateChanged
 
     /**
      * @param args the command line arguments
@@ -1355,8 +1445,8 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     public javax.swing.JPanel jpEscritorio;
     public static final javax.swing.JLabel lbUsuario = new javax.swing.JLabel();
-    public javax.swing.JMenu menuAdministration;
-    public javax.swing.JMenu menuAdmission;
+    public javax.swing.JMenu menuAdministracion;
+    public javax.swing.JMenu menuAdmision;
     public javax.swing.JMenuItem menuAsignacionPermisos;
     public javax.swing.JMenuItem menuAsignaciondeTrabajos;
     public javax.swing.JMenuItem menuBusquedaConvenios;
@@ -1384,14 +1474,14 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     public javax.swing.JMenuItem menuProductos;
     public javax.swing.JMenuItem menuProveedor;
     public javax.swing.JMenuItem menuPuestoDeTrabajo;
-    public javax.swing.JMenu menuRegisters;
-    public javax.swing.JMenu menuReports;
+    public javax.swing.JMenu menuRegistros;
+    public javax.swing.JMenu menuReportes;
+    public javax.swing.JMenuItem menuRoles;
     public javax.swing.JMenuItem menuStock;
     public javax.swing.JMenuItem menuSueldos;
     public javax.swing.JMenuItem menuTarifario;
     public javax.swing.JMenuItem menuTipoMaqVe;
-    public javax.swing.JMenuItem menuTipoProMat;
-    public javax.swing.JMenuItem menuTipoUsuarios;
+    public javax.swing.JMenuItem menuTipoProductosYMateriales;
     public javax.swing.JMenuItem menuTrabajadores;
     public javax.swing.JMenuItem menuTrabajos;
     public javax.swing.JMenuItem menuTrabajosRealizados;
@@ -1402,33 +1492,156 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     public javax.swing.JMenuItem menutipo_pagosgenerales;
     // End of variables declaration//GEN-END:variables
 
-    private void cargarPermisos(int tipUsu) {
-        Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida aquí
-        if (connection == null) {
-            throw new RuntimeException("Error: La conexión a la base de datos es nula.");
-        }
-
-        String sql = "SELECT nombre_menu AS menu, nombre_submenu AS submenu\n"
-                + "FROM roles_menus_submenus rms\n"
-                + "JOIN menus m ON rms.id_menu = m.id_menu\n"
-                + "LEFT JOIN submenus s ON rms.id_submenu = s.id_submenu\n"
-                + "WHERE rms.id_rol =  ?";
-
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setInt(1, tipUsu);
-            ResultSet rs = pst.executeQuery();
-            while (rs.next()) {
-                String menuName = rs.getString("menu");
-                String submenuName = rs.getString("submenu");
-                setMenuVisibility(menuName, true);
-                if (submenuName != null) {
-                    setMenuVisibility(submenuName, true);
-                }
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error al cargar permisos: " + e.getMessage());
-        } finally {
-            Conectar.getInstancia().devolverConexion(connection);
+    public void actualizarMenuPrincipal(String menuName, boolean visualizar) {
+        switch (menuName) {
+            case "Administracion":
+                menuAdministracion.setVisible(visualizar);
+                break;
+            case "Admision":
+                menuAdmision.setVisible(visualizar);
+                break;
+            case "Registros":
+                menuRegistros.setVisible(visualizar);
+                break;
+            case "Reportes":
+                menuReportes.setVisible(visualizar);
+                break;
+            default:
+                System.out.println("Menú principal no encontrado: " + menuName);
+                break;
         }
     }
+
+    public void actualizarSubmenu(String menuName, String submenuName, boolean visualizar, boolean agregar, boolean editar, boolean eliminar) {
+        // Localizar el submenú correspondiente en la interfaz
+        JMenuItem submenu = getSubmenuFromMenu(menuName, submenuName);
+
+        if (submenu != null) {
+            submenu.setVisible(visualizar);  // Mostrar u ocultar el submenú
+
+            // Si es necesario, puedes agregar más lógica para los permisos de agregar, editar, y eliminar
+            if (submenuName.equals("Usuarios")) {
+                actualizarPermisosAccion(submenuName, agregar, editar, eliminar);
+            }
+        } else {
+            System.out.println("Submenú no encontrado: " + submenuName);
+        }
+    }
+
+// Método auxiliar para obtener un submenú a partir del menú principal
+    private JMenuItem getSubmenuFromMenu(String menuName, String submenuName) {
+        JMenu menu = null;
+
+        switch (menuName) {
+            case "Administracion":
+                menu = menuAdministracion;
+                break;
+            case "Admision":
+                menu = menuAdmision;
+                break;
+            case "Registros":
+                menu = menuRegistros;
+                break;
+            case "Reportes":
+                menu = menuReportes;
+                break;
+            default:
+                System.out.println("Menú no reconocido: " + menuName);
+                return null;
+        }
+
+        if (menu != null) {
+            for (int i = 0; i < menu.getItemCount(); i++) {
+                JMenuItem submenu = menu.getItem(i);
+                if (submenu.getText().equals(submenuName)) {
+                    return submenu;
+                }
+            }
+            System.out.println("Submenú no encontrado: " + submenuName);
+        }
+        return null;
+    }
+    
+    public void aplicarPermisos(int menuId, String submenuName, boolean visualizar, boolean agregar, boolean editar, boolean eliminar) {
+        // Primero, obtenemos el submenú correspondiente
+        JMenuItem submenu = getSubmenuFromMenuId(menuId, submenuName);
+
+        // Verificar si se encontró el submenú
+        if (submenu != null) {
+            // Aplicar permisos de visualización
+            submenu.setVisible(visualizar);
+
+            // Si se necesita controlar permisos de agregar, editar o eliminar, puedes aplicar la lógica adicional
+            // Aquí podrías habilitar o deshabilitar botones de "Agregar", "Editar", "Eliminar" en las interfaces correspondientes.
+            if (submenuName.equals("Usuarios")) {
+                actualizarPermisosAccion(submenuName, agregar, editar, eliminar);
+            }
+        } else {
+            System.out.println("Submenú no encontrado: " + submenuName);
+        }
+    }
+
+    // Método auxiliar para obtener el submenú a partir del id del menú
+    private JMenuItem getSubmenuFromMenuId(int menuId, String submenuName) {
+        JMenu menu = null;
+
+        switch (menuId) {
+            case 1:  // Administracion
+                menu = menuAdministracion;
+                break;
+            case 2:  // Admision
+                menu = menuAdmision;
+                break;
+            case 3:  // Registros
+                menu = menuRegistros;
+                break;
+            case 4:  // Reportes
+                menu = menuReportes;
+                break;
+            default:
+                System.out.println("Menú no reconocido: " + menuId);
+                return null;
+        }
+
+        // Recorrer todos los submenús dentro del menú
+        for (int i = 0; i < menu.getItemCount(); i++) {
+            JMenuItem submenu = menu.getItem(i);
+            if (submenu.getText().equals(submenuName)) {
+                return submenu;
+            }
+        }
+
+        return null;  // Submenú no encontrado
+    }
+
+    public void actualizarPermisosAccion(String submenuName, boolean agregar, boolean editar, boolean eliminar) {
+        switch (submenuName) {
+            case "Usuarios":
+                // Asegúrate de que los botones no son nulos antes de manipularlos
+            if (objUsuarios.btnMostrarDatos != null) objUsuarios.btnMostrarDatos.setEnabled(true);
+            if (objUsuarios.btnGuia != null) objUsuarios.btnGuia.setEnabled(true);
+            if (objUsuarios.btnNuevo != null) objUsuarios.btnNuevo.setEnabled(true);
+            if (objUsuarios.btnGrabar != null) objUsuarios.btnGrabar.setEnabled(agregar);
+            if (objUsuarios.btnModificar != null) objUsuarios.btnModificar.setEnabled(editar);
+            if (objUsuarios.btnActivar != null) objUsuarios.btnActivar.setEnabled(editar);
+            if (objUsuarios.btnInactivar != null) objUsuarios.btnInactivar.setEnabled(editar);
+            if (objUsuarios.rdRelacionar != null) objUsuarios.rdRelacionar.setEnabled(editar);
+            if (objUsuarios.btnEliminar != null) objUsuarios.btnEliminar.setEnabled(eliminar);
+                break;
+                
+            case "Deudas Por Cobrar":
+                if(objDeudasPorCobrar.btnMostrarDeudas !=null) objDeudasPorCobrar.btnMostrarDeudas.setEnabled(true);
+                if(objDeudasPorCobrar.btnBusquedaEmpresa !=null) objDeudasPorCobrar.btnBusquedaEmpresa.setEnabled(true);
+                if(objDeudasPorCobrar.btnMostrarCanceladas !=null) objDeudasPorCobrar.btnMostrarCanceladas.setEnabled(true);
+                if(objDeudasPorCobrar.btnPagar !=null) objDeudasPorCobrar.btnPagar.setEnabled(editar);
+                if(objDeudasPorCobrar.btnAbrirPDF !=null) objDeudasPorCobrar.btnAbrirPDF.setEnabled(editar);
+                if(objDeudasPorCobrar.btnBusquedaFechaEmpresa !=null) objDeudasPorCobrar.btnBusquedaFechaEmpresa.setEnabled(true);
+                
+                // Asegúrate de que los botones no son nulos antes de manipularlos
+            
+            // Repetir para otros submenús...
+        }
+    }
+
+
 }
