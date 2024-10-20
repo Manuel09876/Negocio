@@ -375,7 +375,7 @@ Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la
             }
         });
 
-        btnInstruccion.setText("Instruccion");
+        btnInstruccion.setText("Guia");
         btnInstruccion.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnInstruccionActionPerformed(evt);

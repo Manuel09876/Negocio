@@ -230,7 +230,6 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
         txtId = new javax.swing.JTextField();
         btnInactivar = new javax.swing.JButton();
         btnActivar = new javax.swing.JButton();
-        btnLimpiar = new javax.swing.JButton();
         btnModificar = new javax.swing.JButton();
         btnGuia = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
@@ -294,13 +293,6 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
             }
         });
 
-        btnLimpiar.setText("Limpiar");
-        btnLimpiar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnLimpiarActionPerformed(evt);
-            }
-        });
-
         btnModificar.setText("Modificar");
         btnModificar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -336,11 +328,8 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtId, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(btnModificar)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnLimpiar)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE)
+                    .addComponent(btnModificar))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 134, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(btnInactivar)
@@ -381,8 +370,7 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(btnActivar)
-                            .addComponent(btnInactivar)
-                            .addComponent(btnLimpiar))
+                            .addComponent(btnInactivar))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
@@ -492,11 +480,6 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
         SeleccionarTipoPagosGenerales(tbPagos, txtId, txtDescripcion);
     }//GEN-LAST:event_tbPagosMouseClicked
 
-    private void btnLimpiarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLimpiarActionPerformed
-        txtDescripcion.setText("");
-        txtDescripcion.requestFocus();
-    }//GEN-LAST:event_btnLimpiarActionPerformed
-
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
         modificar(txtDescripcion, txtId);
         CargarDatosTabla("");
@@ -525,7 +508,6 @@ public class tipos_pagosgenerales extends javax.swing.JInternalFrame {
     public javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnGuia;
     public javax.swing.JButton btnInactivar;
-    public javax.swing.JButton btnLimpiar;
     public javax.swing.JButton btnModificar;
     private javax.swing.JButton btnsalir;
     private javax.swing.JLabel jLabel1;

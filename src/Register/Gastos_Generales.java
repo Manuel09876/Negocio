@@ -500,7 +500,6 @@ Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la
         btnModificar = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         btnExit = new javax.swing.JButton();
-        btnLimpiar = new javax.swing.JButton();
         txtFrecuencia = new javax.swing.JTextField();
         jLabel19 = new javax.swing.JLabel();
         btnRegistrarCredito = new javax.swing.JButton();
@@ -699,7 +698,7 @@ Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la
                 btnCancelActionPerformed(evt);
             }
         });
-        jPanel2.add(btnCancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(940, 10, -1, 30));
+        jPanel2.add(btnCancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(850, 10, -1, 30));
 
         btnExit.setBackground(new java.awt.Color(0, 102, 255));
         btnExit.setFont(new java.awt.Font("Segoe UI", 1, 10)); // NOI18N
@@ -711,10 +710,6 @@ Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la
             }
         });
         jPanel2.add(btnExit, new org.netbeans.lib.awtextra.AbsoluteConstraints(950, 230, -1, 30));
-
-        btnLimpiar.setBackground(new java.awt.Color(0, 102, 255));
-        btnLimpiar.setText("Limpiar");
-        jPanel2.add(btnLimpiar, new org.netbeans.lib.awtextra.AbsoluteConstraints(850, 10, -1, 30));
         jPanel2.add(txtFrecuencia, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 250, 100, -1));
 
         jLabel19.setText("Inicial");
@@ -884,7 +879,6 @@ Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la
     private javax.swing.JButton btnExit;
     public javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnGuia;
-    public javax.swing.JButton btnLimpiar;
     public javax.swing.JButton btnModificar;
     public javax.swing.JButton btnNuevo;
     public javax.swing.JButton btnRegistrarCredito;

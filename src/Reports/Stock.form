@@ -288,7 +288,7 @@
             </Component>
             <Component class="javax.swing.JButton" name="btnInstruccion">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Instruccion"/>
+                <Property name="text" type="java.lang.String" value="Guia"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnInstruccionActionPerformed"/>

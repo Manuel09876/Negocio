@@ -20,9 +20,9 @@ import java.io.FileOutputStream;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 
-public class RTrabajosRealizados extends javax.swing.JInternalFrame {
+public class TrabajosRealizados extends javax.swing.JInternalFrame {
 
-    public RTrabajosRealizados() {
+    public TrabajosRealizados() {
         initComponents();
         
         MostrarEmpresa(cbxEmpresa);

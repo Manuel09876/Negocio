@@ -69,7 +69,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
     private Kardex k;
     private Cotizaciones ct;
     private Cancelaciones cc;
-    private RTrabajosRealizados tr;
+    private TrabajosRealizados tr;
     private Estadisticas es;
     private DeudasPorPagar dpp;
     private DeudasPorCobrar dpc;
@@ -241,7 +241,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
         this.k = new Kardex();
         this.ct = new Cotizaciones();
         this.cc = new Cancelaciones();
-        this.tr = new RTrabajosRealizados();
+        this.tr = new TrabajosRealizados();
         this.es = new Estadisticas();
         this.dpp = new DeudasPorPagar();
         this.dpc = new DeudasPorCobrar();
@@ -857,7 +857,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
             case 3: // Agregar
                 if (selected) {
                     em.btnAgregar.setVisible(true);
-                    em.btnEliminar.setVisible(true);
+                    em.btnCancelar.setVisible(true);
                     em.btnNuevo.setVisible(true);
                 }
                 break;
@@ -1210,11 +1210,10 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 if (selected) {
                     c.btnActivar.setVisible(false);
                     c.btnActualizar.setVisible(false);
-                    c.btnBorrar.setVisible(false);
+                    c.btnEliminar.setVisible(false);
                     c.btnCancelar.setVisible(false);
                     c.btnGuardar.setVisible(false);
                     c.btnInactivar.setVisible(false);
-                    c.btnLimpiar.setVisible(false);
                     c.btnNuevo.setVisible(false);
                 }
                 break;
@@ -1222,7 +1221,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 if (selected) {
                     c.btnGuardar.setVisible(true);
                     c.btnCancelar.setVisible(true);
-                    c.btnLimpiar.setVisible(true);
                     c.btnNuevo.setVisible(true);
                 }
                 break;
@@ -1235,7 +1233,7 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                 break;
             case 5: // Eliminar
                 if (selected) {
-                    c.btnBorrar.setVisible(true);
+                    c.btnEliminar.setVisible(true);
                 }
                 break;
         }
@@ -1317,14 +1315,12 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                     tp.btnGuardar.setVisible(false);
                     tp.btnInactivar.setVisible(false);
                     tp.btnModificar.setVisible(false);
-                    tp.btnLimpiar.setVisible(false);
                 }
                 break;
             case 3: // Agregar
                 if (selected) {
                     tp.btnCancelar.setVisible(true);
                     tp.btnGuardar.setVisible(true);
-                    tp.btnLimpiar.setVisible(true);
                 }
                 break;
             case 4: // Editar
@@ -1631,7 +1627,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                     gg.btnBorrar.setVisible(false);
                     gg.btnCancel.setVisible(false);
                     gg.btnGuardar.setVisible(false);
-                    gg.btnLimpiar.setVisible(false);
                     gg.btnModificar.setVisible(false);
                     gg.btnNuevo.setVisible(false);
                     gg.btnRegistrarCredito.setVisible(false);
@@ -1642,7 +1637,6 @@ public class AsignacionPermisos extends javax.swing.JInternalFrame {
                     gg.btnBorrar.setVisible(true);
                     gg.btnCancel.setVisible(true);
                     gg.btnGuardar.setVisible(true);
-                    gg.btnLimpiar.setVisible(true);
                     gg.btnModificar.setVisible(true);
                     gg.btnNuevo.setVisible(true);
                     gg.btnRegistrarCredito.setVisible(true);

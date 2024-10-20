@@ -409,8 +409,8 @@ Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la
             }
         });
         jPanel12.add(btnPagadas, new org.netbeans.lib.awtextra.AbsoluteConstraints(970, 30, -1, -1));
-        jPanel12.add(jDateChooser1, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 40, 120, -1));
-        jPanel12.add(jDateChooser2, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 40, 110, -1));
+        jPanel12.add(jDateChooser1, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 40, 150, -1));
+        jPanel12.add(jDateChooser2, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 40, 140, -1));
 
         jLabel1.setText("Inicio");
         jPanel12.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 10, -1, -1));

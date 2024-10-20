@@ -31,286 +31,289 @@ import javax.swing.WindowConstants;
 
 public class VentanaPrincipal extends javax.swing.JFrame {
     
-    
-
     public JMenu getMenuAdministration() {
         return menuAdministracion;
     }
-
+    
     public JMenu getMenuAdmission() {
         return menuAdmision;
     }
-
+    
     public JMenuItem getMenuAsignacionPermisos() {
         return menuAsignacionPermisos;
     }
-
+    
     public JMenuItem getMenuAsignaciondeTrabajos() {
         return menuAsignaciondeTrabajos;
     }
-
+    
     public JMenuItem getMenuBusquedaConvenios() {
         return menuBusquedaConvenios;
     }
-
+    
     public JMenuItem getMenuCancelaciones() {
         return menuCancelaciones;
     }
-
+    
     public JMenuItem getMenuClientes() {
         return menuClientes;
     }
-
+    
     public JMenuItem getMenuCompraEquyVehi() {
         return menuCompraEquyVehi;
     }
-
+    
     public JMenuItem getMenuCompraProMat() {
         return menuCompraProMat;
     }
-
+    
     public JMenuItem getMenuConfiguracion() {
         return menuConfiguracion;
     }
-
+    
     public JMenuItem getMenuConvenios() {
         return menuConvenios;
     }
-
+    
     public JMenuItem getMenuCotizaciones() {
         return menuCotizaciones;
     }
-
+    
     public JMenuItem getMenuDeudasPorCobrar() {
         return menuDeudasPorCobrar;
     }
-
+    
     public JMenuItem getMenuDeudasPorPagar() {
         return menuDeudasPorPagar;
     }
-
+    
     public JMenuItem getMenuEmpresas() {
         return menuEmpresas;
     }
-
+    
     public JMenuItem getMenuEstadisticas() {
         return menuEstadisticas;
     }
-
+    
     public JMenuItem getMenuFormaDePago() {
         return menuFormaDePago;
     }
-
+    
     public JMenuItem getMenuFormularios() {
         return menuFormularios;
     }
-
+    
     public JMenuItem getMenuGastosGenerales() {
         return menuGastosGenerales;
     }
-
+    
     public JMenuItem getMenuHorasTrabajadas() {
         return menuHorasTrabajadas;
     }
-
+    
     public JMenuItem getMenuKardex() {
         return menuKardex;
     }
-
+    
     public JMenuItem getMenuLocalizacion() {
         return menuLocalizacion;
     }
-
+    
     public JMenuItem getMenuMarcas() {
         return menuMarcas;
     }
-
+    
     public JMenuItem getMenuMenusSubmenus() {
         return menuMenusSubmenus;
     }
-
+    
     public JMenuItem getMenuOrdenes() {
         return menuOrdenes;
     }
-
+    
     public JMenuItem getMenuPresupuesto() {
         return menuPresupuesto;
     }
-
+    
     public JMenuItem getMenuProductos() {
         return menuProductos;
     }
-
+    
     public JMenuItem getMenuProveedor() {
         return menuProveedor;
     }
-
+    
     public JMenuItem getMenuPuestoDeTrabajo() {
         return menuPuestoDeTrabajo;
     }
-
+    
     public JMenu getMenuRegisters() {
         return menuRegistros;
     }
-
+    
     public JMenu getMenuReports() {
         return menuReportes;
     }
-
+    
     public JMenuItem getMenuStock() {
         return menuStock;
     }
-
+    
     public JMenuItem getMenuSueldos() {
         return menuSueldos;
     }
-
+    
     public JMenuItem getMenuTarifario() {
         return menuTarifario;
     }
-
+    
     public JMenuItem getMenuTipoMaqVe() {
         return menuTipoMaqVe;
     }
-
+    
     public JMenuItem getMenuTipoProMat() {
         return menuTipoProductosYMateriales;
     }
-
+    
     public JMenuItem getMenuTipoUsuarios() {
         return menuRoles;
     }
-
+    
     public JMenuItem getMenuTrabajadores() {
         return menuTrabajadores;
     }
-
+    
     public JMenuItem getMenuTrabajos() {
         return menuTrabajos;
     }
-
+    
     public JMenuItem getMenuTrabajosRealizados() {
         return menuTrabajosRealizados;
     }
-
+    
     public JMenuItem getMenuUnidades() {
         return menuUnidades;
     }
-
+    
     public JMenuItem getMenuUsuarios() {
         return menuUsuarios;
     }
-
+    
     public JMenuItem getMenuVentas() {
         return menuVentas;
     }
-
+    
     public JMenuItem getMenuVerOrdenes() {
         return menuVerOrdenes;
     }
-
+    
     public JMenuItem getMenutipo_pagosgenerales() {
         return menutipo_pagosgenerales;
     }
-
+    
     private int tipUsu;
-
+    
     private String usuario; // Variable para almacenar el usuario
     private HorasTrabajadas horasTrabajadas; // Asegúrate de que esta instancia esté correctamente inicializada
-    private PuestoDeTrabajo puestoDeTrabajo;
+//    private PuestoDeTrabajo puestoDeTrabajo;
     private Connection connection;
-
+    
     private Map<String, JMenuItem> menuMap = new HashMap<>();
-
+    
     Loggin lg = new Loggin();
     
     private Usuarios objUsuarios; // Mantener una única instancia
-////    private Roles objRoles;
+    private Roles objRoles;
 ////    private AsignacionPermisos objAsignacionPermisos;
-////    private Empresas objEmpresas;
-////    private Trabajadores objTrabajadores;
-////    private Tarifario objTarifario;
-////    private Productos objProductos;
+    private Empresas objEmpresas;
+    private Trabajadores objTrabajadores;
+    private Tarifario objTarifario;
+    private Productos objProductos;
 ////    private Formularios objFormularios;
-////    private Proveedor objProveedor;
+    private Proveedor objProveedor;
 ////    private Convenios objConvenios;
 ////    private BusquedaDeConvenios objBusquedaDeConvenios;
-////    private AsignacionTrabajos asignacionTrabajos;
-////    private PuestoDeTrabajo puestoDeTrabajo1;
-////    private FormaDePago objFormaDePago;
-////    private Menus objMenus;
-////    private Clientes objClientes;
-////    private Marcas objMarcas;
-////    private Unidades objUnidades;
-////    private tipos_pagosgenerales objtipos_pagosgenerales;
-////    private TipoProductosMateriales objTipoProductosMateriales;
-////    private TipoMaquinariasYVehiculos objMaquinariasYVehiculos;
-////    private Localizacion objLocalizacion;
-////    private Configuracion objConfiguracion;
-////    private Orden objOrden;
-////    private VerOrdenes objVerOrdenes;
+    private AsignacionTrabajos objAsignacionTrabajos;
+    private PuestoDeTrabajo objPuestoDeTrabajo;
+    private FormaDePago objFormaDePago;
+    private Menus objMenus;
+    private Clientes objClientes;
+    private Marcas objMarcas;
+    private Unidades objUnidades;
+    private tipos_pagosgenerales objtipos_pagosgenerales;
+    private TipoProductosMateriales objTipoProductosMateriales;
+    private TipoMaquinariasYVehiculos objTipoMaquinariasYVehiculos;
+    private Localizacion objLocalizacion;
+    private Configuracion objConfiguracion;
+    private Orden objOrden;
+    private VerOrdenes objVerOrdenes;
 ////    private Ventas objVentas;
-////    private ComprasProductosMateriales objComprasProductosMateriales;
-////    private CompraEquiposVehiculos objCompraEquiposVehiculos;
-////    private Gastos_Generales objGastos_Generales;
+    private ComprasProductosMateriales objComprasProductosMateriales;
+    private CompraEquiposVehiculos objCompraEquiposVehiculos;
+    private Gastos_Generales objGastos_Generales;
 ////    private Kardex objKardex;
-////    private Cotizaciones objCotizaciones;
+    private Cotizaciones objCotizaciones;
 ////    private Cancelaciones objCancelaciones;
-////    private RTrabajosRealizados objRTrabajosRealizados;
-////    private Estadisticas objEstadisticas;
-////    private DeudasPorPagar objDeudasPorPagar;
+    private TrabajosRealizados objTrabajosRealizados;
+    private Estadisticas objEstadisticas;
+    private DeudasPorPagar objDeudasPorPagar;
     private DeudasPorCobrar objDeudasPorCobrar;
 ////    private HorasTrabajadas horasTrabajadas1;
-////    private Sueldos objSueldos;
-////    private Stock objStock;
-////    private Trabajos objTrabajos;
+    private Sueldos objSueldos;
+    private Stock objStock;
+    private Trabajos objTrabajos;
     private Presupuesto objPresupuesto;
-
+    
     public VentanaPrincipal(int tipUsu, String usuario) {
         initComponents();
         
         objUsuarios = new Usuarios();
-//        objRoles = new Roles();
-//        
+        objRoles = new Roles();
+        objAsignacionTrabajos = new AsignacionTrabajos();
 //        objBusquedaDeConvenios = new BusquedaDeConvenios();
 //        objCancelaciones = new Cancelaciones();
-//        objClientes = new Clientes();
-//        objCompraEquiposVehiculos = new CompraEquiposVehiculos();
-//        objComprasProductosMateriales = new ComprasProductosMateriales();
-//        objConfiguracion = new Configuracion();
+        objClientes = new Clientes();
+        objCompraEquiposVehiculos = new CompraEquiposVehiculos();
+        objComprasProductosMateriales = new ComprasProductosMateriales();
+        objConfiguracion = new Configuracion();
 //        objConvenios = new Convenios();
-//        objCotizaciones = new Cotizaciones();
+        objCotizaciones = new Cotizaciones();
         objDeudasPorCobrar = new DeudasPorCobrar();
 ////        objDeudasPorPagar = new DeudasPorPagar();
-//        objEmpresas = new Empresas();
-//        objEstadisticas = new Estadisticas();
-//        objFormaDePago = new FormaDePago();
+        objEmpresas = new Empresas();
+        objEstadisticas = new Estadisticas();
+        objFormaDePago = new FormaDePago();
 //        objFormularios = new Formularios();
-//        objGastos_Generales = new Gastos_Generales();
+        objGastos_Generales = new Gastos_Generales();
 //        objKardex = new Kardex();
-//        objLocalizacion = new Localizacion();
-//        objMaquinariasYVehiculos = new TipoMaquinariasYVehiculos();
-//        objMarcas = new Marcas();
-//        objMenus = new Menus();
-//        objOrden = new Orden();
+        objLocalizacion = new Localizacion();
+        objTipoMaquinariasYVehiculos = new TipoMaquinariasYVehiculos();
+        objMarcas = new Marcas();
+        objMenus = new Menus();
+        objOrden = new Orden();
         objPresupuesto = new Presupuesto();
-//        objProductos = new Productos();
-//        objProveedor = new Proveedor();
+        objProductos = new Productos();
+        objProveedor = new Proveedor();
+//        objPuestoDeTrabajo = new objPuestoDeTrabajo();
 //        objRTrabajosRealizados = new RTrabajosRealizados();
-//        objRoles = new Roles();
-//        objStock = new Stock();
-//        objSueldos = new Sueldos();
-//        objTarifario = new Tarifario();
+        objRoles = new Roles();
+        objStock = new Stock();
+        objSueldos = new Sueldos();
+        objTarifario = new Tarifario();
+        objTrabajadores = new Trabajadores();
+        objtipos_pagosgenerales = new tipos_pagosgenerales();
+        objTipoProductosMateriales = new TipoProductosMateriales();
+        objTrabajos = new Trabajos();
+        objVerOrdenes = new VerOrdenes();
         
-
-//         // Cargar los permisos del usuario
-//        cargarPermisosMenusSubmenus(tipUsu);
+        objUnidades = new Unidades();
+        
         this.tipUsu = tipUsu;
         this.usuario = usuario;
-
-        this.puestoDeTrabajo = new PuestoDeTrabajo(); // Inicializamos puestoDeTrabajo
+        
+        this.objPuestoDeTrabajo = new PuestoDeTrabajo(); // Inicializamos puestoDeTrabajo
         this.horasTrabajadas = new HorasTrabajadas(); // Constructor sin parámetros
-        this.horasTrabajadas.setPuestoDeTrabajo(this.puestoDeTrabajo); // Establecer el puesto después
+        this.horasTrabajadas.setPuestoDeTrabajo(this.objPuestoDeTrabajo); // Establecer el puesto después
 
         this.setExtendedState(javax.swing.JFrame.MAXIMIZED_BOTH);
 //        cargarPermisos();
@@ -345,7 +348,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 }
             }
         });
-
+        
         initializeMenuMap(); // Inicializamos el mapa con los menús
     }
 
@@ -386,24 +389,24 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             }
         }
     }
-
+    
     private boolean registrarSalidaDelSistema() {
         boolean ocurrioError = false;
-
+        
         try {
             if (this.usuario == null) {
                 System.out.println("Error: usuario no está inicializado.");
                 return false;
             }
-
+            
             int trabajadorId = obtenerTrabajadorId(this.usuario);
-
+            
             if (trabajadorId != 0) {
                 this.horasTrabajadas.registrarFinSesion(trabajadorId); // Registro de fin de sesión
 
                 if (this.horasTrabajadas.puestoDeTrabajo != null) {
                     int idPDT = this.horasTrabajadas.puestoDeTrabajo.obtenerIdPuestoActivo(trabajadorId);
-
+                    
                     if (idPDT != -1) {
                         // Calcular y guardar horas trabajadas y período de pago
                         double horasTrabajadasPorDia = this.horasTrabajadas.calcularHorasTrabajadasPorDia(trabajadorId);
@@ -416,7 +419,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                             LocalDate[] fechasPeriodo = this.horasTrabajadas.calcularInicioYFinPeriodo(tipoPeriodo, fechaInicioActividades, 1);
                             LocalDate fechaInicio = fechasPeriodo[0];
                             LocalDate fechaFin = fechasPeriodo[1];
-
+                            
                             this.horasTrabajadas.guardarHorasTrabajadas(trabajadorId, horasTrabajadasPorDia, fecha, tipoPeriodo);
                             this.horasTrabajadas.calcularSueldos(trabajadorId, fechaInicio, fechaFin);
                         } else {
@@ -435,15 +438,15 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 System.out.println("No se encontró el ID del trabajador.");
                 ocurrioError = true;
             }
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
             System.out.println("Ocurrió un error al registrar fin de sesión o calcular pagos: " + ex.getMessage());
             ex.printStackTrace();
             ocurrioError = true;  // Indicar que hubo un error
         }
-
+        
         return !ocurrioError; // Retornar verdadero si no hubo errores
     }
-
+    
     private void initializeMenuMap() {
         menuMap.put("menuAdministration", menuAdministracion);
         menuMap.put("menuAdmission", menuAdmision);
@@ -453,24 +456,24 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         menuMap.put("menuTipoUsuarios", menuRoles);
         // Añadir los demás menús y submenús aquí...
     }
-
+    
     public void setMenuVisibility(String menuName, boolean visibility) {
         JMenuItem menu = menuMap.get(menuName);
         if (menu != null) {
             menu.setVisible(visibility);
         }
     }
-
+    
     private int obtenerTrabajadorId(String usuario) {
         Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida aquí
         if (connection == null) {
             throw new RuntimeException("Error: La conexión a la base de datos es nula.");
         }
-
+        
         String sql = "SELECT ut.id_trabajador FROM usuario_trabajador ut INNER JOIN usuarios u ON ut.id_usuario = u.idUsuarios WHERE u.usuario = ?";
-
+        
         try {
-
+            
             try (PreparedStatement pst = connection.prepareStatement(sql)) {
                 pst.setString(1, usuario);
                 ResultSet rs = pst.executeQuery();
@@ -489,7 +492,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
         }
         return 0;
     }
-
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -1021,53 +1024,57 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void menuSueldosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuSueldosActionPerformed
-
-        Sueldos objSueldos = new Sueldos();
-        jpEscritorio.add(objSueldos);
-        objSueldos.show();
-
+        if (!objSueldos.isShowing()) {
+            jpEscritorio.add(objSueldos);
+            objSueldos.show();
+        }
+        actualizarPermisosAccion("Sueldos", true, true, true);
     }//GEN-LAST:event_menuSueldosActionPerformed
 
     private void menuUsuariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUsuariosActionPerformed
         if (!objUsuarios.isShowing()) {
-        jpEscritorio.add(objUsuarios);
-        objUsuarios.show();
+            jpEscritorio.add(objUsuarios);
+            objUsuarios.show();
         }
         //Aquí aplicar los permisos al abrir la ventana
-    actualizarPermisosAccion("Usuarios", true, true, true); // Cambia según los permisos correctos
+        actualizarPermisosAccion("Usuarios", true, true, true); // Cambia según los permisos correctos
     }//GEN-LAST:event_menuUsuariosActionPerformed
-
+    
 
     private void menuEmpresasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEmpresasActionPerformed
-        Empresas objEmpresas = new Empresas();
-        jpEscritorio.add(objEmpresas);
-        objEmpresas.show();
-
+        if (!objEmpresas.isShowing()) {
+            jpEscritorio.add(objEmpresas);
+            objEmpresas.show();
+        }
+        actualizarPermisosAccion("Empresas", true, true, true);
     }//GEN-LAST:event_menuEmpresasActionPerformed
 
     private void menuTrabajadoresActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTrabajadoresActionPerformed
-        Trabajadores objTrabajadores = new Trabajadores();
-        jpEscritorio.add(objTrabajadores);
-        objTrabajadores.show();
-
+        if (!objTrabajadores.isShowing()) {
+            jpEscritorio.add(objTrabajadores);
+            objTrabajadores.show();
+        }
+        actualizarPermisosAccion("Trabajadores", true, true, true);
     }//GEN-LAST:event_menuTrabajadoresActionPerformed
 
     private void menuTarifarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTarifarioActionPerformed
-        Tarifario objTarifario = new Tarifario();
-        jpEscritorio.add(objTarifario);
-        objTarifario.show();
-
+        if (!objTarifario.isShowing()) {
+            jpEscritorio.add(objTarifario);
+            objTarifario.show();
+        }
+        actualizarPermisosAccion("Tarifario", true, true, true);
     }//GEN-LAST:event_menuTarifarioActionPerformed
 
     private void menuProductosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuProductosActionPerformed
-        Productos objProductos = new Productos();
-        jpEscritorio.add(objProductos);
-        objProductos.show();
-
+        if (!objProductos.isShowing()) {
+            jpEscritorio.add(objProductos);
+            objProductos.show();
+        }
+        actualizarPermisosAccion("Productos", true, true, true);
     }//GEN-LAST:event_menuProductosActionPerformed
 
     private void menuFormulariosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFormulariosActionPerformed
-
+        
         Formularios objFormularios = new Formularios();
         jpEscritorio.add(objFormularios);
         objFormularios.show();
@@ -1075,10 +1082,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuFormulariosActionPerformed
 
     private void menuProveedorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuProveedorActionPerformed
-        Proveedor objProveedor = new Proveedor();
-        jpEscritorio.add(objProveedor);
-        objProveedor.show();
-
+        if (!objProveedor.isShowing()) {
+            jpEscritorio.add(objProveedor);
+            objProveedor.show();
+        }
+        actualizarPermisosAccion("Proveedor", true, true, true);
     }//GEN-LAST:event_menuProveedorActionPerformed
 
     private void menuConveniosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuConveniosActionPerformed
@@ -1089,38 +1097,42 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuConveniosActionPerformed
 
     private void menuAsignaciondeTrabajosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAsignaciondeTrabajosActionPerformed
-        AsignacionTrabajos objAsignacionTrabajos = new AsignacionTrabajos();
+        if(objAsignacionTrabajos.isShowing()) {
         jpEscritorio.add(objAsignacionTrabajos);
         objAsignacionTrabajos.show();
-
+        }
+        actualizarPermisosAccion("Asignacion de Trabajos", true, true, true);
     }//GEN-LAST:event_menuAsignaciondeTrabajosActionPerformed
 
     private void menuPuestoDeTrabajoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuPuestoDeTrabajoActionPerformed
-        PuestoDeTrabajo objPuestosdeTrabajo = new PuestoDeTrabajo();
-        jpEscritorio.add(objPuestosdeTrabajo);
-        objPuestosdeTrabajo.show();
-
+        if (!objPuestoDeTrabajo.isShowing()) {
+            jpEscritorio.add(objPuestoDeTrabajo);
+            objPuestoDeTrabajo.show();
+        }
     }//GEN-LAST:event_menuPuestoDeTrabajoActionPerformed
 
     private void menuClientesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuClientesActionPerformed
-        Clientes objClientes = new Clientes();
-        jpEscritorio.add(objClientes);
-        objClientes.show();
-
+        if (!objClientes.isShowing()) {
+            jpEscritorio.add(objClientes);
+            objClientes.show();
+        }
+        actualizarPermisosAccion("Clientes", true, true, true);
     }//GEN-LAST:event_menuClientesActionPerformed
 
     private void menuOrdenesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuOrdenesActionPerformed
-        Orden objOrdenes = new Orden();
-        jpEscritorio.add(objOrdenes);
-        objOrdenes.show();
-
+        if (!objOrden.isShowing()) {
+            jpEscritorio.add(objOrden);
+            objOrden.show();
+        }
+        actualizarPermisosAccion("Orden", true, true, true);
     }//GEN-LAST:event_menuOrdenesActionPerformed
 
     private void menuCotizacionesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCotizacionesActionPerformed
-        Cotizaciones objCotizaciones = new Cotizaciones();
-        jpEscritorio.add(objCotizaciones);
-        objCotizaciones.show();
-
+        if (!objCotizaciones.isShowing()) {
+            jpEscritorio.add(objCotizaciones);
+            objCotizaciones.show();
+        }
+        actualizarPermisosAccion("Cotizaciones", true, true, true);
     }//GEN-LAST:event_menuCotizacionesActionPerformed
 
     private void menuVentasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuVentasActionPerformed
@@ -1131,10 +1143,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuVentasActionPerformed
 
     private void menuCompraProMatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCompraProMatActionPerformed
-        ComprasProductosMateriales objComprasProductosMateriales = new ComprasProductosMateriales();
-        jpEscritorio.add(objComprasProductosMateriales);
-        objComprasProductosMateriales.show();
-
+        if (!objComprasProductosMateriales.isShowing()) {
+            jpEscritorio.add(objComprasProductosMateriales);
+            objComprasProductosMateriales.show();
+        }
+        actualizarPermisosAccion("Compra de Productos y Materiales", true, true, true);
     }//GEN-LAST:event_menuCompraProMatActionPerformed
 
     private void menuKardexActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuKardexActionPerformed
@@ -1145,10 +1158,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuKardexActionPerformed
 
     private void menuVerOrdenesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuVerOrdenesActionPerformed
-        VerOrdenes objVerOrdenes = new VerOrdenes();
-        jpEscritorio.add(objVerOrdenes);
-        objVerOrdenes.show();
-
+        if (!objVerOrdenes.isShowing()) {
+            jpEscritorio.add(objVerOrdenes);
+            objVerOrdenes.show();
+        }
+        actualizarPermisosAccion("Ver Ordenes", true, true, true);
     }//GEN-LAST:event_menuVerOrdenesActionPerformed
 
     private void menuCancelacionesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCancelacionesActionPerformed
@@ -1159,35 +1173,33 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuCancelacionesActionPerformed
 
     private void menuTrabajosRealizadosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTrabajosRealizadosActionPerformed
-        RTrabajosRealizados objRTrabajosRealizados = new RTrabajosRealizados();
-        jpEscritorio.add(objRTrabajosRealizados);
-        objRTrabajosRealizados.show();
-
+        if (!objTrabajosRealizados.isShowing()) {
+            jpEscritorio.add(objTrabajosRealizados);
+            objTrabajosRealizados.show();
+        }
+        actualizarPermisosAccion("Trabajos Realizados", true, true, true);
     }//GEN-LAST:event_menuTrabajosRealizadosActionPerformed
 
     private void menuEstadisticasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEstadisticasActionPerformed
-        Estadisticas objEstadisticas = new Estadisticas();
-        jpEscritorio.add(objEstadisticas);
-        objEstadisticas.show();
-
+        if (!objEstadisticas.isShowing()) {
+            jpEscritorio.add(objEstadisticas);
+            objEstadisticas.show();
+        }
+        actualizarPermisosAccion("Estadisticas", true, true, true);
     }//GEN-LAST:event_menuEstadisticasActionPerformed
 
     private void menuDeudasPorPagarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDeudasPorPagarActionPerformed
-        DeudasPorPagar objDeudasPorPagar = null;
-        try {
-            objDeudasPorPagar = new DeudasPorPagar();
-        } catch (SQLException ex) {
-            Logger.getLogger(VentanaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        if (!objDeudasPorPagar.isShowing()) {
+            jpEscritorio.add(objDeudasPorPagar);
+            objDeudasPorPagar.show();
         }
-        jpEscritorio.add(objDeudasPorPagar);
-        objDeudasPorPagar.show();
-
+        actualizarPermisosAccion("Deudas por Pagar", true, true, true);
     }//GEN-LAST:event_menuDeudasPorPagarActionPerformed
 
     private void menuDeudasPorCobrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDeudasPorCobrarActionPerformed
         if (!objDeudasPorCobrar.isShowing()) {
-        jpEscritorio.add(objDeudasPorCobrar);
-        objDeudasPorCobrar.show();
+            jpEscritorio.add(objDeudasPorCobrar);
+            objDeudasPorCobrar.show();
         }
         actualizarPermisosAccion("Deudas Por Cobrar", true, true, true);
     }//GEN-LAST:event_menuDeudasPorCobrarActionPerformed
@@ -1200,36 +1212,37 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuHorasTrabajadasActionPerformed
 
     private void menuStockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuStockActionPerformed
-        Stock objStock = new Stock();
-        jpEscritorio.add(objStock);
-        objStock.show();
-
+        if (!objStock.isShowing()) {
+            jpEscritorio.add(objStock);
+            objStock.show();
+        }
+        actualizarPermisosAccion("Stock", true, true, true);
     }//GEN-LAST:event_menuStockActionPerformed
 
     private void btnSalirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalirActionPerformed
         System.out.println("Botón de salida presionado");
-
+        
         if (JOptionPane.showConfirmDialog(null, "¿Desea salir del Sistema?", "Acceso", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             boolean ocurrioError = false;
             Connection connection = Conectar.getInstancia().obtenerConexion(); // Obtener la conexión válida aquí
             if (connection == null) {
                 throw new RuntimeException("Error: La conexión a la base de datos es nula.");
             }
-
+            
             try {
                 if (this.usuario == null) {
                     System.out.println("Error: usuario no está inicializado.");
                     return;
                 }
-
+                
                 int trabajadorId = obtenerTrabajadorId(this.usuario);
-
+                
                 if (trabajadorId != 0) {
                     this.horasTrabajadas.registrarFinSesion(trabajadorId); // Registro de fin de sesión
 
                     if (this.horasTrabajadas.puestoDeTrabajo != null) {
                         int idPDT = this.horasTrabajadas.puestoDeTrabajo.obtenerIdPuestoActivo(trabajadorId);
-
+                        
                         if (idPDT != -1) {
                             // Calcular y guardar horas trabajadas y período de pago
                             double horasTrabajadasPorDia = this.horasTrabajadas.calcularHorasTrabajadasPorDia(trabajadorId);
@@ -1242,10 +1255,10 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                                 LocalDate[] fechasPeriodo = this.horasTrabajadas.calcularInicioYFinPeriodo(tipoPeriodo, fechaInicioActividades, 1);
                                 LocalDate fechaInicio = fechasPeriodo[0];
                                 LocalDate fechaFin = fechasPeriodo[1];
-
+                                
                                 this.horasTrabajadas.guardarHorasTrabajadas(trabajadorId, horasTrabajadasPorDia, fecha, tipoPeriodo);
                                 this.horasTrabajadas.calcularSueldos(trabajadorId, fechaInicio, fechaFin);
-
+                                
                                 try {
                                     Conectar.getInstancia().cerrarTodasLasConexiones();
                                 } catch (Exception ex) {
@@ -1253,7 +1266,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                                     ex.printStackTrace();
                                     ocurrioError = true;
                                 }
-
+                                
                             } else {
                                 System.out.println("Error: no se pudo determinar el tipo de periodo.");
                                 ocurrioError = true;
@@ -1275,7 +1288,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 ex.printStackTrace();
                 ocurrioError = true;  // Indicar que hubo un error
             }
-
+            
             if (!ocurrioError) {
                 System.exit(0); // Cerrar el sistema si no ocurrió ningún error
             }
@@ -1283,9 +1296,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_btnSalirActionPerformed
 
     private void menuRolesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuRolesActionPerformed
-        Roles objRoles = new Roles();
-        jpEscritorio.add(objRoles);
-        objRoles.show();
+        if (!objRoles.isShowing()) {
+            jpEscritorio.add(objRoles);
+            objRoles.show();
+        }
+        actualizarPermisosAccion("Roles", true, true, true);
     }//GEN-LAST:event_menuRolesActionPerformed
 
     private void menuBusquedaConveniosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuBusquedaConveniosActionPerformed
@@ -1302,7 +1317,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
             // Cargar permisos para el Rol actual después de mostrar la ventana
             int rolId = objAsignacionPermisos.getRolId();  // Obtener el Rol Id actual
             if (rolId != -1) {
-
+                
                 System.out.println("Rol ID obtenido: " + rolId);
 
                 // Cargar las tablas de permisos con el rolId correcto
@@ -1318,78 +1333,100 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_menuAsignacionPermisosActionPerformed
 
     private void menuTrabajosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTrabajosActionPerformed
-        Trabajos objTrabajos = new Trabajos();
-        jpEscritorio.add(objTrabajos);
-        objTrabajos.show();
+        if (!objTrabajos.isShowing()) {
+            jpEscritorio.add(objTrabajos);
+            objTrabajos.show();
+        }
+        actualizarPermisosAccion("Trabajos", true, true, true);
     }//GEN-LAST:event_menuTrabajosActionPerformed
 
     private void menuCompraEquyVehiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuCompraEquyVehiActionPerformed
-        CompraEquiposVehiculos objCompraEquiposVehiculos = new CompraEquiposVehiculos();
-        jpEscritorio.add(objCompraEquiposVehiculos);
-        objCompraEquiposVehiculos.show();
+        if (!objCompraEquiposVehiculos.isShowing()) {
+            jpEscritorio.add(objCompraEquiposVehiculos);
+            objCompraEquiposVehiculos.show();
+        }
+        actualizarPermisosAccion("Compra de Equipos y Vehiculos", true, true, true);
     }//GEN-LAST:event_menuCompraEquyVehiActionPerformed
 
     private void menuMarcasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMarcasActionPerformed
-        Marcas objMarcas = new Marcas();
-        jpEscritorio.add(objMarcas);
-        objMarcas.show();
+        if (!objMarcas.isShowing()) {
+            jpEscritorio.add(objMarcas);
+            objMarcas.show();
+        }
+        actualizarPermisosAccion("Marcas", true, true, true);
     }//GEN-LAST:event_menuMarcasActionPerformed
 
     private void menuGastosGeneralesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGastosGeneralesActionPerformed
-        Gastos_Generales objGastos_Generales = new Gastos_Generales();
-        jpEscritorio.add(objGastos_Generales);
-        objGastos_Generales.show();
+        if (!objGastos_Generales.isShowing()) {
+            jpEscritorio.add(objGastos_Generales);
+            objGastos_Generales.show();
+        }
+        actualizarPermisosAccion("Gastos Generales", true, true, true);
     }//GEN-LAST:event_menuGastosGeneralesActionPerformed
 
     private void menutipo_pagosgeneralesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menutipo_pagosgeneralesActionPerformed
-        tipos_pagosgenerales objtipo_pagosgenerales = new tipos_pagosgenerales();
-        jpEscritorio.add(objtipo_pagosgenerales);
-        objtipo_pagosgenerales.show();
+        if (!objtipos_pagosgenerales.isShowing()) {
+            jpEscritorio.add(objtipos_pagosgenerales);
+            objtipos_pagosgenerales.show();
+        }
+        actualizarPermisosAccion("Tipo de Pagos Generales", true, true, true);
     }//GEN-LAST:event_menutipo_pagosgeneralesActionPerformed
 
     private void menuUnidadesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuUnidadesActionPerformed
-        Unidades objUnidades = new Unidades();
-        jpEscritorio.add(objUnidades);
-        objUnidades.show();
+        if (!objUnidades.isShowing()) {
+            jpEscritorio.add(objUnidades);
+            objUnidades.show();
+        }
+        actualizarPermisosAccion("Unidades", true, true, true);
     }//GEN-LAST:event_menuUnidadesActionPerformed
 
     private void menuLocalizacionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuLocalizacionActionPerformed
-        Localizacion objLocalizacion = new Localizacion();
-        jpEscritorio.add(objLocalizacion);
-        objLocalizacion.show();
+        if (!objLocalizacion.isShowing()) {
+            jpEscritorio.add(objLocalizacion);
+            objLocalizacion.show();
+        }
+        actualizarPermisosAccion("Localizacion", true, true, true);
     }//GEN-LAST:event_menuLocalizacionActionPerformed
 
     private void menuFormaDePagoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuFormaDePagoActionPerformed
-        FormaDePago objFormasDePago = new FormaDePago();
-        jpEscritorio.add(objFormasDePago);
-        objFormasDePago.show();
+        if (!objFormaDePago.isShowing()) {
+            jpEscritorio.add(objFormaDePago);
+            objFormaDePago.show();
+        }
+        actualizarPermisosAccion("Forma de Pago", true, true, true);
     }//GEN-LAST:event_menuFormaDePagoActionPerformed
 
     private void menuTipoMaqVeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTipoMaqVeActionPerformed
-        TipoMaquinariasYVehiculos objTipoMaquinariasYVehiculos = new TipoMaquinariasYVehiculos();
-        jpEscritorio.add(objTipoMaquinariasYVehiculos);
-        objTipoMaquinariasYVehiculos.show();
+        if (!objTipoMaquinariasYVehiculos.isShowing()) {
+            jpEscritorio.add(objTipoMaquinariasYVehiculos);
+            objTipoMaquinariasYVehiculos.show();
+        }
+        actualizarPermisosAccion("Tipo de Maquinarias y Vehiculos", true, true, true);
     }//GEN-LAST:event_menuTipoMaqVeActionPerformed
 
     private void menuTipoProductosYMaterialesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuTipoProductosYMaterialesActionPerformed
-        TipoProductosMateriales objTipoProductosMateriales = new TipoProductosMateriales();
-        jpEscritorio.add(objTipoProductosMateriales);
-        objTipoProductosMateriales.show();
+        if (!objTipoProductosMateriales.isShowing()) {
+            jpEscritorio.add(objTipoProductosMateriales);
+            objTipoProductosMateriales.show();
+        }
+        actualizarPermisosAccion("Tipo de Productos y Materiales", true, true, true);
     }//GEN-LAST:event_menuTipoProductosYMaterialesActionPerformed
 
     private void menuConfiguracionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuConfiguracionActionPerformed
-        Configuracion objConfiguracion = new Configuracion();
-        jpEscritorio.add(objConfiguracion);
-        objConfiguracion.show();
+        if (!objConfiguracion.isShowing()) {
+            jpEscritorio.add(objConfiguracion);
+            objConfiguracion.show();
+        }
+        actualizarPermisosAccion("Configuracion", true, true, true);
     }//GEN-LAST:event_menuConfiguracionActionPerformed
 
     private void menuPresupuestoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuPresupuestoActionPerformed
         if (!objPresupuesto.isShowing()) {
-        jpEscritorio.add(objPresupuesto);
-        objPresupuesto.show();
+            jpEscritorio.add(objPresupuesto);
+            objPresupuesto.show();
         }
         //Aquí aplicar los permisos al abrir la ventana
-    actualizarPermisosAccion("Usuarios", true, true, true); // Cambia según los permisos correctos
+        actualizarPermisosAccion("Usuarios", true, true, true); // Cambia según los permisos correctos
     }//GEN-LAST:event_menuPresupuestoActionPerformed
 
     private void menuMenusSubmenusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMenusSubmenusActionPerformed
@@ -1511,11 +1548,11 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 break;
         }
     }
-
+    
     public void actualizarSubmenu(String menuName, String submenuName, boolean visualizar, boolean agregar, boolean editar, boolean eliminar) {
         // Localizar el submenú correspondiente en la interfaz
         JMenuItem submenu = getSubmenuFromMenu(menuName, submenuName);
-
+        
         if (submenu != null) {
             submenu.setVisible(visualizar);  // Mostrar u ocultar el submenú
 
@@ -1531,7 +1568,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
 // Método auxiliar para obtener un submenú a partir del menú principal
     private JMenuItem getSubmenuFromMenu(String menuName, String submenuName) {
         JMenu menu = null;
-
+        
         switch (menuName) {
             case "Administracion":
                 menu = menuAdministracion;
@@ -1549,7 +1586,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 System.out.println("Menú no reconocido: " + menuName);
                 return null;
         }
-
+        
         if (menu != null) {
             for (int i = 0; i < menu.getItemCount(); i++) {
                 JMenuItem submenu = menu.getItem(i);
@@ -1584,7 +1621,7 @@ public class VentanaPrincipal extends javax.swing.JFrame {
     // Método auxiliar para obtener el submenú a partir del id del menú
     private JMenuItem getSubmenuFromMenuId(int menuId, String submenuName) {
         JMenu menu = null;
-
+        
         switch (menuId) {
             case 1:  // Administracion
                 menu = menuAdministracion;
@@ -1610,38 +1647,628 @@ public class VentanaPrincipal extends javax.swing.JFrame {
                 return submenu;
             }
         }
-
+        
         return null;  // Submenú no encontrado
     }
-
+    
     public void actualizarPermisosAccion(String submenuName, boolean agregar, boolean editar, boolean eliminar) {
         switch (submenuName) {
             case "Usuarios":
                 // Asegúrate de que los botones no son nulos antes de manipularlos
-            if (objUsuarios.btnMostrarDatos != null) objUsuarios.btnMostrarDatos.setEnabled(true);
-            if (objUsuarios.btnGuia != null) objUsuarios.btnGuia.setEnabled(true);
-            if (objUsuarios.btnNuevo != null) objUsuarios.btnNuevo.setEnabled(true);
-            if (objUsuarios.btnGrabar != null) objUsuarios.btnGrabar.setEnabled(agregar);
-            if (objUsuarios.btnModificar != null) objUsuarios.btnModificar.setEnabled(editar);
-            if (objUsuarios.btnActivar != null) objUsuarios.btnActivar.setEnabled(editar);
-            if (objUsuarios.btnInactivar != null) objUsuarios.btnInactivar.setEnabled(editar);
-            if (objUsuarios.rdRelacionar != null) objUsuarios.rdRelacionar.setEnabled(editar);
-            if (objUsuarios.btnEliminar != null) objUsuarios.btnEliminar.setEnabled(eliminar);
+                if (objUsuarios.btnMostrarDatos != null) {
+                    objUsuarios.btnMostrarDatos.setEnabled(true);
+                }
+                if (objUsuarios.btnGuia != null) {
+                    objUsuarios.btnGuia.setEnabled(true);
+                }
+                if (objUsuarios.btnNuevo != null) {
+                    objUsuarios.btnNuevo.setEnabled(true);
+                }
+                if (objUsuarios.btnGrabar != null) {
+                    objUsuarios.btnGrabar.setEnabled(agregar);
+                }
+                if (objUsuarios.btnModificar != null) {
+                    objUsuarios.btnModificar.setEnabled(editar);
+                }
+                if (objUsuarios.btnActivar != null) {
+                    objUsuarios.btnActivar.setEnabled(editar);
+                }
+                if (objUsuarios.btnInactivar != null) {
+                    objUsuarios.btnInactivar.setEnabled(editar);
+                }
+                if (objUsuarios.rdRelacionar != null) {
+                    objUsuarios.rdRelacionar.setEnabled(editar);
+                }
+                if (objUsuarios.btnEliminar != null) {
+                    objUsuarios.btnEliminar.setEnabled(eliminar);
+                }
                 break;
-                
-            case "Deudas Por Cobrar":
-                if(objDeudasPorCobrar.btnMostrarDeudas !=null) objDeudasPorCobrar.btnMostrarDeudas.setEnabled(true);
-                if(objDeudasPorCobrar.btnBusquedaEmpresa !=null) objDeudasPorCobrar.btnBusquedaEmpresa.setEnabled(true);
-                if(objDeudasPorCobrar.btnMostrarCanceladas !=null) objDeudasPorCobrar.btnMostrarCanceladas.setEnabled(true);
-                if(objDeudasPorCobrar.btnPagar !=null) objDeudasPorCobrar.btnPagar.setEnabled(editar);
-                if(objDeudasPorCobrar.btnAbrirPDF !=null) objDeudasPorCobrar.btnAbrirPDF.setEnabled(editar);
-                if(objDeudasPorCobrar.btnBusquedaFechaEmpresa !=null) objDeudasPorCobrar.btnBusquedaFechaEmpresa.setEnabled(true);
-                
-                // Asegúrate de que los botones no son nulos antes de manipularlos
             
+            case "Roles":
+                if (objRoles.btnGrabarTU != null) {
+                    objRoles.btnGrabarTU.setEnabled(agregar);
+                }
+                if (objRoles.btnModificar != null) {
+                    objRoles.btnModificar.setEnabled(editar);
+                }
+                if (objRoles.btnActivar != null) {
+                    objRoles.btnActivar.setEnabled(editar);
+                }
+                if (objRoles.btnInactivar != null) {
+                    objRoles.btnInactivar.setEnabled(editar);
+                }
+                if (objRoles.btnEliminar != null) {
+                    objRoles.btnInactivar.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Asignacion de Permisos":
+                break;
+            
+            case "Empresas":
+                if (objEmpresas.btnAgregar != null) {
+                    objEmpresas.setEnabled(agregar);
+                }
+                if (objEmpresas.btnCancelar != null) {
+                    objEmpresas.setEnabled(agregar);
+                }
+                if (objEmpresas.btnNuevo != null) {
+                    objEmpresas.setEnabled(agregar);
+                }
+                if (objEmpresas.btnModificar != null) {
+                    objEmpresas.setEnabled(editar);
+                }
+                if (objEmpresas.btnActivar != null) {
+                    objEmpresas.setEnabled(editar);
+                }
+                if (objEmpresas.btnInactivar != null) {
+                    objEmpresas.setEnabled(editar);
+                }
+                if (objEmpresas.btnEliminar != null) {
+                    objEmpresas.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Trabajadores":
+                if (objTrabajadores.btnGrabar != null) {
+                    objTrabajadores.setEnabled(agregar);
+                }
+                if (objTrabajadores.btnNuevo != null) {
+                    objTrabajadores.setEnabled(agregar);
+                }
+                if (objTrabajadores.btnCancelar != null) {
+                    objTrabajadores.setEnabled(agregar);
+                }
+                if (objTrabajadores.btnModificar != null) {
+                    objTrabajadores.setEnabled(editar);
+                }
+                if (objTrabajadores.btnActivar != null) {
+                    objTrabajadores.setEnabled(editar);
+                }
+                if (objTrabajadores.btnInactivar != null) {
+                    objTrabajadores.setEnabled(editar);
+                }
+                if (objTrabajadores.btnEliminar != null) {
+                    objTrabajadores.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Tarifario":
+                if (objTarifario.btnCancelar != null) {
+                    objTarifario.setEnabled(agregar);
+                }
+                if (objTarifario.btnGuardar != null) {
+                    objTarifario.setEnabled(agregar);
+                }
+                if (objTarifario.btnModificar != null) {
+                    objTarifario.setEnabled(editar);
+                }
+                if (objTarifario.btnEliminar != null) {
+                    objTarifario.setEnabled(eliminar);
+                }
+            
+            case "Productos":
+                if (objProductos.btnAdd != null) {
+                    objProductos.setEnabled(agregar);
+                }
+                if (objProductos.btnNew != null) {
+                    objProductos.setEnabled(agregar);
+                }
+                if (objProductos.btnCancel != null) {
+                    objProductos.setEnabled(agregar);
+                }
+                if (objProductos.btnUpdate != null) {
+                    objProductos.setEnabled(editar);
+                }
+                if (objProductos.btnActivar != null) {
+                    objProductos.setEnabled(editar);
+                }
+                if (objProductos.btnInactivar != null) {
+                    objProductos.setEnabled(editar);
+                }
+                if (objProductos.btnDelete != null) {
+                    objProductos.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Formulario":
+                break;
+            
+            case "Proveedor":
+                if (objProveedor.btnGrabar != null) {
+                    objProveedor.setEnabled(agregar);
+                }
+                if (objProveedor.btnCancel != null) {
+                    objProveedor.setEnabled(agregar);
+                }
+                if (objProveedor.btnNew != null) {
+                    objProveedor.setEnabled(agregar);
+                }
+                if (objProveedor.btnModificar != null) {
+                    objProveedor.setEnabled(editar);
+                }
+                if (objProveedor.btnReingresar != null) {
+                    objProveedor.setEnabled(editar);
+                }
+                if (objProveedor.btnInactivar != null) {
+                    objProveedor.setEnabled(editar);
+                }
+                if (objProveedor.btnEliminar != null) {
+                    objProveedor.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Convenios":
+                
+                break;
+            
+            case "Busqueda de Convenios":
+                break;
+            
+            case "Asignacion de Trabajos":
+                if(objAsignacionTrabajos.btnMostrarTodo !=null){
+                    objAsignacionTrabajos.setEnabled(agregar);
+                }
+                if(objAsignacionTrabajos.btnFiltrar !=null) {
+                    objAsignacionTrabajos.setEnabled(agregar);
+                }
+                if(objAsignacionTrabajos.btnSoloEmpresa !=null) {
+                    objAsignacionTrabajos.setEnabled(agregar);
+                }
+                if(objAsignacionTrabajos.btnProgramar !=null){
+                    objAsignacionTrabajos.setEnabled(editar);
+                }
+                break;
+            
+            case "Puesto de Trabajo":
+                if (objPuestoDeTrabajo.btnGuardar != null) {
+                    objPuestoDeTrabajo.setEnabled(agregar);
+                }
+                if (objPuestoDeTrabajo.btnNuevoTipoDeTrabajo != null) {
+                    objPuestoDeTrabajo.setEnabled(agregar);
+                }
+                if (objPuestoDeTrabajo.btnModificar != null) {
+                    objPuestoDeTrabajo.setEnabled(editar);
+                }
+                if (objPuestoDeTrabajo.btnActivar != null) {
+                    objPuestoDeTrabajo.setEnabled(editar);
+                }
+                if (objPuestoDeTrabajo.btnDesactivar != null) {
+                    objPuestoDeTrabajo.setEnabled(editar);
+                }
+                if (objPuestoDeTrabajo.btnEliminar != null) {
+                    objPuestoDeTrabajo.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Forma de Pago":
+                if (objFormaDePago.btnGuardar != null) {
+                    objFormaDePago.setEnabled(agregar);
+                }
+                if (objFormaDePago.btnCancelar != null) {
+                    objFormaDePago.setEnabled(agregar);
+                }
+                if (objFormaDePago.btnActivar != null) {
+                    objFormaDePago.setEnabled(editar);
+                }
+                if (objFormaDePago.btnInactivar != null) {
+                    objFormaDePago.setEnabled(editar);
+                }
+                if (objFormaDePago.btnEliminar != null) {
+                    objFormaDePago.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Menu - Submenus":
+                if (objMenus.btnAddMenu != null) {
+                    objMenus.setEnabled(agregar);
+                }
+                if (objMenus.btnAddSubmenu != null) {
+                    objMenus.setEnabled(agregar);
+                }
+                if (objMenus.btnModificar != null) {
+                    objMenus.setEnabled(editar);
+                }
+                break;
+            
+                //ADMISION
+            case "Cientes":
+                if (objClientes.btnGuardar != null) {
+                    objClientes.setEnabled(agregar);
+                }
+                if (objClientes.btnCancelar != null) {
+                    objClientes.setEnabled(agregar);
+                }
+                if (objClientes.btnNuevo != null) {
+                    objClientes.setEnabled(agregar);
+                }
+                if (objClientes.btnActualizar != null) {
+                    objClientes.setEnabled(editar);
+                }
+                if (objClientes.btnActivar != null) {
+                    objClientes.setEnabled(editar);
+                }
+                if (objClientes.btnInactivar != null) {
+                    objClientes.setEnabled(editar);
+                }
+                if (objClientes.btnEliminar != null) {
+                    objClientes.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Marcas":
+                if (objMarcas.btnGuardar != null) {
+                    objMarcas.setEnabled(agregar);
+                }
+                if (objMarcas.btnCancelar != null) {
+                    objMarcas.setEnabled(agregar);
+                }
+                if (objMarcas.btnModificar != null) {
+                    objMarcas.setEnabled(editar);
+                }
+                if (objMarcas.btnActivar != null) {
+                    objMarcas.setEnabled(editar);
+                }
+                if (objMarcas.btnInactivar != null) {
+                    objMarcas.setEnabled(editar);
+                }
+                if (objMarcas.btnEliminar != null) {
+                    objMarcas.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Unidades":
+                if (objUnidades.btnCancelar != null) {
+                    objUnidades.setEnabled(agregar);
+                }
+                if (objUnidades.btnGuardar != null) {
+                    objUnidades.setEnabled(agregar);
+                }
+                if (objUnidades.btnModificar != null) {
+                    objUnidades.setEnabled(editar);
+                }
+                if (objUnidades.btnActivar != null) {
+                    objUnidades.setEnabled(editar);
+                }
+                if (objUnidades.btnInactivar != null) {
+                    objUnidades.setEnabled(editar);
+                }
+                if (objUnidades.btnEliminar != null) {
+                    objUnidades.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Tipo de Pagos Generales":
+                if (objtipos_pagosgenerales.btnCancelar != null) {
+                    objtipos_pagosgenerales.setEnabled(agregar);
+                }
+                if (objtipos_pagosgenerales.btnGuardar != null) {
+                    objtipos_pagosgenerales.setEnabled(agregar);
+                }
+                if (objtipos_pagosgenerales.btnModificar != null) {
+                    objtipos_pagosgenerales.setEnabled(editar);
+                }
+                if (objtipos_pagosgenerales.btnActivar != null) {
+                    objtipos_pagosgenerales.setEnabled(editar);
+                }
+                if (objtipos_pagosgenerales.btnInactivar != null) {
+                    objtipos_pagosgenerales.setEnabled(editar);
+                }
+                if (objtipos_pagosgenerales.btnEliminar != null) {
+                    objtipos_pagosgenerales.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Tipo de Productos y Materiales":
+                if (objTipoProductosMateriales.btnCancelar != null) {
+                    objTipoProductosMateriales.setEnabled(agregar);
+                }
+                if (objTipoProductosMateriales.btnGuardar != null) {
+                    objTipoProductosMateriales.setEnabled(agregar);
+                }
+                if (objTipoProductosMateriales.btnActivar != null) {
+                    objTipoProductosMateriales.setEnabled(editar);
+                }
+                if (objTipoProductosMateriales.btnInactivar != null) {
+                    objTipoProductosMateriales.setEnabled(editar);
+                }
+                if (objTipoProductosMateriales.btnModificar != null) {
+                    objTipoProductosMateriales.setEnabled(editar);
+                }
+                if (objTipoProductosMateriales.btnEliminar != null) {
+                    objTipoProductosMateriales.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Tipo de Maquinarias y Vehiculos":
+                if (objTipoMaquinariasYVehiculos.btnCancelar != null) {
+                    objTipoMaquinariasYVehiculos.setEnabled(agregar);
+                }
+                if (objTipoMaquinariasYVehiculos.btnGuardar != null) {
+                    objTipoMaquinariasYVehiculos.setEnabled(agregar);
+                }
+                if (objTipoMaquinariasYVehiculos.btnActivar != null) {
+                    objTipoMaquinariasYVehiculos.setEnabled(editar);
+                }
+                if (objTipoMaquinariasYVehiculos.btnInactivar != null) {
+                    objTipoMaquinariasYVehiculos.setEnabled(editar);
+                }
+                if (objTipoMaquinariasYVehiculos.btnModificar != null) {
+                    objTipoMaquinariasYVehiculos.setEnabled(editar);
+                }
+                if (objTipoMaquinariasYVehiculos.btnEliminar != null) {
+                    objTipoMaquinariasYVehiculos.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Localizacion":
+                if (objLocalizacion.btnCancelar != null) {
+                    objLocalizacion.setEnabled(agregar);
+                }
+                if (objLocalizacion.btnGuardar != null) {
+                    objLocalizacion.setEnabled(agregar);
+                }
+                if (objLocalizacion.btnActivar != null) {
+                    objLocalizacion.setEnabled(editar);
+                }
+                if (objLocalizacion.btnInactivar != null) {
+                    objLocalizacion.setEnabled(editar);
+                }
+                if (objLocalizacion.btnEliminar != null) {
+                    objLocalizacion.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Configuracion":
+                if (objConfiguracion.btnGuardar != null) {
+                    objConfiguracion.setEnabled(agregar);
+                }
+                if (objConfiguracion.btnCargarLogo != null) {
+                    objConfiguracion.setEnabled(agregar);
+                }
+                if (objConfiguracion.btnActualizar != null) {
+                    objConfiguracion.setEnabled(editar);
+                }
+                break;
+            
+                //REGISTROS
+            case "Orden de Servicio":
+                if (objOrden.btnAdicionar != null) {
+                    objOrden.setEnabled(agregar);
+                }
+                if (objOrden.btnGenerarCompra != null) {
+                    objOrden.setEnabled(agregar);
+                }
+                if (objOrden.btnGenerarCompra != null) {
+                    objOrden.setEnabled(agregar);
+                }
+                if (objOrden.btnMTP != null) {
+                    objOrden.setEnabled(agregar);
+                }
+                if (objOrden.btnServicios != null) {
+                    objOrden.setEnabled(agregar);
+                }
+                if (objOrden.btnTotal != null) {
+                    objOrden.setEnabled(agregar);
+                }
+                if (objOrden.btnEliminar != null) {
+                    objOrden.setEnabled(agregar);
+                }
+                break;
+            
+            case "Ver Ordenes":
+                if (objVerOrdenes.btnBuscarFechaEmpresa != null) {
+                    objVerOrdenes.setEnabled(agregar);
+                }
+                if (objVerOrdenes.btnSoloEmpresa != null) {
+                    objVerOrdenes.setEnabled(agregar);
+                }
+                if (objVerOrdenes.btnMostrarTodo != null) {
+                    objVerOrdenes.setEnabled(agregar);
+                }
+                break;
+            
+            case "Ventas":
+                break;
+            
+            case "Compra de Productos y Materiales":
+                if (objComprasProductosMateriales.btnGuardar != null) {
+                    objComprasProductosMateriales.setEnabled(agregar);
+                }
+                if (objComprasProductosMateriales.btnMostrarStock != null) {
+                    objComprasProductosMateriales.setEnabled(agregar);
+                }
+                if (objComprasProductosMateriales.btnRegistrarCredito != null) {
+                    objComprasProductosMateriales.setEnabled(agregar);
+                }
+                if (objComprasProductosMateriales.btnEliminar != null) {
+                    objComprasProductosMateriales.setEnabled(agregar);
+                }
+                break;
+            
+            case "Compra de Equipos, Vehiculos":
+                if (objCompraEquiposVehiculos.btnGuardar != null) {
+                    objCompraEquiposVehiculos.setEnabled(agregar);
+                }
+                if (objCompraEquiposVehiculos.btnNuevo != null) {
+                    objCompraEquiposVehiculos.setEnabled(agregar);
+                }
+                if (objCompraEquiposVehiculos.btnLimpiar != null) {
+                    objCompraEquiposVehiculos.setEnabled(agregar);
+                }
+                if (objCompraEquiposVehiculos.btnModificar != null) {
+                    objCompraEquiposVehiculos.setEnabled(editar);
+                }
+                if (objCompraEquiposVehiculos.btnBorrar != null) {
+                    objCompraEquiposVehiculos.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Gastos generales":
+                if (objGastos_Generales.btnNuevo != null) {
+                    objGastos_Generales.setEnabled(agregar);
+                }
+                if (objGastos_Generales.btnGuardar != null) {
+                    objGastos_Generales.setEnabled(agregar);
+                }
+                if (objGastos_Generales.btnCancel != null) {
+                    objGastos_Generales.setEnabled(agregar);
+                }
+                if (objGastos_Generales.btnModificar != null) {
+                    objGastos_Generales.setEnabled(editar);
+                }
+                if (objGastos_Generales.btnModificar != null) {
+                    objGastos_Generales.setEnabled(editar);
+                }
+                if (objGastos_Generales.btnBorrar != null) {
+                    objGastos_Generales.setEnabled(eliminar);
+                }
+                break;
+            
+            case "Kardex":
+                break;
+            
+            case "Cotizaciones":
+                if (objCotizaciones.btnAdicionar != null) {
+                    objCotizaciones.setEnabled(agregar);
+                }
+                if (objCotizaciones.btnEliminar != null) {
+                    objCotizaciones.setEnabled(agregar);
+                }
+                if (objCotizaciones.btnGenerar != null) {
+                    objCotizaciones.setEnabled(agregar);
+                }
+                break;
+            
+            case "Cancelaciones":                
+                break;
+            
+                //REPORTES
+            case "Trabajos Realizados":
+                if (objTrabajosRealizados.btnBusquedaEmpresa != null) {
+                    objTrabajosRealizados.setEnabled(agregar);
+                }
+                if (objTrabajosRealizados.btnBusquedaFechaEmpresa != null) {
+                    objTrabajosRealizados.setEnabled(agregar);
+                }
+                if (objTrabajosRealizados.btnMostrarTodo != null) {
+                    objTrabajosRealizados.setEnabled(agregar);
+                }
+                if (objTrabajosRealizados.btnPagar != null) {
+                    objTrabajosRealizados.setEnabled(editar);
+                }
+                break;
+            
+            case "Estadisticas":
+                if (objEstadisticas.btnGenerarReporte != null) {
+                    objEstadisticas.setEnabled(agregar);
+                }
+                if (objEstadisticas.btnImprimirGrafica != null) {
+                    objEstadisticas.setEnabled(agregar);
+                }
+                break;
+            
+            case "Deudas por Pagar":
+                if (objDeudasPorPagar.btnCanceladas != null) {
+                    objDeudasPorPagar.setEnabled(agregar);
+                }
+                break;
+            
+            case "Deudas Por Cobrar":
+                if (objDeudasPorCobrar.btnMostrarDeudas != null) {
+                    objDeudasPorCobrar.btnMostrarDeudas.setEnabled(true);
+                }
+                if (objDeudasPorCobrar.btnBusquedaEmpresa != null) {
+                    objDeudasPorCobrar.btnBusquedaEmpresa.setEnabled(true);
+                }
+                if (objDeudasPorCobrar.btnMostrarCanceladas != null) {
+                    objDeudasPorCobrar.btnMostrarCanceladas.setEnabled(true);
+                }
+                if (objDeudasPorCobrar.btnPagar != null) {
+                    objDeudasPorCobrar.btnPagar.setEnabled(editar);
+                }
+                if (objDeudasPorCobrar.btnAbrirPDF != null) {
+                    objDeudasPorCobrar.btnAbrirPDF.setEnabled(editar);
+                }
+                if (objDeudasPorCobrar.btnBusquedaFechaEmpresa != null) {
+                    objDeudasPorCobrar.btnBusquedaFechaEmpresa.setEnabled(true);
+                }
+                break;
+            
+            case "Horas Trabajadas":   //REVISAR                
+                break;
+            
+            case "Sueldos":
+                if (objSueldos.btnCargarPeriodos != null) {
+                    objSueldos.setEnabled(agregar);
+                }
+                if (objSueldos.btnLimpiar != null) {
+                    objSueldos.setEnabled(agregar);
+                }
+                if (objSueldos.btnMostrar != null) {
+                    objSueldos.setEnabled(agregar);
+                }
+                if (objSueldos.btnReporte != null) {
+                    objSueldos.setEnabled(agregar);
+                }
+                break;
+            
+            case "Stock":
+                if (objStock.btnActualizarStock != null) {
+                    objStock.setEnabled(agregar);
+                }
+                if (objStock.btnMostrarTodo != null) {
+                    objStock.setEnabled(agregar);
+                }
+                if (objStock.btnSolicitantes != null) {
+                    objStock.setEnabled(agregar);
+                }
+                break;
+            
+            case "Trabajos":
+                if (objTrabajos.btnFiltrar != null) {
+                    objTrabajos.setEnabled(agregar);
+                }
+                if (objTrabajos.btnMostrarTodo != null) {
+                    objTrabajos.setEnabled(agregar);
+                }
+                if (objTrabajos.btnTrabajoRealizado != null) {
+                    objTrabajos.setEnabled(agregar);
+                }
+                if (objTrabajos.btnReasignar != null) {
+                    objTrabajos.setEnabled(editar);
+                }
+                if (objTrabajos.btnReprogramar != null) {
+                    objTrabajos.setEnabled(editar);
+                }
+                break;
+            
+            case "Presupuesto":
+                break;
+            // Asegúrate de que los botones no son nulos antes de manipularlos
+
             // Repetir para otros submenús...
         }
     }
-
-
+    
 }
